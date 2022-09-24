@@ -1,0 +1,7 @@
+{
+  "name": "emit-im",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
