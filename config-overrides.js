@@ -1,14 +1,26 @@
 const webpack = require('webpack');
 const WorkerPlugin = require("worker-plugin");
+const path = require('path');
+
 const {
     override,
     addWebpackResolve,
     addWebpackPlugin,
     adjustStyleLoaders,
-    addWebpackModuleRule
+    addWebpackModuleRule,
+    setWebpackPublicPath
 } = require("customize-cra");
 
+
+const publicPathPlugin = (config, env) => {
+    config.output = {
+        publicPath: '/',
+    }
+    return config
+}
+
 const config = override(
+    // setWebpackPublicPath("./"),
     addWebpackResolve({
         fallback:  {
             "buffer": require.resolve('buffer'),
@@ -53,6 +65,6 @@ const config = override(
     })
 );
 
-console.log(config);
+// console.log("config", JSON.stringizfy(config));
 
 module.exports = config;

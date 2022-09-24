@@ -2,8 +2,8 @@
   "name": "emit-pins",
   "version": "0.0.1",
   "private": true,
-  "homepage": "./",
-  "main": "./",
+  "homepage": "/",
+  "main": "/",
   "dependencies": {
     "@capacitor/app": "1.1.1",
     "@capacitor/core": "3.6.0",

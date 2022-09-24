@@ -1,4 +1,4 @@
-import service from 'imWorker/lib/index';
+import service from 'imWorker';
 import {PinnedSticky, WsStatus} from "../types";
 import {tribeService} from "../service/tribe";
 import selfStorage from "../common/storage";
