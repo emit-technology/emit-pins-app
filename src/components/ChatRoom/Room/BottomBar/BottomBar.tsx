@@ -186,7 +186,7 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                             <div style={{transform: 'translate(-10px,4px)'}}>
                                                 {
                                                     tribeInfo && tribeInfo.keeper !== owner && <IonBadge>
-                                                        {/*<small>Role</small>*/}
+                                                        <small>Role</small>
                                                         {userLimit && <>&nbsp;
                                                             <IonIcon src={chatbubbleEllipsesOutline}
                                                                      style={{transform: 'translateY(2px)'}}/><small>{userLimit.msgLeft}</small> &nbsp;
@@ -242,12 +242,11 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                              onClick={(e) => {
                                                  e.stopPropagation();
                                                  tribeService.picUpload().then(({url, themeColors}) => {
-
-                                                     console.log("===== themeColors", themeColors)
+                                                     const displayImage = utils.convertImgDisplay(themeColors.width, themeColors.height, url);
                                                      setDisplayImage({
                                                          url: url,
-                                                         width: themeColors.width,
-                                                         height: themeColors.height
+                                                         width: displayImage.width,
+                                                         height: displayImage.height
                                                      });
 
                                                      setThemeColor(themeColors)

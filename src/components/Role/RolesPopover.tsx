@@ -15,6 +15,7 @@ import {
 import {addCircleOutline, createOutline, personOutline} from "ionicons/icons";
 import {RoleEditModal} from "./RoleEditModal";
 import {tribeService} from "../../service/tribe";
+import {utils} from "../../common";
 
 interface Props {
     defaultRole: TribeRole
@@ -55,7 +56,7 @@ export const RolesPopover: React.FC<Props> = ({roles,isOpen,onClose, defaultRole
                                     onRoleCheck(v)
                             }}>
                                 <IonAvatar slot="start" className="ion-avatar2">
-                                    <img src={v.avatar}/>
+                                    <img src={utils.getDisPlayUrl(v.avatar)}/>
                                 </IonAvatar>
                                 <IonLabel className="ion-text-wrap">
                                     <b style={{

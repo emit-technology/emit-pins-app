@@ -33,7 +33,7 @@ export class BaseRpc {
         const image: any = await Camera.getPhoto({
             quality: 100,
             resultType: CameraResultType.Uri,
-            source: CameraSource.Photos
+            source: CameraSource.Photos,
         });
         const themeColors = await getMainColor(image.webPath);
 

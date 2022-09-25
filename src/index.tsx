@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
+import { defineCustomElements } from '@ionic/pwa-elements/loader';
+
 
 ReactDOM.render(
   <React.StrictMode>
@@ -10,6 +12,7 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById('root')
 );
+defineCustomElements(window);
 
 // console.log=(function (oriLogFunc) {
 //     return function () {

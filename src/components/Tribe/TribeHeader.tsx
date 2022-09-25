@@ -72,7 +72,7 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
                 <IonItem lines="none">
                     {
                         (stickyMsg && stickyMsg.groupId && stickyMsg.seq >1 || stickyMsg && !stickyMsg.groupId ) ? <IonIcon src={chevronBackOutline} slot="start" color="medium" onClick={()=>{
-                                // console.log("stickyMsg.seq - 1",stickyMsg, stickyMsg.seq - 1)
+                                console.log("stickyMsg.seq - 1",stickyMsg, stickyMsg.seq - 1)
                                 dispatch(saveDataState({data: JSON.stringify({forward: 1, refresh: stickyMsg.groupId ?new BigNumber(stickyMsg.seq).minus(1).toNumber(): 666666}), tag: 'scrollToItem'}))
                             }}/>:
                             <IonIcon src={chevronBackOutline} slot="start" style={{color:"#ffffff"}}/>
@@ -83,7 +83,7 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
                         }).catch(e=>console.error(e))
                     }}>
                         {
-                            stickyMsg && stickyMsg.theme.image && <img width="100%" height="100%" src={utils.getDisPlayUrl(stickyMsg && stickyMsg.groupId ? stickyMsg.theme.image: tribeInfo && tribeInfo.theme.image)}
+                            (stickyMsg && stickyMsg.theme.image || tribeInfo && tribeInfo.theme ) && <img width="100%" height="100%" src={utils.getDisPlayUrl(stickyMsg && stickyMsg.groupId ? stickyMsg.theme.image: tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image))}
                                  style={{borderRadius: 6, objectFit:'cover'}}/>
                         }
                     </div>
@@ -106,7 +106,7 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
                     </IonLabel>
                     {
                         (stickyMsg && stickyMsg.groupId && stickyMsg.seq > 0) ? <IonIcon src={chevronForwardOutline} slot="end" color="medium"  onClick={()=>{
-                            // console.log("stickyMsg.seq + 1",stickyMsg, stickyMsg.seq + 1);
+                            console.log("stickyMsg.seq + 1",stickyMsg, stickyMsg.seq + 1);
                                 dispatch(saveDataState({data: JSON.stringify({forward: 2,refresh: stickyMsg.groupId ? new BigNumber(stickyMsg.seq).plus(1).toNumber():888888}), tag: 'scrollToItem'}))
                             }}/>:
                             <IonIcon src={chevronForwardOutline} slot="end" style={{color:"#ffffff"}}/>
