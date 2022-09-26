@@ -96,6 +96,7 @@
     "https-browserify": "^1.0.0",
     "lorem-ipsum": "^2.0.8",
     "mutexify": "^1.4.0",
+    "next-seo": "^5.5.0",
     "next-share": "^0.18.1",
     "node-sass": "^7.0.1",
     "os-browserify": "^0.3.0",

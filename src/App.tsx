@@ -37,35 +37,37 @@ setupIonicReact({
 const App: React.FC = () => {
     // const [roles,setRoles] = React.useState([]);
     // const [tribeInfo,setTribeInfo,]
-    return <div className={`page`}>
-        <div className="page-inner">
-            <IonApp>
-                <Provider store={store}>
-                    <IonReactHashRouter>
-                        <Switch>
+    return <>
+        <div className={`page`}>
+            <div className="page-inner">
+                <IonApp>
+                    <Provider store={store}>
+                        <IonReactHashRouter>
+                            <Switch>
 
-                            {/*<IonMenu side="end" type="push">*/}
-                            {/*    <IonHeader>*/}
-                            {/*        <IonToolbar color="danger">*/}
-                            {/*            <IonTitle>End Menu</IonTitle>*/}
-                            {/*        </IonToolbar>*/}
-                            {/*    </IonHeader>*/}
-                            {/*    <IonContent>*/}
-                            {/*        <RoleListModal roles={} tribeInfo={} defaultRole={} onRoleCheck={} onReloadList={} />*/}
-                            {/*    </IonContent>*/}
-                            {/*</IonMenu>*/}
+                                {/*<IonMenu side="end" type="push">*/}
+                                {/*    <IonHeader>*/}
+                                {/*        <IonToolbar color="danger">*/}
+                                {/*            <IonTitle>End Menu</IonTitle>*/}
+                                {/*        </IonToolbar>*/}
+                                {/*    </IonHeader>*/}
+                                {/*    <IonContent>*/}
+                                {/*        <RoleListModal roles={} tribeInfo={} defaultRole={} onRoleCheck={} onReloadList={} />*/}
+                                {/*    </IonContent>*/}
+                                {/*</IonMenu>*/}
 
-                            <Route exact path="/:tribeId" component={(props: any) => {
-                                const tribeId = props.match.params.tribeId;
-                                config.tribeId = tribeId;
-                                return <Dashboard tribeId={tribeId}/>
-                            }}/>
-                        </Switch>
-                    </IonReactHashRouter>
-                </Provider>
-            </IonApp>
+                                <Route exact path="/:tribeId" component={(props: any) => {
+                                    const tribeId = props.match.params.tribeId;
+                                    config.tribeId = tribeId;
+                                    return <Dashboard tribeId={tribeId}/>
+                                }}/>
+                            </Switch>
+                        </IonReactHashRouter>
+                    </Provider>
+                </IonApp>
+            </div>
         </div>
-    </div>
+    </>
 }
 
 export default App;
