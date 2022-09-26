@@ -3,7 +3,7 @@ import {
     IonApp, IonContent, IonHeader, IonMenu, IonTitle, IonToolbar,
     setupIonicReact
 } from '@ionic/react';
-import {IonReactHashRouter} from '@ionic/react-router';
+import {IonReactRouter as Router} from '@ionic/react-router';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -42,7 +42,7 @@ const App: React.FC = () => {
             <div className="page-inner">
                 <IonApp>
                     <Provider store={store}>
-                        <IonReactHashRouter>
+                        <Router>
                             <Switch>
 
                                 {/*<IonMenu side="end" type="push">*/}
@@ -62,7 +62,7 @@ const App: React.FC = () => {
                                     return <Dashboard tribeId={tribeId}/>
                                 }}/>
                             </Switch>
-                        </IonReactHashRouter>
+                        </Router>
                     </Provider>
                 </IonApp>
             </div>
