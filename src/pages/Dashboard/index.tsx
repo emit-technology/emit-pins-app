@@ -3,7 +3,7 @@ import {
     IonActionSheet,
     IonButton,
     IonButtons,
-    IonCol,
+    IonCol,IonToast,
     IonContent,
     IonHeader,
     IonIcon,
@@ -76,6 +76,8 @@ interface State {
     userLimit?: UserLimit
 
     showAlert: boolean;
+    showToast: boolean;
+    toastMsg?:string;
 
 }
 
@@ -106,7 +108,8 @@ export class Dashboard extends React.Component<Props, State> {
         groupPinnedMsg: [],
 
         showAlert: false,
-        showShare: false
+        showShare: false,
+        showToast: false,
     }
 
     componentDidMount() {
@@ -148,6 +151,7 @@ export class Dashboard extends React.Component<Props, State> {
 
         if (rest == WsStatus.active && (!this.state.userLimit || (Math.floor(Date.now() / 1000)) % 9 == 0)) {
             const rest = await tribeService.userLimit(config.tribeId);
+            config.userLimit = rest;
             if (!userLimit || userLimit.supportLeft != rest.supportLeft || userLimit.msgLeft != rest.msgLeft) {
                 this.setState({userLimit: rest})
             }
@@ -163,6 +167,7 @@ export class Dashboard extends React.Component<Props, State> {
     initOwnerData = async () => {
         {
             const userLimit = await tribeService.userLimit(config.tribeId);
+            config.userLimit = userLimit;
             this.setState({userLimit: userLimit})
         }
     }
@@ -280,6 +285,10 @@ export class Dashboard extends React.Component<Props, State> {
     }
 
     onSupport = async (msgId: string, f: boolean) => {
+        const {userLimit} = this.state;
+        if(userLimit && userLimit.supportLeft <= 0){
+            return Promise.reject(`Max support's limit(${userLimit.maxSupportCount}) reached !`)
+        }
         await tribeService.msgSupport(msgId, f)
     }
 
@@ -308,9 +317,13 @@ export class Dashboard extends React.Component<Props, State> {
         this.setState({showCreateTribe: f})
     }
 
+    setShowToast = (f:boolean, msg?:string) =>{
+        this.setState({showToast: f,toastMsg: msg})
+    }
+
     render() {
         const {
-            owner, showActionSheet, buttons, showShare, showPinnedMsg, userLimit,
+            owner, showActionSheet, buttons, toastMsg,showShare,showToast, showPinnedMsg, userLimit,
             showCreateTribe,
             isUpdating, isConnecting, groupMsgs, showMenusModal, groupPinnedMsg, showPinnedMsgDetailModal,
             account, roles, tribeInfo, latestRole, datas, showTribeEdit, showPin
@@ -441,8 +454,15 @@ export class Dashboard extends React.Component<Props, State> {
                                         tribeInfo={tribeInfo}
                                         owner={owner}
                                         groupMsg={groupMsgs}
-                                        onSupport={(msgId, f) => this.onSupport(msgId, f)}
-                                        showPin={showPin}/>
+                                        onSupport={(msgId, f) => {
+                                            this.onSupport(msgId, f).catch(e=>{
+                                                const err = typeof e == 'string'?e:e.message;
+                                                this.setShowToast(true,err)
+                                            })
+                                        }}
+                                        showPin={showPin}
+                                        userLimit={userLimit}
+                                    />
                                 </div>
 
                                 <BottomBar tribeInfo={tribeInfo} owner={owner} userLimit={userLimit}
@@ -480,6 +500,15 @@ export class Dashboard extends React.Component<Props, State> {
                                                     this.setShowCreateTribe(false)
                                                     window.open(`./#/${tribeId}`)
                                                 }}/>
+
+                                <IonToast
+                                    isOpen={showToast}
+                                    onDidDismiss={() => this.setShowToast(false)}
+                                    message={toastMsg}
+                                    position="top"
+                                    color={"primary"}
+                                    duration={2000}
+                                />
 
                             </IonContent>
                         </IonPage>

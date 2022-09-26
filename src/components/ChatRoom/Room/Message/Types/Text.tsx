@@ -14,8 +14,9 @@ interface Props {
     showPin: boolean;
     owner: string;
     keeper?: string;
-    checked?:boolean;
-    hideTime?:boolean;
+    checked?: boolean;
+    hideTime?: boolean;
+    onSupport?: (msgId: string, f: boolean) => void;
 }
 
 // const PopoverList: React.FC<{
@@ -73,7 +74,7 @@ interface Props {
 //     </div>
 // );
 
-export const Text: React.FC<Props> = ({msg,keeper,hideTime,checked,
+export const Text: React.FC<Props> = ({msg, onSupport,keeper,hideTime,checked,
                                            showPin,
                                           owner, }) => {
 
@@ -102,7 +103,11 @@ export const Text: React.FC<Props> = ({msg,keeper,hideTime,checked,
 
     // console.log("replayCtn.content",replayCtn && replayCtn.content , msg && msg.replayMsg && msg.replayMsg.msgType)
 
-    const support = msg.support>0 && <div>
+    const support = msg.support>0 && <div onClick={()=>{
+        if(onSupport){
+            onSupport(msg.id, true)
+        }
+    }}>
         <div className="support-display">
             <img src={isSupported?'./assets/img/support2.png':'./assets/img/support.png'} width={16} height={16}/><small style={{
                 fontWeight:700
@@ -170,8 +175,8 @@ export const Text: React.FC<Props> = ({msg,keeper,hideTime,checked,
                                 {
                                     !hideTime ? <div style={{textAlign: isOwner ? "right" : "left",padding: "3px"}}>
                                         <b style={{fontSize: '16px'}}>
-                                            {keeper && <><IonText color={msg.owner == keeper && !msg.groupId?"primary":""}>{msg.actor && msg.actor.name}</IonText>&nbsp;{
-                                            msg.owner == keeper && !msg.groupId && <Keeper/>
+                                            {keeper && <><IonText>{msg.actor && msg.actor.name}</IonText>&nbsp;{
+                                            // msg.owner == keeper && !msg.groupId && <Keeper/>
                                         }</>}</b> <span style={{fontSize: '11px'}}><IonText
                                         color="medium">{utils.dateFormat(new Date(msg.timestamp * 1000))} </IonText></span>
                                     </div>:<div style={{height:"1px"}}>&nbsp;</div>

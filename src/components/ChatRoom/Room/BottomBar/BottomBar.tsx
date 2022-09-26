@@ -111,6 +111,9 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
         }
     }, [dispatchData.data]);
     const sendMsg = async (f?: boolean) => {
+        if(userLimit && userLimit.msgLeft <=0){
+            return Promise.reject(`Sending messages has reached the maximum limit ${userLimit.maxMsgCount}`)
+        }
         if (textRef && textRef.current) {
             //@ts-ignore
             let value: any = textRef.current.value;
@@ -183,18 +186,21 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                             </IonAvatar>
                                         </div>
                                         <div className="bottom-role-name">
-                                            <div style={{transform: 'translate(-10px,4px)'}}>
-                                                {
-                                                    tribeInfo && tribeInfo.keeper !== owner && <IonBadge>
-                                                        {/*<small>Role</small>*/}
-                                                        {userLimit && <>&nbsp;
-                                                            <IonIcon src={chatbubbleEllipsesOutline}
-                                                                     style={{transform: 'translateY(2px)'}}/><small>{userLimit.msgLeft}</small> &nbsp;
-                                                            <IonIcon src={thumbsUpOutline}
-                                                                     style={{transform: 'translateY(2px)'}}/><small>{userLimit.supportLeft}</small>
-                                                        </>}
-                                                    </IonBadge>
-                                                }
+                                            <div style={{
+                                                // transform: 'translate(-10px,4px)'
+                                                width: "1px"
+                                            }}>
+                                                {/*{*/}
+                                                {/*    tribeInfo && tribeInfo.keeper !== owner && <IonBadge>*/}
+                                                {/*        <small>Role</small>*/}
+                                                {/*        {userLimit && <>&nbsp;*/}
+                                                {/*            <IonIcon src={chatbubbleEllipsesOutline}*/}
+                                                {/*                     style={{transform: 'translateY(2px)'}}/><small>{userLimit.msgLeft}</small> &nbsp;*/}
+                                                {/*            <IonIcon src={thumbsUpOutline}*/}
+                                                {/*                     style={{transform: 'translateY(2px)'}}/><small>{userLimit.supportLeft}</small>*/}
+                                                {/*        </>}*/}
+                                                {/*    </IonBadge>*/}
+                                                {/*}*/}
                                             </div>
                                             <div className="btn-name">
                                                 {selectRole.name} &nbsp;
@@ -241,6 +247,15 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                     <IonIcon className="footer-icon" src={imageOutline} color="dark" size="large"
                                              onClick={(e) => {
                                                  e.stopPropagation();
+                                                 if(userLimit && userLimit.msgLeft <=0){
+                                                     present({
+                                                         message: `Sending messages has reached the maximum limit ${userLimit.maxMsgCount}`,
+                                                         duration: 2000,
+                                                         position: "top",
+                                                         color: "danger"
+                                                     })
+                                                     return;
+                                                 }
                                                  tribeService.picUpload().then(({url, themeColors}) => {
                                                      const displayImage = utils.convertImgDisplay(themeColors.width, themeColors.height, url);
                                                      setDisplayImage({
@@ -265,6 +280,15 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                     {/*}}/>*/}
                                     <IonIcon className="footer-icon" src={rocketOutline} color="dark" size="large" onClick={(e) => {
                                         e.stopPropagation();
+                                        if(userLimit && userLimit.msgLeft <=0){
+                                            present({
+                                                message: `Sending messages has reached the maximum limit ${userLimit.maxMsgCount}`,
+                                                duration: 2000,
+                                                position: "top",
+                                                color: "danger"
+                                            })
+                                            return;
+                                        }
                                         sendMsg(true).then(() => {
                                             dispatch(saveDataState({
                                                 data: JSON.stringify({refresh: 0}),
@@ -290,7 +314,8 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                     {
                                         //@ts-ignore
                                         <TextareaAutosize onBlur={emitChanges.bind(this)} id="msgText" autoFocus rows={1} maxLength={1024} ref={textRef} wrap='hard'
-                                                          placeholder="Your messages" className="msg-input"/>
+                                                          placeholder={userLimit?`Your message limit: ${userLimit && userLimit.msgLeft}/${userLimit && userLimit.maxMsgCount} , support limit: ${userLimit && userLimit.supportLeft}/${userLimit && userLimit.maxSupportCount}`:`Your messages`} className="msg-input"/>
+
                                     }
                                     {
                                         replayMsg && <ReplayText msg={replayMsg} onClose={() => {
@@ -302,26 +327,29 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                             </IonCol>
                             <IonCol size="2">
                                 <div className="msg-bottom-icon2">
-                                    <IonButton className="footer-btn" disabled={loading} onClick={() => {
-                                        setLoading(true)
-                                        sendMsg().then(() => {
-                                            setLoading(false)
-                                            dispatch(saveDataState({
-                                                data: JSON.stringify({refresh: 0}),
-                                                tag: 'scrollToItem'
-                                            }))
-                                        }).catch(e => {
-                                            setLoading(false)
-                                            const err = typeof e == 'string' ? e : e.message;
-                                            present({
-                                                message: err,
-                                                duration: 2000,
-                                                position: "top",
-                                                color: "danger"
+                                    {
+                                        //@ts-ignore
+                                        <IonButton className="footer-btn" disabled={loading } onClick={() => {
+                                            setLoading(true)
+                                            sendMsg().then(() => {
+                                                setLoading(false)
+                                                dispatch(saveDataState({
+                                                    data: JSON.stringify({refresh: 0}),
+                                                    tag: 'scrollToItem'
+                                                }))
+                                            }).catch(e => {
+                                                setLoading(false)
+                                                const err = typeof e == 'string' ? e : e.message;
+                                                present({
+                                                    message: err,
+                                                    duration: 2000,
+                                                    position: "top",
+                                                    color: "danger"
+                                                })
+                                                console.error(e)
                                             })
-                                            console.error(e)
-                                        })
-                                    }}>SEND</IonButton>
+                                        }}>SEND</IonButton>
+                                    }
                                 </div>
                             </IonCol>
                         </IonRow>
@@ -365,6 +393,15 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
 
         <SendImageModal url={displayImage["url"]} width={displayImage["width"]} height={displayImage["height"]}
                         onOk={(text: string) => {
+                            if(userLimit && userLimit.msgLeft <=0){
+                                present({
+                                    message: `Sending messages has reached the maximum limit ${userLimit.maxMsgCount}`,
+                                    duration: 2000,
+                                    position: "top",
+                                    color: "danger"
+                                })
+                                return;
+                            }
                             // const url =  tribeService.picDisplay(imageUrl, 100, 100);
                             const obj = {image: displayImage} as MsgText;
                             if (text) {

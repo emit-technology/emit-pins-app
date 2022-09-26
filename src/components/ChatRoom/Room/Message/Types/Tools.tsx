@@ -26,7 +26,7 @@ export const Tools:React.FC<Props> = ({msg,isChecked,showPin, onReplay,
 
     return isChecked && !showPin && <div className={isSystem || msg.msgType == MessageType.Role ? "flex-center tool-no-role" : "tools"}>
         {
-            !msg.groupId && !isSupported && <div className={`support-bx ${msg.Supporters && isSupported?"support-bx-owner":""}`}  onClick={() => {
+            (onSupport && msg && (!msg.support || msg.support == 0)) && !msg.groupId && !isSupported && <div className={`support-bx ${msg.Supporters && isSupported?"support-bx-owner":""}`}  onClick={() => {
                 if (!msg.groupId) {
                     // onHide();
                     onSupport(msg.id, !isSupported   );

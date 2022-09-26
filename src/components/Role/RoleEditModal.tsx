@@ -13,12 +13,10 @@ import {
     IonCol,
     IonLoading, useIonToast, IonIcon
 } from '@ionic/react';
-import {RowItemCenterWrapper} from '../../theme/commonStyle';
 import UploadImage from "../utils/UploadImage";
 import {useState} from "react";
 import {tribeService} from "../../service/tribe";
 import config from "../../common/config";
-import {createOutline} from "ionicons/icons";
 import add from "../../img/add_circle.png";
 import {utils} from "../../common";
 
@@ -36,6 +34,7 @@ export const RoleEditModal: React.FC<Props> = ({isOpen, roleInfo, onOk, onClose}
     const [roleName, setRoleName] = useState(roleInfo && roleInfo.name);
     const [desc, setDesc] = useState(roleInfo && roleInfo.desc);
     const [present, dismiss] = useIonToast();
+    const [showLoading, setShowLoading] = useState(false);
     React.useEffect(()=>{
         setImgUrl(roleInfo ? roleInfo.avatar:null)
         setRoleName(roleInfo ? roleInfo.name:"")
@@ -103,8 +102,8 @@ export const RoleEditModal: React.FC<Props> = ({isOpen, roleInfo, onOk, onClose}
                         <IonButton fill="outline" expand="block" onClick={()=>onClose()}>Cancel</IonButton>
                     </IonCol>
                     <IonCol size="8">
-                        <IonButton expand="block" onClick={() => {
-                            // setShowLoading(true);
+                        <IonButton disabled={showLoading} expand="block" onClick={() => {
+                            setShowLoading(true);
                             const ri:TribeRole = {
                                 avatar: imgUrl,
                                 name: roleName,
@@ -118,10 +117,10 @@ export const RoleEditModal: React.FC<Props> = ({isOpen, roleInfo, onOk, onClose}
                                 setRoleName("")
 
                                 onOk(roleInfo)
-                                // setShowLoading(false)
+                                setShowLoading(false)
 
                             }).catch(e=>{
-                                // setShowLoading(false)
+                                setShowLoading(false)
                                 console.error(e)
                                 const err = typeof e == 'string' ? e : e.message;
                                 present({message:err,duration:2000,color:"danger",position:"top"})

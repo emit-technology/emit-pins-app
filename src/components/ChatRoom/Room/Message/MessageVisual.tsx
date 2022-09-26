@@ -1,6 +1,15 @@
 import * as React from 'react';
 import {useEffect, useLayoutEffect, useState} from 'react';
-import {GroupMsg, Message, MessageStatus, MessageType, MsgTextImage, PinnedSticky, TribeInfo} from "../../../../types";
+import {
+    GroupMsg,
+    Message,
+    MessageStatus,
+    MessageType,
+    MsgTextImage,
+    PinnedSticky,
+    TribeInfo,
+    UserLimit
+} from "../../../../types";
 import {Airdrop, Dice, Expression, Text} from "./Types";
 
 import './message.scss';
@@ -48,6 +57,7 @@ interface Props {
     onReload?: (loadOwnerOnly: boolean) => void;
     loaded?: boolean
     groupMsg?: Array<GroupMsg>
+    userLimit?: UserLimit
 }
 
 const pageSize = 1000000;
@@ -116,7 +126,7 @@ const setVisibleStartIndex = (n: number) => {
     visibleStartIndex = n;
 }
 
-export const MessageContentVisual: React.FC<Props> = ({groupMsg, pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
+export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit,pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
     const dispatchData = useAppSelector(state => state.jsonData);
     const dispatch = useAppDispatch();
     const [comments, setComments] = useState([]);
@@ -328,7 +338,6 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, pinnedStickies,
 
     useEffect(() => {
         if (!pinnedStickies && comments.length > 0) {
-
             console.log("scroll to last visit max=[%d], current=[%d] ", maxVisibleIndex, currentVisibleIndex)
             if (shouldScroll++ == 0) {
                 const last = getCurrentVisible();
@@ -409,14 +418,23 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, pinnedStickies,
     }
 
     useLayoutEffect(() => {
-        if (owner && !pinnedStickies && dispatchData) {
+        if (!pinnedStickies && dispatchData) {
             if (dispatchData.tag == 'scrollToItem' && dispatchData.data) {
                 let dataObj = JSON.parse(dispatchData.data);
-                // console.log("-->>>>>>>>. scroll to item: " , dataObj)
+                console.log("-->>>>>>>>. scroll to item: " , dataObj)
                 if (dataObj.refresh > -1) {
                     if (dataObj.refresh == 0) {
                         shouldScrollToBottom = true;
                         // scrollToBottom();
+                    }else if(dataObj.refresh == 9999999){
+                        const index = comments.findIndex(v => ((v as PinnedSticky).records && (v as PinnedSticky).records.length > 0 && (v as PinnedSticky).records[0].groupId == "") )
+                        if (index > 0) {
+                            startItem(index);
+                            scrollToItem({index: index, align: "start"})
+                        }else{
+                            shouldScrollToBottom = true;
+                            scrollToBottom();
+                        }
                     } else if (dataObj.refresh == 666666) {
                         const index = comments.findIndex(v => v.groupId == "")
                         if (index > 0) {
@@ -530,21 +548,17 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, pinnedStickies,
                             selfStorage.setItem(`tribe_pin_arr`, checkedCopy)
                         }
                     }}>
-                        <div className="inner" style={{maxWidth: '100%'}} onMouseOver={() => {
-                            if (onSupport) {
-                                setCheckedMsgId(v.id)
-                            }
-                        }}>
+                        <div className="inner" style={{maxWidth: '100%'}} onMouseOver={()=>setCheckedMsgId(v.id)}>
                             {/*<div>{msgIndex}</div>*/}
                             <Text hideTime={!!v["hideTime"] && v["hideTime"] == 1}
-                                  keeper={tribeInfo && tribeInfo.keeper} checked={checked} msg={v} owner={owner}
+                                  keeper={tribeInfo && tribeInfo.keeper} onSupport={onSupport} checked={checked} msg={v} owner={owner}
                                   showPin={v.msgStatus == MessageStatus.dashed && showPin}
                             />
 
                         </div>
 
                         <Tools msg={v} showPin={v.msgStatus == MessageStatus.dashed && showPin} owner={owner}
-                               onSupport={onSupport}
+                               onSupport={userLimit && userLimit.supportLeft > 0 && onSupport}
                                onReplay={(msg: Message) => {
                                    onReplay(msg)
                                }} onEdit={(msg: Message) => {
@@ -609,7 +623,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, pinnedStickies,
 
                                         const msgItems = renInboxMsg(messages, index, pinnedSticky.seq)
                                         return <div className="visual-msg-box"
-                                                    style={{padding: index == comments.length - 1 ? "0 0 32px" : "0"}}
+                                                    style={{padding: index == comments.length - 1 ? "0 0 44px" : "0"}}
                                                     ref={measureRef} key={`_s_${index}`}>
                                             {/*{showLoading && <Loading/>}*/}
                                             {

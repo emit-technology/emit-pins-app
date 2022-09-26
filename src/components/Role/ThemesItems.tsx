@@ -44,9 +44,9 @@ export const ThemesItems:React.FC<Props> = ({groupMsg,onClose}) =>{
                 <div className="theme-roles-box">
                     {
                         groupMsg && groupMsg.map((v, i) => {
-                            const seq = i == groupMsg.length -1 ?0 :(i+1);
+                            const seq = i == groupMsg.length -1 ?0:(i+1);
                             return <div key={i} onClick={()=>{
-                                dispatch(saveDataState({data: JSON.stringify({refresh: seq}), tag: 'scrollToItem'}))
+                                dispatch(saveDataState({data: JSON.stringify({refresh: seq == 0 ? 9999999: seq}), tag: 'scrollToItem'}))
                             }}>
                                 <ThemeItem theme={v.theme} roles={v.roles} seq={seq} />
                             </div>

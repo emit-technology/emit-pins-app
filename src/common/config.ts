@@ -1,3 +1,5 @@
+import {UserLimit} from "../types";
+
 /**
  * name: string;
  symbol: string;
@@ -17,6 +19,10 @@ interface IConfig {
 
     tribeId?: string;
     isAlive: boolean
+
+    userLimit: UserLimit;
+
+
 }
 
 const NODE_ENV: string = process.env.NODE_ENV || 'development';
@@ -26,7 +32,8 @@ const development: IConfig = {
     tribeWs: "wss://pins-ws.emit.technology/ws",
     tribePic: "https://pic.emit.technology",
     picHost: "https://pic.emit.technology/img/",
-    isAlive: false
+    isAlive: false,
+    userLimit: {maxMsgCount: 0, maxSupportCount: 0, msgLeft: 0, supportLeft: 0}
 };
 
 const production: IConfig = {
@@ -35,7 +42,8 @@ const production: IConfig = {
     tribeWs: "wss://pins-ws.emit.technology/ws",
     tribePic: "https://pic.emit.technology",
     picHost: "https://pic.emit.technology/img/",
-    isAlive: false
+    isAlive: false,
+    userLimit:  {maxMsgCount: 0, maxSupportCount: 0, msgLeft: 0, supportLeft: 0}
 }
 
 const config: {

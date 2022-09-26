@@ -53,7 +53,9 @@ export interface GroupMsg {
     theme: TribeTheme;
 }
 
-export interface UserLimit{
+export interface UserLimit {
+    maxMsgCount: number;
+    maxSupportCount: number;
     msgLeft: number;
     supportLeft: number;
 }
