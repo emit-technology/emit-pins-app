@@ -186,7 +186,7 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                             <div style={{transform: 'translate(-10px,4px)'}}>
                                                 {
                                                     tribeInfo && tribeInfo.keeper !== owner && <IonBadge>
-                                                        <small>Role</small>
+                                                        {/*<small>Role</small>*/}
                                                         {userLimit && <>&nbsp;
                                                             <IonIcon src={chatbubbleEllipsesOutline}
                                                                      style={{transform: 'translateY(2px)'}}/><small>{userLimit.msgLeft}</small> &nbsp;

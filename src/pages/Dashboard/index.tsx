@@ -66,11 +66,11 @@ interface State {
     isUpdating: boolean;
     defaultTheme?: TribeTheme
     showPinnedMsg: boolean
-    showShare:boolean
+    showShare: boolean
 
 
     showPinnedMsgDetailModal: boolean;
-    showCreateTribe:boolean;
+    showCreateTribe: boolean;
     groupPinnedMsg: Array<PinnedSticky>;
 
     userLimit?: UserLimit
@@ -88,7 +88,7 @@ let checkInterVal;
 export class Dashboard extends React.Component<Props, State> {
 
     state: State = {
-        datas:[],
+        datas: [],
         owner: "",
         showLoading: false,
         showActionSheet: false,
@@ -123,12 +123,12 @@ export class Dashboard extends React.Component<Props, State> {
         await this.initData()
 
         checkInterVal = selfStorage.getItem("checkInterVal")
-        if(checkInterVal){
+        if (checkInterVal) {
             clearInterval(checkInterVal)
 
         }
-        checkInterVal = setInterval(()=>{
-            this.checkWsAlive().catch(e=>{
+        checkInterVal = setInterval(() => {
+            this.checkWsAlive().catch(e => {
                 console.error(e)
             });
         }, 2000)
@@ -136,19 +136,19 @@ export class Dashboard extends React.Component<Props, State> {
         selfStorage.setItem("checkInterVal", checkInterVal)
     }
 
-    checkWsAlive = async () =>{
+    checkWsAlive = async () => {
         const {userLimit, isConnecting} = this.state;
-        const rest:WsStatus = await tribeWorker.checkAlive(config.tribeId);
+        const rest: WsStatus = await tribeWorker.checkAlive(config.tribeId);
         console.log("======= check ws status at frontend: ", WsStatus[rest], WsStatus[isConnecting])
-        if(rest !== isConnecting){
+        if (rest !== isConnecting) {
             this.setState({
                 isConnecting: rest
             })
         }
 
-        if(rest == WsStatus.active && (!this.state.userLimit || (Math.floor(Date.now()/1000)) % 9 == 0 ) ){
+        if (rest == WsStatus.active && (!this.state.userLimit || (Math.floor(Date.now() / 1000)) % 9 == 0)) {
             const rest = await tribeService.userLimit(config.tribeId);
-            if(!userLimit || userLimit.supportLeft != rest.supportLeft || userLimit.msgLeft != rest.msgLeft){
+            if (!userLimit || userLimit.supportLeft != rest.supportLeft || userLimit.msgLeft != rest.msgLeft) {
                 this.setState({userLimit: rest})
             }
         }
@@ -160,7 +160,7 @@ export class Dashboard extends React.Component<Props, State> {
         })
     }
 
-    initOwnerData = async ()=>{
+    initOwnerData = async () => {
         {
             const userLimit = await tribeService.userLimit(config.tribeId);
             this.setState({userLimit: userLimit})
@@ -179,13 +179,13 @@ export class Dashboard extends React.Component<Props, State> {
                 console.log('Share clicked');
                 this.setShowCreateTribe(true)
             }
-        },{
+        }, {
             text: 'Share',
             icon: share,
             handler: () => {
-                console.log('Share clicked',navigator.share);
-                Share.canShare().then(f=>console.log(f,"can share ?"))
-                this.setState({showShare:true})
+                console.log('Share clicked', navigator.share);
+                Share.canShare().then(f => console.log(f, "can share ?"))
+                this.setState({showShare: true})
             }
         }, {
             text: 'Cancel',
@@ -229,8 +229,8 @@ export class Dashboard extends React.Component<Props, State> {
             if (roles && roles.length > 0) {
                 role = roles.find(v => v.id == latestRoleId)
             }
-            if(!role){
-               role = roles[0];
+            if (!role) {
+                role = roles[0];
             }
         }
 
@@ -295,8 +295,8 @@ export class Dashboard extends React.Component<Props, State> {
         })
     }
 
-    showPinnedMsgDetail = async (groupId:string) =>{
-        const rest = await tribeService.groupedMsg([groupId],true);
+    showPinnedMsgDetail = async (groupId: string) => {
+        const rest = await tribeService.groupedMsg([groupId], true);
         const ret = tribeService.convertGroupMsgToPinnedSticky(rest);
         this.setState({
             showPinnedMsgDetailModal: true,
@@ -304,20 +304,21 @@ export class Dashboard extends React.Component<Props, State> {
         })
     }
 
-    setShowCreateTribe = (f:boolean)=>{
-        this.setState({showCreateTribe:f})
+    setShowCreateTribe = (f: boolean) => {
+        this.setState({showCreateTribe: f})
     }
 
     render() {
         const {
-            owner, showActionSheet, buttons,showShare, showPinnedMsg,userLimit,
+            owner, showActionSheet, buttons, showShare, showPinnedMsg, userLimit,
             showCreateTribe,
-            isUpdating, isConnecting, groupMsgs, showMenusModal,groupPinnedMsg , showPinnedMsgDetailModal,
-            account, roles, tribeInfo, latestRole, datas,showTribeEdit, showPin
+            isUpdating, isConnecting, groupMsgs, showMenusModal, groupPinnedMsg, showPinnedMsgDetailModal,
+            account, roles, tribeInfo, latestRole, datas, showTribeEdit, showPin
         } = this.state;
 
         return (
             <>
+
                 <IonRow style={{height: '100%'}}>
                     <IonCol sizeMd="8" sizeSm="12" sizeXs="12" style={{height: '100%'}}>
                         <IonPage>
@@ -331,46 +332,48 @@ export class Dashboard extends React.Component<Props, State> {
                                                     Cancel
                                                 </IonButton>
                                             </IonButtons>
-                                            <IonTitle className="font-style-bold" onClick={()=>{
+                                            <IonTitle className="font-style-bold" onClick={() => {
                                                 this.setShowMenusModal(true);
                                             }}>
-                                                <TribeHeader onReladData={()=>{
-                                                    this.initData().catch(e=>{
+                                                <TribeHeader onReladData={() => {
+                                                    this.initData().catch(e => {
                                                         console.error(e)
                                                     })
-                                                }} tribeInfo={tribeInfo} roles={roles} wsStatus={isConnecting} />
+                                                }} tribeInfo={tribeInfo} roles={roles} wsStatus={isConnecting}/>
                                             </IonTitle>
                                         </IonToolbar> :
                                         <IonToolbar className="msg-toolbar">
                                             <div className="msg-head-avatar">
-                                               <div>
-                                                   {
-                                                       account && account.name? <div slot="start"  onClick={() => {
-                                                           tribeService.getAccountAndLogin().then(()=>{
-                                                               this.initData().catch(e=>console.error(e))
-                                                           }).catch(e => {
-                                                           })
+                                                <div>
+                                                    {
+                                                        account && account.name ? <div slot="start" onClick={() => {
+                                                                tribeService.getAccountAndLogin().then(() => {
+                                                                    this.initData().catch(e => console.error(e))
+                                                                }).catch(e => {
+                                                                })
 
-                                                       }}>
-                                                           <Avatar name={account.name} round size="30"/>
-                                                       </div>:<IonIcon size="large" slot="start" src={personCircleOutline}  onClick={() => {
-                                                           tribeService.getAccountAndLogin().then(()=>{
-                                                               this.initData().catch(e=>console.error(e))
-                                                           }).catch(e => {
-                                                           })
+                                                            }}>
+                                                                <Avatar name={account.name} round size="30"/>
+                                                            </div> :
+                                                            <IonIcon size="large" slot="start" src={personCircleOutline}
+                                                                     onClick={() => {
+                                                                         tribeService.getAccountAndLogin().then(() => {
+                                                                             this.initData().catch(e => console.error(e))
+                                                                         }).catch(e => {
+                                                                         })
 
-                                                       }}/>
-                                                   }
-                                               </div>
+                                                                     }}/>
+                                                    }
+                                                </div>
                                             </div>
-                                            <IonTitle className="font-style-bold" onClick={()=>{
+                                            <IonTitle className="font-style-bold" onClick={() => {
                                                 this.setShowMenusModal(true);
                                             }}>
-                                                <TribeHeader onReladData={()=>{
-                                                    this.initData().catch(e=>{
+                                                <TribeHeader onReladData={() => {
+                                                    this.initData().catch(e => {
                                                         console.error(e)
                                                     })
-                                                }} tribeInfo={tribeInfo} roles={roles} wsStatus={isConnecting} />
+                                                }} tribeInfo={tribeInfo} roles={roles} wsStatus={isConnecting}/>
                                             </IonTitle>
                                             {/*<div slot="end" className="menus-list-button">*/}
                                             {/*    <IonIcon src={listOutline} color="medium" size="large" slot="end"*/}
@@ -394,56 +397,67 @@ export class Dashboard extends React.Component<Props, State> {
 
                                 <div className="msg-box">
                                     {
-                                        isConnecting == WsStatus.tokenInvalid && <div className="not-connect" onClick={()=>{
-                                            tribeService.getAccountAndLogin().then(()=>{
-                                                this.initData().catch(e=>console.error(e))
+                                        isConnecting == WsStatus.tokenInvalid &&
+                                        <div className="not-connect" onClick={() => {
+                                            tribeService.getAccountAndLogin().then(() => {
+                                                this.initData().catch(e => console.error(e))
                                             }).catch(e => {
                                             })
 
-                                        }}><IonText color="primary">No connection , <span style={{textDecoration: "underline", textUnderlineOffset: '4px', cursor: "pointer"}}>login</span></IonText></div>
+                                        }}><IonText color="primary">No connection , <span style={{
+                                            textDecoration: "underline",
+                                            textUnderlineOffset: '4px',
+                                            cursor: "pointer"
+                                        }}>login</span></IonText></div>
                                     }
                                     {
-                                        isConnecting == WsStatus.inactive && <div className="not-connect">Connecting...</div>
+                                        isConnecting == WsStatus.inactive &&
+                                        <div className="not-connect">Connecting...</div>
                                     }
                                     <div className="msg-toolbar">
                                         <ToolBar/>
-                                         <ShareEx isOpen={showShare} onClose={()=>this.setState({showShare:false})} tribeInfo={tribeInfo}/>
+                                        <ShareEx isOpen={showShare} onClose={() => this.setState({showShare: false})}
+                                                 tribeInfo={tribeInfo}/>
                                     </div>
-                                        <MessageContentVisual
-                                            loaded={!!tribeInfo}
-                                            showPinnedMsgDetail={(groupId)=>{
-                                                this.showPinnedMsgDetail(groupId).catch(e=>{
-                                                    console.log(e)
+                                    <MessageContentVisual
+                                        loaded={!!tribeInfo}
+                                        showPinnedMsgDetail={(groupId) => {
+                                            this.showPinnedMsgDetail(groupId).catch(e => {
+                                                console.log(e)
+                                            })
+                                        }}
+                                        onReload={(loadOwnerOnly) => {
+                                            if (loadOwnerOnly) {
+                                                this.initOwnerData().catch(e => {
+                                                    console.error(e)
                                                 })
-                                            }}
-                                            onReload={(loadOwnerOnly)=>{
-                                                if(loadOwnerOnly){
-                                                    this.initOwnerData().catch(e=>{
-                                                        console.error(e)
-                                                    })
-                                                }else{
-                                                    this.initData().catch(e=>{
-                                                        console.error(e)
-                                                    })
-                                                }
+                                            } else {
+                                                this.initData().catch(e => {
+                                                    console.error(e)
+                                                })
+                                            }
 
-                                            }}
-                                            tribeInfo={tribeInfo}
-                                            owner={owner}
-                                            groupMsg={groupMsgs}
-                                            onSupport={(msgId, f) => this.onSupport(msgId, f)}
-                                            showPin={showPin} />
+                                        }}
+                                        tribeInfo={tribeInfo}
+                                        owner={owner}
+                                        groupMsg={groupMsgs}
+                                        onSupport={(msgId, f) => this.onSupport(msgId, f)}
+                                        showPin={showPin}/>
                                 </div>
 
-                                <BottomBar tribeInfo={tribeInfo} owner={owner} userLimit={userLimit} onRoleCheck={(v)=>{
-                                    this.setLatestRole(v)
-                                }} roles={roles} selectRole={latestRole} showPin={showPin} onPin={() => {
-                                    // tribeService.setCacheMsg(config.tribeId,[])
-                                    this.setState({showPin: false,datas:[]})
-                                    this.initData().catch(e => {
-                                        console.error(e)
-                                    })
-                                }}/>
+                                <div>
+                                    <div>TiP2</div>
+                                    <BottomBar tribeInfo={tribeInfo} owner={owner} userLimit={userLimit}
+                                               onRoleCheck={(v) => {
+                                                   this.setLatestRole(v)
+                                               }} roles={roles} selectRole={latestRole} showPin={showPin} onPin={() => {
+                                        // tribeService.setCacheMsg(config.tribeId,[])
+                                        this.setState({showPin: false, datas: []})
+                                        this.initData().catch(e => {
+                                            console.error(e)
+                                        })
+                                    }}/>
+                                </div>
 
                                 <IonActionSheet
                                     isOpen={showActionSheet}
@@ -474,6 +488,7 @@ export class Dashboard extends React.Component<Props, State> {
                         </IonPage>
                     </IonCol>
                     <IonCol sizeMd="4" sizeSm="12" sizeXs="12" style={{padding: "unset", height: '100%'}}>
+                        <div>tip1</div>
                         <RoleListModal
                             groupMsg={groupMsgs} tribeInfo={tribeInfo} roles={roles} defaultRole={latestRole}
                             onRoleCheck={v => this.setLatestRole(v)}
@@ -494,9 +509,9 @@ export class Dashboard extends React.Component<Props, State> {
                 {/*    message={'Connecting...'}*/}
                 {/*    duration={60000}*/}
                 {/*/>*/}
-                <PinnedMsgModal isOpen={showPinnedMsgDetailModal} onClose={()=>{
-                    this.setState({showPinnedMsgDetailModal:false})
-                }} data={{data:groupPinnedMsg,total:groupPinnedMsg.length}} tribeInfo={tribeInfo}/>
+                <PinnedMsgModal isOpen={showPinnedMsgDetailModal} onClose={() => {
+                    this.setState({showPinnedMsgDetailModal: false})
+                }} data={{data: groupPinnedMsg, total: groupPinnedMsg.length}} tribeInfo={tribeInfo}/>
 
 
             </>

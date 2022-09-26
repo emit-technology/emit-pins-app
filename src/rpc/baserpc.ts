@@ -2,6 +2,7 @@ import axios from "axios";
 import {Camera, CameraResultType, CameraSource} from "@capacitor/camera";
 import selfStorage from "../common/storage";
 import getMainColor, {ThemeColors} from "../common/getMainColor";
+import {tribeService} from "../service/tribe";
 
 
 export class BaseRpc {
@@ -13,7 +14,7 @@ export class BaseRpc {
     }
 
     post = async (path:string,data: any): Promise<any> => {
-        const authToken = selfStorage.getItem("authToken");
+        const authToken = tribeService.getAuthToken();
         const rest = await axios.post(`${this._url}${path}`,data, {
             headers: {
                 'Content-Type': 'application/json',

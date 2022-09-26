@@ -37,7 +37,7 @@ import BigNumber from "bignumber.js";
 import selfStorage from "../../../../common/storage";
 import {Tools} from "./Types/Tools";
 import {utils} from "../../../../common";
-import {Helmet} from "react-helmet";
+
 interface Props {
     pinnedStickies?: { data: Array<PinnedSticky>, total: number }
     tribeInfo: TribeInfo;
@@ -584,36 +584,6 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, pinnedStickies,
         pinnedStickies && pinnedStickies.data.length > 0 ? pinnedStickies.data[0].theme.image : tribeInfo && tribeInfo.theme.image
 
     return <>
-        <Helmet>
-            {/*<title>{title}</title>*/}
-            {/*<meta charset="utf-8" />*/}
-            {/*<meta http-equiv="X-UA-Compatible" content="IE=edge" />*/}
-            {/*<meta name="csrf_token" content="" />*/}
-            {/*<meta property="type" content="website" />*/}
-            {/*<meta*/}
-            {/*    name="viewport"*/}
-            {/*    content="width=device-width, initial-scale=1, shrink-to-fit=no"*/}
-            {/*/>*/}
-            {/*<meta name="msapplication-TileColor" content="#ffffff" />*/}
-            {/*<meta name="msapplication-TileImage" content="/ms-icon-144x144.png" />*/}
-            {/*<meta name="theme-color" content="#ffffff" />*/}
-            {/*<meta name="_token" content="" />*/}
-            {/*<meta name="robots" content="noodp" />*/}
-            <meta property="title" content={tribeInfo && tribeInfo.title} data-react-helmet="true"/>
-            <meta property="quote" content={tribeInfo && tribeInfo.theme.themeTag } data-react-helmet="true"/>
-            <meta name="description" content={tribeInfo && tribeInfo.theme.themeDesc} data-react-helmet="true"/>
-            <meta property="image" content={tribeInfo && tribeInfo.theme.image["url"]} data-react-helmet="true"/>
-            <meta property="og:locale" content="en_US" />
-            <meta property="og:type" content="website" />
-            <meta property="og:title" content={tribeInfo && tribeInfo.title} />
-            <meta property="og:quote" content={tribeInfo && tribeInfo.theme.themeTag} />
-            <meta property="og:hashtag" content={config.tribeId} />
-            <meta property="og:image" content={tribeInfo && tribeInfo.theme.image["url"]} data-react-helmet="true"/>
-            <meta property="og:image:secure_url" content={tribeInfo && tribeInfo.theme.image["url"]} data-react-helmet="true"/>
-            <meta content="image/*" property="og:image:type" data-react-helmet="true"/>
-            <meta property="og:site_name" content="CampersTribe" />
-            <meta property="og:description" content={tribeInfo && tribeInfo.theme.themeDesc} />{" "}
-        </Helmet>
 
         <div className={!pinnedStickies ? "msg-content" : "msg-content2"} style={{
             backgroundImage: `url(${utils.getDisPlayUrl(_url)})`,

@@ -12,7 +12,7 @@ class ImWorker {
 
     async init(tribeId:string){
         // const authToken = await tribeService.userCheckAuth()
-        const authToken = selfStorage.getItem("authToken");
+        const authToken = tribeService.getAuthToken(); //selfStorage.getItem("authToken");
         return new Promise((resolve, reject)=>{
             service.init(tribeId,authToken,function (data:any){
                 if(data.error){
@@ -25,7 +25,7 @@ class ImWorker {
     }
 
     async checkAlive(tribeId:string):Promise<WsStatus>{
-        let authToken = selfStorage.getItem("authToken");
+        let authToken = tribeService.getAuthToken();
         const accountLocal = await emitBoxSdk.getAccount();
         if(!accountLocal){
             return WsStatus.tokenInvalid;

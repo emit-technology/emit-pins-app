@@ -144,7 +144,7 @@ class TribeService implements ITribe {
         const rest: TribeResult<{ userName: string }> = await this._rpc.post('/user/checkAuth', null);
         let authToken: string;
         if (rest && rest.code == 0) {
-            authToken = selfStorage.getItem('authToken')
+            authToken = tribeService.getAuthToken();
         }
         if (rest.code == 40000) {
             authToken = await this.getAccountAndLogin();
@@ -187,7 +187,8 @@ class TribeService implements ITribe {
                 v: sig.result["v"] as string
             });
             await emitBoxSdk.setAccount(account)
-            selfStorage.setItem("authToken", authToken)
+            tribeService.setAuthToken(authToken);
+            // selfStorage.setItem("authToken", authToken)
             return authToken;
         }
 
@@ -221,9 +222,19 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
+    setAuthToken = (authToken:string) =>{
+        // selfStorage.setItem(`authToken_${config.tribeId}`, authToken)
+        selfStorage.setItem(`authToken`, authToken)
+    }
+
+    getAuthToken = () =>{
+        // return selfStorage.getItem(`authToken_${config.tribeId}`)
+        return selfStorage.getItem(`authToken`)
+    }
+
     connectW3C = (tribeId: string, cb: Function) =>{
         console.log("connect....")
-        const authToken = selfStorage.getItem("authToken");
+        const authToken = tribeService.getAuthToken();
         this._wsW3C = new W3CWebSocket(config.tribeWs, 'echo-protocol');
 
         this._wsW3C.onerror = ()=> {
@@ -261,7 +272,7 @@ class TribeService implements ITribe {
 
     connectOrigin = (tribeId: string, cb: Function) =>{
         console.log("connect origin....")
-        const authToken = selfStorage.getItem("authToken");
+        const authToken = tribeService.getAuthToken();
 
         this._wsOrigin = new WebSocket(config.tribeWs);
 
@@ -304,7 +315,7 @@ class TribeService implements ITribe {
 
     connect = (tribeId: string, cb: Function) => {
         console.log("connect....")
-        const authToken = selfStorage.getItem("authToken");
+        const authToken = tribeService.getAuthToken();
         if (this._ws){
             // this._ws.close();
             // this._ws = null;
