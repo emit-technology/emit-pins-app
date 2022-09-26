@@ -151,6 +151,15 @@ export const utils = {
         return {
             width: w, height: h, displayUrl: `${config.tribePic}/display?url=${url}&w=${w}&h=${h}&op=resize&upscale=1`
         }
+    },
+
+    getQueryString : (name: string) => {
+        const reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        const r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+            return decodeURIComponent(r[2]);
+        }
+        return '';
     }
 
 }
