@@ -36,7 +36,7 @@ import {
 import {IonButton, IonRow,IonCol,IonButtons, IonContent, IonHeader, IonModal, IonTitle, IonToolbar} from "@ionic/react";
 import {TribeInfo} from "../../types";
 import config from "../../common/config";
-import {Helmet} from "react-helmet";
+// import {Helmet} from "react-helmet";
 
 interface Props{
     isOpen: boolean;
@@ -51,24 +51,24 @@ export const ShareEx :React.FC<Props> = ({isOpen,onClose, tribeInfo})=>{
     const desc =`EMIT - PINS, ${tribeInfo && tribeInfo.title}, ${tribeInfo && tribeInfo.theme.themeTag}`;
 
     return <>
-        <Helmet>
-            <meta property="twitter:card" content="summary_large_image"/>
-            <meta property="twitter:site" content="@emit_protocol"/>
-            <meta property="twitter:url"
-                  content={`https://pins.emit.technology/#/${config.tribeId}?ref=twitter_summary_card`}/>
-            <meta property="twitter:title" content={tribeInfo && tribeInfo.title}/>
-            <meta property="twitter:description" content={tribeInfo && tribeInfo.theme.themeDesc}/>
-            <meta property="twitter:image" content={tribeInfo && tribeInfo.theme.image["url"]}/>
+        {/*<Helmet>*/}
+        {/*    <meta property="twitter:card" content="summary_large_image"/>*/}
+        {/*    <meta property="twitter:site" content="@emit_protocol"/>*/}
+        {/*    <meta property="twitter:url"*/}
+        {/*          content={`https://pins.emit.technology/#/${config.tribeId}?ref=twitter_summary_card`}/>*/}
+        {/*    <meta property="twitter:title" content={tribeInfo && tribeInfo.title}/>*/}
+        {/*    <meta property="twitter:description" content={tribeInfo && tribeInfo.theme.themeDesc}/>*/}
+        {/*    <meta property="twitter:image" content={tribeInfo && tribeInfo.theme.image["url"]}/>*/}
 
-            <meta property="og:title" content={tribeInfo && tribeInfo.title}/>
-            <meta property="og:site_name" content={tribeInfo && tribeInfo.title}/>
-            <meta property="og:type" content="article"/>
-            <meta property="og:image" content={tribeInfo && tribeInfo.theme.image["url"]}/>
-            <meta property="og:description" content={tribeInfo && tribeInfo.theme.themeDesc}/>
-            <meta name="robots" content="max-image-preview:large"/>
-            <meta name="description" content={tribeInfo && tribeInfo.theme.themeDesc}/>
+        {/*    <meta property="og:title" content={tribeInfo && tribeInfo.title}/>*/}
+        {/*    <meta property="og:site_name" content={tribeInfo && tribeInfo.title}/>*/}
+        {/*    <meta property="og:type" content="article"/>*/}
+        {/*    <meta property="og:image" content={tribeInfo && tribeInfo.theme.image["url"]}/>*/}
+        {/*    <meta property="og:description" content={tribeInfo && tribeInfo.theme.themeDesc}/>*/}
+        {/*    <meta name="robots" content="max-image-preview:large"/>*/}
+        {/*    <meta name="description" content={tribeInfo && tribeInfo.theme.themeDesc}/>*/}
 
-        </Helmet>
+        {/*</Helmet>*/}
 
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} initialBreakpoint={0.4} breakpoints={[0, 0.4, 0.6]} className="tribe-edit-modal">
         <IonHeader collapse="fade">

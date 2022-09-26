@@ -3,7 +3,7 @@ import {
     IonApp, IonContent, IonHeader, IonMenu, IonTitle, IonToolbar,
     setupIonicReact
 } from '@ionic/react';
-import {IonReactRouter as Router} from '@ionic/react-router';
+import {IonReactHashRouter as Router} from '@ionic/react-router';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -29,7 +29,6 @@ import React from "react";
 import config from "./common/config";
 import {Provider} from "react-redux";
 import store from "./common/state/app/store";
-import {utils} from "./common";
 
 setupIonicReact({
     mode: "ios",
@@ -57,9 +56,8 @@ const App: React.FC = () => {
                                 {/*    </IonContent>*/}
                                 {/*</IonMenu>*/}
 
-                                <Route exact path="/" component={(props: any) => {
-                                    const tribeId = utils.getQueryString("verseId");
-                                    // const tribeId = props.match.params.tribeId;
+                                <Route exact path="/:tribeId" component={(props: any) => {
+                                    const tribeId = props.match.params.tribeId;
                                     config.tribeId = tribeId;
                                     return <Dashboard tribeId={tribeId}/>
                                 }}/>
