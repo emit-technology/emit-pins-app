@@ -55,7 +55,7 @@ export const ShareEx :React.FC<Props> = ({isOpen,onClose, tribeInfo})=>{
         {/*    <meta property="twitter:card" content="summary_large_image"/>*/}
         {/*    <meta property="twitter:site" content="@emit_protocol"/>*/}
         {/*    <meta property="twitter:url"*/}
-        {/*          content={`https://pins.emit.technology/#/${config.tribeId}?ref=twitter_summary_card`}/>*/}
+        {/*          content={`https://pins.emit.technology/${config.tribeId}?ref=twitter_summary_card`}/>*/}
         {/*    <meta property="twitter:title" content={tribeInfo && tribeInfo.title}/>*/}
         {/*    <meta property="twitter:description" content={tribeInfo && tribeInfo.theme.themeDesc}/>*/}
         {/*    <meta property="twitter:image" content={tribeInfo && tribeInfo.theme.image["url"]}/>*/}

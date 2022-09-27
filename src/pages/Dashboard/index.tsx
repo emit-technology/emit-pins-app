@@ -20,10 +20,9 @@ import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import {
     addOutline,
     close, colorPaletteOutline,
-    createOutline,
     ellipsisVertical,
     personCircleOutline,
-    pinOutline, planetOutline,
+    pinOutline,
     share
 } from "ionicons/icons";
 import './index.scss';
