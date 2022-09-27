@@ -97,8 +97,7 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
                             <span style={{fontSize: '11px'}}>
                                 <IonText color="medium">
                                     {
-                                        wsStatus == WsStatus.active ? (stickyMsg && stickyMsg.groupId?`#${stickyMsg.seq}${(stickyMsg as PinnedSticky).theme.themeTag}`: tribeInfo && tribeInfo.theme.themeTag)
-                                        : wsStatus == WsStatus.inactive?"connecting...": wsStatus == WsStatus.tokenInvalid && "not connect"
+                                        (stickyMsg && stickyMsg.groupId?`#${stickyMsg.seq}${(stickyMsg as PinnedSticky).theme.themeTag}`: tribeInfo && tribeInfo.theme.themeTag)
                                     }
                                 </IonText>
                             </span>

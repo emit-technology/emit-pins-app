@@ -112,7 +112,7 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
     }, [dispatchData.data]);
     const sendMsg = async (f?: boolean) => {
         if(userLimit && userLimit.msgLeft <=0){
-            return Promise.reject(`Sending messages has reached the maximum limit ${userLimit.maxMsgCount}`)
+            return Promise.reject(`reaching the max number(${userLimit.maxMsgCount}) of likes`)
         }
         if (textRef && textRef.current) {
             //@ts-ignore
@@ -282,7 +282,7 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                         e.stopPropagation();
                                         if(userLimit && userLimit.msgLeft <=0){
                                             present({
-                                                message: `Sending messages has reached the maximum limit ${userLimit.maxMsgCount}`,
+                                                message: `reaching the max number(${userLimit.maxMsgCount}) of likes`,
                                                 duration: 2000,
                                                 position: "top",
                                                 color: "danger"
@@ -314,7 +314,7 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                     {
                                         //@ts-ignore
                                         <TextareaAutosize onBlur={emitChanges.bind(this)} id="msgText" autoFocus rows={1} maxLength={1024} ref={textRef} wrap='hard'
-                                                          placeholder={userLimit?`Your message limit: ${userLimit && userLimit.msgLeft}/${userLimit && userLimit.maxMsgCount} , support limit: ${userLimit && userLimit.supportLeft}/${userLimit && userLimit.maxSupportCount}`:`Your messages`} className="msg-input"/>
+                                                          placeholder={tribeInfo && owner !== tribeInfo.keeper && userLimit?`msg (${userLimit && userLimit.msgLeft}/${userLimit && userLimit.maxMsgCount}) , likes (${userLimit && userLimit.supportLeft}/${userLimit && userLimit.maxSupportCount}) `:`Your messages`} className="msg-input"/>
 
                                     }
                                     {

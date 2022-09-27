@@ -331,7 +331,6 @@ export class Dashboard extends React.Component<Props, State> {
 
         return (
             <>
-
                 <IonRow style={{height: '100%'}}>
                     <IonCol sizeMd="8" sizeSm="12" sizeXs="12" style={{height: '100%'}}>
                         <IonPage>
@@ -506,7 +505,7 @@ export class Dashboard extends React.Component<Props, State> {
                                     onDidDismiss={() => this.setShowToast(false)}
                                     message={toastMsg}
                                     position="top"
-                                    color={"primary"}
+                                    color={"danger"}
                                     duration={2000}
                                 />
 
@@ -514,7 +513,6 @@ export class Dashboard extends React.Component<Props, State> {
                         </IonPage>
                     </IonCol>
                     <IonCol sizeMd="4" sizeSm="12" sizeXs="12" style={{padding: "unset", height: '100%'}}>
-                        <div>tip1</div>
                         <RoleListModal
                             groupMsg={groupMsgs} tribeInfo={tribeInfo} roles={roles} defaultRole={latestRole}
                             onRoleCheck={v => this.setLatestRole(v)}

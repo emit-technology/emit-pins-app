@@ -1,6 +1,6 @@
 import {Redirect, Route, Switch} from 'react-router-dom';
 import {
-    IonApp, IonContent, IonHeader, IonMenu, IonTitle, IonToolbar,
+    IonApp, IonContent, IonHeader, IonIcon, IonMenu, IonTitle, IonToolbar,
     setupIonicReact
 } from '@ionic/react';
 import {IonReactHashRouter as Router} from '@ionic/react-router';
@@ -25,10 +25,12 @@ import '@ionic/react/css/display.css';
 import './theme/variables.css';
 import './App.scss';
 import {Dashboard} from "./pages/Dashboard";
-import React from "react";
+import React, {useEffect, useState} from "react";
 import config from "./common/config";
 import {Provider} from "react-redux";
 import store from "./common/state/app/store";
+import {closeOutline} from "ionicons/icons";
+import selfStorage from "./common/storage";
 
 setupIonicReact({
     mode: "ios",
@@ -37,9 +39,31 @@ setupIonicReact({
 const App: React.FC = () => {
     // const [roles,setRoles] = React.useState([]);
     // const [tribeInfo,setTribeInfo,]
+
+    // const [showTip,setShowTip ] = useState(true);
+    //
+    // useEffect(()=>{
+    //     const readTip = selfStorage.getItem("readTip");
+    //     setShowTip(!readTip)
+    // },[])
+    // const mobileWidth = document.documentElement.clientWidth <=768;
+    // const Tip = ()=>  mobileWidth?<img src="./assets/img/snaptip2.png" style={{height:'100%', width:'100%'}}/>:<img src="./assets/img/snaptip.png"  style={{height:'100%', width:'100%'}}/>
+    // console.log("page show tips",showTip);
     return <>
         <div className={`page`}>
+
             <div className="page-inner">
+                {/*{*/}
+                {/*    showTip && <div id="spash-div" style={{position:"absolute",zIndex: 100,height:'100%', width:mobileWidth?'780px':'100%', overflow:"hidden"}}  onClick={()=>{*/}
+                {/*        selfStorage.setItem("readTip",true)*/}
+                {/*        document.getElementById("spash-div").style.height = '0px' ;*/}
+                {/*    }}>*/}
+                {/*        <div style={{position: "absolute",height:'100%',top: '20px', right: '20px', color: '#ffffff', fontSize: '32px'}}>*/}
+                {/*            <IonIcon src={closeOutline}/>*/}
+                {/*        </div>*/}
+                {/*        <Tip/>*/}
+                {/*    </div>*/}
+                {/*}*/}
                 <IonApp>
                     <Provider store={store}>
                         <Router>
