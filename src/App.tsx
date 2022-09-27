@@ -1,9 +1,9 @@
-import {Redirect, Route, Switch} from 'react-router-dom';
+import {Redirect, Route, Switch,BrowserRouter as Router} from 'react-router-dom';
 import {
     IonApp, IonContent, IonHeader, IonIcon, IonMenu, IonTitle, IonToolbar,
     setupIonicReact
 } from '@ionic/react';
-import {IonReactRouter as Router} from '@ionic/react-router';
+// import {IonReactRouter as Router} from '@ionic/react-router';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
