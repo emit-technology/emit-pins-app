@@ -2,7 +2,7 @@
   "name": "emit-pins",
   "version": "0.0.1",
   "private": true,
-  "homepage": "https://emit-technology.github.io/emit-pins-app",
+  "homepage": "https://pins.emit.technology",
   "main": "/",
   "dependencies": {
     "@capacitor/app": "1.1.1",

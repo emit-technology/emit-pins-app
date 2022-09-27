@@ -49,6 +49,8 @@ const App: React.FC = () => {
     // const mobileWidth = document.documentElement.clientWidth <=768;
     // const Tip = ()=>  mobileWidth?<img src="./assets/img/snaptip2.png" style={{height:'100%', width:'100%'}}/>:<img src="./assets/img/snaptip.png"  style={{height:'100%', width:'100%'}}/>
     // console.log("page show tips",showTip);
+    const baseURL = process.env.NODE_ENV === 'production' ? 'https://pins.emit.technology' : process.env.REACT_APP_DEV_API_URL;
+
     return <>
         <div className={`page`}>
 
@@ -66,7 +68,7 @@ const App: React.FC = () => {
                 {/*}*/}
                 <IonApp>
                     <Provider store={store}>
-                        <Router>
+                        <Router basename={baseURL}>
                             <Switch>
 
                                 {/*<IonMenu side="end" type="push">*/}
