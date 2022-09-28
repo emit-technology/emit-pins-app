@@ -48,7 +48,7 @@ export const ShareEx :React.FC<Props> = ({isOpen,onClose, tribeInfo})=>{
 
     const url = window.location.href;
     const hash = window.location.hash;
-    const desc =`EMIT - PINS, ${tribeInfo && tribeInfo.title}, ${tribeInfo && tribeInfo.theme.themeTag}`;
+    const desc =`EMIT - PINs, ${tribeInfo && tribeInfo.title}, ${tribeInfo && tribeInfo.theme.themeTag}`;
 
     return <>
         <Helmet>
@@ -56,17 +56,17 @@ export const ShareEx :React.FC<Props> = ({isOpen,onClose, tribeInfo})=>{
             <meta property="twitter:site" content="@emit_protocol"/>
             <meta property="twitter:url"
                   content={`https://pins.emit.technology/${config.tribeId}?ref=twitter_summary_card`}/>
-            <meta property="twitter:title" content={tribeInfo && tribeInfo.title}/>
+            <meta property="twitter:title" content={desc}/>
             <meta property="twitter:description" content={tribeInfo && tribeInfo.theme.themeDesc}/>
             <meta property="twitter:image" content={tribeInfo && tribeInfo.theme.image["url"]}/>
 
-            <meta property="og:title" content={tribeInfo && tribeInfo.title}/>
-            <meta property="og:site_name" content={tribeInfo && tribeInfo.title}/>
+            <meta property="og:title" content={desc}/>
+            <meta property="og:site_name" content="EMIT - PINs"/>
             <meta property="og:type" content="article"/>
             <meta property="og:image" content={tribeInfo && tribeInfo.theme.image["url"]}/>
-            <meta property="og:description" content={tribeInfo && tribeInfo.theme.themeDesc}/>
+            <meta property="og:description" content={`${desc} , ${tribeInfo && tribeInfo.theme.themeDesc}`}/>
             <meta name="robots" content="max-image-preview:large"/>
-            <meta name="description" content={tribeInfo && tribeInfo.theme.themeDesc}/>
+            <meta name="description" content={`${desc} , ${tribeInfo && tribeInfo.theme.themeDesc}`}/>
 
         </Helmet>
 
