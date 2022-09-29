@@ -21,6 +21,10 @@ http://ionicframework.com/docs/theming/ */
   src: url('./fonts/SF/FontsFree-Net-SFProText-Semibold.ttf');
 }
 @font-face {
+  font-family: 'SFProText-Bold';
+  src: url('./fonts/SF/FontsFree-Net-SFProText-Bold.ttf');
+}
+@font-face {
   font-family: 'SFProText-Regular';
   src: url('./fonts/SF/FontsFree-Net-SFProText-Regular.ttf');
 }

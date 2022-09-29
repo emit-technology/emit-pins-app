@@ -278,33 +278,33 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
 
                                     {/*    }*/}
                                     {/*}}/>*/}
-                                    <IonIcon className="footer-icon" src={rocketOutline} color="dark" size="large" onClick={(e) => {
-                                        e.stopPropagation();
-                                        if(userLimit && userLimit.msgLeft <=0){
-                                            present({
-                                                message: `reaching the max number(${userLimit.maxMsgCount}) of likes`,
-                                                duration: 2000,
-                                                position: "top",
-                                                color: "danger"
-                                            })
-                                            return;
-                                        }
-                                        sendMsg(true).then(() => {
-                                            dispatch(saveDataState({
-                                                data: JSON.stringify({refresh: 0}),
-                                                tag: 'scrollToItem'
-                                            }))
-                                        }).catch(e => {
-                                            const err = typeof e == 'string' ? e : e.message;
-                                            present({
-                                                message: err,
-                                                duration: 2000,
-                                                position: "top",
-                                                color: "danger"
-                                            })
-                                            console.error(e)
-                                        })
-                                    }}/>
+                                    {/*<IonIcon className="footer-icon" src={rocketOutline} color="dark" size="large" onClick={(e) => {*/}
+                                    {/*    e.stopPropagation();*/}
+                                    {/*    if(userLimit && userLimit.msgLeft <=0){*/}
+                                    {/*        present({*/}
+                                    {/*            message: `reaching the max number(${userLimit.maxMsgCount}) of likes`,*/}
+                                    {/*            duration: 2000,*/}
+                                    {/*            position: "top",*/}
+                                    {/*            color: "danger"*/}
+                                    {/*        })*/}
+                                    {/*        return;*/}
+                                    {/*    }*/}
+                                    {/*    sendMsg(true).then(() => {*/}
+                                    {/*        dispatch(saveDataState({*/}
+                                    {/*            data: JSON.stringify({refresh: 0}),*/}
+                                    {/*            tag: 'scrollToItem'*/}
+                                    {/*        }))*/}
+                                    {/*    }).catch(e => {*/}
+                                    {/*        const err = typeof e == 'string' ? e : e.message;*/}
+                                    {/*        present({*/}
+                                    {/*            message: err,*/}
+                                    {/*            duration: 2000,*/}
+                                    {/*            position: "top",*/}
+                                    {/*            color: "danger"*/}
+                                    {/*        })*/}
+                                    {/*        console.error(e)*/}
+                                    {/*    })*/}
+                                    {/*}}/>*/}
                                 </div>
                             </IonCol>
                         </IonRow>

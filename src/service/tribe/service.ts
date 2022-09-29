@@ -1,20 +1,21 @@
 import {ITribe} from "./interface";
 import {
-    Airdrop,
-    Dice, Expression,
-    GroupMsg, ImageType,
-    Message, MessageStatus,
+    GroupMsg,
+    ImageType,
+    Message,
+    MessageStatus,
     MessageType,
-    MsgText, MsgTextImage,
-    PinnedSticky, Support,
+    MsgText,
+    PinnedSticky,
     TribeInfo,
     TribeResult,
     TribeRole,
-    TribeTheme, UserLimit
+    TribeTheme,
+    UserLimit
 } from "../../types";
 import {BaseRpc} from "../../rpc";
 import config from "../../common/config";
-import {WebsocketBuilder, Websocket} from 'websocket-ts';
+import {Websocket, WebsocketBuilder} from 'websocket-ts';
 import selfStorage from "../../common/storage";
 import {ThemeColors} from "../../common/getMainColor";
 import {emitBoxSdk} from "../emitBox";
@@ -506,6 +507,9 @@ class TribeService implements ITribe {
             })
             gt.records.sort(_sort)
             for (let r of gt.records) {
+                if(r.msgStatus == MessageStatus.removed){
+                    continue
+                }
                 r.actor = gt.roles.find(role => role.id == r.role);
                 stickies.push({
                     theme: gt.theme,
@@ -582,6 +586,10 @@ class TribeService implements ITribe {
             return copy
         }
         return []
+    }
+
+    uploadFile = async (file:File)=>{
+        return await this._picRpc.uploadFile(file);
     }
 
     setConnectWs = (cb: Function) => {

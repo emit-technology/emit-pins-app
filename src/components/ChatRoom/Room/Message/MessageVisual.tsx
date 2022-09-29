@@ -160,7 +160,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit,pinne
     }
 
     useEffect(() => {
-        if (document.hidden !== undefined) {
+        if (document.hidden !== undefined && !pinnedStickies) {
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden) {
                     console.log("fetch page data")

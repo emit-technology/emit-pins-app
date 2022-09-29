@@ -43,21 +43,44 @@ export const Role:React.FC<Props> = ({msg,isOwner}) =>{
                                         <div onClick={()=>{
                                             setShowOrigin(false);
                                         }}>
-                                            <IonItem lines="none" color="tertiary" style={{borderRadius:12,border: "1px solid #ddd"}} >
-                                                <IonAvatar slot="start">
-                                                    {
-                                                        content.origin && content.origin.avatar && <PhotoProvider maskOpacity={0.8}>
-                                                            <PhotoView src={utils.getDisPlayUrl(content.origin.avatar)}>
-                                                                <img src= {utils.getDisPlayUrl(content.origin.avatar)}/>
-                                                            </PhotoView>
-                                                        </PhotoProvider>
-                                                    }
-                                                </IonAvatar>
-                                                <IonLabel className="ion-text-nowrap">
-                                                    <b>{content.origin.name}</b>
-                                                    <p><IonText>{content.origin.desc}</IonText></p>
-                                                </IonLabel>
-                                            </IonItem>
+                                            {/*<IonItem lines="none" color="tertiary" style={{borderRadius:12,border: "1px solid #ddd"}} >*/}
+                                            {/*    <IonAvatar slot="start">*/}
+                                            {/*        {*/}
+                                            {/*            content.origin && content.origin.avatar && <PhotoProvider maskOpacity={0.8}>*/}
+                                            {/*                <PhotoView src={utils.getDisPlayUrl(content.origin.avatar)}>*/}
+                                            {/*                    <img src= {utils.getDisPlayUrl(content.origin.avatar)}/>*/}
+                                            {/*                </PhotoView>*/}
+                                            {/*            </PhotoProvider>*/}
+                                            {/*        }*/}
+                                            {/*    </IonAvatar>*/}
+                                            {/*    <IonLabel className="ion-text-nowrap">*/}
+                                            {/*        <b>{content.origin.name}</b>*/}
+                                            {/*        <p><IonText>{content.origin.desc}</IonText></p>*/}
+                                            {/*    </IonLabel>*/}
+                                            {/*</IonItem>*/}
+                                            <div style={{borderRadius:12,display:"flex",border: "1px solid #ddd", background:'var(--ion-color-tertiary)',padding: '6px 12px'}}>
+                                               <div style={{  display: 'flex',
+                                                   flexDirection: 'column',
+                                                   justifyContent: 'center'}}>
+                                                   <div>
+                                                       <IonAvatar slot="start" className="ion-avatar2">
+                                                           {
+                                                               content.origin && content.origin.avatar && <PhotoProvider maskOpacity={0.8}>
+                                                                   <PhotoView src={utils.getDisPlayUrl(content.origin.avatar)}>
+                                                                       <img src= {utils.getDisPlayUrl(content.origin.avatar)}  width={36} height={36}/>
+                                                                   </PhotoView>
+                                                               </PhotoProvider>
+                                                           }
+                                                       </IonAvatar>
+                                                   </div>
+                                               </div>
+                                                <div style={{padding: "0 0 0 6px",    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    justifyContent: 'center'}} >
+                                                    <div><b>{content.origin.name}</b></div>
+                                                    <div><IonText>{content.origin.desc}</IonText></div>
+                                                </div>
+                                            </div>
                                         </div>
 
                                     </div>
@@ -70,21 +93,46 @@ export const Role:React.FC<Props> = ({msg,isOwner}) =>{
                                         }
                                     }}>
                                         { content.origin && <div className="origin-to">new</div>}
-                                        <IonItem lines="none" color="tertiary" style={{borderRadius:12,border: isOwner?"1px solid #D8F20C":"0"}} >
-                                            <IonAvatar slot="start">
-                                                {
-                                                    content && content.avatar && <PhotoProvider maskOpacity={0.8}>
-                                                        <PhotoView src={utils.getDisPlayUrl(content.avatar)}>
-                                                            <img src= {utils.getDisPlayUrl(content.avatar)}/>
-                                                        </PhotoView>
-                                                    </PhotoProvider>
-                                                }
-                                            </IonAvatar>
-                                            <IonLabel className="ion-text-nowrap">
-                                                <b>{content.name}</b>
-                                                <p><IonText>{content.desc}</IonText></p>
-                                            </IonLabel>
-                                        </IonItem>
+
+                                        <div style={{borderRadius:12,display:"flex",border: isOwner?"1px solid #D8F20C":"0", background:'var(--ion-color-tertiary)',padding: '6px 12px'}} >
+                                            <div  style={{  display: 'flex',
+                                                flexDirection: 'column',
+                                                justifyContent: 'center'}}>
+                                                <div>
+                                                    <IonAvatar slot="start" className="ion-avatar2">
+                                                        {
+                                                            content && content.avatar && <PhotoProvider maskOpacity={0.8}>
+                                                                <PhotoView src={utils.getDisPlayUrl(content.avatar)}>
+                                                                    <img src= {utils.getDisPlayUrl(content.avatar)} width={36} height={36}/>
+                                                                </PhotoView>
+                                                            </PhotoProvider>
+                                                        }
+                                                    </IonAvatar>
+                                                </div>
+                                            </div>
+                                            <div style={{padding: "0 0 0 6px" ,  display: 'flex',
+                                                flexDirection: 'column',
+                                                justifyContent: 'center'}} >
+                                                <div><b>{content.name}</b></div>
+                                                <div><IonText>{content.desc}</IonText></div>
+                                            </div>
+                                        </div>
+
+                                        {/*<IonItem lines="none" color="tertiary" style={{borderRadius:12,border: isOwner?"1px solid #D8F20C":"0"}} >*/}
+                                        {/*    <IonAvatar slot="start">*/}
+                                        {/*        {*/}
+                                        {/*            content && content.avatar && <PhotoProvider maskOpacity={0.8}>*/}
+                                        {/*                <PhotoView src={utils.getDisPlayUrl(content.avatar)}>*/}
+                                        {/*                    <img src= {utils.getDisPlayUrl(content.avatar)}/>*/}
+                                        {/*                </PhotoView>*/}
+                                        {/*            </PhotoProvider>*/}
+                                        {/*        }*/}
+                                        {/*    </IonAvatar>*/}
+                                        {/*    <IonLabel className="ion-text-nowrap">*/}
+                                        {/*        <b>{content.name}</b>*/}
+                                        {/*        <p><IonText>{content.desc}</IonText></p>*/}
+                                        {/*    </IonLabel>*/}
+                                        {/*</IonItem>*/}
                                     </div>
                                 }
                             </div>

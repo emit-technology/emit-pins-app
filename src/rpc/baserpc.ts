@@ -39,6 +39,13 @@ export class BaseRpc {
         const themeColors = await getMainColor(image.webPath);
 
         const file = await fetch(image.webPath).then(r => r.blob()).then(blobFile => new File([blobFile], `file.${image.format}`, {type: blobFile.type}));
+        const data = await this.uploadFile(file);
+
+        return {url:data["url"].replace("http://","https://"),themeColors: themeColors};
+    }
+
+    uploadFile = async (file:File) :Promise<any> =>{
+        // const file = await fetch(image.webPath).then(r => r.blob()).then(blobFile => new File([blobFile], `file.${image.format}`, {type: blobFile.type}));
         const formData = new FormData();
         formData.append('data', file);
         const {data} = await axios.post(`${this._url}/upload`, formData, {
@@ -46,6 +53,6 @@ export class BaseRpc {
                 'Content-Type': 'multipart/form-data'
             }
         })
-        return {url:data["url"].replace("http://","https://"),themeColors: themeColors};
+        return data;
     }
 }

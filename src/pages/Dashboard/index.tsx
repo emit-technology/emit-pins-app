@@ -3,7 +3,7 @@ import {
     IonActionSheet,
     IonButton,
     IonButtons,
-    IonCol,IonToast,
+    IonCol, IonToast,
     IonContent,
     IonHeader,
     IonIcon,
@@ -41,6 +41,7 @@ import {MessageContentVisual} from "../../components/ChatRoom/Room/Message";
 import Avatar from "react-avatar";
 import {ShareEx} from "../../components/utils/ShareEx";
 
+
 interface State {
     datas: Array<Message>;
     owner: string;
@@ -66,6 +67,7 @@ interface State {
     defaultTheme?: TribeTheme
     showPinnedMsg: boolean
     showShare: boolean
+    latestMgs: Array<Message>;
 
 
     showPinnedMsgDetailModal: boolean;
@@ -76,7 +78,7 @@ interface State {
 
     showAlert: boolean;
     showToast: boolean;
-    toastMsg?:string;
+    toastMsg?: string;
 
 }
 
@@ -109,6 +111,7 @@ export class Dashboard extends React.Component<Props, State> {
         showAlert: false,
         showShare: false,
         showToast: false,
+        latestMgs: []
     }
 
     componentDidMount() {
@@ -171,6 +174,46 @@ export class Dashboard extends React.Component<Props, State> {
         }
     }
 
+    showShareModal = async () => {
+        const {roles} = this.state;
+
+        const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, 1, 6)
+        const latestMgs: Array<Message> = [];
+        for(let ps of rest.data){
+            latestMgs.push(...ps.records)
+        }
+        // if (messages && messages.length > 0 && messages[0].records.length > 0) {
+        //     for(let msg of messages[0].records){
+        //         if (latestMgs.length >= 10) {
+        //             break;
+        //         }
+        //         const m = JSON.parse(JSON.stringify(msg))
+        //         m.actor = roles.find(role=>role.id == m.role)
+        //         latestMgs.push(m)
+        //     }
+        // }
+        // if (latestMgs.length < 10) {
+        //     const groupIds = await tribeService.groupIds(config.tribeId);
+        //     for (let groupId of groupIds) {
+        //         if (latestMgs.length >= 10) {
+        //             break;
+        //         }
+        //         const groupMsg = await tribeService.groupedMsg([groupId]);
+        //         if (groupMsg && groupMsg.length > 0 && groupMsg[0].records.length > 0) {
+        //             for(let msg of groupMsg[0].records){
+        //                 if (latestMgs.length >= 10) {
+        //                     break;
+        //                 }
+        //                 const m = JSON.parse(JSON.stringify(msg))
+        //                 m.actor = groupMsg[0].roles.find(role=>role.id == m.role)
+        //                 latestMgs.push(m)
+        //             }
+        //         }
+        //     }
+        // }
+        this.setState({showShare: true, latestMgs: latestMgs})
+    }
+
     initData = async () => {
         const {tribeId} = this.props;
         const account = await emitBoxSdk.getAccount();
@@ -189,7 +232,7 @@ export class Dashboard extends React.Component<Props, State> {
             handler: () => {
                 console.log('Share clicked', navigator.share);
                 Share.canShare().then(f => console.log(f, "can share ?"))
-                this.setState({showShare: true})
+                this.showShareModal();
             }
         }, {
             text: 'Cancel',
@@ -285,8 +328,8 @@ export class Dashboard extends React.Component<Props, State> {
 
     onSupport = async (msgId: string, f: boolean) => {
         const {userLimit} = this.state;
-        if(userLimit && userLimit.supportLeft <= 0){
-            return Promise.reject(`Max support's limit(${userLimit.maxSupportCount}) reached !`)
+        if (userLimit && userLimit.supportLeft <= 0) {
+            return Promise.reject(`reaching the max number(${userLimit.maxSupportCount})`)
         }
         await tribeService.msgSupport(msgId, f)
     }
@@ -316,13 +359,13 @@ export class Dashboard extends React.Component<Props, State> {
         this.setState({showCreateTribe: f})
     }
 
-    setShowToast = (f:boolean, msg?:string) =>{
-        this.setState({showToast: f,toastMsg: msg})
+    setShowToast = (f: boolean, msg?: string) => {
+        this.setState({showToast: f, toastMsg: msg})
     }
 
     render() {
         const {
-            owner, showActionSheet, buttons, toastMsg,showShare,showToast, showPinnedMsg, userLimit,
+            owner, showActionSheet, buttons, toastMsg, showShare,latestMgs, showToast, showPinnedMsg, userLimit,
             showCreateTribe,
             isUpdating, isConnecting, groupMsgs, showMenusModal, groupPinnedMsg, showPinnedMsgDetailModal,
             account, roles, tribeInfo, latestRole, datas, showTribeEdit, showPin
@@ -393,7 +436,8 @@ export class Dashboard extends React.Component<Props, State> {
                                             {/*             }}/>*/}
                                             {/*</div>*/}
                                             <IonIcon src={ellipsisVertical} color="medium" size="large" slot="end"
-                                                     onClick={() => {
+                                                     onClick={(e) => {
+                                                         e.stopPropagation();
                                                          this.setShowActionSheet(true)
                                                      }}/>
                                         </IonToolbar>
@@ -427,7 +471,8 @@ export class Dashboard extends React.Component<Props, State> {
                                     }
                                     <div className="msg-toolbar">
                                         <ToolBar/>
-                                        <ShareEx isOpen={showShare} onClose={() => this.setState({showShare: false})}
+                                        <ShareEx owner={owner} roles={roles} latestMsg={latestMgs} isOpen={showShare}
+                                                 onClose={() => this.setState({showShare: false})}
                                                  tribeInfo={tribeInfo}/>
                                     </div>
                                     <MessageContentVisual
@@ -453,9 +498,9 @@ export class Dashboard extends React.Component<Props, State> {
                                         owner={owner}
                                         groupMsg={groupMsgs}
                                         onSupport={(msgId, f) => {
-                                            this.onSupport(msgId, f).catch(e=>{
-                                                const err = typeof e == 'string'?e:e.message;
-                                                this.setShowToast(true,err)
+                                            this.onSupport(msgId, f).catch(e => {
+                                                const err = typeof e == 'string' ? e : e.message;
+                                                this.setShowToast(true, err)
                                             })
                                         }}
                                         showPin={showPin}
@@ -496,7 +541,7 @@ export class Dashboard extends React.Component<Props, State> {
                                 <TribeEditModal isOpen={showCreateTribe} onClose={() => this.setShowCreateTribe(false)}
                                                 onOk={(tribeId) => {
                                                     this.setShowCreateTribe(false)
-                                                    window.open(`./#/${tribeId}`)
+                                                    window.open(`./${tribeId}`)
                                                 }}/>
 
                                 <IonToast

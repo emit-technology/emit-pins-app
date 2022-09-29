@@ -144,11 +144,15 @@ export const MessageContentWindow: React.FC<Props> = ({groupMsg, pinnedStickies,
     }
 
     useEffect(() => {
-        if (document.hidden !== undefined) {
+        if (document.hidden !== undefined && !pinnedStickies) {
+            console.log("set fetch page listener");
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden) {
                     console.log("fetch page data")
-                    fetchData(pageNo, setComments)
+                    if(!pinnedStickies){
+                        fetchData(pageNo, setComments)
+                    }
+
                 }
             })
         }

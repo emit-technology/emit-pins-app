@@ -31,7 +31,7 @@ export const PinnedMsgModal: React.FC<Props> = ({isOpen,onClose,tribeInfo,data})
                     <IonTitle>Pinned messages</IonTitle>
                     <IonButton size="small" slot="end" onClick={() => {
                         // tribeService.forkTribe(config.tribeId,data[0].groupId).then((tribeId)=>{
-                        //     window.open(`./#/${tribeId}`)
+                        //     window.open(`./${tribeId}`)
                         // }).catch(e=>{
                         //     console.error(e)
                         // })

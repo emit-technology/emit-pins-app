@@ -25,13 +25,10 @@ import '@ionic/react/css/display.css';
 import './theme/variables.css';
 import './App.scss';
 import {Dashboard} from "./pages/Dashboard";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import config from "./common/config";
 import {Provider} from "react-redux";
 import store from "./common/state/app/store";
-import {closeOutline} from "ionicons/icons";
-import selfStorage from "./common/storage";
-
 setupIonicReact({
     mode: "ios",
 });
@@ -51,48 +48,47 @@ const App: React.FC = () => {
     // console.log("page show tips",showTip);
     const baseURL = process.env.NODE_ENV === 'production' ? 'https://pins.emit.technology' : process.env.REACT_APP_DEV_API_URL;
 
+
     return <>
-        <div className={`page`}>
+        {
+            <div className={`page`}>
+                <div className="page-inner">
+                    <IonApp>
+                        <Provider store={store}>
+                            <Router basename={baseURL}>
+                                <Switch>
 
-            <div className="page-inner">
-                {/*{*/}
-                {/*    showTip && <div id="spash-div" style={{position:"absolute",zIndex: 100,height:'100%', width:mobileWidth?'780px':'100%', overflow:"hidden"}}  onClick={()=>{*/}
-                {/*        selfStorage.setItem("readTip",true)*/}
-                {/*        document.getElementById("spash-div").style.height = '0px' ;*/}
-                {/*    }}>*/}
-                {/*        <div style={{position: "absolute",height:'100%',top: '20px', right: '20px', color: '#ffffff', fontSize: '32px'}}>*/}
-                {/*            <IonIcon src={closeOutline}/>*/}
-                {/*        </div>*/}
-                {/*        <Tip/>*/}
-                {/*    </div>*/}
-                {/*}*/}
-                <IonApp>
-                    <Provider store={store}>
-                        <Router basename={baseURL}>
-                            <Switch>
+                                    {/*<IonMenu side="end" type="push">*/}
+                                    {/*    <IonHeader>*/}
+                                    {/*        <IonToolbar color="danger">*/}
+                                    {/*            <IonTitle>End Menu</IonTitle>*/}
+                                    {/*        </IonToolbar>*/}
+                                    {/*    </IonHeader>*/}
+                                    {/*    <IonContent>*/}
+                                    {/*        <RoleListModal roles={} tribeInfo={} defaultRole={} onRoleCheck={} onReloadList={} />*/}
+                                    {/*    </IonContent>*/}
+                                    {/*</IonMenu>*/}
 
-                                {/*<IonMenu side="end" type="push">*/}
-                                {/*    <IonHeader>*/}
-                                {/*        <IonToolbar color="danger">*/}
-                                {/*            <IonTitle>End Menu</IonTitle>*/}
-                                {/*        </IonToolbar>*/}
-                                {/*    </IonHeader>*/}
-                                {/*    <IonContent>*/}
-                                {/*        <RoleListModal roles={} tribeInfo={} defaultRole={} onRoleCheck={} onReloadList={} />*/}
-                                {/*    </IonContent>*/}
-                                {/*</IonMenu>*/}
+                                    <Route exact path="/:tribeId" component={(props: any) => {
+                                        const tribeId = props.match.params.tribeId;
+                                        config.tribeId = tribeId;
+                                        return <Dashboard tribeId={tribeId}/>
+                                    }}/>
 
-                                <Route exact path="/:tribeId" component={(props: any) => {
-                                    const tribeId = props.match.params.tribeId;
-                                    config.tribeId = tribeId;
-                                    return <Dashboard tribeId={tribeId}/>
-                                }}/>
-                            </Switch>
-                        </Router>
-                    </Provider>
-                </IonApp>
+                                    <Route exact path="/" component={(props: any) => {
+                                        setTimeout(()=>{
+                                            window.location.href = `./4E4ovNhinko`
+                                        },500)
+                                        // config.tribeId = tribeId;
+                                        return <Dashboard tribeId={"4E4ovNhinko"}/>
+                                    }}/>
+                                </Switch>
+                            </Router>
+                        </Provider>
+                    </IonApp>
+                </div>
             </div>
-        </div>
+        }
     </>
 }
 

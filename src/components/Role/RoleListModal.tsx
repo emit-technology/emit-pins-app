@@ -101,7 +101,7 @@ export const RoleListModal: React.FC<Props> = ({
                                 tribeInfo && tribeInfo.forked  && tribeInfo.forked.length>0 && <div>
                                     <IonText color="medium"><small style={{fontWeight:700}}>Forked from {tribeInfo.forked[0].tribeId}</small></IonText>
                                     <IonIcon style={{transform:'translateY(3px)',cursor:'pointer'}} size="small" src={openOutline} color="medium" onClick={()=>{
-                                        window.open(`./#/${tribeInfo.forked[0].tribeId}`)
+                                        window.open(`./${tribeInfo.forked[0].tribeId}`)
                                     }}/>
                                 </div>
                             }
@@ -147,7 +147,7 @@ export const RoleListModal: React.FC<Props> = ({
                                 {
                                     isModal|| pinnedSticky && !pinnedSticky.groupId ? <div className="theme-pinned-box">
                                         <div>{tribeInfo && tribeInfo.theme.themeTag}</div>
-                                        <div>
+                                        <div  className="text-pre">
                                             {tribeInfo && tribeInfo.theme.themeDesc}
                                         </div>
                                     </div>

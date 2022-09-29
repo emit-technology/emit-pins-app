@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react';
 import {useAppDispatch, useAppSelector} from "../../common/state/app/hooks";
 import {saveDataState} from '../../common/state/slice/dataSlice';
 import {IonIcon, IonItem, IonLabel, IonText} from "@ionic/react";
-import {PinnedSticky, TribeInfo, TribeRole, WsStatus} from "../../types";
+import {MessageStatus, PinnedSticky, TribeInfo, TribeRole, WsStatus} from "../../types";
 import tribeWorker from "../../worker/imWorker";
 import config from "../../common/config";
 import {chevronBackOutline, chevronForwardOutline} from "ionicons/icons";
@@ -48,7 +48,8 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
                     [config.tribeId,""]
                     ,[config.tribeId,""]
                 ])
-                setStickies({data:rest.data,total: rest.data.length})
+                const data = rest.data.filter(v=>v.records && (v.records.length>0 && v.records[0].msgStatus !== MessageStatus.removed || v.records.length ==0));
+                setStickies({data:data,total: data.length})
             }else{
                 if(stickyMsg && stickyMsg.groupId) {
                     const rest = await tribeService.groupedMsgRemove([stickyMsg.groupId], true);
@@ -97,7 +98,7 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
                             <span style={{fontSize: '11px'}}>
                                 <IonText color="medium">
                                     {
-                                        (stickyMsg && stickyMsg.groupId?`#${stickyMsg.seq}${(stickyMsg as PinnedSticky).theme.themeTag}`: tribeInfo && tribeInfo.theme.themeTag)
+                                        (stickyMsg && stickyMsg.groupId?`#${stickyMsg.seq} ${(stickyMsg as PinnedSticky).theme.themeTag}`: tribeInfo && tribeInfo.theme.themeTag)
                                     }
                                 </IonText>
                             </span>
