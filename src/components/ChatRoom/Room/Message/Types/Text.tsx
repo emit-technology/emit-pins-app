@@ -98,7 +98,7 @@ export const Text: React.FC<Props> = ({msg, onSupport,keeper,hideTime,checked,
     //     isOwner:isOwner
     // });
 
-    const Keeper = () => <img src="./assets/img/keeper.png" height={14} style={{transform: 'translateY(1px)'}}/>
+    const Keeper = () => <img src="/assets/img/keeper.png" height={14} style={{transform: 'translateY(1px)'}}/>
 
 
     // console.log("replayCtn.content",replayCtn && replayCtn.content , msg && msg.replayMsg && msg.replayMsg.msgType)
@@ -225,14 +225,14 @@ export const Text: React.FC<Props> = ({msg, onSupport,keeper,hideTime,checked,
                                     background: content.image  && content.image.url && !content.content &&
                                         "inherit", border: isOwnerPinned?"1px solid #D8F20C":"0"}}>
                                     {
-                                        content.image  && content.image.url && <div style={{ borderRadius:12, padding:0 }}>
+                                        content.image  && content.image.url && <div style={{ borderRadius:12, padding:'6px 6px 0 6px' }}>
                                            <ImageView url={content.image.url} width={content.image.width} height={content.image.height} />
                                         </div>
                                     }
                                     {
                                         content.content && <div style={{padding: '5px'}}>
                                             {replayItem}
-                                            <div style={{padding:'0 6px'}}>
+                                            <div style={{padding:'0'}}>
                                                 <div className="text-pre">
                                                     {content.content}
                                                 </div>

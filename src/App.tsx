@@ -77,10 +77,10 @@ const App: React.FC = () => {
 
                                     <Route exact path="/" component={(props: any) => {
                                         setTimeout(()=>{
-                                            window.location.href = `./4E4ovNhinko`
+                                            window.location.href = `./4E6BFunxNE5`
                                         },500)
                                         // config.tribeId = tribeId;
-                                        return <Dashboard tribeId={"4E4ovNhinko"}/>
+                                        return <Dashboard tribeId={"4E6BFunxNE5"}/>
                                     }}/>
                                 </Switch>
                             </Router>

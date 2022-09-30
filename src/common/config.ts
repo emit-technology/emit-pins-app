@@ -30,7 +30,7 @@ const development: IConfig = {
     emitNode: "https://node-account.emit.technology",
     tribeNode: "https://pins-api.emit.technology",
     tribeWs: "wss://pins-ws.emit.technology/ws",
-    tribePic: "https://pic.emit.technology",
+    tribePic: "https://pins.emit.technology/pic",
     picHost: "https://pic.emit.technology/img/",
     isAlive: false,
     userLimit: {maxMsgCount: 0, maxSupportCount: 0, msgLeft: 0, supportLeft: 0}
@@ -40,7 +40,7 @@ const production: IConfig = {
     emitNode: "https://node-account.emit.technology",
     tribeNode: "https://pins-api.emit.technology",
     tribeWs: "wss://pins-ws.emit.technology/ws",
-    tribePic: "https://pic.emit.technology",
+    tribePic: "https://pins.emit.technology/pic",
     picHost: "https://pic.emit.technology/img/",
     isAlive: false,
     userLimit:  {maxMsgCount: 0, maxSupportCount: 0, msgLeft: 0, supportLeft: 0}

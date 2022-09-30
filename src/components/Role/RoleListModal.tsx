@@ -154,7 +154,7 @@ export const RoleListModal: React.FC<Props> = ({
                                         :
                                         <div className="theme-pinned-box">
                                             <div>{pinnedSticky && pinnedSticky.theme.themeTag}</div>
-                                            <div>
+                                            <div className="text-pre">
                                                 {pinnedSticky && pinnedSticky.theme.themeDesc}
                                             </div>
                                         </div>

@@ -125,7 +125,7 @@ class TribeService implements ITribe {
     tribeRoles = async (tribeId: string): Promise<Array<TribeRole>> => {
         const rest: TribeResult<Array<TribeRole>> = await this._rpc.post('/tribe/tribeRoles', {tribeId});
         const defaultRole = {
-            avatar: "./assets/img/default-avatar.png",
+            avatar: "https://pins.emit.technology/assets/img/default-avatar.png",
             name: "Narrator",
             id: "",
             tribeId: config.tribeId

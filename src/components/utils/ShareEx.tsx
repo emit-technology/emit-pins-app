@@ -41,13 +41,12 @@ import {
     IonContent,
     IonHeader,
     IonModal,
-    IonTitle, IonLoading,
-    IonToolbar, IonAvatar, IonIcon
+    IonTitle, IonLoading, useIonToast,
+    IonToolbar, IonAvatar, IonIcon, IonPage
 } from "@ionic/react";
 import {Message, MessageStatus, MessageType, TribeInfo, TribeRole} from "../../types";
-// import config from "../../common/config";
-// import {Helmet} from "react-helmet";
 import {tribeService} from "../../service/tribe";
+import html2canvas from "html2canvas";
 // import domtoimage from "dom-to-image-more";
 import domtoimage from 'dom-to-image-improved';
 import {Text} from "../ChatRoom/Room/Message/Types";
@@ -55,7 +54,8 @@ import {utils} from "../../common";
 import selfStorage from "../../common/storage";
 import {Tools} from "../ChatRoom/Room/Message/Types/Tools";
 import {useEffect, useState} from "react";
-import {shareOutline} from "ionicons/icons";
+import {copyOutline, linkOutline, shareOutline} from "ionicons/icons";
+import copy from "copy-to-clipboard";
 
 interface Props {
     isOpen: boolean;
@@ -70,12 +70,13 @@ export const ShareEx: React.FC<Props> = ({isOpen, latestMsg, owner, roles, onClo
 
     // const url = "https://abesc12.emit.technology/verse/4E4c8YEgUvE/22172ea7d796eedc959eb8b7dcfd5757";
     const [url, setUrl] = useState("");
+    const [present, dismiss] = useIonToast();
     const hash = window.location.hash;
     const desc = `EMIT - PINs, ${tribeInfo && tribeInfo.title}, ${tribeInfo && tribeInfo.theme.themeTag}`;
 
-    const [genning,setGenning] = useState(false);
-    const [loading,setLoading] = useState(false);
-    const [showButtons,setShowButtons] = useState(false);
+    const [genning, setGenning] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [showButtons, setShowButtons] = useState(false);
 
     useEffect(() => {
         if (latestMsg && latestMsg.length > 0) {
@@ -97,6 +98,41 @@ export const ShareEx: React.FC<Props> = ({isOpen, latestMsg, owner, roles, onClo
             }
         }
         setGenning(true)
+
+        const urlToImag = async (furl: string) => {
+            const file = await fetch(furl).then(r => r.blob()).then(blobFile => new File([blobFile], `${Date.now()}.png`, {type: blobFile.type}));
+            tribeService.uploadFile(file).then(data => {
+                setLoading(false)
+                console.log(data);
+                setUrl(`https://pins.emit.technology/verse/${tribeInfo.tribeId}/${data["filename"].replace(".png", "")}`)
+                setShowButtons(true);
+            }).catch(e => {
+                console.error(e);
+                setLoading(false)
+            })
+        }
+        // html2canvas(domNode).then(function (canvas) {
+        //     setGenning(false)
+        //     setLoading(true)
+        //
+        //     canvas.toBlob((blob) => {
+        //         setGenning(false)
+        //         setLoading(true)
+        //         const file = new File([blob], `file.png`)
+        //         tribeService.uploadFile(file).then(data => {
+        //             setLoading(false)
+        //             console.log(data);
+        //             setUrl(`https://pins.emit.technology/verse/${tribeInfo.tribeId}/${data["filename"].replace(".png", "")}`)
+        //             setShowButtons(true);
+        //         }).catch(e => {
+        //             console.error(e);
+        //             setLoading(false)
+        //         })
+        //     }, typs, 0.99)
+        //
+        //
+        // });
+
         domtoimage.toBlob(domNode, typs, 0.99).then((blob) => {
             setGenning(false)
             setLoading(true)
@@ -162,98 +198,111 @@ export const ShareEx: React.FC<Props> = ({isOpen, latestMsg, owner, roles, onClo
 
         {/*//initialBreakpoint={0.4} breakpoints={[0, 0.4, 0.6]}*/}
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-share-modal">
-            <IonHeader collapse="fade">
-                <IonToolbar>
-                    <IonButtons slot="end">
-                        <IonButton onClick={() => sharePng()}><IonIcon src={shareOutline}/> Share</IonButton>
-                    </IonButtons>
-                    <IonTitle>Share {tribeInfo && tribeInfo.title}</IonTitle>
-                    <IonButtons slot="start">
-                        <IonButton onClick={() => onClose()}>Close</IonButton>
-                    </IonButtons>
-                </IonToolbar>
-            </IonHeader>
-            <IonContent className="ion-padding">
-                <div id="my-node" className="share-node">
-                    <div className="visual-msg-box share-page" style={{
-                        height: '100%',
-                        backgroundImage: `url(${tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image)})`
-                    }}>
-                        <div className="share-box">
-                            <div className="share-left">
-                                <div className="share-left-top">
-                                    <div className="share-left-top-in">
-                                        {
-                                            roleImgs && roleImgs.length > 0 && roleImgs.map((img, i) => {
-                                                if (i >= 4) {
-                                                    return <div key={i} className="pinned-msg-roles pinned-msg-rolesi">
-                                                        +{roleImgs[i]}
+            <IonPage>
+                <IonHeader collapse="fade">
+                    <IonToolbar>
+                        <IonButtons slot="end">
+                            <IonButton onClick={() => sharePng()}><IonIcon src={shareOutline}/> Share</IonButton>
+                        </IonButtons>
+                        <IonTitle>Share {tribeInfo && tribeInfo.title}</IonTitle>
+                        <IonButtons slot="start">
+                            <IonButton onClick={() => onClose()}>Close</IonButton>
+                        </IonButtons>
+                    </IonToolbar>
+                </IonHeader>
+                <IonContent className="ion-padding">
+                    <div id="my-node" className="share-node">
+                        <div className="visual-msg-box share-page" style={{
+                            height: '100%',
+                            backgroundImage: `url(${tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image)})`
+                        }}>
+                            <div className="share-box">
+                                <div className="share-left">
+                                    <div className="share-left-top">
+                                        <div className="share-left-top-in">
+                                            {
+                                                roleImgs && roleImgs.length > 0 && roleImgs.map((img, i) => {
+                                                    if (i >= 4) {
+                                                        return <div key={i}
+                                                                    className="pinned-msg-roles pinned-msg-rolesi">
+                                                            +{roleImgs[i]}
+                                                        </div>
+                                                    }
+                                                    return <div key={i} className="pinned-msg-roles"
+                                                                style={{
+                                                                    right: 20 + (i + 1) * 22,
+                                                                    zIndex: 10000 - i * 2
+                                                                }}>
+                                                        <IonAvatar className="ion-avatar2">
+                                                            <img src={img}/>
+                                                        </IonAvatar>
                                                     </div>
+                                                })
+                                            }
+                                        </div>
+                                    </div>
+                                    <div className="share-left-bottom">
+                                        <div className="share-left-bottom-info-box">
+                                            <div className="share-left-bottom-info">
+                                                <img src={utils.getDisPlayUrl(tribeInfo && tribeInfo.theme.image)}
+                                                     width="100%"
+                                                     height="100%" style={{borderRadius: '8px'}}/>
+                                            </div>
+                                            <div>
+                                                <div style={{
+                                                    fontFamily: 'SFBold',
+                                                    fontSize: '24px'
+                                                }}>{tribeInfo && tribeInfo.title}</div>
+                                                <div
+                                                    className="share-ic-itext">{tribeInfo && tribeInfo.theme.themeTag}</div>
+                                            </div>
+                                        </div>
+                                        <div style={{width: '58px'}}>
+                                            <img src="https://pins.emit.technology/assets/img/pins-logo.png"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="share-right">
+                                    <div className="share-right-msg-box"
+                                         style={{backgroundImage: `url(${tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image)})`}}>
+                                        <div className="share-right-msg" id="msg-bb-xbo">
+                                            <div className="share-right-msg-inner">
+                                                {
+                                                    latestMsg && latestMsg.map((v, i) => {
+                                                        return renMessage(v, i)
+                                                    })
                                                 }
-                                                return <div key={i} className="pinned-msg-roles"
-                                                            style={{right: 20 + (i + 1) * 22, zIndex: 10000 - i * 2}}>
-                                                    <IonAvatar className="ion-avatar2">
-                                                        <img src={img}/>
-                                                    </IonAvatar>
-                                                </div>
-                                            })
-                                        }
-                                    </div>
-                                </div>
-                                <div className="share-left-bottom">
-                                    <div className="share-left-bottom-info-box">
-                                        <div className="share-left-bottom-info">
-                                            <img src={utils.getDisPlayUrl(tribeInfo && tribeInfo.theme.image)}
-                                                 width="100%"
-                                                 height="100%" style={{borderRadius: '8px'}}/>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <div className="head-pin-title" style={{fontFamily:'SFBold',fontSize:'24px'}}>{tribeInfo && tribeInfo.title}</div>
-                                            <div className="share-ic-itext">{tribeInfo && tribeInfo.theme.themeTag}{tribeInfo && tribeInfo.theme.themeTag}{tribeInfo && tribeInfo.theme.themeTag}</div>
-                                        </div>
-                                    </div>
-                                    <div style={{width: '58px'}}>
-                                        <img src="./assets/img/pins-logo.png"/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="share-right">
-                                <div className="share-right-msg-box"
-                                     style={{backgroundImage: `url(${tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image)})`}}>
-                                    <div className="share-right-msg" id="msg-bb-xbo">
-                                        {
-                                            latestMsg && latestMsg.map((v, i) => {
-                                                return renMessage(v, i)
-                                            })
-                                        }
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <IonLoading
-                    isOpen={loading}
-                    onDidDismiss={() => setLoading(false)}
-                    message={'Loading...'}
-                    duration={50000}
-                />
+                    <IonLoading
+                        isOpen={loading}
+                        onDidDismiss={() => setLoading(false)}
+                        message={'Loading...'}
+                        duration={50000}
+                    />
 
-                <IonLoading
-                    isOpen={genning}
-                    onDidDismiss={() => setGenning(false)}
-                    message={'Please wait...'}
-                    duration={50000}
-                />
+                    <IonLoading
+                        isOpen={genning}
+                        onDidDismiss={() => setGenning(false)}
+                        message={'Please wait...'}
+                        duration={50000}
+                    />
 
-            </IonContent>
+                </IonContent>
+            </IonPage>
         </IonModal>
 
 
-        <IonModal isOpen={showButtons} initialBreakpoint={0.4} breakpoints={[0, 0.4, 0.6]} onDidDismiss={() => setShowButtons(false)}>
+        <IonModal isOpen={showButtons} initialBreakpoint={0.4} breakpoints={[0, 0.4, 0.6]}
+                  onDidDismiss={() => setShowButtons(false)}>
             <IonContent className="ion-padding">
-                <div  className="share-tbs">
+                <div className="share-tbs">
                     <div>
                         <IonRow style={{textAlign: 'center'}}>
                             <IonCol size={"2"}>
@@ -403,6 +452,23 @@ export const ShareEx: React.FC<Props> = ({isOpen, latestMsg, owner, roles, onClo
                                 >
                                     <LivejournalIcon size={48} round/>
                                 </LivejournalShareButton>
+                            </IonCol>
+
+                        </IonRow>
+                        <IonRow>
+                            <IonCol size="8">
+                                <div className="link-url">
+                                    {url}
+                                </div>
+                            </IonCol>
+                            <IonCol size="4">
+                                <IonButton expand="block" fill="outline" color="dark" onClick={() => {
+                                    copy(url)
+                                    copy(url)
+                                    present({message: "Copied to clipboard!", color: "primary", duration: 2000})
+                                }}>
+                                    <IonIcon src={copyOutline} size="large" slot="start"/> Copy Link
+                                </IonButton>
                             </IonCol>
                         </IonRow>
                     </div>

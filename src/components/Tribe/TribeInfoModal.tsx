@@ -93,7 +93,7 @@ export const TribeInfoModal:React.FC<Props> = ({isOpen,stickies,onReladData,onCl
                         stickyMsg && stickyMsg.groupId ?
                             <div className="theme-pinned-box">
                                 <div>{stickyMsg && stickyMsg.theme.themeTag}</div>
-                                <div>
+                                <div className="text-pre">
                                     {stickyMsg && stickyMsg.theme.themeDesc}
                                 </div>
                             </div>:

@@ -156,7 +156,9 @@ input::placeholder {
 
 .tribe-share-modal {
   --width: 90%;
-  --max-height: 75% ;
+  //--max-height: 75% ;
+  --height: 55%;
+  --border-radius: 12px;
 }
 
 .role-list-box{
@@ -424,6 +426,7 @@ ion-icon:before {
   border-radius: 18px;
   height: 100%;
   width: 100%;
+  //padding: 12px;
 }
 .share-right-msg{
   padding: 20px;
@@ -439,6 +442,21 @@ ion-icon:before {
   width: 100%;
   box-shadow: 0 0 2px #ffffff;
   filter: drop-shadow(2px 4px 6px #858282);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.share-right-msg-inner{
+  overflow: hidden;
+  position: relative;
+  /* background: 0% 0%/100% 100% rgba(255, 255, 255, 0.8); */
+  /* background-size: cover; */
+  /* border-radius: 18px; */
+  height: 100%;
+  width: 100%;
+  /* box-shadow: 0 0 2px #ffffff; */
+  /* filter: drop-shadow(2px 4px 6px #858282); */
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -460,18 +478,15 @@ ion-icon:before {
   //border-radius: 12px;
 }
 
-.share-node{
-  //height: 100%;
-  //background: transparent;
-  //padding: 12px;
+.share-node {
   width: 100%;
-  //height: calc( var(--width) * 0.5238095238);
   aspect-ratio: 21 / 11;
+  transform: unset ;
 }
 
 .share-info-text{
   font-size: 16px;
-  font-family: 'SFProText-Bold';
+  //font-family: 'SFProText-Bold';
   font-weight: 700;
 }
 
@@ -489,4 +504,10 @@ ion-icon:before {
   text-overflow: ellipsis;
   overflow: hidden;
   max-width: 160px;
+}
+
+.link-url{
+  background: var(--ion-color-light);
+  padding: 6px;
+  border-radius: 12px;
 }

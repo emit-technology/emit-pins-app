@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {TribeRole} from "../../types";
+import {MsgTextImage, TribeRole} from "../../types";
 import {
     IonModal,
     IonHeader,
@@ -103,7 +103,10 @@ export const RoleEditModal: React.FC<Props> = ({isOpen, roleInfo, onOk, onClose}
                     </IonCol>
                     <IonCol size="8">
                         <IonButton disabled={showLoading} expand="block" onClick={() => {
-                            setShowLoading(true);
+                            if (!imgUrl || !(imgUrl as MsgTextImage).url){
+                                present({message: "Please upload avatar image !", color:"danger", duration: 2000})
+                                return
+                            }
                             const ri:TribeRole = {
                                 avatar: imgUrl,
                                 name: roleName,
@@ -111,6 +114,7 @@ export const RoleEditModal: React.FC<Props> = ({isOpen, roleInfo, onOk, onClose}
                                 tribeId: config.tribeId,
                                 id:roleInfo && roleInfo.id
                             }
+                            setShowLoading(true);
                             tribeService.addRole(ri).then(()=>{
                                 setImgUrl(null)
                                 setDesc("")

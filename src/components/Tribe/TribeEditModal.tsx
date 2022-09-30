@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {ImageType, TribeInfo, TribeRole} from "../../types";
+import {ImageType, MsgTextImage, TribeInfo, TribeRole} from "../../types";
 import {
     IonModal,
     IonHeader,
@@ -49,6 +49,10 @@ export const TribeEditModal: React.FC<Props> = ({isOpen, tribeInfo, onOk, onClos
         setShowLoading(false)
     },[tribeInfo])
     const createTribe = async (): Promise<string> => {
+        if(!imgUrl || !(imgUrl as MsgTextImage).url){
+            present({message:"Please upload the image!", color: "danger", duration: 2000})
+            return
+        }
         if (tribeInfo) {
             await tribeService.updateTribe({
                 tribeId: tribeInfo.tribeId,

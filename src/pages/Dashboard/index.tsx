@@ -177,7 +177,7 @@ export class Dashboard extends React.Component<Props, State> {
     showShareModal = async () => {
         const {roles} = this.state;
 
-        const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, 1, 6)
+        const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, 1, 20)
         const latestMgs: Array<Message> = [];
         for(let ps of rest.data){
             latestMgs.push(...ps.records)

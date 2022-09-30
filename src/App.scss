@@ -50,7 +50,28 @@ pre {
     max-width:  unset !important;
   }
 
+
+
 }
+
+@media (max-width: 768px) {
+  .share-node{
+
+    width: 200% !important;
+    aspect-ratio: 21 / 11;
+    transform: scale(0.5) translate(-50%, -50%)  !important;
+    overflow: hidden  !important;
+  }
+
+  .tribe-share-modal {
+    --width: 90%;
+    //--max-height: 75% ;
+    --height: 35% !important;
+  }
+
+}
+
+
 
 @media (min-width: 1025px) {
   .page {
