@@ -64,9 +64,10 @@ interface Props {
     latestMsg: Array<Message>;
     roles: Array<TribeRole>;
     owner: string;
+    showHistory?:boolean
 }
 
-export const ShareEx: React.FC<Props> = ({isOpen, latestMsg, owner, roles, onClose, tribeInfo}) => {
+export const ShareEx: React.FC<Props> = ({isOpen,showHistory, latestMsg, owner, roles, onClose, tribeInfo}) => {
 
     // const url = "https://abesc12.emit.technology/verse/4E4c8YEgUvE/22172ea7d796eedc959eb8b7dcfd5757";
     const [url, setUrl] = useState("");
@@ -78,39 +79,42 @@ export const ShareEx: React.FC<Props> = ({isOpen, latestMsg, owner, roles, onClo
     const [loading, setLoading] = useState(false);
     const [showButtons, setShowButtons] = useState(false);
 
-    useEffect(() => {
-        if (latestMsg && latestMsg.length > 0) {
-            const element = document.getElementById("msg-bb-xbo");
-            if (element) {
-                element.scrollTop = element.scrollHeight;
-            }
+    const getLastImageId = ()=>{
+        if(!latestMsg || latestMsg.length ==0){
+            return ""
         }
-    }, [latestMsg])
-    const sharePng = () => {
-        const domNode: any = document.getElementById("my-node");
-        const scale = 2;
-        const typs: any = {
-            width: domNode.clientWidth * scale,
-            height: domNode.clientHeight * scale,
-            style: {
-                transform: 'scale(' + scale + ')',
-                transformOrigin: 'top left',
-            }
+        if(showHistory){
+            return selfStorage.getItem(`lastShareImgId_${latestMsg[0].id}`)
+        }else{
+            return selfStorage.getItem(`lastShareImgId_${latestMsg[latestMsg.length-1].id}`)
         }
-        setGenning(true)
+    }
 
-        const urlToImag = async (furl: string) => {
-            const file = await fetch(furl).then(r => r.blob()).then(blobFile => new File([blobFile], `${Date.now()}.png`, {type: blobFile.type}));
-            tribeService.uploadFile(file).then(data => {
-                setLoading(false)
-                console.log(data);
-                setUrl(`https://pins.emit.technology/verse/${tribeInfo.tribeId}/${data["filename"].replace(".png", "")}`)
-                setShowButtons(true);
-            }).catch(e => {
-                console.error(e);
-                setLoading(false)
-            })
+    const setLastImageId = (shareImageId:string)=>{
+        if(!latestMsg || latestMsg.length ==0){
+            return
         }
+        if(showHistory){
+            selfStorage.setItem(`lastShareImgId_${latestMsg[0].id}`,shareImageId)
+        }else{
+            selfStorage.setItem(`lastShareImgId_${latestMsg[latestMsg.length-1].id}`,shareImageId)
+        }
+    }
+    const sharePng = () => {
+
+
+        // const urlToImag = async (furl: string) => {
+        //     const file = await fetch(furl).then(r => r.blob()).then(blobFile => new File([blobFile], `${Date.now()}.png`, {type: blobFile.type}));
+        //     tribeService.uploadFile(file).then(data => {
+        //         setLoading(false)
+        //         console.log(data);
+        //         setUrl(`https://pins.emit.technology/verse/${tribeInfo.tribeId}/${data["filename"].replace(".png", "")}`)
+        //         setShowButtons(true);
+        //     }).catch(e => {
+        //         console.error(e);
+        //         setLoading(false)
+        //     })
+        // }
         // html2canvas(domNode).then(function (canvas) {
         //     setGenning(false)
         //     setLoading(true)
@@ -133,20 +137,39 @@ export const ShareEx: React.FC<Props> = ({isOpen, latestMsg, owner, roles, onClo
         //
         // });
 
-        domtoimage.toBlob(domNode, typs, 0.99).then((blob) => {
-            setGenning(false)
-            setLoading(true)
-            const file = new File([blob], `file.png`)
-            tribeService.uploadFile(file).then(data => {
-                setLoading(false)
-                console.log(data);
-                setUrl(`https://pins.emit.technology/verse/${tribeInfo.tribeId}/${data["filename"].replace(".png", "")}`)
-                setShowButtons(true);
-            }).catch(e => {
-                console.error(e);
-                setLoading(false)
-            })
-        });
+        const lastShareImgId = getLastImageId();
+        if(!lastShareImgId){
+            const domNode: any = document.getElementById("my-node");
+            const scale = 2;
+            const typs: any = {
+                width: domNode.clientWidth * scale,
+                height: domNode.clientHeight * scale,
+                style: {
+                    transform: 'scale(' + scale + ')',
+                    transformOrigin: 'top left',
+                }
+            }
+            setGenning(true)
+            domtoimage.toBlob(domNode, typs, 0.99).then((blob) => {
+                setGenning(false)
+                setLoading(true)
+                const file = new File([blob], `file.png`)
+                tribeService.uploadFile(file).then(data => {
+                    setLoading(false)
+                    console.log(data);
+                    const shareImageId = data["filename"].replace(".png", "");
+                    setUrl(`https://pins.emit.technology/verse/${tribeInfo.tribeId}/${shareImageId}`)
+                    setLastImageId(shareImageId)
+                    setShowButtons(true);
+                }).catch(e => {
+                    console.error(e);
+                    setLoading(false)
+                })
+            });
+        }else{
+            setUrl(`https://pins.emit.technology/verse/${tribeInfo.tribeId}/${lastShareImgId}`)
+            setShowButtons(true);
+        }
     }
 
     const roleImgs: Array<string> = [];
@@ -234,7 +257,7 @@ export const ShareEx: React.FC<Props> = ({isOpen, latestMsg, owner, roles, onClo
                                                                     zIndex: 10000 - i * 2
                                                                 }}>
                                                         <IonAvatar className="ion-avatar2">
-                                                            <img src={img}/>
+                                                            <img src={img} width="100%" height="100%"/>
                                                         </IonAvatar>
                                                     </div>
                                                 })
@@ -258,7 +281,7 @@ export const ShareEx: React.FC<Props> = ({isOpen, latestMsg, owner, roles, onClo
                                             </div>
                                         </div>
                                         <div style={{width: '58px'}}>
-                                            <img src="https://pins.emit.technology/assets/img/pins-logo.png"/>
+                                            <img src="https://pins.emit.technology/pic/display?url=https://pic.emit.technology/img/596b38a47d086a32a5804ea7a4da9868.png&w=299&h=119&op=resize&upscale=1" width="100%"/>
                                         </div>
                                     </div>
                                 </div>
@@ -266,7 +289,7 @@ export const ShareEx: React.FC<Props> = ({isOpen, latestMsg, owner, roles, onClo
                                     <div className="share-right-msg-box"
                                          style={{backgroundImage: `url(${tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image)})`}}>
                                         <div className="share-right-msg" id="msg-bb-xbo">
-                                            <div className="share-right-msg-inner">
+                                            <div className="share-right-msg-inner" style={{justifyContent: showHistory?"flex-start" : "flex-end"}}>
                                                 {
                                                     latestMsg && latestMsg.map((v, i) => {
                                                         return renMessage(v, i)

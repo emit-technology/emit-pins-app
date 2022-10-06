@@ -5,9 +5,9 @@ import {
     Message,
     MessageStatus,
     MessageType,
-    MsgTextImage,
     PinnedSticky,
     TribeInfo,
+    TribeRole,
     UserLimit
 } from "../../../../types";
 import {Airdrop, Dice, Expression, Text} from "./Types";
@@ -29,14 +29,7 @@ import {
     IonToolbar,
     useIonAlert
 } from '@ionic/react';
-import {
-    arrowUndoOutline,
-    chevronDownOutline,
-    chevronUpOutline,
-    createOutline,
-    thumbsUpOutline,
-    trashOutline
-} from "ionicons/icons";
+import {chevronDownOutline, chevronUpOutline} from "ionicons/icons";
 import {tribeService} from "../../../../service/tribe";
 import UploadImage from "../../../utils/UploadImage";
 import add from "../../../../img/add.png";
@@ -46,6 +39,7 @@ import BigNumber from "bignumber.js";
 import selfStorage from "../../../../common/storage";
 import {Tools} from "./Types/Tools";
 import {utils} from "../../../../common";
+import {ShareEx} from "../../../utils/ShareEx";
 
 interface Props {
     pinnedStickies?: { data: Array<PinnedSticky>, total: number }
@@ -83,7 +77,7 @@ const fetchData = async (pageNo, setComments, condition?: Array<any>) => {
         console.log("fetch data total == %d ,page=%d", total, pageNo)
         const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, pageNo, pageSize, condition)
         total = rest.data.length;
-        // console.log("fetch data", rest.data)
+        console.log("fetch data =========> ", rest.data)
         // Pre-pend new items
         setComments((prevComments: Array<PinnedSticky>) => [...rest.data, ...[]]);
         // setComments(rest.data)
@@ -96,20 +90,20 @@ const fetchData = async (pageNo, setComments, condition?: Array<any>) => {
     }
 };
 
-const fetchNewPin = async (groupMsg: Array<GroupMsg>, pageNo: number, setComments: any) => {
-    const grpmsg = await tribeService.groupIds(config.tribeId);
-    if (grpmsg.length > groupMsg.length) {
-        const groupIds = grpmsg.slice(groupMsg.length)
-        for (let groupId of groupIds) {
-            const condition = [
-                "tribeIdAndGroupId", [config.tribeId, groupId], [config.tribeId, groupId]
-            ]
-            const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, pageNo, pageSize, condition)
-            setComments((prevComments: Array<PinnedSticky>) => [...prevComments, ...rest.data]);
-        }
-    }
-
-}
+// const fetchNewPin = async () => {
+//     const grpmsg = await tribeService.groupIds(config.tribeId);
+//     if (grpmsg.length > groupMsg.length) {
+//         const groupIds = grpmsg.slice(groupMsg.length)
+//         for (let groupId of groupIds) {
+//             const condition = [
+//                 "tribeIdAndGroupId", [config.tribeId, groupId], [config.tribeId, groupId]
+//             ]
+//             const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, pageNo, pageSize, condition)
+//             setComments((prevComments: Array<PinnedSticky>) => [...prevComments, ...rest.data]);
+//         }
+//     }
+//
+// }
 
 function setCurrentVisible(visibleStartIndex: number) {
     selfStorage.setItem(`current_visible_index_${config.tribeId}`, visibleStartIndex)
@@ -126,11 +120,16 @@ const setVisibleStartIndex = (n: number) => {
     visibleStartIndex = n;
 }
 
-export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit,pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
+export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit, pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
     const dispatchData = useAppSelector(state => state.jsonData);
     const dispatch = useAppDispatch();
     const [comments, setComments] = useState([]);
     const [showModifyMsg, setShowModifyMsg] = useState(null);
+
+    const [showShareModal, setShowShareModal] = useState(false);
+    const [shareMsgs, setShareMsgs] = useState([]);
+    const [shareRoles, setShareRoles] = useState([]);
+
     const [stickyMsg, setStickyMsg] = useState(null);
     const [checkedMsgArr, setCheckedMsgArr] = useState([])
     const [currentVisibleIndex, setCurrentVisibleIndex] = useState(0);
@@ -421,17 +420,17 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit,pinne
         if (!pinnedStickies && dispatchData) {
             if (dispatchData.tag == 'scrollToItem' && dispatchData.data) {
                 let dataObj = JSON.parse(dispatchData.data);
-                console.log("-->>>>>>>>. scroll to item: " , dataObj)
+                console.log("-->>>>>>>>. scroll to item: ", dataObj)
                 if (dataObj.refresh > -1) {
                     if (dataObj.refresh == 0) {
                         shouldScrollToBottom = true;
                         // scrollToBottom();
-                    }else if(dataObj.refresh == 9999999){
-                        const index = comments.findIndex(v => ((v as PinnedSticky).records && (v as PinnedSticky).records.length > 0 && (v as PinnedSticky).records[0].groupId == "") )
+                    } else if (dataObj.refresh == 9999999) {
+                        const index = comments.findIndex(v => ((v as PinnedSticky).records && (v as PinnedSticky).records.length > 0 && (v as PinnedSticky).records[0].groupId == ""))
                         if (index > 0) {
                             startItem(index);
                             scrollToItem({index: index, align: "start"})
-                        }else{
+                        } else {
                             shouldScrollToBottom = true;
                             scrollToBottom();
                         }
@@ -500,6 +499,32 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit,pinne
         selfStorage.setItem(`maxVisibleIndex_${config.tribeId}`, n)
     }
 
+
+    const onShare = async (msg: Message) => {
+        console.log("====> share msg: ", msg, new Date(msg.timestamp * 1000))
+        const condition: Array<any> = [
+            "tribeIdAndTimestamp",
+            [config.tribeId, 2, msg.timestamp],
+            [config.tribeId, 2, Math.floor(Date.now() / 1000) + 3600],
+            false
+        ]
+        const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, 1, 20, condition)
+        let shareMsgs: Array<Message> = [];
+        let shareRoles: Array<TribeRole> = [];
+        const data = rest.data;
+        data.reverse();
+        for (let stmsg of data) {
+            shareMsgs.push(stmsg.records[0])
+            if (shareRoles.length == 0) {
+                shareRoles.push(...stmsg.roles)
+            }
+        }
+
+        setShowShareModal(true);
+        setShareMsgs(shareMsgs);
+        setShareRoles(shareRoles)
+    }
+
     const renInboxMsg = (messages: Array<Message>, msgIndex: number, seq: number): Array<any> => {
         const htmls = [];
         if (messages && messages.length > 0) {
@@ -548,16 +573,18 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit,pinne
                             selfStorage.setItem(`tribe_pin_arr`, checkedCopy)
                         }
                     }}>
-                        <div className="inner" style={{maxWidth: '100%'}} onMouseOver={()=>setCheckedMsgId(v.id)}>
+                        <div className="inner" style={{maxWidth: '100%'}} onMouseOver={() => setCheckedMsgId(v.id)}>
                             {/*<div>{msgIndex}</div>*/}
                             <Text hideTime={!!v["hideTime"] && v["hideTime"] == 1}
-                                  keeper={tribeInfo && tribeInfo.keeper} onSupport={onSupport} checked={checked} msg={v} owner={owner}
+                                  keeper={tribeInfo && tribeInfo.keeper} onSupport={onSupport} checked={checked} msg={v}
+                                  owner={owner}
                                   showPin={v.msgStatus == MessageStatus.dashed && showPin}
                             />
 
                         </div>
 
-                        <Tools msg={v} showPin={v.msgStatus == MessageStatus.dashed && showPin} owner={owner}
+                        <Tools onShare={(msg) => onShare(msg)} msg={v}
+                               showPin={v.msgStatus == MessageStatus.dashed && showPin} owner={owner}
                                onSupport={userLimit && userLimit.supportLeft > 0 && onSupport}
                                onReplay={(msg: Message) => {
                                    onReplay(msg)
@@ -615,41 +642,46 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit,pinne
                                     const pinnedSticky: PinnedSticky = comments[index];
 
                                     if (pinnedSticky) {
-                                        const isNewTheme = index > 0 && comments[index - 1] && (comments[index - 1] as PinnedSticky).records && (comments[index - 1] as PinnedSticky).records[0].msgStatus == MessageStatus.pinned
-                                            && pinnedSticky.records && pinnedSticky.records[0].msgStatus == MessageStatus.dashed;
+                                        if (pinnedSticky.records && pinnedSticky.records.length > 0
+                                            && ((pinnedSticky.records[0].msgStatus !== MessageStatus.removed && pinnedSticky.records[0].msgStatus !== MessageStatus.draft)
+                                                || (!!pinnedStickies && pinnedSticky.records[0].msgStatus == MessageStatus.draft)))
+                                        {
+                                            const isNewTheme = index > 0 && comments[index - 1] && (comments[index - 1] as PinnedSticky).records && (comments[index - 1] as PinnedSticky).records[0].msgStatus == MessageStatus.pinned
+                                                && pinnedSticky.records && pinnedSticky.records[0].msgStatus == MessageStatus.dashed;
 
-                                        // const theme = stickyMsg.theme;
-                                        const messages = pinnedSticky.records
+                                            // const theme = stickyMsg.theme;
+                                            const messages = pinnedSticky.records
 
-                                        const msgItems = renInboxMsg(messages, index, pinnedSticky.seq)
-                                        return <div className="visual-msg-box"
-                                                    style={{padding: index == comments.length - 1 ? "0 0 44px" : "0"}}
-                                                    ref={measureRef} key={`_s_${index}`}>
-                                            {/*{showLoading && <Loading/>}*/}
-                                            {
-                                                isNewTheme &&
-                                                <div className="strike">
-                                                    <span>New Tape</span>
-                                                </div>
-                                            }
-                                            {
-                                                index == 0 && <div style={{height: '20px'}}></div>
-                                            }
-
-                                            <div className={"visual-msg-content"} onClick={(e) => {
-                                                // console.log("click msg")
-                                                e.stopPropagation();
-                                                e.persist();
-                                                const sticky = comments[index];
-                                                if (sticky && stickyMsg && sticky.seq != stickyMsg.seq) {
-                                                    setStickyMsg(sticky)
-                                                    dispatchTheme(sticky);
+                                            const msgItems = renInboxMsg(messages, index, pinnedSticky.seq)
+                                            return <div className="visual-msg-box"
+                                                        style={{padding: index == comments.length - 1 ? "0 0 44px" : "0"}}
+                                                        ref={measureRef} key={`_s_${index}`}>
+                                                {/*{showLoading && <Loading/>}*/}
+                                                {
+                                                    isNewTheme &&
+                                                    <div className="strike">
+                                                        <span>New Tape</span>
+                                                    </div>
                                                 }
-                                                // setCheckedMsgId(sticky && (sticky as PinnedSticky).records && (sticky as PinnedSticky).records.length>0 && (sticky as PinnedSticky).records[0].id)
-                                            }}>
-                                                {msgItems}
+                                                {
+                                                    index == 0 && <div style={{height: '20px'}}></div>
+                                                }
+
+                                                <div className={"visual-msg-content"} onClick={(e) => {
+                                                    // console.log("click msg")
+                                                    e.stopPropagation();
+                                                    e.persist();
+                                                    const sticky = comments[index];
+                                                    if (sticky && stickyMsg && sticky.seq != stickyMsg.seq) {
+                                                        setStickyMsg(sticky)
+                                                        dispatchTheme(sticky);
+                                                    }
+                                                    // setCheckedMsgId(sticky && (sticky as PinnedSticky).records && (sticky as PinnedSticky).records.length>0 && (sticky as PinnedSticky).records[0].id)
+                                                }}>
+                                                    {msgItems}
+                                                </div>
                                             </div>
-                                        </div>
+                                        }
                                     }
                                 })
                             }
@@ -705,6 +737,8 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit,pinne
                 </IonFab>
             }
 
+            <ShareEx isOpen={showShareModal} showHistory={true} onClose={() => setShowShareModal(false)}
+                     tribeInfo={tribeInfo} latestMsg={shareMsgs} roles={shareRoles as Array<TribeRole>} owner={owner}/>
 
             <IonModal isOpen={!!showModifyMsg} className="role-select-list" onDidDismiss={() => setShowModifyMsg(null)}>
                 <IonHeader collapse="fade">
