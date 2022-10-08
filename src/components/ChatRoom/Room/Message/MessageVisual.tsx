@@ -77,7 +77,7 @@ const fetchData = async (pageNo, setComments, condition?: Array<any>) => {
         console.log("fetch data total == %d ,page=%d", total, pageNo)
         const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, pageNo, pageSize, condition)
         total = rest.data.length;
-        console.log("fetch data =========> ", rest.data)
+        // console.log("fetch data =========> ", rest.data)
         // Pre-pend new items
         setComments((prevComments: Array<PinnedSticky>) => [...rest.data, ...[]]);
         // setComments(rest.data)
