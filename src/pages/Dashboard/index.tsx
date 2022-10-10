@@ -506,18 +506,21 @@ export class Dashboard extends React.Component<Props, State> {
                                         showPin={showPin}
                                         userLimit={userLimit}
                                     />
+
+                                    <BottomBar tribeInfo={tribeInfo} owner={owner} userLimit={userLimit}
+                                               onRoleCheck={(v) => {
+                                                   this.setLatestRole(v)
+                                               }} roles={roles} selectRole={latestRole} showPin={showPin} onPin={() => {
+                                        // tribeService.setCacheMsg(config.tribeId,[])
+                                        this.setState({showPin: false, datas: []})
+                                        this.initData().catch(e => {
+                                            console.error(e)
+                                        })
+                                    }}/>
+
+
                                 </div>
 
-                                <BottomBar tribeInfo={tribeInfo} owner={owner} userLimit={userLimit}
-                                           onRoleCheck={(v) => {
-                                               this.setLatestRole(v)
-                                           }} roles={roles} selectRole={latestRole} showPin={showPin} onPin={() => {
-                                    // tribeService.setCacheMsg(config.tribeId,[])
-                                    this.setState({showPin: false, datas: []})
-                                    this.initData().catch(e => {
-                                        console.error(e)
-                                    })
-                                }}/>
 
                                 <IonActionSheet
                                     isOpen={showActionSheet}

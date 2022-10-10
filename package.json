@@ -113,6 +113,7 @@
     "react-emojis": "^1.0.6",
     "react-helmet": "^6.1.0",
     "react-image-size": "^1.0.5",
+    "react-images-upload": "^1.2.8",
     "react-photo-view": "^1.2.2",
     "react-popper-tooltip": "^4.4.2",
     "react-redux": "^8.0.2",

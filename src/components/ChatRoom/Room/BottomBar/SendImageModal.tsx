@@ -46,7 +46,8 @@ export const SendImageModal: React.FC<Props> = ({url, onOk, onClose, isOpen,widt
         delayHide: 200,
         closeOnTriggerHidden: true,
         closeOnOutsideClick: true,
-        followCursor: true
+        followCursor: true,
+        trigger:['click','hover']
     });
     return <>
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal">

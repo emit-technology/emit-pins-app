@@ -66,6 +66,7 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
     const [loading, setLoading] = useState(false);
 
     const [cursorPosition, setCursorPosition] = useState(-1);
+
     const {
         getTooltipProps,
         setTooltipRef,
@@ -77,7 +78,8 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
         delayHide: 100,
         closeOnTriggerHidden: true,
         closeOnOutsideClick: true,
-        followCursor: true
+        followCursor: true,
+        trigger:['click','hover']
     });
     // const popper = usePopperTooltip({
     //     placement: "top-end",
@@ -218,13 +220,6 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                              size="large"
                                              onClick={(e) => {
                                                  e.stopPropagation();
-                                                 if (textRef && textRef.current) {
-                                                     //@ts-ignore
-                                                     // const value:any = textRef.current.value;
-                                                     const value = lorem.generateSentences(1);
-                                                     if (value) {
-                                                     }
-                                                 }
                                              }}/>
                                     {visible && (
                                         <div
@@ -244,6 +239,8 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                     )}
 
                                     {/*</div>*/}
+
+
                                     <IonIcon className="footer-icon" src={imageOutline} color="dark" size="large"
                                              onClick={(e) => {
                                                  e.stopPropagation();

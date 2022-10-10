@@ -7,15 +7,15 @@ import {tribeService} from "../service/tribe";
 
 export class BaseRpc {
 
-    _url:string;
+    _url: string;
 
-    constructor(url:string) {
+    constructor(url: string) {
         this._url = url;
     }
 
-    post = async (path:string,data: any): Promise<any> => {
+    post = async (path: string, data: any): Promise<any> => {
         const authToken = tribeService.getAuthToken();
-        const rest = await axios.post(`${this._url}${path}`,data, {
+        const rest = await axios.post(`${this._url}${path}`, data, {
             headers: {
                 'Content-Type': 'application/json',
                 'AuthToken': authToken
@@ -24,14 +24,21 @@ export class BaseRpc {
         return rest.data;
     }
 
-    get = async (params:string): Promise<any> =>{
+    get = async (params: string): Promise<any> => {
         const _url = `${this._url}${params}`;
         const {data} = await axios.get(_url);
         return data;
     }
 
-    upload = async () : Promise<{url:string,themeColors:ThemeColors}> =>{
+    upload = async (): Promise<{ url: string, themeColors: ThemeColors }> => {
+
+        const domm = document.querySelector('#_capacitor-camera-input');
+        if(domm){
+           domm.remove();
+        }
+
         const image: any = await Camera.getPhoto({
+            webUseInput: true,
             quality: 100,
             resultType: CameraResultType.Uri,
             source: CameraSource.Photos,
@@ -41,10 +48,11 @@ export class BaseRpc {
         const file = await fetch(image.webPath).then(r => r.blob()).then(blobFile => new File([blobFile], `file.${image.format}`, {type: blobFile.type}));
         const data = await this.uploadFile(file);
 
-        return {url:data["url"].replace("http://","https://"),themeColors: themeColors};
+        return {url: data["url"].replace("http://", "https://"), themeColors: themeColors};
+
     }
 
-    uploadFile = async (file:File) :Promise<any> =>{
+    uploadFile = async (file: File): Promise<any> => {
         // const file = await fetch(image.webPath).then(r => r.blob()).then(blobFile => new File([blobFile], `file.${image.format}`, {type: blobFile.type}));
         const formData = new FormData();
         formData.append('data', file);
