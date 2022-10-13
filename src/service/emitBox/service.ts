@@ -1,8 +1,9 @@
-import {AccountModel,ChainType} from '@emit-technology/emit-lib';
+import {AccountModel, ChainType, Factor} from '@emit-technology/emit-lib';
 import EmitBox from '@emit-technology/emit-account-node-sdk';
 import selfStorage from "../../common/storage";
 import config from "../../common/config";
 import Web3 from "web3";
+import {utils} from "../../common";
 
 const dapp = {
     name: "EMIT-IM",
@@ -20,11 +21,12 @@ class EmitBoxSdk {
     web3: { [chain: number]: Web3 }
 
     constructor() {
-        const emitBox = new EmitBox(dapp, {nodeUrl:config.emitNode,chainType:ChainType.EMIT.valueOf()});
+        //network: {nodeUrl: "https://core-node-beta.emit.technology", chainId: "667", chainType: ChainType.EMIT.valueOf()},
+        const emitBox = new EmitBox(dapp, {nodeUrl: config.nodeUrl,chainId:"667", chainType: ChainType.EMIT.valueOf()});
         this.emitBox = emitBox;
         const bscProvider = emitBox.newProvider({
             dapp: dapp,
-            network:  {nodeUrl: "https://node-bsc.bangs.network", chainId: "1", chainType: ChainType.BSC.valueOf()},
+            network: {nodeUrl: "https://node-bsc.bangs.network", chainId: "1", chainType: ChainType.BSC.valueOf()},
             version: "1.0"
         });
         // const bscProvider = emitBox.newProvider({
@@ -57,6 +59,48 @@ class EmitBoxSdk {
                     resolve(account)
                 }
             }, 200)
+        })
+    }
+
+    getFactor = async (address: string): Promise<Array<Factor>> => {
+        const rest = await emitBoxSdk.emitBox.emitDataNode.getFactors(address)
+        // let ret:Array<Factor> = [];
+        // if (rest) {
+        //     for (let factor of rest) {
+        //         const symbol = utils.formatCategoryString(factor.category);
+        //         const b = utils.fromHexValue(factor.value, 0).toString(10);
+        //         ret[symbol] = b;
+        //     }
+        // }
+        return Promise.resolve(rest)
+    }
+
+    emitSend = async (receive: string, amount: string, factor:Factor, outData: string,datasets:Array<any>) => {
+        const account = await emitBoxSdk.getAccount();
+        const from = account.addresses[ChainType.EMIT];
+        const prepareBlock = await emitBoxSdk.emitBox.emitDataNode.genPrepareBlock(
+            from,
+            datasets,
+            {
+                settles: [],
+                outs: [
+                    {
+                        target: receive,
+                        factor: {
+                            category: factor.category,
+                            value: utils.toValueHex(amount),
+                        },
+                        data: outData? Buffer.from(outData).toString("hex"):""//TODO for refer data
+                    },
+                ],
+            },
+            undefined
+        );
+        await emitBoxSdk.emitBox.emitDataNode.prepareBlock(prepareBlock);
+        return Promise.resolve({
+            transactionHash: prepareBlock.blk.parent_hash,
+            blockNumber: prepareBlock.blk.num,
+            address: from
         })
     }
 

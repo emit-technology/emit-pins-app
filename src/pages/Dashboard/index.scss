@@ -51,7 +51,7 @@
 .msg-input{
   background-color: var(--ion-color-tertiary);
   border-radius: 12px;
-  padding: 12px 12px;
+  padding: 12px 12px !important;
   max-height: 200px;
   border: unset;
   width: 100%;
@@ -510,4 +510,10 @@ ion-icon:before {
   background: var(--ion-color-light);
   padding: 6px;
   border-radius: 12px;
+}
+
+.amount-input {
+  font-size: 20px !important;
+  padding: 6px 12px !important;
+  font-family: 'SFProText-Bold';
 }

@@ -29,7 +29,7 @@ import './index.scss';
 import selfStorage from "../../common/storage";
 import {RoleListModal} from "../../components/Role";
 import {TribeEditModal} from "../../components/Tribe";
-import {Share} from '@capacitor/share';
+// import {Share} from '@capacitor/share';
 import config from "../../common/config";
 import {BottomBar} from "../../components/ChatRoom/Room/BottomBar";
 import {PinnedMsgModal} from "../../components/ChatRoom/Room/Message/PinnedMsgModal";
@@ -231,7 +231,7 @@ export class Dashboard extends React.Component<Props, State> {
             icon: share,
             handler: () => {
                 console.log('Share clicked', navigator.share);
-                Share.canShare().then(f => console.log(f, "can share ?"))
+                // Share.canShare().then(f => console.log(f, "can share ?"))
                 this.showShareModal();
             }
         }, {

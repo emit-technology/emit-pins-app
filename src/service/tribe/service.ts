@@ -1,5 +1,6 @@
 import {ITribe} from "./interface";
 import {
+    AirdropInfo,
     GroupMsg,
     ImageType,
     Message,
@@ -21,6 +22,8 @@ import {ThemeColors} from "../../common/getMainColor";
 import {emitBoxSdk} from "../emitBox";
 import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import tribeWorker from "../../worker/imWorker";
+import {utils} from "../../common";
+import {App} from "@capacitor/app";
 // import WebSocket from 'ws';
 
 const W3CWebSocket = require('websocket').w3cwebsocket;
@@ -167,6 +170,7 @@ class TribeService implements ITribe {
 
     getAccountAndLogin = async (): Promise<string> => {
         const accountLocal = await emitBoxSdk.getAccount();
+
         const rest: { error: string, result: AccountModel } = await emitBoxSdk.emitBox.requestAccount(accountLocal && accountLocal.accountId);
         if(!rest || rest.error){
             return Promise.reject(rest.error)
@@ -474,15 +478,23 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
-    updateMsg = async (msgId: string, content: string): Promise<string> => {
+    updateMsg = async (msgId: string, content: string, role?: string): Promise<string> => {
         await this.userCheckAuth()
-        const rest: TribeResult<string> = await this._rpc.post('/tribe/updateMsg', {msgId, content});
+        const rest: TribeResult<string> = await this._rpc.post('/tribe/updateMsg', {msgId,role, content});
         if (rest && rest.code == 0) {
             return Promise.resolve(rest.data)
         }
         return Promise.reject(rest.message);
     }
 
+    airdropRecords = async (msgId: string): Promise<Array<AirdropInfo>> => {
+        await this.userCheckAuth()
+        const rest: TribeResult<Array<AirdropInfo>> = await this._rpc.post('/tribe/airdropRecords', {msgId});
+        if (rest && rest.code == 0) {
+            return Promise.resolve(rest.data)
+        }
+        return Promise.reject(rest.message);
+    }
 
     convertGroupMsgToPinnedSticky = (groupTribes: Array<GroupMsg>): Array<PinnedSticky> => {
         const stickies: Array<PinnedSticky> = [];

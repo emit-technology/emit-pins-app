@@ -1,4 +1,5 @@
 import {ImageType, TribeRole, TribeTheme} from "./tribe";
+import {Factor} from "@emit-technology/emit-lib";
 
 export enum MessageType {
     Dice = 'dice',
@@ -45,7 +46,7 @@ export interface Message {
     tribeId: string
     owner: string;
     timestamp: number;
-    content: Dice | TribeRole | MsgText | Expression | TribeTheme | Airdrop | Support;
+    content: Dice | TribeRole | MsgText | Expression | TribeTheme | AirdropContent | Support;
     replayToMsgId?: string;
 
     groupId: string;
@@ -101,24 +102,13 @@ export interface Expression {
 //     backgroundColor: string;
 // }
 
-export interface Airdrop {
+export interface AirdropContent {
     title: string;
     max: number;
-    amount: string;
+    // amount: string;
     factor: Factor;
     content: string;
-    type: AirdropType;
-}
-
-export interface Factor {
-    category: Category;
-    value: string;
-}
-
-export interface Category {
-    supplier: string;
-    symbol: string;
-    id: string
+    airdropType: AirdropType;
 }
 
 export interface PinnedSticky {

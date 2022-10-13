@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'emit-im',
+  appId: 'technology.emit.pins',
+  appName: 'EMIT PINs',
   webDir: 'build',
   bundledWebRuntime: false
 };

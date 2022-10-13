@@ -1,4 +1,4 @@
-import {Message, MsgTextImage} from "./message";
+import {AirdropType, Message, MsgTextImage} from "./message";
 
 export type ImageType = MsgTextImage | string;
 
@@ -58,4 +58,22 @@ export interface UserLimit {
     maxSupportCount: number;
     msgLeft: number;
     supportLeft: number;
+}
+
+export interface FunctionReq {
+    tribeId: string
+    role: string
+    title: string
+    max: string
+    content: string
+    airdropType: AirdropType
+}
+
+export interface AirdropInfo {
+    id: string;
+    user: string;
+    groupId: string;
+    apportionId: string;
+    amount: string;
+    txHash: string;
 }

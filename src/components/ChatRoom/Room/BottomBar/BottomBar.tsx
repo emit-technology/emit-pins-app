@@ -8,16 +8,14 @@ import {
     IonItem,
     IonLabel,
     IonRow,
-    IonTextarea,
-    useIonToast, IonBadge, IonContent
+    useIonToast,
 } from '@ionic/react'
 import {
-    chatboxEllipsesOutline, chatbubbleEllipsesOutline,
+    chatboxEllipsesOutline,
     happyOutline,
-    imageOutline,
-    rocketOutline, thumbsUpOutline
+    imageOutline, rocketOutline,
 } from "ionicons/icons";
-import {Message, MessageType, MsgText, MsgTextImage, TribeInfo, TribeRole, UserLimit} from "../../../../types";
+import {Message, MessageType, MsgText, TribeInfo, TribeRole, UserLimit} from "../../../../types";
 import {LoremIpsum} from "lorem-ipsum";
 import {tribeService} from "../../../../service/tribe";
 import {EmojiBlock} from "../../../Emojis/block";
@@ -34,6 +32,7 @@ import {SendImageModal} from "./SendImageModal";
 import TextareaAutosize from 'react-textarea-autosize';
 import {ThemeColors} from "../../../../common/getMainColor";
 import {utils} from "../../../../common";
+import {AirdropModal} from "./AirdropModal";
 
 interface Props {
     selectRole?: TribeRole
@@ -65,6 +64,8 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
 
     const [loading, setLoading] = useState(false);
 
+    const [showAirdropModal, setShowAirdropModal] = useState(false);
+
     const [cursorPosition, setCursorPosition] = useState(-1);
 
     const {
@@ -81,23 +82,7 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
         followCursor: true,
         trigger:['click','hover']
     });
-    // const popper = usePopperTooltip({
-    //     placement: "top-end",
-    //     interactive: true,
-    //     delayHide: 100,
-    //     closeOnTriggerHidden: true,
-    //     closeOnOutsideClick: true,
-    //     followCursor: true
-    // });
 
-
-    // useEffect(()=>{
-    //     //@ts-ignore
-    //     if( emo){
-    //         //@ts-ignore
-    //         textRef.current.value = textRef.current.value+emo;
-    //     }
-    // },[textRef,emo])
     const dispatch = useAppDispatch();
     const dispatchData = useAppSelector(state => state.jsonData);
     useEffect(() => {
@@ -144,6 +129,11 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
             }
         }
     }
+
+    const sendAirdrop = async () => {
+        setShowAirdropModal(false);
+    }
+
     const typeInTextarea = (newText, e: any) => {
         // let cursorPosition = e.selectionStart
 
@@ -275,33 +265,10 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
 
                                     {/*    }*/}
                                     {/*}}/>*/}
-                                    {/*<IonIcon className="footer-icon" src={rocketOutline} color="dark" size="large" onClick={(e) => {*/}
-                                    {/*    e.stopPropagation();*/}
-                                    {/*    if(userLimit && userLimit.msgLeft <=0){*/}
-                                    {/*        present({*/}
-                                    {/*            message: `reaching the max number(${userLimit.maxMsgCount}) of likes`,*/}
-                                    {/*            duration: 2000,*/}
-                                    {/*            position: "top",*/}
-                                    {/*            color: "danger"*/}
-                                    {/*        })*/}
-                                    {/*        return;*/}
-                                    {/*    }*/}
-                                    {/*    sendMsg(true).then(() => {*/}
-                                    {/*        dispatch(saveDataState({*/}
-                                    {/*            data: JSON.stringify({refresh: 0}),*/}
-                                    {/*            tag: 'scrollToItem'*/}
-                                    {/*        }))*/}
-                                    {/*    }).catch(e => {*/}
-                                    {/*        const err = typeof e == 'string' ? e : e.message;*/}
-                                    {/*        present({*/}
-                                    {/*            message: err,*/}
-                                    {/*            duration: 2000,*/}
-                                    {/*            position: "top",*/}
-                                    {/*            color: "danger"*/}
-                                    {/*        })*/}
-                                    {/*        console.error(e)*/}
-                                    {/*    })*/}
-                                    {/*}}/>*/}
+                                    <IonIcon className="footer-icon" src={rocketOutline} color="dark" size="large" onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowAirdropModal(true)
+                                    }}/>
                                 </div>
                             </IonCol>
                         </IonRow>
@@ -438,6 +405,8 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
             setShowSelectRole(false)
             onRoleCheck(role)
         }}/>
+
+        <AirdropModal actor={selectRole} onOk={()=>sendAirdrop()} onClose={()=>setShowAirdropModal(false)} owner={owner} isOpen={showAirdropModal} />
 
     </div>
 }

@@ -496,8 +496,6 @@ export const MessageContentWindow: React.FC<Props> = ({groupMsg, pinnedStickies,
                     </div>
                 } else if (v.msgType == MessageType.Dice) {
                     item = <Dice/>
-                } else if (v.msgType == MessageType.Airdrop) {
-                    item = <Airdrop/>
                 } else if (v.msgType == MessageType.Expression) {
                     item = <Expression/>
                 } else if (v.msgType == MessageType.Divide) {

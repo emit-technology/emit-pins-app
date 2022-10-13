@@ -44,7 +44,7 @@ import {
     IonTitle, IonLoading, useIonToast,
     IonToolbar, IonAvatar, IonIcon, IonPage
 } from "@ionic/react";
-import {Message, MessageStatus, MessageType, TribeInfo, TribeRole} from "../../types";
+import {Message, MessageStatus, MessageType, PinnedSticky, TribeInfo, TribeRole} from "../../types";
 import {tribeService} from "../../service/tribe";
 import html2canvas from "html2canvas";
 // import domtoimage from "dom-to-image-more";
@@ -65,9 +65,10 @@ interface Props {
     roles: Array<TribeRole>;
     owner: string;
     showHistory?:boolean
+    stickyMsg?: PinnedSticky
 }
 
-export const ShareEx: React.FC<Props> = ({isOpen,showHistory, latestMsg, owner, roles, onClose, tribeInfo}) => {
+export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMsg, owner, roles, onClose, tribeInfo}) => {
 
     // const url = "https://abesc12.emit.technology/verse/4E4c8YEgUvE/22172ea7d796eedc959eb8b7dcfd5757";
     const [url, setUrl] = useState("");
@@ -101,42 +102,6 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory, latestMsg, owner, 
         }
     }
     const sharePng = () => {
-
-
-        // const urlToImag = async (furl: string) => {
-        //     const file = await fetch(furl).then(r => r.blob()).then(blobFile => new File([blobFile], `${Date.now()}.png`, {type: blobFile.type}));
-        //     tribeService.uploadFile(file).then(data => {
-        //         setLoading(false)
-        //         console.log(data);
-        //         setUrl(`https://pins.emit.technology/verse/${tribeInfo.tribeId}/${data["filename"].replace(".png", "")}`)
-        //         setShowButtons(true);
-        //     }).catch(e => {
-        //         console.error(e);
-        //         setLoading(false)
-        //     })
-        // }
-        // html2canvas(domNode).then(function (canvas) {
-        //     setGenning(false)
-        //     setLoading(true)
-        //
-        //     canvas.toBlob((blob) => {
-        //         setGenning(false)
-        //         setLoading(true)
-        //         const file = new File([blob], `file.png`)
-        //         tribeService.uploadFile(file).then(data => {
-        //             setLoading(false)
-        //             console.log(data);
-        //             setUrl(`https://pins.emit.technology/verse/${tribeInfo.tribeId}/${data["filename"].replace(".png", "")}`)
-        //             setShowButtons(true);
-        //         }).catch(e => {
-        //             console.error(e);
-        //             setLoading(false)
-        //         })
-        //     }, typs, 0.99)
-        //
-        //
-        // });
-
         const lastShareImgId = getLastImageId();
         if(!lastShareImgId){
             const domNode: any = document.getElementById("my-node");
@@ -199,26 +164,8 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory, latestMsg, owner, 
         </div>
     }
 
+    const backImg = `url(${stickyMsg? utils.getDisPlayUrl(stickyMsg.theme.image):tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image)})`;
     return <>
-        {/*<Helmet>*/}
-        {/*    <meta property="twitter:card" content="summary_large_image"/>*/}
-        {/*    <meta property="twitter:site" content="@emit_protocol"/>*/}
-        {/*    <meta property="twitter:url"*/}
-        {/*          content={`https://pins.emit.technology/${config.tribeId}?ref=twitter_summary_card`}/>*/}
-        {/*    <meta property="twitter:title" content={desc}/>*/}
-        {/*    <meta property="twitter:description" content={tribeInfo && tribeInfo.theme.themeDesc}/>*/}
-        {/*    <meta property="twitter:image" content={tribeInfo && tribeInfo.theme.image["url"]}/>*/}
-
-        {/*    <meta property="og:title" content={desc}/>*/}
-        {/*    <meta property="og:site_name" content="EMIT - PINs"/>*/}
-        {/*    <meta property="og:type" content="article"/>*/}
-        {/*    <meta property="og:image" content={tribeInfo && tribeInfo.theme.image["url"]}/>*/}
-        {/*    <meta property="og:description" content={`${desc} , ${tribeInfo && tribeInfo.theme.themeDesc}`}/>*/}
-        {/*    <meta name="robots" content="max-image-preview:large"/>*/}
-        {/*    <meta name="description" content={`${desc} , ${tribeInfo && tribeInfo.theme.themeDesc}`}/>*/}
-
-        {/*</Helmet>*/}
-
         {/*//initialBreakpoint={0.4} breakpoints={[0, 0.4, 0.6]}*/}
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-share-modal">
             <IonPage>
@@ -237,7 +184,7 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory, latestMsg, owner, 
                     <div id="my-node" className="share-node">
                         <div className="visual-msg-box share-page" style={{
                             height: '100%',
-                            backgroundImage: `url(${tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image)})`
+                            backgroundImage: backImg
                         }}>
                             <div className="share-box">
                                 <div className="share-left">
@@ -287,7 +234,7 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory, latestMsg, owner, 
                                 </div>
                                 <div className="share-right">
                                     <div className="share-right-msg-box"
-                                         style={{backgroundImage: `url(${tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image)})`}}>
+                                         style={{backgroundImage: backImg}}>
                                         <div className="share-right-msg" id="msg-bb-xbo">
                                             <div className="share-right-msg-inner" style={{justifyContent: showHistory?"flex-start" : "flex-end"}}>
                                                 {

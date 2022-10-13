@@ -501,7 +501,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit, pinn
 
 
     const onShare = async (msg: Message) => {
-        console.log("====> share msg: ", msg, new Date(msg.timestamp * 1000))
+        // console.log("====> share msg: ", msg, new Date(msg.timestamp * 1000))
         const condition: Array<any> = [
             "tribeIdAndTimestamp",
             [config.tribeId, 2, msg.timestamp],
@@ -550,7 +550,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit, pinn
                         }
                     }
                 }
-                if (v.msgType == MessageType.Text || v.msgType == MessageType.Role) {
+                if (v.msgType == MessageType.Text || v.msgType == MessageType.Role || v.msgType == MessageType.Airdrop) {
                     let className = 'msg-no-role-rec';
                     if (v.role) {
                         className = owner == v.owner && !v.groupId ? "msg-sender" : "msg-receive"
@@ -576,7 +576,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit, pinn
                         <div className="inner" style={{maxWidth: '100%'}} onMouseOver={() => setCheckedMsgId(v.id)}>
                             {/*<div>{msgIndex}</div>*/}
                             <Text hideTime={!!v["hideTime"] && v["hideTime"] == 1}
-                                  keeper={tribeInfo && tribeInfo.keeper} onSupport={onSupport} checked={checked} msg={v}
+                                  keeper={tribeInfo && tribeInfo.keeper} onSupport={onSupport} checked={checked || v.msgType == MessageType.Airdrop} msg={v}
                                   owner={owner}
                                   showPin={v.msgStatus == MessageStatus.dashed && showPin}
                             />
@@ -598,8 +598,6 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit, pinn
                     </div>
                 } else if (v.msgType == MessageType.Dice) {
                     item = <Dice/>
-                } else if (v.msgType == MessageType.Airdrop) {
-                    item = <Airdrop/>
                 } else if (v.msgType == MessageType.Expression) {
                     item = <Expression/>
                 } else if (v.msgType == MessageType.Divide) {
@@ -737,7 +735,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit, pinn
                 </IonFab>
             }
 
-            <ShareEx isOpen={showShareModal} showHistory={true} onClose={() => setShowShareModal(false)}
+            <ShareEx stickyMsg={stickyMsg} isOpen={showShareModal} showHistory={true} onClose={() => setShowShareModal(false)}
                      tribeInfo={tribeInfo} latestMsg={shareMsgs} roles={shareRoles as Array<TribeRole>} owner={owner}/>
 
             <IonModal isOpen={!!showModifyMsg} className="role-select-list" onDidDismiss={() => setShowModifyMsg(null)}>

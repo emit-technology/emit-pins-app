@@ -1,7 +1,8 @@
 import BigNumber from 'bignumber.js';
 import config from "./config";
-import {tribeService} from "../service/tribe";
 import {ImageType, MsgTextImage} from "../types";
+import {Category, ChainType} from "@emit-technology/emit-lib";
+
 const format = require('date-format');
 const BN = require("bn.js");
 
@@ -38,7 +39,10 @@ export const utils = {
         }
         return new BigNumber(value).multipliedBy(10 ** decimal)
     },
-
+    toValueHex(v: any, decimal: number = 18) {
+        const cv = new BigNumber(v).multipliedBy(10 ** decimal).toString(16);
+        return new BN(cv, "hex").toArrayLike(Buffer, "be", 32).toString("hex");
+    },
     nFormatter: function (n: number | BigNumber | string | undefined, digits: number) {
         if (!n || new BigNumber(n).toNumber() == 0) {
             return "0.000"
@@ -60,9 +64,9 @@ export const utils = {
                 break;
             }
         }
-        return new BigNumber(n ).dividedBy(new BigNumber(si[i].value)).toFixed(digits,1).replace(rx, "$1") + si[i].symbol;
+        return new BigNumber(n).dividedBy(new BigNumber(si[i].value)).toFixed(digits, 1).replace(rx, "$1") + si[i].symbol;
     },
-    toHex(value: string | number | BigNumber, decimal?: number):string {
+    toHex(value: string | number | BigNumber, decimal?: number): string {
         if (value === "0x") {
             return "0x0"
         }
@@ -111,15 +115,15 @@ export const utils = {
         );
     },
 
-    getDisPlayUrl : (image: ImageType):string =>{
-        if(!image){
+    getDisPlayUrl: (image: ImageType): string => {
+        if (!image) {
             return ""
         }
-        return typeof image == 'string'? image as string:
-            utils.convertImgDisplay( (image as MsgTextImage).width,  (image as MsgTextImage).height,  (image as MsgTextImage).url).displayUrl;
+        return typeof image == 'string' ? image as string :
+            utils.convertImgDisplay((image as MsgTextImage).width, (image as MsgTextImage).height, (image as MsgTextImage).url).displayUrl;
     },
 
-    convertImgDisplay :(width:number, height:number, url:string): {width:number, height: number, displayUrl:string}=>{
+    convertImgDisplay: (width: number, height: number, url: string): { width: number, height: number, displayUrl: string } => {
         // content.image.width>content.image.height? 200: content.image.height>300?300:content.image.height
         function _getHeight() {
             if (width > 0 && height > 0) {
@@ -153,13 +157,29 @@ export const utils = {
         }
     },
 
-    getQueryString : (name: string) => {
+    getQueryString: (name: string) => {
         const reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
         const r = window.location.search.substr(1).match(reg);
         if (r != null) {
             return decodeURIComponent(r[2]);
         }
         return '';
-    }
+    },
+
+    isIos: (): boolean => {
+        //@ts-ignore
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        //@ts-ignore
+        if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+            return true
+        }
+        return false;
+    },
+
+    formatCategoryString: (category: Category): string => {
+        const name = utils.fromHex(category.symbol);
+        return name;
+    },
+
 
 }

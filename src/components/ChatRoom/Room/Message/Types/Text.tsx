@@ -1,12 +1,12 @@
 import * as React from 'react';
 import {Message, MessageStatus, MessageType, MsgText} from "../../../../../types";
-import {IonAvatar, IonBadge, IonCheckbox, IonIcon, IonText, useIonPopover} from "@ionic/react";
-import {arrowUndoOutline, createOutline, imageOutline, thumbsUpOutline, trashOutline} from "ionicons/icons";
+import {IonAvatar, IonBadge, IonCheckbox, IonIcon, IonText} from "@ionic/react";
+import {imageOutline, trashOutline} from "ionicons/icons";
 import {utils} from "../../../../../common";
 import {Role} from "./Role";
-import {PhotoProvider, PhotoView} from 'react-photo-view';
 import 'react-photo-view/dist/react-photo-view.css';
 import {ImageView} from "../../../../utils/ImageView";
+import {Airdrop} from "./AirDrop";
 
 
 interface Props {
@@ -74,17 +74,19 @@ interface Props {
 //     </div>
 // );
 
-export const Text: React.FC<Props> = ({msg, onSupport,keeper,hideTime,checked,
-                                           showPin,
-                                          owner, }) => {
+export const Text: React.FC<Props> = ({
+                                          msg, onSupport, keeper, hideTime, checked,
+                                          showPin,
+                                          owner,
+                                      }) => {
 
     const content: MsgText = msg.content as MsgText;
     const isSystem = !msg.role;
     const replayCtn: MsgText = msg.replayMsg && (msg.replayMsg.content as MsgText);
 
-    const isOwner =  msg && owner == msg.owner && !msg.groupId
-    const isOwnerPinned =  msg && owner == msg.owner && !!msg.groupId
-    const isSupported = msg && msg.Supporters && msg.Supporters.indexOf(owner)>-1;
+    const isOwner = msg && owner == msg.owner && !msg.groupId
+    const isOwnerPinned = msg && owner == msg.owner && !!msg.groupId
+    const isSupported = msg && msg.Supporters && msg.Supporters.indexOf(owner) > -1;
     // const [present, dismiss] = useIonPopover(PopoverList, {
     //     onHide: () => dismiss(),
     //     isSystem:isSystem,
@@ -103,105 +105,149 @@ export const Text: React.FC<Props> = ({msg, onSupport,keeper,hideTime,checked,
 
     // console.log("replayCtn.content",replayCtn && replayCtn.content , msg && msg.replayMsg && msg.replayMsg.msgType)
 
-    const support = msg.support>0 && <div onClick={()=>{
-        if(onSupport){
+    const support = msg.support > 0 && <div onClick={() => {
+        if (onSupport) {
             onSupport(msg.id, true)
         }
     }}>
         <div className="support-display">
-            <img src={isSupported?'./assets/img/support2.png':'./assets/img/support.png'} width={16} height={16}/><small style={{
-                fontWeight:700
+            <img src={isSupported ? './assets/img/support2.png' : './assets/img/support.png'} width={16}
+                 height={16}/><small style={{
+            fontWeight: 700
         }}>
-            &nbsp;<IonText color={isSupported?"primary":""}>{msg.support}</IonText></small>
+            &nbsp;<IonText color={isSupported ? "primary" : ""}>{msg.support}</IonText></small>
         </div>
     </div>
 
-    const replayItem = replayCtn && msg.replayMsg && <div style={{minWidth:replayCtn && replayCtn.image && replayCtn.image.url?"150px":"50px",width: '100%', backgroundBlendMode: msg.role?"multiply":"screen"}} className={isOwner ?
-        `${!msg.role?'replay-box replay-box-sender-norole-owner':'replay-box replay-box-sender'}`
-        :`replay-box ${msg.role?'replay-box-receive':'replay-box-sender-norole'}`} >
+    const replayItem = replayCtn && msg.replayMsg && <div style={{
+        minWidth: replayCtn && replayCtn.image && replayCtn.image.url ? "150px" : "50px",
+        width: '100%',
+        backgroundBlendMode: msg.role ? "multiply" : "screen"
+    }} className={isOwner ?
+        `${!msg.role ? 'replay-box replay-box-sender-norole-owner' : 'replay-box replay-box-sender'}`
+        : `replay-box ${msg.role ? 'replay-box-receive' : 'replay-box-sender-norole'}`}>
 
         {
             msg.replayMsg.msgType == MessageType.Text ?
-                <div style={{padding: '0 6px',width: '100%'}}>
-                    <div style={{paddingBottom: '3px',minHeight: replayCtn && replayCtn.image && replayCtn.image.url ?'46px':'20px'}}>
+                <div style={{padding: '0 6px', width: '100%'}}>
+                    <div style={{
+                        paddingBottom: '3px',
+                        minHeight: replayCtn && replayCtn.image && replayCtn.image.url ? '46px' : '20px'
+                    }}>
                         <b>
                             <IonText color="dark">
-                                {msg.replayMsg.actor?msg.replayMsg.actor.name:"Narrator"}
+                                {msg.replayMsg.actor ? msg.replayMsg.actor.name : "Narrator"}
                             </IonText>
                         </b>
                         {
-                            replayCtn.image && replayCtn.image.url && <div><IonIcon color="dark" src={imageOutline}/></div>
+                            replayCtn.image && replayCtn.image.url &&
+                            <div><IonIcon color="dark" src={imageOutline}/></div>
                         }
                     </div>
                     {
-                        replayCtn.content && <div className="text-pre"  style={{width: '85%',overflow:"hidden",textOverflow:"ellipsis",whiteSpace: "nowrap"}}>
-                                {replayCtn.content}
+                        replayCtn.content && <div className="text-pre" style={{
+                            width: '85%',
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap"
+                        }}>
+                            {replayCtn.content}
                         </div>
                     }
                     {
-                        replayCtn.image && replayCtn.image.url &&  <div style={{position: 'absolute', top: 0, right: 0, padding: 6}}>
-                            <ImageView url={replayCtn.image.url} width={replayCtn.image.width} height={replayCtn.image.height} disH={45} disW={45}/>
+                        replayCtn.image && replayCtn.image.url &&
+                        <div style={{position: 'absolute', top: 0, right: 0, padding: 6}}>
+                            <ImageView url={replayCtn.image.url} width={replayCtn.image.width}
+                                       height={replayCtn.image.height} disH={45} disW={45}/>
                         </div>
                     }
                 </div>
                 :
-                msg.replayMsg.msgType == MessageType.Role &&
-                <div style={{maxWidth:'300px'}}>
-                    <Role msg={msg.replayMsg} showPin={false}/>
-                </div>
+                msg.replayMsg.msgType == MessageType.Role ?
+                    <div style={{maxWidth: '300px'}}>
+                        <Role msg={msg.replayMsg} showPin={false}/>
+                    </div> :
+                    msg.replayMsg.msgType == MessageType.Airdrop &&
+                    <div style={{maxWidth: '300px'}}>
+                        <Airdrop msg={msg.replayMsg}/>
+                    </div>
         }
     </div>
-    return <div style={{width: '100%'}} className={isSystem ? `box msg-no-role` : `box`} >
+    return <div style={{width: '100%'}} className={isSystem ? `box msg-no-role` : `box`}>
 
         {
             showPin && <div className="pin-check">
-                <IonCheckbox name="pinMsgId" checked={checked} value={msg.id} />
+                <IonCheckbox name="pinMsgId" checked={checked} value={msg.id} disabled={msg && msg.msgType == MessageType.Airdrop}/>
             </div>
         }
 
         {
-            msg.msgType == MessageType.Text ?
+            (
+                msg.msgType == MessageType.Text || msg.msgType == MessageType.Airdrop
+            ) ?
                 <>
                     {
                         msg && msg.role ? <>
                             <div className="avatar">
                                 {
-                                    !hideTime && msg && msg.actor && !!msg.actor.avatar ? <IonAvatar className="ion-avatar">
-                                        <img src={utils.getDisPlayUrl(msg.actor && msg.actor.avatar)} width={30}/>
-                                    </IonAvatar>:<div style={{width: '48px'}}></div>
+                                    !hideTime && msg && msg.actor && !!msg.actor.avatar ?
+                                        <IonAvatar className="ion-avatar">
+                                            <img src={utils.getDisPlayUrl(msg.actor && msg.actor.avatar)} width={30}/>
+                                        </IonAvatar> : <div style={{width: '48px'}}></div>
                                 }
                             </div>
                             <div style={{maxWidth: '72%'}}>
                                 {
-                                    !hideTime ? <div style={{textAlign: isOwner ? "right" : "left",padding: "3px"}}>
+                                    !hideTime ? <div style={{textAlign: isOwner ? "right" : "left", padding: "3px"}}>
                                         <b style={{fontSize: '16px'}}>
                                             {keeper && <><IonText>{msg.actor && msg.actor.name}</IonText>&nbsp;{
-                                            // msg.owner == keeper && !msg.groupId && <Keeper/>
-                                        }</>}</b> <span style={{fontSize: '11px'}}><IonText
+                                                // msg.owner == keeper && !msg.groupId && <Keeper/>
+                                            }</>}</b> <span style={{fontSize: '11px'}}><IonText
                                         color="medium">{utils.dateFormat(new Date(msg.timestamp * 1000))} </IonText></span>
-                                    </div>:<div style={{height:"1px"}}>&nbsp;</div>
+                                    </div> : <div style={{height: "1px"}}>&nbsp;</div>
                                 }
-                                <div className={isOwner?"support-outer-owner":"support-outer"}>
+                                <div className={isOwner ? "support-outer-owner" : "support-outer"}>
                                     <div style={{position: "relative", width: '100%'}}>
                                         {
-                                            content.content &&
-                                            <div style={{width: '100%',position: "relative", border: isOwnerPinned?"1px solid #D8F20C":"0"}} className={isOwner ? "msg-text-sender": "msg-text-receive"}>
-                                                {replayItem}
-                                                <div style={{padding:'0px 6px 0px'}}>
-                                                    <div className="text-pre">
-                                                        {content.content}
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            msg && msg.msgType == MessageType.Text ?
+                                                <>
+                                                    {
+                                                        content.content &&
+                                                        <div style={{
+                                                            width: '100%',
+                                                            position: "relative",
+                                                            border: isOwnerPinned ? "1px solid #D8F20C" : "0"
+                                                        }} className={isOwner ? "msg-text-sender" : "msg-text-receive"}>
+                                                            {replayItem}
+                                                            <div style={{padding: '0px 6px 0px'}}>
+                                                                <div className="text-pre">
+                                                                    {content.content}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    {
+                                                        content.image && content.image.url && <div style={{
+                                                            borderRadius: 12,
+                                                            background: "inherit",
+                                                            padding: 0,
+                                                            textAlign: isOwner ? "right" : "left",
+                                                            border: isOwnerPinned ? "1px solid #D8F20C" : "0"
+                                                        }}
+                                                                                                   className={owner != msg.owner ? "msg-text-receive" : ""}>
+                                                            <ImageView url={content.image.url}
+                                                                       width={content.image.width}
+                                                                       height={content.image.height}/>
+                                                        </div>
+                                                    }
+                                                </> : msg.msgType == MessageType.Airdrop && <>
+                                                <Airdrop msg={msg} isOwner={owner == msg.owner}/>
+                                            </>
+
                                         }
                                         {
-                                            content.image && content.image.url &&  <div style={{borderRadius:12,background: "inherit", padding:0,textAlign: isOwner ?"right":"left", border: isOwnerPinned?"1px solid #D8F20C":"0"}}
-                                                                                        className={owner != msg.owner ? "msg-text-receive" : ""}>
-                                                <ImageView url={content.image.url} width={content.image.width} height={content.image.height} />
-                                            </div>
-                                        }
-                                        {
-                                            msg && (msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&  <div className="removed">
+                                            msg && (msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&
+                                            <div className="removed">
                                                 <IonBadge color="danger"><IonIcon src={trashOutline}/></IonBadge>
                                             </div>
                                         }
@@ -214,33 +260,44 @@ export const Text: React.FC<Props> = ({msg, onSupport,keeper,hideTime,checked,
                             </div>
                         </> : <div style={{width: '100%'}}>
                             {
-                                !hideTime ?<div>
+                                !hideTime ? <div>
                                 <span style={{fontSize: '11px'}}>
-                                    {keeper && msg.owner == keeper && !msg.groupId && <Keeper/>} <IonText color="medium">{utils.dateFormat(new Date(msg.timestamp * 1000))}</IonText>
+                                    {keeper && msg.owner == keeper && !msg.groupId && <Keeper/>} <IonText
+                                    color="medium">{utils.dateFormat(new Date(msg.timestamp * 1000))}</IonText>
                                 </span>
-                                </div>:<div style={{height:"1px"}}></div>
+                                </div> : <div style={{height: "1px"}}></div>
                             }
                             <div className="support-outer">
-                                <div className={isOwner?'no-role-div-owner': "no-role-div"} style={{position: "relative",
-                                    background: content.image  && content.image.url && !content.content &&
-                                        "inherit", border: isOwnerPinned?"1px solid #D8F20C":"0"}}>
+                                <div className={isOwner ? 'no-role-div-owner' : "no-role-div"} style={{
+                                    position: "relative",
+                                    background: content.image && content.image.url && !content.content &&
+                                        "inherit", border: isOwnerPinned ? "1px solid #D8F20C" : "0"
+                                }}>
                                     {
-                                        content.image  && content.image.url && <div style={{ borderRadius:12, padding:'6px 6px 0 6px' }}>
-                                           <ImageView url={content.image.url} width={content.image.width} height={content.image.height} />
-                                        </div>
-                                    }
-                                    {
-                                        content.content && <div style={{padding: '5px'}}>
-                                            {replayItem}
-                                            <div style={{padding:'0'}}>
-                                                <div className="text-pre">
-                                                    {content.content}
+                                        msg.msgType == MessageType.Airdrop ? <Airdrop msg={msg} isOwner={owner == msg.owner}/> :<>
+                                            {
+                                                content.image && content.image.url &&
+                                                <div style={{borderRadius: 12, padding: '6px 6px 0 6px'}}>
+                                                    <ImageView url={content.image.url} width={content.image.width}
+                                                               height={content.image.height}/>
                                                 </div>
-                                            </div>
-                                        </div>
+                                            }
+                                            {
+                                                content.content && <div style={{padding: '5px'}}>
+                                                    {replayItem}
+                                                    <div style={{padding: '0'}}>
+                                                        <div className="text-pre">
+                                                            {content.content}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </>
                                     }
+
                                     {
-                                        msg && (msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&  <div className="removed">
+                                        msg && (msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&
+                                        <div className="removed">
                                             <IonBadge color="danger"><IonIcon src={trashOutline}/></IonBadge>
                                         </div>
                                     }
@@ -250,15 +307,15 @@ export const Text: React.FC<Props> = ({msg, onSupport,keeper,hideTime,checked,
                         </div>
                     }
                 </> : <div>
-                    {
-                        msg.msgType == MessageType.Role && <div className="support-outer" >
-                            <div>
+                    <div className="support-outer">
+                        <div>
+                            {
+                                msg.msgType == MessageType.Role &&
                                 <Role msg={msg} showPin={showPin} isOwner={msg && msg.owner == owner}/>
-                            </div>
-                            {support}
+                            }
                         </div>
-                    }
-
+                        {support}
+                    </div>
                 </div>
         }
 

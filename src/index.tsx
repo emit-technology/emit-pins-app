@@ -4,7 +4,8 @@ import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
-
+import {App as AppPlugin} from "@capacitor/app";
+import { Toast } from '@capacitor/toast';
 
 const rootElement = document.getElementById("root");
 if (rootElement.hasChildNodes()) {
@@ -16,6 +17,16 @@ if (rootElement.hasChildNodes()) {
         <App />
     </React.StrictMode>, rootElement);
 }
+console.log("added app url open listener.")
+AppPlugin.addListener("appUrlOpen",(appUrlOpen)=>{
+    console.log("app open pins: ", JSON.stringify(appUrlOpen));
+    Toast.show({
+        text: 'app url open emit pins!',
+    });
+    Toast.show({
+        text: JSON.stringify(appUrlOpen),
+    });
+})
 
 // ReactDOM.render(
 //   <React.StrictMode>

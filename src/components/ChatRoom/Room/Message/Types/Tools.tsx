@@ -55,7 +55,7 @@ export const Tools:React.FC<Props> = ({msg,isChecked,showPin, onReplay,
             </div>
         }
         {
-            onDelete && isOwnerAndNotPinned &&
+            onDelete && msg.msgType !== MessageType.Airdrop && isOwnerAndNotPinned &&
             <div className="support-bx"  onClick={() => {
                 // onHide();
                 onDelete(msg)

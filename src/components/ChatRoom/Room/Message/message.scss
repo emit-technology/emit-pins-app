@@ -296,7 +296,7 @@
   text-align: left;
   background: rgba(120, 120, 120, 0.5);
   font-size: 14px;
-  border-radius: 18px;
+  border-radius: 12px;
   /* min-width: 200px; */
   margin-top: 2px;
   color: #fff;
@@ -310,7 +310,7 @@
   text-align: left;
   background: #A7C1E7;
   font-size: 14px;
-  border-radius: 16px;
+  border-radius: 12px;
   //min-width: 200px;
   margin-top: 2px;
   color: #fff;
@@ -810,6 +810,14 @@
 
 }
 
+.airdrop-cnt {
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+}
+
 .origin{
   position: absolute;
   right: 0;
@@ -855,3 +863,53 @@
 //.cf2 .top:hover {
 //  opacity:0;
 //}
+
+.airdrop-content-text {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 90%;
+  overflow: hidden;
+  color: var(--ion-color-medium)
+}
+
+.airdrop-record {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 12px;
+}
+
+ion-radio {
+  width: 30px;
+  height: 30px;
+  transform: translateY(10px);
+}
+
+ion-radio::part(container) {
+  border-radius: 8px;
+  border: 2px solid #ddd;
+}
+
+ion-radio::part(mark) {
+  background: none;
+  transition: none;
+  transform: none;
+  border-radius: 0;
+}
+
+ion-radio.radio-checked::part(container) {
+  background: #6815ec;
+  border-color: transparent;
+}
+
+ion-radio.radio-checked::part(mark) {
+  width: 6px;
+  height: 10px;
+
+  border-width: 0px 2px 2px 0px;
+  border-style: solid;
+  border-color: #fff;
+
+  transform: rotate(45deg);
+}
