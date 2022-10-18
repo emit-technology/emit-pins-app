@@ -32,7 +32,7 @@ http://ionicframework.com/docs/theming/ */
 /** Ionic CSS Variables **/
 :root {
 
-  --ion-font-family: SFProText-Regular;
+  --ion-font-family: "SFRegular";
   /*--border-radius: 20px;*/
 
   --ion-color-primary: #0620F9;

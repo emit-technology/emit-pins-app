@@ -24,8 +24,9 @@ interface IConfig {
     userLimit: UserLimit;
 
     airdropHandler: string;
+    assetsUrl:string
 
-
+    defaultTribes: string
 }
 
 const NODE_ENV: string = process.env.NODE_ENV || 'development';
@@ -38,7 +39,9 @@ const development: IConfig = {
     picHost: "https://pic.emit.technology/img/",
     isAlive: false,
     userLimit: {maxMsgCount: 0, maxSupportCount: 0, msgLeft: 0, supportLeft: 0},
-    airdropHandler: "EL79FoZQ7ty8zbPHS64tNptBP5QfeLPafTbS6Bd7TQN8G9g2F"
+    airdropHandler: "EL79FoZQ7ty8zbPHS64tNptBP5QfeLPafTbS6Bd7TQN8G9g2F",
+    assetsUrl: "https://assets.emit.technology",
+    defaultTribes: "4E6BFunxNE5"
 };
 
 const production: IConfig = {
@@ -50,7 +53,9 @@ const production: IConfig = {
     picHost: "https://pic.emit.technology/img/",
     isAlive: false,
     userLimit:  {maxMsgCount: 0, maxSupportCount: 0, msgLeft: 0, supportLeft: 0},
-    airdropHandler: "EL79FoZQ7ty8zbPHS64tNptBP5QfeLPafTbS6Bd7TQN8G9g2F"
+    airdropHandler: "EL79FoZQ7ty8zbPHS64tNptBP5QfeLPafTbS6Bd7TQN8G9g2F",
+    assetsUrl: "https://assets.emit.technology",
+    defaultTribes: "4E6BFunxNE5"
 }
 
 const config: {

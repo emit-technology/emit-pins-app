@@ -32,6 +32,9 @@ export interface TribeInfo {
 
     themeTag: string;
     themeDesc: string;
+
+    roles?: Array<TribeRole>
+    latestMsg?: Message
 }
 
 export interface TribeTheme {

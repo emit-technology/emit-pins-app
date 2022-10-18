@@ -1,14 +1,14 @@
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {
-    IonButton,
+    IonButton,IonRow,IonCol,
     IonButtons,
     IonContent,
-    IonHeader,
-    IonModal,IonItem,
-    IonTitle,IonItemDivider,
+    IonHeader,IonAvatar,
+    IonModal, IonItem,
+    IonTitle, IonItemDivider,
     IonToolbar,
-    IonBadge, IonLabel, IonRadioGroup, IonRadio, IonText, IonInput
+    IonBadge, IonLabel, IonRadioGroup, IonRadio, IonText, IonInput, IonIcon
 } from "@ionic/react";
 import {AirdropContent, AirdropInfo, AirdropType, Message} from "../../../../../types";
 import {tribeService} from "../../../../../service/tribe";
@@ -17,6 +17,7 @@ import {Text} from "./Text";
 import {FactorItem} from "../../../../Assets";
 import {NoneData} from "../../../../Data/None";
 import TextareaAutosize from "react-textarea-autosize";
+import {closeOutline} from "ionicons/icons";
 
 interface Props {
     onClose: () => void;
@@ -25,68 +26,87 @@ interface Props {
     msg: Message;
 
     airdropRecord: Array<AirdropInfo>;
+    owner: string;
 }
 
-export const AirdropInfoModal: React.FC<Props> = ({onClose, isOpen,airdropRecord,msg}) => {
+export const AirdropInfoModal: React.FC<Props> = ({onClose, isOpen,owner,airdropRecord,msg}) => {
 
     const content = msg && msg.content as AirdropContent;
+
+    const _index = airdropRecord.findIndex(v=> v.user == owner);
+    if(_index>-1){
+        const _copy = JSON.parse(JSON.stringify(airdropRecord[_index]))
+        airdropRecord.splice(_index,1);
+        airdropRecord.unshift(_copy)
+    }
     return <>
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal">
-            <IonHeader collapse="fade">
-                <IonToolbar>
-                    <IonTitle>Airdrop Info</IonTitle>
-                    <IonButtons slot="end">
-                        <IonButton onClick={() => onClose()}>Close</IonButton>
-                    </IonButtons>
-                </IonToolbar>
-            </IonHeader>
-            <IonContent className="ion-padding">
-                {/*<div>*/}
-                {/*    {msg && <Text msg={msg} showPin={false} owner={""}/>}*/}
-                {/*</div>*/}
-                <IonItemDivider>Info</IonItemDivider>
-                <div style={{border: "1px solid #ddd",borderRadius: '0 0 8px 8px',marginBottom: 20}}>
-                    <IonItem>
-                        <IonLabel>Airdrop Type</IonLabel>
-                        <IonLabel slot="end" className="ion-text-wrap">
-                            { content && content.airdropType.toUpperCase() }
-                        </IonLabel>
-                    </IonItem>
-
-                    <IonItem>
-                        <IonLabel>Token</IonLabel>
-                        <IonLabel slot="end" className="ion-text-wrap">{content && <IonBadge color="dark">{content.factor.category.symbol}&nbsp;[{utils.ellipsisStr(content.factor.category.supplier,3)}]</IonBadge>}</IonLabel>
-                    </IonItem>
-
-                    <IonItem>
-                        <IonLabel>Amount</IonLabel>
-                        <IonBadge slot="end" className="ion-text-wrap">{content && utils.fromValue(content.max,18).toString(10)}</IonBadge>
-                    </IonItem>
-
-                    <IonItem style={{position: "relative"}}>
-                        <IonLabel>Title</IonLabel>
-                        <IonLabel  slot="end"  className="ion-text-wrap"><b>{content && content.title}</b></IonLabel>
-                    </IonItem>
-                    <IonItem  lines="none">
-                        <IonLabel>Content</IonLabel>
-                        <IonLabel className="ion-text-wrap">{content && content.content}</IonLabel>
-                    </IonItem>
-                </div>
-                <IonItemDivider>Record</IonItemDivider>
-                <div style={{border: "1px solid #ddd",borderRadius: '0 0 8px 8px',overflow: "scroll",maxHeight:"42vh"}}>
-                    {
-                        airdropRecord && airdropRecord.length>0 ? (airdropRecord as Array<AirdropInfo>).map((v,i)=>{
-                            return <div key={i} className="airdrop-record">
-                                <div>{i+1}</div>
-                                <div>{utils.ellipsisStr(v.user,3)}</div>
-                                <div><b>{utils.fromHexValue(v.amount,18).toString(10)}</b></div>
-                                <IonBadge color="dark">{content && content.factor && `${content.factor.category.symbol } ${utils.ellipsisStr(content.factor.category.supplier,3)}`}</IonBadge>
-                            </div>
-                        }):<div>
-                            <NoneData desc={"No Record"}/>
+            {/*<IonHeader>*/}
+            {/*    <IonToolbar color="primary">*/}
+            {/*        <IonTitle>Airdrop Info</IonTitle>*/}
+            {/*        <IonButtons slot="end">*/}
+            {/*            <IonIcon src={closeOutline} onClick={() => onClose()} size="large"/>*/}
+            {/*        </IonButtons>*/}
+            {/*    </IonToolbar>*/}
+            {/*</IonHeader>*/}
+            <IonContent className="modal-content" color="light">
+                <div style={{position: "relative",marginBottom:20}}>
+                    <img src="./assets/img/airdrop-info-head.png"/>
+                    <div className="balance-hd balance-db1">
+                        <div style={{fontWeight: 700}}>
+                            Airdrop
                         </div>
-                    }
+                        <div className="slskjs">
+                            {content && <IonBadge color="secondary">{content.factor.category.symbol}&nbsp;[{utils.ellipsisStr(content.factor.category.supplier,3)}]</IonBadge>}
+                        </div>
+                        <div className="blsl">
+                            {content && utils.fromValue(content.factor.value,18).toFixed(3)}
+                            {/*<div className="balance-text">Balance</div>*/}
+                        </div>
+                        <div style={{width: 48, height: 48,background: "#fff",borderRadius:'50%',padding: 3}}>
+                            <img style={{borderRadius:'50%'}} src={msg && msg.actor ?utils.getDisPlayUrl(msg.actor.avatar):"./assets/img/default-avatar.png"} width="100%" height="100%"/>
+                        </div>
+
+                        <div className="slwSS">
+                            {content && content.title}
+
+                            <div style={{color: "#000"}} className="ssowSdc text-pre  recmt-context">
+                                {content && content.content}
+                            </div>
+                        </div>
+
+                    </div>
+                    <div style={{position: "absolute", top: 0 ,right: 0,padding: '12px',color: '#fff'}} onClick={()=>{
+                        onClose();
+                    }}>
+                        <IonIcon src={closeOutline} size="large"/>
+                    </div>
                 </div>
+
+                <div style={{marginBottom: 20,padding: '12px'}}>
+                    {/*<div style={{fontSize:16,fontWeight:500,padding: '0 0 6px 12px'}}>Record</div>*/}
+                    <div style={{borderRadius: '0 0 8px 8px',overflow: "scroll",maxHeight:"42vh"}}>
+                        {
+                            airdropRecord && airdropRecord.length>0 ? (airdropRecord as Array<AirdropInfo>).map((v,i)=>{
+                                return <IonItem lines="none" color={owner == v.user ?"secondary":""} className="item-ion" key={i}>
+                                    <IonAvatar slot="start">
+                                        <img src={msg && msg.actor ?utils.getDisPlayUrl(msg.actor.avatar):"./assets/img/default-avatar.png"}/>
+                                    </IonAvatar>
+                                    <IonLabel className="ion-text-wrap">
+                                        {msg && msg.actor && msg.actor.name? msg.actor.name:"Narrator"}
+                                        <p>{utils.ellipsisStr(v.user)}</p>
+                                    </IonLabel>
+                                    <IonLabel slot="end">
+                                        {utils.fromHexValue(v.amount,18).toFixed(3,1)}
+                                    </IonLabel>
+                                </IonItem>
+                            }):<div>
+                                <NoneData desc={"No Record"}/>
+                            </div>
+                        }
+                    </div>
+                </div>
+
             </IonContent>
         </IonModal>
     </>

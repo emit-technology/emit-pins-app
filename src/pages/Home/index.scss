@@ -1,0 +1,36 @@
+.home-head-title {
+  display: flex;
+  justify-content: center;
+}
+
+.home-head-ctn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100px;
+  justify-content: space-around;
+}
+.home-ctn {
+  --background: #F5F7F9 !important;
+}
+
+.segment {
+  border-bottom: 2px solid #f7f7f7;
+  --backgroud:  #F5F7F9 !important;
+}
+.segment-button{
+  --indicator-height: 3px;
+}
+
+.searchbar-modal{
+  --height: 60px;
+  --max-width: 90vw;
+  align-items: flex-start !important;
+  padding-top: 60px;
+}
+
+.airdrop-time{
+  font-size: 14px;
+  padding: 6px 0;
+  color: var(--ion-color-medium);
+}

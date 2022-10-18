@@ -4,15 +4,22 @@ import {
     IonButton,
     IonButtons,
     IonContent,
-    IonHeader,IonItem,
+    IonHeader, IonItem,
     IonIcon,
     IonLabel, IonInput,
     IonModal,
-    IonText,
+    IonText, IonTextarea,
     IonTitle, IonRadioGroup, IonRadio,
-    IonToolbar,useIonToast
+    IonToolbar, useIonToast, IonRow, IonCol, IonBadge, IonLoading
 } from "@ionic/react";
-import {happyOutline, openOutline} from "ionicons/icons";
+import {
+    arrowForwardOutline,
+    chevronDownOutline,
+    chevronForwardOutline,
+    closeOutline,
+    happyOutline,
+    openOutline
+} from "ionicons/icons";
 import {usePopperTooltip} from "react-popper-tooltip";
 import {EmojiBlock} from "../../../Emojis/block";
 import TextareaAutosize from 'react-textarea-autosize';
@@ -40,23 +47,9 @@ export const AirdropModal: React.FC<Props> = ({onOk, actor, onClose, isOpen,owne
     const [factor, setFactor] = React.useState(null);
     const [factors, setFactors] = React.useState([]);
     const [showBalance, setShowBalance] = useState(false);
+    const [showLoading, setShowLoading] = useState(false);
 
     const [present, dismiss] = useIonToast();
-
-    const {
-        getTooltipProps,
-        setTooltipRef,
-        setTriggerRef,
-        visible,
-    } = usePopperTooltip({
-        placement: "top-end",
-        interactive: true,
-        delayHide: 200,
-        closeOnTriggerHidden: true,
-        closeOnOutsideClick: true,
-        followCursor: true,
-        trigger: ['click', 'hover']
-    });
 
     useEffect(() => {
         init().catch(e => {
@@ -115,99 +108,89 @@ export const AirdropModal: React.FC<Props> = ({onOk, actor, onClose, isOpen,owne
     }
     return <>
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal">
-            <IonHeader collapse="fade">
-                <IonToolbar>
-                    <IonButtons slot="start">
-                        <IonButton onClick={() => {
-                            window.open("https://assets.emit.technology")
-                        }}><IonIcon src={openOutline}/>Assets</IonButton>
-                    </IonButtons>
+            <IonHeader>
+                <IonToolbar color="primary">
                     <IonTitle>Airdrop</IonTitle>
                     <IonButtons slot="end">
-                        <IonButton onClick={() => onClose()}>Close</IonButton>
+                        <IonIcon src={closeOutline} onClick={() => onClose()} size="large"/>
                     </IonButtons>
                 </IonToolbar>
             </IonHeader>
-            <IonContent className="ion-padding">
-                {/*<div style={{height: `${height}px`,borderRadius:12, display: "flex",justifyContent:"center"}}>*/}
-                {/*    <ImageView url={url} width={width} height={height}/>*/}
-                {/*    /!*<img src={url} style={{objectFit: 'cover', height: '100%', borderRadius: 12}}/>*!/*/}
-                {/*</div>*/}
-
+            <IonContent className="ion-padding modal-content" color="light">
                 <div style={{position: "relative"}}>
-                    <div style={{padding: '12px 0'}}>
+                    <IonRow>
+                        <IonCol><div className="balance-hd">
+                            <div className="slskjs" onClick={()=>{
+                                loadBalance().catch(e => console.log(e));
+                            }}>
+                                <IonBadge>{ factor ? `${utils.fromHex((factor as Factor).category.symbol)} [${utils.ellipsisStr((factor as Factor).category.supplier,3)}]` : "/"}  <IonIcon src={chevronDownOutline} style={{transform: "translateY(2px)"}}/></IonBadge>
+                            </div>
+                            <div className="blsl">
+                                {factor && utils.fromHexValue((factor as Factor).value,18).toFixed(3) }
+                                <div className="balance-text">Balance</div>
+                            </div>
+                        </div></IonCol>
+                    </IonRow>
 
-                        <IonLabel position="stacked"><b>Airdrop Type: </b></IonLabel>
-                        <IonLabel>
-                            {
-                                //@ts-ignore
-                                <IonRadioGroup value={AirdropType.Random} ref={airdropRef}>
-                                    <IonRadio value={AirdropType.Random}/> Random &nbsp; <IonRadio value={AirdropType.Average}/> Average
-                                </IonRadioGroup>
-                            }
-                        </IonLabel>
-                    </div>
-                    <div className={'common-title'} style={{padding: '12px 0'}}>Token</div>
-                    <div>
-                        <IonLabel className="ion-text-wrap" onClick={() => {
-                            loadBalance().catch(e => console.log(e));
-                        }}>
-                            {factor && <FactorItem factor={factor}/>}
-                            {!factor && <IonLabel><IonText>No Available Token</IonText></IonLabel>}
-                        </IonLabel>
-                    </div>
+                    {/*<IonItem lines="none" className="item-ion">*/}
+                    {/*    <IonLabel>Token</IonLabel>*/}
+                    {/*    <IonLabel className="ion-text-wrap" slot="end" onClick={() => {*/}
+                    {/*        loadBalance().catch(e => console.log(e));*/}
+                    {/*    }}>*/}
+                    {/*        {factor && `${utils.fromHex((factor as Factor).category.symbol)} [${utils.ellipsisStr((factor as Factor).category.supplier,3)}]`}*/}
+                    {/*        {!factor && <IonButton>Select</IonButton>}*/}
+                    {/*    </IonLabel>*/}
+                    {/*    <IonIcon src={chevronForwardOutline} color="medium" slot="end"/>*/}
+                    {/*</IonItem>*/}
 
-                    <div className={'common-title'} style={{padding: '12px 0'}}>Amount</div>
-                    <div>
+                    <IonItem lines="none" className="item-ion">
+                        <IonLabel>Amount</IonLabel>
                         {
                             //@ts-ignore
-                            <IonInput placeholder="0.000" ref={amountRef} className="msg-input amount-input" inputmode="decimal"/>
+                            <IonInput placeholder="Enter amount" style={{textAlign: "right"}} slot="end" ref={amountRef}  inputmode="decimal"/>
                         }
-                    </div>
+                    </IonItem>
 
-                    <div className={'common-title'} style={{padding: '12px 0'}}>Title</div>
-                    <div style={{position: "relative"}}>
-                        {//@ts-ignore
-                            <TextareaAutosize autoFocus ref={textRef} className="msg-input"/>
+
+                    <IonItem lines="none" className="item-ion">
+                        <IonLabel position="stacked">Title</IonLabel>
+                        {
+                            //@ts-ignore
+                            <IonTextarea placeholder="Enter title"  ref={textRef}/>
                         }
-                        {/*<div style={{position: "absolute", right: "12px", bottom: "4px", zIndex: 1}}>*/}
-                        {/*    <IonIcon className="footer-icon" src={happyOutline} color="primary" ref={setTriggerRef}*/}
-                        {/*             size="large"/>*/}
-                        {/*    {visible && (*/}
-                        {/*        <div*/}
-                        {/*            style={{zIndex: 10000000}}*/}
-                        {/*            ref={setTooltipRef}*/}
-                        {/*            {...getTooltipProps({className: 'tooltip-container'})}*/}
-                        {/*        >*/}
-                        {/*            <EmojiBlock onSelectEmoji={(v) => {*/}
-                        {/*                if (textRef && textRef.current) {*/}
-                        {/*                    //@ts-ignore*/}
-                        {/*                    textRef.current.value = textRef.current.value + v.emoji*/}
-                        {/*                }*/}
-                        {/*            }}/>*/}
-                        {/*        </div>*/}
-                        {/*    )}*/}
-                        {/*</div>*/}
-                    </div>
-                    <div className={'common-title'} style={{padding: '12px 0'}}>Content</div>
-                    <div style={{position: "relative"}}>
-                        {//@ts-ignore
-                            <TextareaAutosize autoFocus ref={contentRef} className="msg-input"/>
+                    </IonItem>
+
+                    <IonItem lines="none" className="item-ion">
+                        <IonLabel position="stacked">Content</IonLabel>
+                        {
+                            //@ts-ignore
+                            <IonTextarea placeholder="Enter content"  ref={contentRef} />
                         }
-                    </div>
+                    </IonItem>
 
                 </div>
 
                 <div style={{padding: '12px',width:'100%'}}>
-                    <IonButton expand="block" size="small" onClick={() => {
+                    <IonButton expand="block" disabled={showLoading} onClick={() => {
+                        setShowLoading(true)
                         sendAirdrop().then(()=>{
+                            setShowLoading(false)
                             onClose();
                         }).catch(e=>{
+                            setShowLoading(true)
                             const err = typeof e =='string'?e:e.message;
                             present({message: err,color:"danger",duration: 2000,position: "top"}).catch(e=>console.error(e))
                         })
                     }}>Send</IonButton>
                 </div>
+
+                <IonLoading
+                    cssClass='my-custom-class'
+                    isOpen={showLoading}
+                    onDidDismiss={() => setShowLoading(false)}
+                    message={'Loading...'}
+                    duration={60000}
+                />
 
                 <Balance isOpen={showBalance} onSelect={(factor) => {
                     setFactor(factor);

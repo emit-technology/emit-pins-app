@@ -144,6 +144,14 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
+    isSessionAvailable = async () : Promise<boolean> =>{
+        const rest = await this._rpc.post('/user/checkAuth', null)
+        if (rest && rest.code == 0) {
+            return true
+        }
+        return false
+    }
+
     userCheckAuth = async (): Promise<string> => {
         const rest: TribeResult<{ userName: string }> = await this._rpc.post('/user/checkAuth', null);
         let authToken: string;
@@ -490,6 +498,26 @@ class TribeService implements ITribe {
     airdropRecords = async (msgId: string): Promise<Array<AirdropInfo>> => {
         await this.userCheckAuth()
         const rest: TribeResult<Array<AirdropInfo>> = await this._rpc.post('/tribe/airdropRecords', {msgId});
+        if (rest && rest.code == 0) {
+            return Promise.resolve(rest.data)
+        }
+        return Promise.reject(rest.message);
+    }
+
+    myTribes = async (): Promise<Array<TribeInfo>> => {
+        const account = await emitBoxSdk.getAccount();
+        const address = account.addresses[ChainType.EMIT]
+        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/myTribes', {userId:address});
+        if (rest && rest.code == 0) {
+            return Promise.resolve(rest.data)
+        }
+        return Promise.reject(rest.message);
+    }
+
+    involvedTribes = async (): Promise<Array<TribeInfo>> => {
+        const account = await emitBoxSdk.getAccount();
+        const address = account && account.addresses &&  account.addresses[ChainType.EMIT]
+        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/involvedTribes', {userId:address});
         if (rest && rest.code == 0) {
             return Promise.resolve(rest.data)
         }

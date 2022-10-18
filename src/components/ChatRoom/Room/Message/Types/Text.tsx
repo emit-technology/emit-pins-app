@@ -173,6 +173,14 @@ export const Text: React.FC<Props> = ({
                     </div>
         }
     </div>
+
+    let contentText = content && content.content;
+
+    const isMind = contentText && contentText.indexOf("💭") == 0;
+
+    // if(isMind){
+    //     contentText = contentText.replace("💭","")
+    // }
     return <div style={{width: '100%'}} className={isSystem ? `box msg-no-role` : `box`}>
 
         {
@@ -206,56 +214,60 @@ export const Text: React.FC<Props> = ({
                                         color="medium">{utils.dateFormat(new Date(msg.timestamp * 1000))} </IonText></span>
                                     </div> : <div style={{height: "1px"}}>&nbsp;</div>
                                 }
-                                <div className={isOwner ? "support-outer-owner" : "support-outer"}>
-                                    <div style={{position: "relative", width: '100%'}}>
-                                        {
-                                            msg && msg.msgType == MessageType.Text ?
-                                                <>
-                                                    {
-                                                        content.content &&
-                                                        <div style={{
-                                                            width: '100%',
-                                                            position: "relative",
-                                                            border: isOwnerPinned ? "1px solid #D8F20C" : "0"
-                                                        }} className={isOwner ? "msg-text-sender" : "msg-text-receive"}>
-                                                            {replayItem}
-                                                            <div style={{padding: '0px 6px 0px'}}>
-                                                                <div className="text-pre">
-                                                                    {content.content}
+
+                                {
+                                    <div className={isOwner ? "support-outer-owner" : "support-outer"}>
+                                        <div style={{position: "relative", width: '100%'}}>
+                                            {
+                                                msg && msg.msgType == MessageType.Text ?
+                                                    <>
+                                                        {
+                                                            content.content &&
+                                                            <div style={{
+                                                                width: '100%',
+                                                                position: "relative",
+                                                                border: isMind?"1px dashed #000000": (isOwnerPinned ? "1px solid #D8F20C" : "0"),
+                                                                background: isMind ? "unset":""
+                                                            }} className={isOwner ? "msg-text-sender" : "msg-text-receive"}>
+                                                                {replayItem}
+                                                                <div style={{padding: '0px 6px 0px'}}>
+                                                                    <div className="text-pre">
+                                                                        {content.content}
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    }
-                                                    {
-                                                        content.image && content.image.url && <div style={{
-                                                            borderRadius: 12,
-                                                            background: "inherit",
-                                                            padding: 0,
-                                                            textAlign: isOwner ? "right" : "left",
-                                                            border: isOwnerPinned ? "1px solid #D8F20C" : "0"
-                                                        }}
-                                                                                                   className={owner != msg.owner ? "msg-text-receive" : ""}>
-                                                            <ImageView url={content.image.url}
-                                                                       width={content.image.width}
-                                                                       height={content.image.height}/>
-                                                        </div>
-                                                    }
-                                                </> : msg.msgType == MessageType.Airdrop && <>
-                                                <Airdrop msg={msg} isOwner={owner == msg.owner}/>
-                                            </>
+                                                        }
+                                                        {
+                                                            content.image && content.image.url && <div style={{
+                                                                borderRadius: 12,
+                                                                background: "inherit",
+                                                                padding: 0,
+                                                                textAlign: isOwner ? "right" : "left",
+                                                                border: isOwnerPinned ? "1px solid #D8F20C" : "0"
+                                                            }}
+                                                                                                       className={owner != msg.owner ? "msg-text-receive" : ""}>
+                                                                <ImageView url={content.image.url}
+                                                                           width={content.image.width}
+                                                                           height={content.image.height}/>
+                                                            </div>
+                                                        }
+                                                    </> : msg.msgType == MessageType.Airdrop && <>
+                                                    <Airdrop msg={msg} isOwner={owner == msg.owner}/>
+                                                </>
 
-                                        }
-                                        {
-                                            msg && (msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&
-                                            <div className="removed">
-                                                <IonBadge color="danger"><IonIcon src={trashOutline}/></IonBadge>
-                                            </div>
-                                        }
+                                            }
+                                            {
+                                                msg && (msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&
+                                                <div className="removed">
+                                                    <IonBadge color="danger"><IonIcon src={trashOutline}/></IonBadge>
+                                                </div>
+                                            }
+                                        </div>
+                                        {support}
+
                                     </div>
-                                    {support}
 
-                                </div>
-
+                                }
 
                             </div>
                         </> : <div style={{width: '100%'}}>

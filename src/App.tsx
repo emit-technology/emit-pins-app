@@ -29,6 +29,7 @@ import React, {useEffect, useRef, useState} from "react";
 import config from "./common/config";
 import {Provider} from "react-redux";
 import store from "./common/state/app/store";
+import {HomePage} from "./pages/Home";
 setupIonicReact({
     mode: "ios",
 });
@@ -58,29 +59,22 @@ const App: React.FC = () => {
                             <Router basename={baseURL}>
                                 <Switch>
 
-                                    {/*<IonMenu side="end" type="push">*/}
-                                    {/*    <IonHeader>*/}
-                                    {/*        <IonToolbar color="danger">*/}
-                                    {/*            <IonTitle>End Menu</IonTitle>*/}
-                                    {/*        </IonToolbar>*/}
-                                    {/*    </IonHeader>*/}
-                                    {/*    <IonContent>*/}
-                                    {/*        <RoleListModal roles={} tribeInfo={} defaultRole={} onRoleCheck={} onReloadList={} />*/}
-                                    {/*    </IonContent>*/}
-                                    {/*</IonMenu>*/}
-
                                     <Route exact path="/:tribeId" component={(props: any) => {
                                         const tribeId = props.match.params.tribeId;
                                         config.tribeId = tribeId;
                                         return <Dashboard tribeId={tribeId}/>
                                     }}/>
 
+                                    {/*<Route exact path="/home" component={(props:any)=>{*/}
+                                    {/*    return <HomePage />*/}
+                                    {/*}}/>*/}
+
                                     <Route exact path="/" component={(props: any) => {
-                                        setTimeout(()=>{
-                                            window.location.href = `./4E6BFunxNE5`
-                                        },500)
+                                        // setTimeout(()=>{
+                                        //     window.location.href = `./4E6BFunxNE5`
+                                        // },500)
                                         // config.tribeId = tribeId;
-                                        return <Dashboard tribeId={"4E6BFunxNE5"}/>
+                                        return <HomePage />
                                     }}/>
                                 </Switch>
                             </Router>

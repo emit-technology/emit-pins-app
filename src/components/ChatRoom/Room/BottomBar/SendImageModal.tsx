@@ -15,10 +15,6 @@ import {
     IonToolbar,IonTextarea,
     IonCol, IonItem, IonCheckbox, IonLabel, IonRow
 } from "@ionic/react";
-import {saveDataState} from "../../../../common/state/slice/dataSlice";
-import selfStorage from "../../../../common/storage";
-import {tribeService} from "../../../../service/tribe";
-import config from "../../../../common/config";
 import {happyOutline} from "ionicons/icons";
 import {usePopperTooltip} from "react-popper-tooltip";
 import {EmojiBlock} from "../../../Emojis/block";
@@ -69,7 +65,15 @@ export const SendImageModal: React.FC<Props> = ({url, onOk, onClose, isOpen,widt
                     <IonItem>
                         <IonLabel position="stacked">Comment</IonLabel>
                         {//@ts-ignore
-                            <IonTextarea autoFocus ref={textRef}/>
+                            <IonTextarea autoFocus ref={textRef} onIonChange={(e)=>{
+                                if(e.detail.value && e.detail.value.indexOf("/mind") == 0){
+                                    //@ts-ignore
+                                    if(textRef.current){
+                                        //@ts-ignore
+                                        textRef.current.value = textRef.current.value.replace("/mind","💭");
+                                    }
+                                }}
+                            }/>
                         }
 
                     </IonItem>

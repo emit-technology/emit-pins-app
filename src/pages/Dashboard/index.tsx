@@ -12,15 +12,15 @@ import {
     IonText,
     IonRow,
     IonTitle,
-    IonToolbar
+    IonToolbar, IonMenu, IonMenuToggle
 } from "@ionic/react";
 import {GroupMsg, Message, PinnedSticky, TribeInfo, TribeRole, TribeTheme, UserLimit, WsStatus} from "../../types";
 import {emitBoxSdk, tribeService} from "../../service";
 import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import {
-    addOutline,
+    addOutline, arrowBackOutline,
     close, colorPaletteOutline,
-    ellipsisVertical,
+    ellipsisVertical, listOutline, menuOutline,
     personCircleOutline,
     pinOutline,
     share
@@ -40,6 +40,7 @@ import {MessageContentVisual} from "../../components/ChatRoom/Room/Message";
 // import {MessageContentWindow as MessageContentVisual} from "../../components/ChatRoom/Room/Message";
 import Avatar from "react-avatar";
 import {ShareEx} from "../../components/utils/ShareEx";
+import {SideBar} from "../../components/ChatRoom/SideBar";
 
 
 interface State {
@@ -79,6 +80,7 @@ interface State {
     showAlert: boolean;
     showToast: boolean;
     toastMsg?: string;
+    isSessionAvailable: boolean
 
 }
 
@@ -111,7 +113,8 @@ export class Dashboard extends React.Component<Props, State> {
         showAlert: false,
         showShare: false,
         showToast: false,
-        latestMgs: []
+        latestMgs: [],
+        isSessionAvailable: false
     }
 
     componentDidMount() {
@@ -179,7 +182,7 @@ export class Dashboard extends React.Component<Props, State> {
 
         const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, 1, 20)
         const latestMgs: Array<Message> = [];
-        for(let ps of rest.data){
+        for (let ps of rest.data) {
             latestMgs.push(...ps.records)
         }
         // if (messages && messages.length > 0 && messages[0].records.length > 0) {
@@ -218,7 +221,9 @@ export class Dashboard extends React.Component<Props, State> {
         const {tribeId} = this.props;
         const account = await emitBoxSdk.getAccount();
         const tribeInfo = await tribeService.tribeInfo(tribeId);
-        const owner = account && account.addresses[ChainType.EMIT.valueOf()]
+        const owner = account && account.addresses && account.addresses[ChainType.EMIT.valueOf()]
+        const f = await tribeService.isSessionAvailable()
+
         const buttons = [{
             text: 'Verse',
             icon: addOutline,
@@ -290,6 +295,7 @@ export class Dashboard extends React.Component<Props, State> {
             roles: roles,
             latestRole: role,
             groupMsgs: groupTribes,
+            isSessionAvailable: f
         })
     }
 
@@ -365,7 +371,7 @@ export class Dashboard extends React.Component<Props, State> {
 
     render() {
         const {
-            owner, showActionSheet, buttons, toastMsg, showShare,latestMgs, showToast, showPinnedMsg, userLimit,
+            owner, showActionSheet, isSessionAvailable, buttons, toastMsg, showShare, latestMgs, showToast, showPinnedMsg, userLimit,
             showCreateTribe,
             isUpdating, isConnecting, groupMsgs, showMenusModal, groupPinnedMsg, showPinnedMsgDetailModal,
             account, roles, tribeInfo, latestRole, datas, showTribeEdit, showPin
@@ -375,7 +381,40 @@ export class Dashboard extends React.Component<Props, State> {
             <>
                 <IonRow style={{height: '100%'}}>
                     <IonCol sizeMd="8" sizeSm="12" sizeXs="12" style={{height: '100%'}}>
-                        <IonPage>
+                        <IonMenu contentId="main-content">
+                            <IonHeader>
+                                <IonToolbar className="msg-toolbar">
+                                    <IonMenuToggle>
+                                        <div style={{paddingLeft: 12}}><IonIcon src={arrowBackOutline}/></div>
+                                    </IonMenuToggle>
+                                    <IonTitle>
+                                        <img height={28} src="./assets/img/pins-logo.png"/>
+                                    </IonTitle>
+                                </IonToolbar>
+                            </IonHeader>
+                            <IonContent className="ion-padding">
+
+                                <SideBar onRequestAccount={() => {
+                                    tribeService.getAccountAndLogin().then(() => {
+                                        this.initData().catch(e => console.error(e))
+                                    }).catch(e => {
+                                        const err = typeof e == 'string'?e:e.message;
+                                        this.setShowToast(true,err)
+                                        console.error(e)
+                                    })
+                                }} account={account} onLogout={() => {
+                                    tribeService.userLogout().then(() => {
+                                        this.initData().catch(e => console.error(e))
+                                    }).catch(e => {
+                                        const err = typeof e == 'string'?e:e.message;
+                                        this.setShowToast(true,err)
+                                        console.error(e)
+                                    })
+                                }} isSessionAvailable={isSessionAvailable}/>
+                            </IonContent>
+                        </IonMenu>
+
+                        <IonPage id="main-content">
                             <IonHeader mode="ios" color="primary">
                                 {
                                     showPin ? <IonToolbar className="msg-toolbar">
@@ -399,25 +438,31 @@ export class Dashboard extends React.Component<Props, State> {
                                         <IonToolbar className="msg-toolbar">
                                             <div className="msg-head-avatar">
                                                 <div>
-                                                    {
-                                                        account && account.name ? <div slot="start" onClick={() => {
-                                                                tribeService.getAccountAndLogin().then(() => {
-                                                                    this.initData().catch(e => console.error(e))
-                                                                }).catch(e => {
-                                                                })
+                                                    <div slot="start" id="main-content">
+                                                        <IonMenuToggle>
+                                                            <IonIcon src={listOutline} size="large"/>
+                                                        </IonMenuToggle>
+                                                    </div>
 
-                                                            }}>
-                                                                <Avatar name={account.name} round size="30"/>
-                                                            </div> :
-                                                            <IonIcon size="large" slot="start" src={personCircleOutline}
-                                                                     onClick={() => {
-                                                                         tribeService.getAccountAndLogin().then(() => {
-                                                                             this.initData().catch(e => console.error(e))
-                                                                         }).catch(e => {
-                                                                         })
+                                                    {/*{*/}
+                                                    {/*    account && account.name ? <div slot="start" onClick={() => {*/}
+                                                    {/*            tribeService.getAccountAndLogin().then(() => {*/}
+                                                    {/*                this.initData().catch(e => console.error(e))*/}
+                                                    {/*            }).catch(e => {*/}
+                                                    {/*            })*/}
 
-                                                                     }}/>
-                                                    }
+                                                    {/*        }}>*/}
+                                                    {/*            <Avatar name={account.name} round size="30"/>*/}
+                                                    {/*        </div> :*/}
+                                                    {/*        <IonIcon size="large" slot="start" src={personCircleOutline}*/}
+                                                    {/*                 onClick={() => {*/}
+                                                    {/*                     tribeService.getAccountAndLogin().then(() => {*/}
+                                                    {/*                         this.initData().catch(e => console.error(e))*/}
+                                                    {/*                     }).catch(e => {*/}
+                                                    {/*                     })*/}
+
+                                                    {/*                 }}/>*/}
+                                                    {/*}*/}
                                                 </div>
                                             </div>
                                             <IonTitle className="font-style-bold" onClick={() => {

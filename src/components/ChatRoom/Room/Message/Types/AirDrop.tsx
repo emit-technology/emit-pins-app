@@ -43,47 +43,19 @@ export const Airdrop: React.FC<Props> = ({msg, isOwner}) => {
                 justifyContent: 'center'
             }}>
                 <div style={{display: "flex"}}>
-                    <div style={{maxWidth: '300px'}}>
-                        <div className="airdrop-cnt">
-                            <div style={{
-                                position: "relative", minWidth: '200px',
-                                border: isOwner ? "1px solid #D8F20C" : "0",
-                                background: 'var(--ion-color-tertiary)',
-                                padding: '6px 12px',
-                                borderRadius: 12,
-                                overflow: "hidden",
-                            }}>
-                                <div style={{
-                                    display: "flex",
-                                    borderRadius: 12,
-                                }}>
-                                    <div style={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        justifyContent: 'center'
-                                    }}>
-                                        <div>
-                                            <IonAvatar slot="start" className="ion-avatar2">
-                                                <IonIcon src={rocketOutline} size="large"/>
-                                            </IonAvatar>
-                                        </div>
-                                    </div>
-                                    <div style={{
-                                        padding: "0 0 0 6px", display: 'flex',
-                                        flexDirection: 'column',
-                                        justifyContent: 'center'
-                                    }}>
-                                        <div><b>{content.title}</b></div>
-                                        <div style={{position: "relative"}}>
-                                            <IonBadge>{utils.fromValue(content.factor.value,18).toFixed(3)}</IonBadge>
-                                            <IonBadge color="secondary">{content.factor.category.symbol}</IonBadge>
-                                            {/*<FactorItem factor={content.factor} noTransform={true} showLine={false}/>*/}
-                                        </div>
-                                    </div>
+                    <div className="airdrop-cnt">
+                        <div className="airdrop-png" style={{backgroundImage:'url("./assets/img/airdrop-bg.png")'}}>
+                            <div className="airdrop-ctx">
+                                <div style={{fontSize: '10px',opacity: 0.75,color:"#fff"}}><small>AIRDROP</small></div>
+                                <div>{content.title}</div>
+                                <div style={{position: "relative",fontSize:'24px',color:"var(--ion-color-secondary)"}}>
+                                    {utils.fromValue(content.factor.value,18).toFixed(3)}
                                 </div>
-                                <div className="airdrop-content-text"><IonText color="medium">{content.content}</IonText></div>
                             </div>
+                        </div>
 
+                        <div className="symbol-cat">
+                            {content.factor.category.symbol}
                         </div>
                     </div>
                 </div>
@@ -96,6 +68,6 @@ export const Airdrop: React.FC<Props> = ({msg, isOwner}) => {
             message={'Please wait...'}
             duration={50000}
         />
-        <AirdropInfoModal onClose={()=>setShowInfo(false)} isOpen={showInfo} msg={msg} airdropRecord={airdropRecord}/>
+        <AirdropInfoModal onClose={()=>setShowInfo(false)} owner={isOwner &&  msg.owner} isOpen={showInfo} msg={msg} airdropRecord={airdropRecord}/>
     </>
 }

@@ -47,12 +47,12 @@ export const Balance: React.FC<Props> = ({isOpen, onSelect, factors,onClose}) =>
             <IonContent className="ion-padding">
                 {
                     factors && factors.length>0 ? <>
-                        <IonItem>
-                            <IonLabel>
-                                Token
-                            </IonLabel>
-                            <IonLabel color="primary" slot="end">Balance</IonLabel>
-                        </IonItem>
+                        {/*<IonItem>*/}
+                        {/*    <IonLabel>*/}
+                        {/*        Token*/}
+                        {/*    </IonLabel>*/}
+                        {/*    <IonLabel color="primary" slot="end">Balance</IonLabel>*/}
+                        {/*</IonItem>*/}
                         {
                             factors && factors.map((v,i)=>{
                                 return <div key={i} onClick={()=>onSelect(v)}>

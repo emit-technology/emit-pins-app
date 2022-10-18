@@ -267,7 +267,10 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                     {/*}}/>*/}
                                     <IonIcon className="footer-icon" src={rocketOutline} color="dark" size="large" onClick={(e) => {
                                         e.stopPropagation();
-                                        setShowAirdropModal(true)
+                                        tribeService.userCheckAuth().then(()=>{
+                                            setShowAirdropModal(true)
+                                        }).catch(e=>console.error(e))
+
                                     }}/>
                                 </div>
                             </IonCol>
@@ -276,9 +279,19 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                             <IonCol size="10">
                                 <div>
                                     {
-                                        //@ts-ignore
-                                        <TextareaAutosize onBlur={emitChanges.bind(this)} id="msgText" autoFocus rows={1} maxLength={1024} ref={textRef} wrap='hard'
-                                                          placeholder={tribeInfo && owner !== tribeInfo.keeper && userLimit?`msg (${userLimit && userLimit.msgLeft}/${userLimit && userLimit.maxMsgCount}) , likes (${userLimit && userLimit.supportLeft}/${userLimit && userLimit.maxSupportCount}) `:`Your messages`} className="msg-input"/>
+
+                                        <TextareaAutosize onChange={(e)=>{
+                                            if(e.target.value && e.target.value.indexOf("/mind") == 0){
+                                                //@ts-ignore
+                                                if(textRef.current){
+                                                    //@ts-ignore
+                                                    textRef.current.value = textRef.current.value.replace("/mind","💭");
+                                                }
+                                            }
+                                            //@ts-ignore
+                                        }} onBlur={emitChanges.bind(this)} id="msgText" autoFocus rows={1} maxLength={1024} ref={textRef} wrap='hard'
+                                                          placeholder={tribeInfo && owner !== tribeInfo.keeper && userLimit?`msg (${userLimit && userLimit.msgLeft}/${userLimit && userLimit.maxMsgCount}) , likes (${userLimit && userLimit.supportLeft}/${userLimit && userLimit.maxSupportCount}) `:`Your messages`}
+                                                      className="msg-input"/>
 
                                     }
                                     {
