@@ -527,7 +527,7 @@ ion-icon:before {
 
 .recmt-head{
   display: flex;
-  padding: 6px 0 12px;
+  padding: 0px 0 12px;
 }
 
 .recmt-head-icon {
@@ -546,21 +546,23 @@ ion-icon:before {
 .recmt-head-title {
   display: flex;
   flex-direction: column;
-  padding: 0 12px;
-  justify-content: space-between;
+  padding: 0 8px;
+  /* justify-content: space-between; */
+  padding-top: 2px;
+  position: relative;
 }
 
 .recmt-head-title div:first-child {
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 16px;
+  //font-weight: 700;
+  font-size: 15px;
   font-family: SFBold;
+  letter-spacing: -0.41px;
 }
 
 .recmt-head-title div:last-child {
   font-size: 14px;
   color: #868990;
-  line-height: 16px;
+  //line-height: 16px;
 }
 
 .recmt-img {
@@ -608,7 +610,7 @@ ion-icon:before {
 
 .recmt-context {
   background: #F0F2F3;
-  padding: 3px 12px;
+  padding: 6px 12px 6px 12px;
   border-radius: 18px;
   max-height: 300px;
   overflow: hidden;
@@ -618,6 +620,7 @@ ion-icon:before {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 6;
   overflow: hidden;
+  line-height: 1.2;
 }
 
 .recmt-context div:first-child {

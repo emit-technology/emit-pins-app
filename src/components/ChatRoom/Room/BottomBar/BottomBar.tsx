@@ -93,7 +93,6 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                 if (dataObj["msg"]) {
                     setReplayMsg(dataObj["msg"])
                 }
-                dispatch(saveDataState({data: JSON.stringify({msg: null}), tag: 'replayMsg'}))
             }
         }
     }, [dispatchData.data]);
@@ -297,6 +296,7 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                     {
                                         replayMsg && <ReplayText msg={replayMsg} onClose={() => {
                                             setReplayMsg(null)
+                                            dispatch(saveDataState({data: JSON.stringify({msg: null}), tag: 'replayMsg'}))
                                         }
                                         }/>
                                     }

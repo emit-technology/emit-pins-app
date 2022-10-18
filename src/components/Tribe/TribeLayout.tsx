@@ -3,6 +3,7 @@ import {MsgText, TribeInfo, TribeRole} from "../../types";
 import {utils} from "../../common";
 import { XMasonry, XBlock } from "react-xmasonry";
 import selfStorage from "../../common/storage";
+import config from "../../common/config";
 
 interface Props {
     data: Array<TribeInfo>
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export const TribeLayout: React.FC<Props> = ({data,tribeTimeMap}) => {
+
 
     return <>
 
@@ -25,9 +27,6 @@ export const TribeLayout: React.FC<Props> = ({data,tribeTimeMap}) => {
 
                     return <XBlock key={i}>
                         <div className="recmt-content card" onClick={() => {
-                            if(v.latestMsg){
-                                selfStorage.setItem(`latest_view_${v.tribeId}`,v.latestMsg.timestamp)
-                            }
                             window.location.href = `./${v.tribeId}`
                         }}>
                             <div className="recmt-head">
@@ -35,7 +34,10 @@ export const TribeLayout: React.FC<Props> = ({data,tribeTimeMap}) => {
                                     <img src={utils.getDisPlayUrl(v.theme.image)}/>
                                 </div>
                                 <div className="recmt-head-title">
-                                    <div>{v.title}</div>
+                                    <div style={{padding: "0px 0 3px 0",position: "relative"}}>{v.title} {
+                                        v.tribeId == config.defaultTribes &&
+                                        <div className="cert-icon"><img src="./assets/img/cert.png" className="cert-icon" width="100%" height="100%"/></div>
+                                    }</div>
                                     {/*<div>{v.theme.themeTag}</div>*/}
                                     <div>{v.tribeId}</div>
                                 </div>
@@ -51,7 +53,7 @@ export const TribeLayout: React.FC<Props> = ({data,tribeTimeMap}) => {
                                 content && content["content"] &&
                                 <div className="recmt-context">
                                     {content["content"]}
-                                    <div>
+                                    <div >
                                         <img src="./assets/img/talk.png"/>
                                     </div>
                                 </div>
@@ -90,8 +92,8 @@ export const TribeLayout: React.FC<Props> = ({data,tribeTimeMap}) => {
                             </div>
 
                             {
-                                tribeTimeMap && tribeTimeMap.has(v.tribeId) && tribeTimeMap.get(v.tribeId) > v.latestMsg.timestamp && <>
-                                    <div>point</div>
+                                tribeTimeMap && tribeTimeMap.has(v.tribeId) && tribeTimeMap.get(v.tribeId) < v.latestMsg.timestamp && <>
+                                    <div className="tag-point"></div>
                                     </>
                             }
                         </div>

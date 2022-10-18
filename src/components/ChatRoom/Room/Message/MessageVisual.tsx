@@ -17,19 +17,27 @@ import {useAppDispatch, useAppSelector} from "../../../../common/state/app/hooks
 import useVirtual from "react-cool-virtual";
 import {saveDataState} from "../../../../common/state/slice/dataSlice";
 import {
+    IonAvatar,
     IonButton,
-    IonButtons,
+    IonButtons, IonCol,
     IonContent,
     IonFab,
-    IonHeader,
-    IonIcon,
+    IonHeader,IonRow,
+    IonIcon, IonItem, IonLabel,
     IonModal,
     IonTextarea,
     IonTitle,
     IonToolbar,
     useIonAlert
 } from '@ionic/react';
-import {chevronDownOutline, chevronUpOutline} from "ionicons/icons";
+import {
+    arrowForwardOutline,
+    chatboxEllipsesOutline,
+    chevronDownOutline,
+    chevronUpOutline,
+    createOutline,
+    layersOutline
+} from "ionicons/icons";
 import {tribeService} from "../../../../service/tribe";
 import UploadImage from "../../../utils/UploadImage";
 import add from "../../../../img/add.png";
@@ -40,6 +48,7 @@ import selfStorage from "../../../../common/storage";
 import {Tools} from "./Types/Tools";
 import {utils} from "../../../../common";
 import {ShareEx} from "../../../utils/ShareEx";
+import {ReplayText} from "./Types/ReplayText";
 
 interface Props {
     pinnedStickies?: { data: Array<PinnedSticky>, total: number }
@@ -52,6 +61,7 @@ interface Props {
     loaded?: boolean
     groupMsg?: Array<GroupMsg>
     userLimit?: UserLimit
+    selectRole?: TribeRole
 }
 
 const pageSize = 1000000;
@@ -120,7 +130,7 @@ const setVisibleStartIndex = (n: number) => {
     visibleStartIndex = n;
 }
 
-export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit, pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
+export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit,selectRole, pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
     const dispatchData = useAppSelector(state => state.jsonData);
     const dispatch = useAppDispatch();
     const [comments, setComments] = useState([]);
@@ -134,6 +144,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit, pinn
     const [checkedMsgArr, setCheckedMsgArr] = useState([])
     const [currentVisibleIndex, setCurrentVisibleIndex] = useState(0);
     const [maxVisibleIndex, setMaxVisibleIndex] = useState(0);
+    const [replayMsg, setReplayMsg] = useState(null);
     // const [visibleStartIndex, setVisibleStartIndex] = useState(0);
     const [checkedMsgId, setCheckedMsgId] = useState("");
     // const [checkedAll, setCheckedAll] = useState(false)
@@ -392,6 +403,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit, pinn
 
     const onReplay = (msg: Message) => {
         if (owner) {
+            setReplayMsg(msg)
             dispatch(saveDataState({data: JSON.stringify({msg: msg}), tag: 'replayMsg'}))
         }
     }
@@ -471,6 +483,11 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit, pinn
                     }
                 }
                 dispatch(saveDataState({data: JSON.stringify({refresh: false, checked: false}), tag: 'checkedAllMsg'}))
+            }else if (dispatchData.tag == 'replayMsg' && dispatchData.data) {
+                let dataObj = JSON.parse(dispatchData.data);
+                if (!dataObj["msg"]) {
+                    setReplayMsg(null)
+                }
             }
         }
     }, [dispatchData.data]);
@@ -497,6 +514,10 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit, pinn
         // console.log("set max visible=[%d]", n)
         setMaxVisibleIndex(n)
         selfStorage.setItem(`maxVisibleIndex_${config.tribeId}`, n)
+        const data:PinnedSticky = comments[n];
+        if(data){
+            selfStorage.setItem(`latest_view_${config.tribeId}`,data.records && data.records.length>0 && data.records[0].timestamp)
+        }
     }
 
 
@@ -750,44 +771,105 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit, pinn
                 <IonContent className="ion-padding">
                     {
                         showModifyMsg && showModifyMsg.content && <div style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            justifyContent: 'center'
+                            // display: 'flex',
+                            // flexDirection: 'row',
+                            // justifyContent: 'center'
                         }}>
                             {
-                                showModifyMsg.content && <div>
-                                    <div style={{padding: '12px 0'}}>
-                                        <div className="create-title">Message</div>
-                                        <IonTextarea className="msg-input" rows={2} placeholder="Input your message"
-                                                     autoGrow value={showModifyMsg.content.content}
-                                                     onIonChange={(e) => {
+                                showModifyMsg.content && <div style={{maxWidth: '100%'}}>
+                                    <div className="create-title">Role</div>
+                                    <div style={{maxWidth: "100%"}}>
+                                        <IonRow>
+                                            {
+                                                selectRole && selectRole.id != (showModifyMsg as Message).role && <>
 
-                                                         const msgCopy = JSON.parse(JSON.stringify(showModifyMsg))
-                                                         msgCopy.content.content = e.target.value;
-                                                         setShowModifyMsg(msgCopy)
-                                                     }}/>
+                                                    <IonCol size="5">
+                                                        {
+                                                            (showModifyMsg as Message).actor ? <div style={{position: "relative"}}>
+                                                                <IonItem lines="none" color="light" style={{borderRadius: 12}}>
+                                                                    <IonAvatar className="ion-avatar2">
+                                                                        <img src={utils.getDisPlayUrl((showModifyMsg as Message).actor.avatar)}/>
+                                                                    </IonAvatar>
+                                                                    <IonLabel className="ion-text-wrap" >
+                                                                        <b style={{fontSize: '12px'}}>&nbsp;{(showModifyMsg as Message).actor.name}</b>
+                                                                    </IonLabel>
+                                                                </IonItem>
+                                                            </div>: <div style={{position: "relative"}}>
+                                                                <IonItem lines="none" color="light" style={{borderRadius: 12}}>
+                                                                    <IonAvatar className="ion-avatar2">
+                                                                        <img src={"./assets/img/default-avatar.png"}/>
+                                                                    </IonAvatar>
+                                                                    <IonLabel className="ion-text-wrap" >
+                                                                        <b style={{fontSize: '12px'}}>&nbsp;Narrator</b>
+                                                                    </IonLabel>
+                                                                </IonItem>
+                                                            </div>
+                                                        }
+                                                    </IonCol>
+                                                    <IonCol  size="2">
+                                                        <div className="Swlwn"><IonIcon src={arrowForwardOutline} size="large"/></div>
+                                                    </IonCol>
+                                                </>
+                                            }
+                                            <IonCol size={selectRole && selectRole.id != (showModifyMsg as Message).role?"5":"12"}>
+                                                {
+                                                    selectRole &&  <div style={{position: "relative"}}>
+                                                        <IonItem lines="none" color="light" style={{borderRadius: 12}}>
+                                                            <IonAvatar className="ion-avatar2">
+                                                                <img src={utils.getDisPlayUrl(selectRole.avatar)}/>
+                                                            </IonAvatar>
+                                                            <IonLabel className="ion-text-wrap" >
+                                                                &nbsp;<b style={{fontSize: '12px'}}>{selectRole.name}</b>
+                                                            </IonLabel>
+                                                        </IonItem>
+                                                    </div>
+                                                }
+                                            </IonCol>
+                                        </IonRow>
                                     </div>
-                                    <div className="create-title">Image</div>
+
+                                    <div className="create-title">Message <IonIcon src={createOutline} color="medium" style={{transform:"translateY(2px)"}}/></div>
+                                    <IonTextarea className="msg-input" rows={1} placeholder="Input your message"
+                                                 autoGrow value={showModifyMsg.content.content}
+                                                 onIonChange={(e) => {
+
+                                                     const msgCopy = JSON.parse(JSON.stringify(showModifyMsg))
+                                                     msgCopy.content.content = e.target.value;
+                                                     setShowModifyMsg(msgCopy)
+                                                 }}/>
+                                    <div style={{maxWidth: '100%'}}>
+                                        {
+                                            replayMsg && <ReplayText msg={replayMsg}/>
+                                        }
+                                    </div>
+                                    <div className="create-title">Image <IonIcon src={createOutline} color="medium" style={{transform:"translateY(2px)"}}/></div>
                                     <div style={{
                                         borderRadius: '5px',
                                         // border: '1px solid var(--ion-color-medium)',
-                                        padding: '12px',
+                                        padding: '0 12px',
                                         position: "relative",
                                         display: 'flex',
                                         flexDirection: 'row',
                                         justifyContent: 'center'
                                     }}>
-                                        <UploadImage defaultIcon={add} height={200} width={'100%'}
-                                                     imgUrl={showModifyMsg.content.image.url}
+                                        <UploadImage borderRadio={12} defaultIcon={add} width={showModifyMsg && showModifyMsg.content && !showModifyMsg.content.image["url"]?"100%":""}
+                                                     imgUrl={showModifyMsg && showModifyMsg.content && showModifyMsg.content.image["url"] && utils.getDisPlayUrl(showModifyMsg.content.image)}
                                                      setImgUrl={(url, w, h) => {
                                                          const msgCopy = JSON.parse(JSON.stringify(showModifyMsg))
                                                          msgCopy.content.image = {url: url, width: w, height: h}
                                                          setShowModifyMsg(msgCopy)
                                                      }}/>
+                                                     {/*<div style={{position: "absolute",top: 16 , right: 26}} onClick={(e)=>{*/}
+                                                     {/*e.persist()}*/}
+                                                     {/*}>*/}
+                                                     {/*    <IonIcon src={createOutline} size="large" color="medium"/>*/}
+                                                     {/*</div>*/}
                                     </div>
 
                                     <IonButton expand="block" onClick={() => {
-                                        tribeService.updateMsg(showModifyMsg.id, '0x' + Buffer.from(JSON.stringify(showModifyMsg.content)).toString('hex')).then(() => {
+                                        tribeService.updateMsg(showModifyMsg.id, '0x' + Buffer.from(JSON.stringify(showModifyMsg.content)).toString('hex'),
+                                            selectRole && selectRole.id,replayMsg && replayMsg.id
+                                        ).then(() => {
                                             setShowModifyMsg(null)
                                         }).catch(e => {
                                             console.log(e)

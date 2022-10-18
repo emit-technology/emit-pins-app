@@ -550,6 +550,7 @@ export class Dashboard extends React.Component<Props, State> {
                                         }}
                                         showPin={showPin}
                                         userLimit={userLimit}
+                                        selectRole={latestRole}
                                     />
 
                                     <BottomBar tribeInfo={tribeInfo} owner={owner} userLimit={userLimit}

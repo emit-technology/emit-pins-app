@@ -486,9 +486,9 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
-    updateMsg = async (msgId: string, content: string, role?: string): Promise<string> => {
+    updateMsg = async (msgId: string, content: string, role?: string,replayToMsgId?:string): Promise<string> => {
         await this.userCheckAuth()
-        const rest: TribeResult<string> = await this._rpc.post('/tribe/updateMsg', {msgId,role, content});
+        const rest: TribeResult<string> = await this._rpc.post('/tribe/updateMsg', {msgId,role, content,replayToMsgId});
         if (rest && rest.code == 0) {
             return Promise.resolve(rest.data)
         }

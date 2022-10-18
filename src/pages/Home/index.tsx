@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {
     IonHeader, IonModal, IonPage, IonSearchbar, IonContent, IonToolbar, IonSegment, IonLabel, IonSegmentButton, IonItem,
-    IonButtons, IonIcon, IonToast, IonTitle, IonLoading, IonMenu, IonMenuToggle
+    IonButtons, IonIcon,IonText, IonToast, IonTitle, IonLoading, IonMenu, IonMenuToggle
 } from "@ionic/react";
 import {arrowBackOutline, listOutline, personCircleOutline, searchOutline} from "ionicons/icons";
 import {tribeService} from "../../service/tribe";
@@ -12,6 +12,7 @@ import {AccountModel} from "@emit-technology/emit-lib";
 import {emitBoxSdk} from "../../service/emitBox";
 import {TribeLayout} from "../../components/Tribe/TribeLayout";
 import selfStorage from "../../common/storage";
+import {fontSize} from "html2canvas/dist/types/css/property-descriptors/font-size";
 
 interface State {
     segment: string
@@ -79,6 +80,7 @@ export class HomePage extends React.Component<Props, State> {
         const account = await emitBoxSdk.getAccount();
         const f = await tribeService.isSessionAvailable()
 
+        await this.initTimeMap(data);
         this.setState({data: data, dataOrigin: data, account: account, isSessionAvailable: f})
 
     }
@@ -169,10 +171,8 @@ export class HomePage extends React.Component<Props, State> {
                                     <div style={{height: 32, width: 32, borderRadius: 6}} slot={"start"}>
                                         <img src="./assets/icon/icon.png"/>
                                     </div>
-                                    <div>
-                                        <IonLabel className="ion-text-wrap">
-                                            Verse
-                                        </IonLabel>
+                                    <div style={{fontSize: '20px',fontFamily:"SFBold",paddingLeft: 2}}>
+                                       Verse
                                     </div>
                                 </div>
                             </div>
@@ -192,7 +192,7 @@ export class HomePage extends React.Component<Props, State> {
                     </IonToolbar>
                 </IonHeader>
                 <IonContent fullscreen className="ion-padding home-ctn">
-                    <IonSegment className="segment" color="dark" mode="md" value={segment} onIonChange={(e) => {
+                    <IonSegment className="segment" color="secondary" mode="md" value={segment} onIonChange={(e) => {
                         this.setState({showLoading: true, segment: e.detail.value})
                         this.init(e.detail.value).then(() => {
                             this.setShowLoading(false)
@@ -201,10 +201,12 @@ export class HomePage extends React.Component<Props, State> {
                             console.error(e)
                         });
                     }}>
-                        <IonSegmentButton color="dark" className="segment-button" value="forYou">For
-                            You</IonSegmentButton>
-                        <IonSegmentButton color="dark" className="segment-button" value="myVerse">My
-                            Verse</IonSegmentButton>
+                        <IonSegmentButton color="dark" className="segment-button" value="forYou">
+                            <span className={segment == "forYou"?"seq-title":"seq-title-2"}><IonText color="dark">For You</IonText></span>
+                        </IonSegmentButton>
+                        <IonSegmentButton color="dark" className="segment-button" value="myVerse">
+                            <span className={segment == "myVerse"?"seq-title":"seq-title-2"}><IonText color="dark">My Verse</IonText></span>
+                        </IonSegmentButton>
                         {/*<IonSegmentButton color="dark" className="segment-button" value="recentView">Recent View</IonSegmentButton>*/}
                     </IonSegment>
 

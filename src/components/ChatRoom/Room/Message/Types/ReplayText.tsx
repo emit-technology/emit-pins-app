@@ -6,7 +6,7 @@ import {utils} from "../../../../../common";
 
 interface Props {
     msg: Message;
-    onClose:()=>void;
+    onClose?:()=>void;
 }
 
 export const ReplayText: React.FC<Props> = ({msg,onClose}) => {
@@ -24,15 +24,16 @@ export const ReplayText: React.FC<Props> = ({msg,onClose}) => {
                 <div><b><small>{msg && msg.actor && msg.actor.name}</small></b></div>
                 <div style={{float:'left'}}><small>Role: [{content.name}]</small></div>
             </IonLabel>
-            <IonIcon color="dark" size="small" src={closeOutline} onClick={()=>{
+            {
+                <IonIcon color="dark" size="small" src={closeOutline} onClick={()=>{
                 onClose()
-            }}/>
+            }}/>}
         </IonItem>
         </div>
     }else{
         const content: MsgText = msg.content as MsgText;
 
-        return <div>
+        return <>
             {
                 <IonItem className="replay-item" lines="none" color="secondary">
                     {
@@ -53,12 +54,14 @@ export const ReplayText: React.FC<Props> = ({msg,onClose}) => {
                             content.image && content.image.url && <div style={{float:'left'}}>[image]</div>
                         }
                     </IonLabel>
-                    <IonIcon color="dark" size="small" src={closeOutline} onClick={()=>{
-                        onClose()
-                    }}/>
+                    {
+                        onClose && <IonIcon color="dark" size="small" src={closeOutline} onClick={()=>{
+                            onClose()
+                        }}/>
+                    }
                 </IonItem>
             }
 
-        </div>
+        </>
     }
 }

@@ -34,3 +34,37 @@
   padding: 6px 0;
   color: var(--ion-color-medium);
 }
+
+.tag-point {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  top: 12px;
+  right: 14px;
+  background: #FF453A;
+  border-radius: 50%;
+}
+
+.cert-icon {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: -1px;
+  right: -6px;
+}
+
+.cert-icon img {
+
+}
+
+.seq-title{
+  font-family: SFBold;
+  font-size: 16px;
+  letter-spacing: -0.1px;
+}
+
+.seq-title-2{
+  font-family: SFProText-Medium;
+  font-size: 16px;
+  letter-spacing: -0.1px;
+}

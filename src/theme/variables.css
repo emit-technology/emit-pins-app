@@ -28,6 +28,10 @@ http://ionicframework.com/docs/theming/ */
   font-family: 'SFProText-Regular';
   src: url('./fonts/SF/FontsFree-Net-SFProText-Regular.ttf');
 }
+@font-face {
+  font-family: 'SFProText-Medium';
+  src: url('./fonts/SF/FontsFree-Net-SFProText-Medium.ttf');
+}
 
 /** Ionic CSS Variables **/
 :root {
