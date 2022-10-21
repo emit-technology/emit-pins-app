@@ -44,7 +44,7 @@ export const SideBar:React.FC<Props> = ({onRequestAccount,account,onLogout,isSes
         </IonItem>
 
         <IonItem onClick={()=>{
-            window.open(config.assetsUrl)
+            window.open(utils.assetUrl())
         }}>
             <IonIcon slot="start" src={walletOutline} size="large"/>
             <IonLabel>Assets</IonLabel>

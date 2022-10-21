@@ -623,15 +623,11 @@ ion-icon:before {
   line-height: 1.2;
 }
 
-.recmt-context div:first-child {
+.recmt-context .sflwf {
 position: absolute;
 /* size: 32px; */
   right: 18px;
   bottom: 54px;
-}
-
-.recmt-context div:first-child img{
-  height: 20px;
 }
 
 @keyframes comeIn {

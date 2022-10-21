@@ -164,7 +164,7 @@ export const AirdropModal: React.FC<Props> = ({onOk, actor, onClose, isOpen,owne
                         <IonLabel position="stacked">Content</IonLabel>
                         {
                             //@ts-ignore
-                            <IonTextarea placeholder="Enter content"  ref={contentRef} />
+                            <IonTextarea placeholder="Enter content" autoGrow rows={3}   ref={contentRef} />
                         }
                     </IonItem>
 

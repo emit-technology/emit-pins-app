@@ -3,6 +3,7 @@ import {IonButton, IonButtons,IonAvatar, IonContent, IonHeader,IonLabel,IonItemD
 import {Factor} from "@emit-technology/emit-lib";
 import {utils} from "../../common";
 import {arrowForwardOutline, chevronForwardOutline} from "ionicons/icons";
+import config from "../../common/config";
 
 interface Props {
     factor: Factor;
@@ -18,7 +19,7 @@ export const FactorItem: React.FC<Props> = ({factor,showLine,noTransform}) => {
         {
             factor && <IonItem detail detailIcon={arrowForwardOutline} lines={showLine?"inset":"none"}>
                 <IonAvatar slot="start">
-                    <img src={`https://assets.emit.technology/assets/img/tokens/${symbol}.png`}/>
+                    <img src={`${utils.assetUrl()}/assets/img/tokens/${symbol}.png`}/>
                 </IonAvatar>
                 <IonLabel className="ion-text-wrap">
                     <div>{symbol}</div>

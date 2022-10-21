@@ -96,6 +96,16 @@ pre {
     --max-width: 512px;
     --max-height: 100vh !important;
   }
+
+  .airdrop-png2 {
+    position: relative;
+    padding: 6px 12px;
+    overflow: hidden;
+    background-size: 299px 89px !important;
+    color: #fff;
+    width: 299px !important;
+    height: 89px;
+  }
 }
 
 

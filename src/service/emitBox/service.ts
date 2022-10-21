@@ -21,8 +21,21 @@ class EmitBoxSdk {
     web3: { [chain: number]: Web3 }
 
     constructor() {
-        //network: {nodeUrl: "https://core-node-beta.emit.technology", chainId: "667", chainType: ChainType.EMIT.valueOf()},
-        const emitBox = new EmitBox(dapp, {nodeUrl: config.nodeUrl,chainId:"667", chainType: ChainType.EMIT.valueOf()});
+
+        /**
+         *  network: INetwork;
+         dapp?:IDapp;
+         version:string
+         backupAccountUrl?: string;
+         */
+            //network: {nodeUrl: "https://core-node-beta.emit.technology", chainId: "667", chainType: ChainType.EMIT.valueOf()},
+            console.log("utils.isIos() || utils.isSafari()",utils.isIos() ,utils.isSafari());
+        const emitBox = new EmitBox(dapp, {
+                nodeUrl: config.nodeUrl,
+                chainId: "667",
+                chainType: ChainType.EMIT.valueOf(),
+                backupAccountUrl: (utils.isIos() || utils.isSafari()) && `${config.baseUrl}/account/#/widget`
+            });
         this.emitBox = emitBox;
         const bscProvider = emitBox.newProvider({
             dapp: dapp,
@@ -75,7 +88,7 @@ class EmitBoxSdk {
         return Promise.resolve(rest)
     }
 
-    emitSend = async (receive: string, amount: string, factor:Factor, outData: string,datasets:Array<any>) => {
+    emitSend = async (receive: string, amount: string, factor: Factor, outData: string, datasets: Array<any>) => {
         const account = await emitBoxSdk.getAccount();
         const from = account.addresses[ChainType.EMIT];
         const prepareBlock = await emitBoxSdk.emitBox.emitDataNode.genPrepareBlock(
@@ -90,7 +103,7 @@ class EmitBoxSdk {
                             category: factor.category,
                             value: utils.toValueHex(amount),
                         },
-                        data: outData? Buffer.from(outData).toString("hex"):""//TODO for refer data
+                        data: outData ? Buffer.from(outData).toString("hex") : ""//TODO for refer data
                     },
                 ],
             },

@@ -56,6 +56,7 @@ import {Tools} from "../ChatRoom/Room/Message/Types/Tools";
 import {useEffect, useState} from "react";
 import {copyOutline, linkOutline, shareOutline} from "ionicons/icons";
 import copy from "copy-to-clipboard";
+import config from "../../common/config";
 
 interface Props {
     isOpen: boolean;
@@ -123,7 +124,7 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
                     setLoading(false)
                     console.log(data);
                     const shareImageId = data["filename"].replace(".png", "");
-                    setUrl(`https://pins.emit.technology/verse/${tribeInfo.tribeId}/${shareImageId}`)
+                    setUrl(`${config.baseUrl}/verse/${tribeInfo.tribeId}/${shareImageId}`)
                     setLastImageId(shareImageId)
                     setShowButtons(true);
                 }).catch(e => {
@@ -132,7 +133,7 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
                 })
             });
         }else{
-            setUrl(`https://pins.emit.technology/verse/${tribeInfo.tribeId}/${lastShareImgId}`)
+            setUrl(`${config.baseUrl}/verse/${tribeInfo.tribeId}/${lastShareImgId}`)
             setShowButtons(true);
         }
     }
@@ -228,7 +229,7 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
                                             </div>
                                         </div>
                                         <div style={{width: '58px'}}>
-                                            <img src="https://pins.emit.technology/pic/display?url=https://pic.emit.technology/img/596b38a47d086a32a5804ea7a4da9868.png&w=299&h=119&op=resize&upscale=1" width="100%"/>
+                                            <img src={`${config.baseUrl}/pic/display?url=https://pic.emit.technology/img/596b38a47d086a32a5804ea7a4da9868.png&w=299&h=119&op=resize&upscale=1`} width="100%"/>
                                         </div>
                                     </div>
                                 </div>

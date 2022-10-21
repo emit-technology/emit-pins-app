@@ -1,9 +1,9 @@
 import * as React from 'react';
-import {MsgText, TribeInfo, TribeRole} from "../../types";
+import {MessageType, MsgText, TribeInfo, TribeRole} from "../../types";
 import {utils} from "../../common";
-import { XMasonry, XBlock } from "react-xmasonry";
-import selfStorage from "../../common/storage";
+import {XBlock, XMasonry} from "react-xmasonry";
 import config from "../../common/config";
+import {Airdrop} from "../ChatRoom/Room/Message/Types";
 
 interface Props {
     data: Array<TribeInfo>
@@ -52,9 +52,35 @@ export const TribeLayout: React.FC<Props> = ({data,tribeTimeMap}) => {
                             {
                                 content && content["content"] &&
                                 <div className="recmt-context">
-                                    {content["content"]}
-                                    <div >
-                                        <img src="./assets/img/talk.png"/>
+                                    { v.latestMsg && v.latestMsg.msgType == MessageType.Text?content["content"]:
+                                        v.latestMsg && v.latestMsg.msgType == MessageType.Airdrop && <>
+                                            <div className="box" style={{
+                                                flexDirection: 'row',
+                                                justifyContent: 'center',
+                                                width: "100%"
+                                            }}>
+                                                <div style={{width: "100%"}}>
+                                                    <div className="airdrop-cnt">
+                                                        <div className="airdrop-png2" style={{backgroundImage:'url("./assets/img/airdrop-bg.png")'}}>
+                                                            <div className="airdrop-ctx">
+                                                                <div style={{fontSize: '10px',opacity: 0.75,color:"#fff"}}><small>AIRDROP</small></div>
+                                                                <div>{content["title"]}</div>
+                                                                <div style={{position: "relative",fontSize:'24px',color:"var(--ion-color-secondary)"}}>
+                                                                    {utils.fromValue(content["factor"]["value"],18).toFixed(3)}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="symbol-cat">
+                                                            {content["factor"]["category"]["symbol"]}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </>
+                                    }
+                                    <div className="sflwf">
+                                        <img src="./assets/img/talk.png" height={20}/>
                                     </div>
                                 </div>
                             }
@@ -92,7 +118,7 @@ export const TribeLayout: React.FC<Props> = ({data,tribeTimeMap}) => {
                             </div>
 
                             {
-                                tribeTimeMap && tribeTimeMap.has(v.tribeId) && tribeTimeMap.get(v.tribeId) < v.latestMsg.timestamp && <>
+                                tribeTimeMap && (tribeTimeMap.has(v.tribeId) && tribeTimeMap.get(v.tribeId) < v.latestMsg.timestamp || !tribeTimeMap.has(v.tribeId)) && <>
                                     <div className="tag-point"></div>
                                     </>
                             }

@@ -176,10 +176,20 @@ export const utils = {
         return false;
     },
 
+    isSafari: ():boolean =>{
+        return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    },
+
     formatCategoryString: (category: Category): string => {
         const name = utils.fromHex(category.symbol);
         return name;
     },
 
+    assetUrl :():string =>{
+        if(utils.isSafari() || utils.isIos()){
+            return "https://pins.emit.technology/asset/"
+        }
+        return "https://assets.emit.technology/";
+    }
 
 }

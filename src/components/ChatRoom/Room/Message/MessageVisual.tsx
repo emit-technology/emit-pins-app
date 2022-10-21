@@ -323,7 +323,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit,selec
                 //     // }, 100)
                 // }
 
-                if (e.visibleStopIndex > maxVisibleIndex) {
+                if (e.visibleStopIndex >= maxVisibleIndex) {
                     setMaxVisible(e.visibleStopIndex);
                 }
                 const data = comments[e.visibleStartIndex + 1];

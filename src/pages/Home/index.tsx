@@ -168,12 +168,12 @@ export class HomePage extends React.Component<Props, State> {
                         <IonTitle>
                             <div className="home-head-title">
                                 <div className="home-head-ctn">
-                                    <div style={{height: 32, width: 32, borderRadius: 6}} slot={"start"}>
-                                        <img src="./assets/icon/icon.png"/>
+                                    <div style={{height: 32,borderRadius: 6}} slot={"start"}>
+                                        <img src="./assets/img/pins-logo.png" height='100%'/>
                                     </div>
-                                    <div style={{fontSize: '20px',fontFamily:"SFBold",paddingLeft: 2}}>
-                                       Verse
-                                    </div>
+                                    {/*<div style={{fontSize: '20px',fontFamily:"SFBold",paddingLeft: 2}}>*/}
+                                    {/*   Verse*/}
+                                    {/*</div>*/}
                                 </div>
                             </div>
                         </IonTitle>

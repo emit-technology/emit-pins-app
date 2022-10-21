@@ -50,7 +50,7 @@ export const AirdropInfoModal: React.FC<Props> = ({onClose, isOpen,owner,airdrop
             {/*    </IonToolbar>*/}
             {/*</IonHeader>*/}
             <IonContent className="modal-content" color="light">
-                <div style={{position: "relative",marginBottom:20}}>
+                <div style={{position: "relative"}}>
                     <img src="./assets/img/airdrop-info-head.png"/>
                     <div className="balance-hd balance-db1">
                         <div style={{fontWeight: 700}}>
@@ -63,16 +63,12 @@ export const AirdropInfoModal: React.FC<Props> = ({onClose, isOpen,owner,airdrop
                             {content && utils.fromValue(content.factor.value,18).toFixed(3)}
                             {/*<div className="balance-text">Balance</div>*/}
                         </div>
-                        <div style={{width: 48, height: 48,background: "#fff",borderRadius:'50%',padding: 3}}>
+                        <div style={{width: 54, height: 54,background: "#fff",borderRadius:'50%',padding: 3}}>
                             <img style={{borderRadius:'50%'}} src={msg && msg.actor ?utils.getDisPlayUrl(msg.actor.avatar):"./assets/img/default-avatar.png"} width="100%" height="100%"/>
                         </div>
 
                         <div className="slwSS">
                             {content && content.title}
-
-                            <div style={{color: "#000"}} className="ssowSdc text-pre  recmt-context">
-                                {content && content.content}
-                            </div>
                         </div>
 
                     </div>
@@ -83,7 +79,10 @@ export const AirdropInfoModal: React.FC<Props> = ({onClose, isOpen,owner,airdrop
                     </div>
                 </div>
 
-                <div style={{marginBottom: 20,padding: '12px'}}>
+                <div style={{marginBottom: 20,padding: '0 12px 12px'}}>
+                    <div style={{color: "#000",background:"#fff"}} className="ssowSdc text-pre  recmt-context">
+                        {content && content.content}
+                    </div>
                     {/*<div style={{fontSize:16,fontWeight:500,padding: '0 0 6px 12px'}}>Record</div>*/}
                     <div style={{borderRadius: '0 0 8px 8px',overflow: "scroll",maxHeight:"42vh"}}>
                         {
