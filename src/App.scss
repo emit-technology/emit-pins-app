@@ -73,15 +73,15 @@ pre {
     position: relative;
     padding: 6px 12px;
     overflow: hidden;
-    background-size: 250px 74px !important;
+    background-size: 240px 71px !important;
     color: #fff;
-    width: 250px !important;
-    height: 74px !important;
+    width: 240px !important;
+    height: 71px !important;
   }
 
   .airdrop-ctx {
     display: flex;
-    padding: 0px 0px 0px 70px !important;
+    padding: 4px 0px 0px 70px !important;
     flex-direction: column;
     justify-content: center;
     font-size: 20px;
@@ -105,6 +105,21 @@ pre {
     color: #fff;
     width: 299px !important;
     height: 89px;
+  }
+
+  .airdrop-title{
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    font-size: 14px !important;
+  }
+
+  .airdrop-amount{
+    font-size: 20px !important;
   }
 }
 

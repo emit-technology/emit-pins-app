@@ -47,10 +47,10 @@ export const Airdrop: React.FC<Props> = ({msg, isOwner}) => {
                         <div className="airdrop-png" style={{backgroundImage:'url("./assets/img/airdrop-bg.png")'}}>
                             <div className="airdrop-ctx">
                                 <div style={{fontSize: '10px',opacity: 0.75,color:"#fff"}}><small>AIRDROP</small></div>
-                                <div>{content.title}</div>
-                                <div style={{position: "relative",fontSize:'16px',color:"var(--ion-color-secondary)"}}>
+                                <div className="airdrop-amount">
                                     {utils.fromValue(content.factor.value,18).toFixed(3)}
                                 </div>
+                                <div className="airdrop-title">{content.title}</div>
                             </div>
                         </div>
 

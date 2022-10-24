@@ -31,24 +31,30 @@ export class BaseRpc {
     }
 
     upload = async (): Promise<{ url: string, themeColors: ThemeColors }> => {
+       try{
+           console.log("upload....");
+           const domm = document.querySelector('#_capacitor-camera-input');
+           if(domm){
+               domm.remove();
+           }
 
-        const domm = document.querySelector('#_capacitor-camera-input');
-        if(domm){
-           domm.remove();
-        }
+           const image: any = await Camera.getPhoto({
+               webUseInput: true,
+               quality: 100,
+               resultType: CameraResultType.Uri,
+               source: CameraSource.Photos,
+           });
+           console.log(image);
+           const themeColors = await getMainColor(image.webPath);
+           console.log(themeColors);
+           const file = await fetch(image.webPath).then(r => r.blob()).then(blobFile => new File([blobFile], `file.${image.format}`, {type: blobFile.type}));
+           const data = await this.uploadFile(file);
 
-        const image: any = await Camera.getPhoto({
-            webUseInput: true,
-            quality: 100,
-            resultType: CameraResultType.Uri,
-            source: CameraSource.Photos,
-        });
-        const themeColors = await getMainColor(image.webPath);
-
-        const file = await fetch(image.webPath).then(r => r.blob()).then(blobFile => new File([blobFile], `file.${image.format}`, {type: blobFile.type}));
-        const data = await this.uploadFile(file);
-
-        return {url: data["url"].replace("http://", "https://"), themeColors: themeColors};
+           return {url: data["url"].replace("http://", "https://"), themeColors: themeColors};
+       }catch (e){
+           console.error(e)
+           return Promise.reject(e)
+       }
 
     }
 

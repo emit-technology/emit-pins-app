@@ -232,6 +232,7 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
 
                                     <IonIcon className="footer-icon" src={imageOutline} color="dark" size="large"
                                              onClick={(e) => {
+                                                 console.log("click upload");
                                                  e.stopPropagation();
                                                  if(userLimit && userLimit.msgLeft <=0){
                                                      present({
@@ -251,6 +252,14 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                                      });
 
                                                      setThemeColor(themeColors)
+                                                 }).catch(e=>{
+                                                     const err = typeof e == 'string'?e:e.message;
+                                                     present({
+                                                         message: err,
+                                                         duration: 2000,
+                                                         position: "top",
+                                                         color: "danger"
+                                                     })
                                                  })
                                              }}/>
                                     {/*<IonIcon className="footer-icon" src={diceOutline} color="dark" size="large" onClick={(e) => {*/}
