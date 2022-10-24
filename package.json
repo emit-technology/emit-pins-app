@@ -10,8 +10,7 @@
     "@capacitor/core": "^3.6.0",
     "@capacitor/ios": "3.6.0",
     "@capacitor/toast": "^4.0.1",
-    "@emit-technology/emit-account-node-sdk": "1.2.1",
-    "@emit-technology/emit-lib": "1.0.9",
+    "@emit-technology/emit-account-node-sdk": "1.2.2",
     "@ionic/react": "^6.0.0",
     "@ionic/react-router": "^6.0.0",
     "@testing-library/jest-dom": "^5.11.9",
@@ -29,7 +28,7 @@
     "react-dom": "^17.0.1",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "^5.0.0",
+    "react-scripts": "5.0.0",
     "typescript": "^4.1.3",
     "web-vitals": "^0.2.4",
     "web3": "npm:@emit-technology/web3@^1.7.4",
@@ -46,13 +45,14 @@
     "workbox-range-requests": "^5.1.4",
     "workbox-routing": "^5.1.4",
     "workbox-strategies": "^5.1.4",
-    "workbox-streams": "^5.1.4"
+    "workbox-streams": "^5.1.4",
+    "@emit-technology/emit-lib": "1.1.0"
   },
   "scripts": {
     "start": "react-app-rewired start",
     "build": "GENERATE_SOURCEMAP=false react-app-rewired build",
     "test": "react-app-rewired test --transformIgnorePatterns 'node_modules/(?!(@ionic/react|@ionic/react-router|@ionic/core|@stencil/core|ionicons)/)'",
-    "eject": "react-app-rewired eject"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
@@ -69,14 +69,17 @@
       "safari >= 14"
     ],
     "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
+      "chrome >= 67",
+      "edge >= 79",
+      "firefox >= 68",
+      "opera >= 54",
+      "safari >= 14"
     ]
   },
   "devDependencies": {
     "@capacitor/cli": "3.6.0",
     "@ionic/pwa-elements": "^3.1.1",
+    "@noble/ed25519": "^1.7.1",
     "@reduxjs/toolkit": "^1.8.4",
     "@types/react-virtualized-auto-sizer": "^1.0.1",
     "@types/react-window": "^1.8.5",
