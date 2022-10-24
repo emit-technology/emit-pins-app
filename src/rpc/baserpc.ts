@@ -3,6 +3,7 @@ import {Camera, CameraResultType, CameraSource} from "@capacitor/camera";
 import selfStorage from "../common/storage";
 import getMainColor, {ThemeColors} from "../common/getMainColor";
 import {tribeService} from "../service/tribe";
+import {utils} from "../common";
 
 
 export class BaseRpc {
@@ -31,30 +32,40 @@ export class BaseRpc {
     }
 
     upload = async (): Promise<{ url: string, themeColors: ThemeColors }> => {
-       try{
-           console.log("upload....");
-           const domm = document.querySelector('#_capacitor-camera-input');
-           if(domm){
-               domm.remove();
-           }
+        try {
+            console.log("upload....");
 
-           const image: any = await Camera.getPhoto({
-               webUseInput: true,
-               quality: 100,
-               resultType: CameraResultType.Uri,
-               source: CameraSource.Photos,
-           });
-           console.log(image);
-           const themeColors = await getMainColor(image.webPath);
-           console.log(themeColors);
-           const file = await fetch(image.webPath).then(r => r.blob()).then(blobFile => new File([blobFile], `file.${image.format}`, {type: blobFile.type}));
-           const data = await this.uploadFile(file);
+            if (utils.isIos()) {
+                const permissions = await Camera.checkPermissions()
+                console.log(permissions, "permissionsReq")
+                if (permissions.photos != "granted") {
+                    const permissionsReq = await Camera.requestPermissions()
+                    console.log(permissionsReq, "permissionsReq==")
+                }
+            }
 
-           return {url: data["url"].replace("http://", "https://"), themeColors: themeColors};
-       }catch (e){
-           console.error(e)
-           return Promise.reject(e)
-       }
+            const domm = document.querySelector('#_capacitor-camera-input');
+            if (domm) {
+                domm.remove();
+            }
+            console.log("Camera.getPhoto....");
+            const image: any = await Camera.getPhoto({
+                webUseInput: true,
+                quality: 100,
+                resultType: CameraResultType.Uri,
+                source: CameraSource.Photos,
+            });
+            console.log(image);
+            const themeColors = await getMainColor(image.webPath);
+            console.log(themeColors);
+            const file = await fetch(image.webPath).then(r => r.blob()).then(blobFile => new File([blobFile], `file.${image.format}`, {type: blobFile.type}));
+            const data = await this.uploadFile(file);
+
+            return {url: data["url"].replace("http://", "https://"), themeColors: themeColors};
+        } catch (e) {
+            console.error(e)
+            return Promise.reject(e)
+        }
 
     }
 

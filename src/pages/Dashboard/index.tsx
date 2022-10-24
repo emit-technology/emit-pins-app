@@ -372,8 +372,7 @@ export class Dashboard extends React.Component<Props, State> {
     render() {
         const {
             owner, showActionSheet, isSessionAvailable, buttons, toastMsg, showShare, latestMgs, showToast, showPinnedMsg, userLimit,
-            showCreateTribe,
-            isUpdating, isConnecting, groupMsgs, showMenusModal, groupPinnedMsg, showPinnedMsgDetailModal,
+            showCreateTribe, isUpdating, isConnecting, groupMsgs, showMenusModal, groupPinnedMsg, showPinnedMsgDetailModal,
             account, roles, tribeInfo, latestRole, datas, showTribeEdit, showPin
         } = this.state;
 

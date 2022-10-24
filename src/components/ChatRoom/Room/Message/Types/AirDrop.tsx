@@ -48,7 +48,7 @@ export const Airdrop: React.FC<Props> = ({msg, isOwner}) => {
                             <div className="airdrop-ctx">
                                 <div style={{fontSize: '10px',opacity: 0.75,color:"#fff"}}><small>AIRDROP</small></div>
                                 <div className="airdrop-amount">
-                                    {utils.fromValue(content.factor.value,18).toFixed(3)}
+                                    {utils.fromValue(content.factor.value,18).toString()}
                                 </div>
                                 <div className="airdrop-title">{content.title}</div>
                             </div>

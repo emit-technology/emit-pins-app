@@ -1,14 +1,14 @@
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {
-    IonButton,IonRow,IonCol,
+    IonButton, IonRow, IonCol,
     IonButtons,
     IonContent,
-    IonHeader,IonAvatar,
+    IonHeader, IonAvatar,
     IonModal, IonItem,
     IonTitle, IonItemDivider,
     IonToolbar,
-    IonBadge, IonLabel, IonRadioGroup, IonRadio, IonText, IonInput, IonIcon
+    IonBadge, IonLabel, IonRadioGroup, IonRadio, IonText, IonInput, IonIcon, useIonToast
 } from "@ionic/react";
 import {AirdropContent, AirdropInfo, AirdropType, Message} from "../../../../../types";
 import {tribeService} from "../../../../../service/tribe";
@@ -17,7 +17,9 @@ import {Text} from "./Text";
 import {FactorItem} from "../../../../Assets";
 import {NoneData} from "../../../../Data/None";
 import TextareaAutosize from "react-textarea-autosize";
-import {closeOutline} from "ionicons/icons";
+import {closeOutline, copyOutline, downloadOutline} from "ionicons/icons";
+import copy from "copy-to-clipboard";
+import useToast from "../../../../../../../../pancake/pancake-frontend/src/hooks/useToast";
 
 interface Props {
     onClose: () => void;
@@ -29,14 +31,15 @@ interface Props {
     owner: string;
 }
 
-export const AirdropInfoModal: React.FC<Props> = ({onClose, isOpen,owner,airdropRecord,msg}) => {
+export const AirdropInfoModal: React.FC<Props> = ({onClose, isOpen, owner, airdropRecord, msg}) => {
 
     const content = msg && msg.content as AirdropContent;
 
-    const _index = airdropRecord.findIndex(v=> v.user == owner);
-    if(_index>-1){
+    const [present, dismiss] = useIonToast();
+    const _index = airdropRecord.findIndex(v => v.user == owner);
+    if (_index > -1) {
         const _copy = JSON.parse(JSON.stringify(airdropRecord[_index]))
-        airdropRecord.splice(_index,1);
+        airdropRecord.splice(_index, 1);
         airdropRecord.unshift(_copy)
     }
     return <>
@@ -52,19 +55,46 @@ export const AirdropInfoModal: React.FC<Props> = ({onClose, isOpen,owner,airdrop
             <IonContent className="modal-content" color="light">
                 <div style={{position: "relative"}}>
                     <img src="./assets/img/airdrop-info-head.png"/>
+                    {
+                        owner == msg.role && airdropRecord && airdropRecord.length>0&& <div style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            padding: '12px',
+                            zIndex: 100,
+                            color: '#fff'
+                        }} onClick={() => {
+                            const mgr = airdropRecord.map(v => `${v.user} , ${utils.fromHexValue(v.amount, 18).toFixed(3, 1)} , ${content && content.factor.category.symbol}`)
+                            copy(mgr.join("\n"))
+                            present({
+                                message: "Copied to clipboard!",
+                                position: "top",
+                                color: "primary",
+                                duration: 2000
+                            })
+                        }}>
+                            <IonIcon src={copyOutline} size="large"/>&nbsp;<span>Records</span>
+                        </div>
+                    }
                     <div className="balance-hd balance-db1">
                         <div style={{fontWeight: 700}}>
                             Airdrop
                         </div>
                         <div className="slskjs">
-                            {content && <IonBadge color="secondary">{content.factor.category.symbol}&nbsp;[{utils.ellipsisStr(content.factor.category.supplier,3)}]</IonBadge>}
+                            {content && <IonBadge
+                                color="secondary">{content.factor.category.symbol}&nbsp;[{utils.ellipsisStr(content.factor.category.supplier, 3)}]</IonBadge>}
                         </div>
                         <div className="blsl">
-                            {content && utils.fromValue(content.factor.value,18).toFixed(3)}
+                            {content && utils.fromValue(content.factor.value, 18).toFixed(3)}
                             {/*<div className="balance-text">Balance</div>*/}
                         </div>
-                        <div style={{width: 54, height: 54,background: "#fff",borderRadius:'50%',padding: 3}}>
-                            <img style={{borderRadius:'50%'}} src={msg && msg.actor ?utils.getDisPlayUrl(msg.actor.avatar):"./assets/img/default-avatar.png"} width="100%" height="100%"/>
+                        <div style={{width: 54, height: 54, background: "#fff", borderRadius: '50%', padding: 3}}>
+                            <img style={{borderRadius: '50%'}}
+                                 src={msg && msg.actor ? utils.getDisPlayUrl(msg.actor.avatar) : "./assets/img/default-avatar.png"}
+                                 width="100%" height="100%"/>
                         </div>
 
                         <div className="slwSS">
@@ -72,34 +102,38 @@ export const AirdropInfoModal: React.FC<Props> = ({onClose, isOpen,owner,airdrop
                         </div>
 
                     </div>
-                    <div style={{position: "absolute", top: 0 ,right: 0,padding: '12px',color: '#fff'}} onClick={()=>{
-                        onClose();
-                    }}>
+                    <div style={{position: "absolute", top: 0, right: 0, padding: '12px', color: '#fff'}}
+                         onClick={() => {
+                             onClose();
+                         }}>
                         <IonIcon src={closeOutline} size="large"/>
                     </div>
+
                 </div>
 
-                <div style={{marginBottom: 20,padding: '0 12px 12px'}}>
-                    <div style={{color: "#000",background:"#fff"}} className="ssowSdc text-pre  recmt-context">
+                <div style={{marginBottom: 20, padding: '0 12px 12px'}}>
+                    <div style={{color: "#000", background: "#fff"}} className="ssowSdc text-pre  recmt-context">
                         {content && content.content}
                     </div>
                     {/*<div style={{fontSize:16,fontWeight:500,padding: '0 0 6px 12px'}}>Record</div>*/}
-                    <div style={{borderRadius: '0 0 8px 8px',overflow: "scroll",maxHeight:"42vh"}}>
+                    <div style={{borderRadius: '0 0 8px 8px', overflow: "scroll", maxHeight: "42vh"}}>
                         {
-                            airdropRecord && airdropRecord.length>0 ? (airdropRecord as Array<AirdropInfo>).map((v,i)=>{
-                                return <IonItem lines="none" color={owner == v.user ?"secondary":""} className="item-ion" key={i}>
+                            airdropRecord && airdropRecord.length > 0 ? (airdropRecord as Array<AirdropInfo>).map((v, i) => {
+                                return <IonItem lines="none" color={owner == v.user ? "secondary" : ""}
+                                                className="item-ion" key={i}>
                                     <IonAvatar slot="start">
-                                        <img src={msg && msg.actor ?utils.getDisPlayUrl(msg.actor.avatar):"./assets/img/default-avatar.png"}/>
+                                        <img
+                                            src={msg && msg.actor ? utils.getDisPlayUrl(msg.actor.avatar) : "./assets/img/default-avatar.png"}/>
                                     </IonAvatar>
                                     <IonLabel className="ion-text-wrap">
-                                        {msg && msg.actor && msg.actor.name? msg.actor.name:"Narrator"}
+                                        {msg && msg.actor && msg.actor.name ? msg.actor.name : "Narrator"}
                                         <p>{utils.ellipsisStr(v.user)}</p>
                                     </IonLabel>
                                     <IonLabel slot="end">
-                                        {utils.fromHexValue(v.amount,18).toFixed(3,1)}
+                                        {utils.fromHexValue(v.amount, 18).toFixed(3, 1)}
                                     </IonLabel>
                                 </IonItem>
-                            }):<div>
+                            }) : <div>
                                 <NoneData desc={"No Record"}/>
                             </div>
                         }

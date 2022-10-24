@@ -218,7 +218,7 @@ class TribeService implements ITribe {
     }
 
     picUpload = async (): Promise<{ url: string, themeColors: ThemeColors }> => {
-        await this.userCheckAuth()
+        // await this.userCheckAuth()
         return await this._picRpc.upload()
     }
 
