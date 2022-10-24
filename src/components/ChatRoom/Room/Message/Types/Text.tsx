@@ -169,7 +169,7 @@ export const Text: React.FC<Props> = ({
                     </div> :
                     msg.replayMsg.msgType == MessageType.Airdrop &&
                     <div style={{maxWidth: '300px'}}>
-                        <Airdrop msg={msg.replayMsg}/>
+                        <Airdrop msg={msg.replayMsg} keeper={keeper} isOwner={owner == msg.replayMsg.owner}/>
                     </div>
         }
     </div>
@@ -252,7 +252,7 @@ export const Text: React.FC<Props> = ({
                                                             </div>
                                                         }
                                                     </> : msg.msgType == MessageType.Airdrop && <>
-                                                    <Airdrop msg={msg} isOwner={owner == msg.owner}/>
+                                                    <Airdrop msg={msg} isOwner={owner == msg.owner} keeper={keeper}/>
                                                 </>
 
                                             }
@@ -286,7 +286,7 @@ export const Text: React.FC<Props> = ({
                                         "inherit", border: isOwnerPinned ? "1px solid #D8F20C" : "0"
                                 }}>
                                     {
-                                        msg.msgType == MessageType.Airdrop ? <Airdrop msg={msg} isOwner={owner == msg.owner}/> :<>
+                                        msg.msgType == MessageType.Airdrop ? <Airdrop msg={msg} isOwner={owner == msg.owner} keeper={keeper}/> :<>
                                             {
                                                 content.image && content.image.url &&
                                                 <div style={{borderRadius: 12, padding: '6px 6px 0 6px'}}>

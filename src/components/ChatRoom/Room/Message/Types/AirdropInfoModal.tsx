@@ -1,25 +1,16 @@
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {
-    IonButton, IonRow, IonCol,
-    IonButtons,
     IonContent,
     IonHeader, IonAvatar,
     IonModal, IonItem,
-    IonTitle, IonItemDivider,
-    IonToolbar,
     IonBadge, IonLabel, IonRadioGroup, IonRadio, IonText, IonInput, IonIcon, useIonToast
 } from "@ionic/react";
 import {AirdropContent, AirdropInfo, AirdropType, Message} from "../../../../../types";
-import {tribeService} from "../../../../../service/tribe";
 import {utils} from "../../../../../common";
-import {Text} from "./Text";
-import {FactorItem} from "../../../../Assets";
 import {NoneData} from "../../../../Data/None";
-import TextareaAutosize from "react-textarea-autosize";
 import {closeOutline, copyOutline, downloadOutline} from "ionicons/icons";
 import copy from "copy-to-clipboard";
-import useToast from "../../../../../../../../pancake/pancake-frontend/src/hooks/useToast";
 
 interface Props {
     onClose: () => void;
@@ -29,9 +20,10 @@ interface Props {
 
     airdropRecord: Array<AirdropInfo>;
     owner: string;
+    keeper: string;
 }
 
-export const AirdropInfoModal: React.FC<Props> = ({onClose, isOpen, owner, airdropRecord, msg}) => {
+export const AirdropInfoModal: React.FC<Props> = ({onClose, isOpen,keeper, owner, airdropRecord, msg}) => {
 
     const content = msg && msg.content as AirdropContent;
 
@@ -56,7 +48,7 @@ export const AirdropInfoModal: React.FC<Props> = ({onClose, isOpen, owner, airdr
                 <div style={{position: "relative"}}>
                     <img src="./assets/img/airdrop-info-head.png"/>
                     {
-                        owner == msg.role && airdropRecord && airdropRecord.length>0&& <div style={{
+                        owner && (keeper && keeper == owner || owner == msg.owner) && airdropRecord && airdropRecord.length>0&& <div style={{
                             position: "absolute",
                             top: 0,
                             left: 0,

@@ -1,10 +1,7 @@
 import * as React from 'react';
 import {AirdropContent, Message} from "../../../../../types";
-import {IonAvatar, IonIcon,IonBadge, IonText,IonLoading} from "@ionic/react";
+import {IonLoading} from "@ionic/react";
 import {utils} from "../../../../../common";
-import {PhotoProvider, PhotoView} from "react-photo-view";
-import {rocketOutline} from "ionicons/icons";
-import {FactorItem} from "../../../../Assets";
 import {useState} from "react";
 import {AirdropInfoModal} from "./AirdropInfoModal";
 import {tribeService} from "../../../../../service/tribe";
@@ -12,9 +9,10 @@ import {tribeService} from "../../../../../service/tribe";
 interface Props {
     msg: Message
     isOwner?: boolean
+    keeper: string;
 }
 
-export const Airdrop: React.FC<Props> = ({msg, isOwner}) => {
+export const Airdrop: React.FC<Props> = ({msg,keeper, isOwner}) => {
     const content: AirdropContent = msg.content as AirdropContent;
 
     const [showInfo,setShowInfo] = useState(false);
@@ -68,6 +66,6 @@ export const Airdrop: React.FC<Props> = ({msg, isOwner}) => {
             message={'Please wait...'}
             duration={50000}
         />
-        <AirdropInfoModal onClose={()=>setShowInfo(false)} owner={isOwner &&  msg.owner} isOpen={showInfo} msg={msg} airdropRecord={airdropRecord}/>
+        <AirdropInfoModal keeper={keeper} onClose={()=>setShowInfo(false)} owner={isOwner &&  msg.owner} isOpen={showInfo} msg={msg} airdropRecord={airdropRecord}/>
     </>
 }
