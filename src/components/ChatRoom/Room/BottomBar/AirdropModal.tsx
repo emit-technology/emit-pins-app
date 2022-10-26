@@ -8,26 +8,18 @@ import {
     IonIcon,
     IonLabel, IonInput,
     IonModal,
-    IonText, IonTextarea,
-    IonTitle, IonRadioGroup, IonRadio,
+    IonTextarea,
+    IonTitle,
     IonToolbar, useIonToast, IonRow, IonCol, IonBadge, IonLoading
 } from "@ionic/react";
 import {
-    arrowForwardOutline,
     chevronDownOutline,
-    chevronForwardOutline,
     closeOutline,
-    happyOutline,
-    openOutline
 } from "ionicons/icons";
-import {usePopperTooltip} from "react-popper-tooltip";
-import {EmojiBlock} from "../../../Emojis/block";
-import TextareaAutosize from 'react-textarea-autosize';
-import {FactorItem} from "../../../Assets/Factor";
 import {Balance} from "../../../Assets";
 import {emitBoxSdk} from "../../../../service/emitBox";
 import {ChainType, Factor} from "@emit-technology/emit-lib";
-import {AirdropType, FunctionReq, TribeRole} from "../../../../types";
+import {FunctionReq, TribeRole} from "../../../../types";
 import config from "../../../../common/config";
 import {utils} from "../../../../common";
 
@@ -177,7 +169,7 @@ export const AirdropModal: React.FC<Props> = ({onOk, actor, onClose, isOpen,owne
                             setShowLoading(false)
                             onClose();
                         }).catch(e=>{
-                            setShowLoading(true)
+                            setShowLoading(false)
                             const err = typeof e =='string'?e:e.message;
                             present({message: err,color:"danger",duration: 2000,position: "top"}).catch(e=>console.error(e))
                         })
