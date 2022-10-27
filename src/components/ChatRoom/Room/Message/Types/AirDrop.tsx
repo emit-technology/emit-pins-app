@@ -8,11 +8,11 @@ import {tribeService} from "../../../../../service/tribe";
 
 interface Props {
     msg: Message
-    isOwner?: boolean
+    owner: string
     keeper: string;
 }
 
-export const Airdrop: React.FC<Props> = ({msg,keeper, isOwner}) => {
+export const Airdrop: React.FC<Props> = ({msg,keeper, owner}) => {
     const content: AirdropContent = msg.content as AirdropContent;
 
     const [showInfo,setShowInfo] = useState(false);
@@ -66,6 +66,6 @@ export const Airdrop: React.FC<Props> = ({msg,keeper, isOwner}) => {
             message={'Please wait...'}
             duration={50000}
         />
-        <AirdropInfoModal keeper={keeper} onClose={()=>setShowInfo(false)} owner={msg.owner} isOpen={showInfo} msg={msg} airdropRecord={airdropRecord}/>
+        <AirdropInfoModal keeper={keeper} onClose={()=>setShowInfo(false)} owner={owner} isOpen={showInfo} msg={msg} airdropRecord={airdropRecord}/>
     </>
 }
