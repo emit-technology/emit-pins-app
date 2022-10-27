@@ -34,7 +34,7 @@ import {
     HatenaIcon,
 } from 'next-share';
 import {
-    IonButton, IonText,
+    IonButton,
     IonRow,
     IonCol,
     IonButtons,

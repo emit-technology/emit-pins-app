@@ -60,7 +60,8 @@
   width: 100%;
   align-items: center;
   flex-direction: column;
-  overflow: hidden;
+  //overflow-x: hidden;
+  //min-height: 120px;
   //margin: 6px 0;
 }
 
@@ -1061,4 +1062,8 @@ ion-radio.radio-checked::part(mark) {
   font-family: SFBold;
   font-size: 24px;
   color: var(--ion-color-secondary);
+}
+
+.box-max-width {
+  max-width: 100%;
 }

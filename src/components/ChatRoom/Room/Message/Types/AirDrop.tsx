@@ -66,6 +66,6 @@ export const Airdrop: React.FC<Props> = ({msg,keeper, isOwner}) => {
             message={'Please wait...'}
             duration={50000}
         />
-        <AirdropInfoModal keeper={keeper} onClose={()=>setShowInfo(false)} owner={isOwner &&  msg.owner} isOpen={showInfo} msg={msg} airdropRecord={airdropRecord}/>
+        <AirdropInfoModal keeper={keeper} onClose={()=>setShowInfo(false)} owner={msg.owner} isOpen={showInfo} msg={msg} airdropRecord={airdropRecord}/>
     </>
 }

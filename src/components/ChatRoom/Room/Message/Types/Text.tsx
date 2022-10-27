@@ -204,7 +204,7 @@ export const Text: React.FC<Props> = ({
                                         </IonAvatar> : <div style={{width: '48px'}}></div>
                                 }
                             </div>
-                            <div style={{maxWidth: '72%'}}>
+                            <div className="box-max-width">
                                 {
                                     !hideTime ? <div style={{textAlign: isOwner ? "right" : "left", padding: "3px"}}>
                                         <b style={{fontSize: '16px'}}>
