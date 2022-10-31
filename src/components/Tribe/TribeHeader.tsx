@@ -45,8 +45,8 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
             if(!stickyMsg || !stickyMsg.groupId){
                 const rest =  await tribeWorker.getPinnedMessageArray(config.tribeId,1, 100000,[
                     "tribeIdAndGroupId",
-                    [config.tribeId,""]
-                    ,[config.tribeId,""]
+                    [config.tribeId,'']
+                    ,[config.tribeId,''],"next"
                 ])
                 const data = rest.data.filter(v=>v.records && (v.records.length>0 && v.records[0].msgStatus !== MessageStatus.removed || v.records.length ==0));
                 setStickies({data:data,total: data.length})

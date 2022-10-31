@@ -10,7 +10,7 @@
     "@capacitor/core": "^3.6.0",
     "@capacitor/ios": "3.6.0",
     "@capacitor/toast": "^4.0.1",
-    "@emit-technology/emit-account-node-sdk": "1.2.2",
+    "@emit-technology/emit-account-node-sdk": "1.2.3",
     "@ionic/react": "^6.0.0",
     "@ionic/react-router": "^6.0.0",
     "@testing-library/jest-dom": "^5.11.9",
@@ -46,7 +46,8 @@
     "workbox-routing": "^5.1.4",
     "workbox-strategies": "^5.1.4",
     "workbox-streams": "^5.1.4",
-    "@emit-technology/emit-lib": "1.1.0"
+    "@emit-technology/emit-lib": "1.1.0",
+    "walletService": "file:../../emit-wallet-worker"
   },
   "scripts": {
     "start": "react-app-rewired start",
@@ -130,6 +131,7 @@
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "styled-components": "^5.3.5",
+    "ts-loader": "^9.4.1",
     "url": "^0.11.0",
     "util": "^0.12.4",
     "websocket": "^1.0.34",

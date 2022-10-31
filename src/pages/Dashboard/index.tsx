@@ -41,6 +41,12 @@ import {MessageContentVisual} from "../../components/ChatRoom/Room/Message";
 import Avatar from "react-avatar";
 import {ShareEx} from "../../components/utils/ShareEx";
 import {SideBar} from "../../components/ChatRoom/SideBar";
+import {AccountUnlock} from "../../components/Account/modal/Unlock";
+import {AccountList} from "../../components/Account/modal/List";
+import {ResetModal} from "../../components/Account/modal/Reset";
+import walletWorker from "../../worker/walletWorker";
+import {utils} from "../../common";
+import {CreateModal} from "../../components/Account/modal";
 
 
 interface State {
@@ -82,10 +88,17 @@ interface State {
     toastMsg?: string;
     isSessionAvailable: boolean
 
+    showUnlock: boolean;
+    showList: boolean;
+    showReset: boolean;
+    showCreate: boolean
+
 }
 
 interface Props {
     tribeId: string
+    router: any;
+    msgId?: string
 }
 
 let checkInterVal;
@@ -114,7 +127,13 @@ export class Dashboard extends React.Component<Props, State> {
         showShare: false,
         showToast: false,
         latestMgs: [],
-        isSessionAvailable: false
+        isSessionAvailable: false,
+
+        showUnlock: false,
+        showReset: false,
+        showList: false,
+        showCreate: false
+
     }
 
     componentDidMount() {
@@ -369,11 +388,44 @@ export class Dashboard extends React.Component<Props, State> {
         this.setState({showToast: f, toastMsg: msg})
     }
 
+    onAccount = async (account: AccountModel) => {
+        await tribeService.accountLogin(account)
+        await this.initData();
+    }
+
+
+    requestAccount = () => {
+        if (utils.useInjectAccount()) {
+            this.checkAccount().catch(e => console.error(e))
+        } else {
+            tribeService.getAccountAndLogin().then(() => {
+                this.initData();
+            }).catch(e => {
+                const err = typeof e == 'string' ? e : e.message;
+                this.setShowToast(true,err)
+            })
+        }
+    }
+
+    checkAccount = async () => {
+        const isLock = await walletWorker.isLocked();
+        if (isLock) {
+            const accounts = await walletWorker.accounts();
+            if (!accounts || accounts.length == 0) {
+                this.setState({showCreate: true})
+            } else {
+                this.setState({showUnlock: true})
+            }
+        } else {
+            this.setState({showList: true})
+        }
+    }
+
     render() {
         const {
-            owner, showActionSheet, isSessionAvailable, buttons, toastMsg, showShare, latestMgs, showToast, showPinnedMsg, userLimit,
+            owner, showActionSheet, isSessionAvailable,showCreate, buttons, toastMsg, showShare, latestMgs, showToast, showPinnedMsg, userLimit,
             showCreateTribe, isUpdating, isConnecting, groupMsgs, showMenusModal, groupPinnedMsg, showPinnedMsgDetailModal,
-            account, roles, tribeInfo, latestRole, datas, showTribeEdit, showPin
+            account, roles, tribeInfo, latestRole, datas, showTribeEdit, showPin, showList, showReset, showUnlock
         } = this.state;
 
         return (
@@ -393,22 +445,10 @@ export class Dashboard extends React.Component<Props, State> {
                             </IonHeader>
                             <IonContent className="ion-padding">
 
-                                <SideBar onRequestAccount={() => {
-                                    tribeService.getAccountAndLogin().then(() => {
-                                        this.initData().catch(e => console.error(e))
-                                    }).catch(e => {
-                                        const err = typeof e == 'string'?e:e.message;
-                                        this.setShowToast(true,err)
-                                        console.error(e)
-                                    })
+                                <SideBar router={this.props.router}  onRequestAccount={() => {
+                                    this.initData().catch(e => console.error(e))
                                 }} account={account} onLogout={() => {
-                                    tribeService.userLogout().then(() => {
-                                        this.initData().catch(e => console.error(e))
-                                    }).catch(e => {
-                                        const err = typeof e == 'string'?e:e.message;
-                                        this.setShowToast(true,err)
-                                        console.error(e)
-                                    })
+                                    this.initData().catch(e => console.error(e))
                                 }} isSessionAvailable={isSessionAvailable}/>
                             </IonContent>
                         </IonMenu>
@@ -498,11 +538,7 @@ export class Dashboard extends React.Component<Props, State> {
                                     {
                                         isConnecting == WsStatus.tokenInvalid &&
                                         <div className="not-connect" onClick={() => {
-                                            tribeService.getAccountAndLogin().then(() => {
-                                                this.initData().catch(e => console.error(e))
-                                            }).catch(e => {
-                                            })
-
+                                            this.requestAccount();
                                         }}><IonText color="primary">No connection , <span style={{
                                             textDecoration: "underline",
                                             textUnderlineOffset: '4px',
@@ -550,6 +586,7 @@ export class Dashboard extends React.Component<Props, State> {
                                         showPin={showPin}
                                         userLimit={userLimit}
                                         selectRole={latestRole}
+                                        shareMsgId={this.props.msgId}
                                     />
 
                                     <BottomBar tribeInfo={tribeInfo} owner={owner} userLimit={userLimit}
@@ -629,7 +666,43 @@ export class Dashboard extends React.Component<Props, State> {
                     this.setState({showPinnedMsgDetailModal: false})
                 }} data={{data: groupPinnedMsg, total: groupPinnedMsg.length}} tribeInfo={tribeInfo}/>
 
+                <AccountList isOpen={showList} onOk={(account) => {
+                    this.onAccount(account).then(() => {
+                        this.setState({showList: false})
+                    }).catch(e => {
+                        const err = typeof e == 'string' ? e : e.message;
+                        this.setShowToast(true, err)
+                        console.error(e)
+                    })
+                }} onClose={() => this.setState({showList: false})}/>
 
+                <AccountUnlock isOpen={showUnlock} onOk={() => {
+                    this.setState({showUnlock: false, showList: true})
+                }} onClose={() => {
+                    this.setState({showUnlock: false})
+                }} onForgot={() => {
+                    this.setState({showUnlock: false, showReset: true})
+                }}/>
+
+                <ResetModal isOpen={showReset} onOk={() => {
+
+                }} onClose={() => {
+                    this.setState({showReset: false})
+                }} onUnlock={() => {
+                    this.setState({showReset: false, showUnlock: true})
+                }}/>
+
+                <CreateModal isOpen={showCreate} onOk={(account) => {
+                    this.onAccount(account).then(() => {
+                        this.setState({showCreate: false})
+                    }).catch((e) => {
+                        const err = typeof e == 'string' ? e : e.message;
+                        this.setShowToast(true,err)
+                        this.setState({showCreate: false})
+                    });
+                }} onClose={() => {
+                    this.setState({showCreate: false})
+                }}/>
             </>
         );
     }

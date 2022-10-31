@@ -62,6 +62,7 @@ interface Props {
     groupMsg?: Array<GroupMsg>
     userLimit?: UserLimit
     selectRole?: TribeRole
+    shareMsgId?:string
 }
 
 const pageSize = 1000000;
@@ -130,7 +131,7 @@ const setVisibleStartIndex = (n: number) => {
     visibleStartIndex = n;
 }
 
-export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit,selectRole, pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
+export const MessageContentVisual: React.FC<Props> = ({groupMsg, shareMsgId, userLimit,selectRole, pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
     const dispatchData = useAppSelector(state => state.jsonData);
     const dispatch = useAppDispatch();
     const [comments, setComments] = useState([]);
@@ -350,7 +351,8 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, userLimit,selec
         if (!pinnedStickies && comments.length > 0) {
             console.log("scroll to last visit max=[%d], current=[%d] ", maxVisibleIndex, currentVisibleIndex)
             if (shouldScroll++ == 0) {
-                const last = getCurrentVisible();
+                const lastId = comments.findIndex(value => (value as PinnedSticky).records && (value as PinnedSticky).records && (value as PinnedSticky).records.length>0 && (value as PinnedSticky).records[0].id == shareMsgId );
+                const last = shareMsgId? lastId-1:getCurrentVisible();
                 console.log("scroll to last: ", last)
                 if (last >= 0) {
                     setTimeout(() => {

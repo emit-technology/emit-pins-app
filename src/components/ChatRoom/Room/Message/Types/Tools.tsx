@@ -42,7 +42,7 @@ export const Tools:React.FC<Props> = ({msg,isChecked,showPin, onReplay,
                 // onHide();
                 onReplay(msg)
             }}>
-                <IonIcon size="small" src={arrowUndoOutline} />
+                <IonIcon size="small" src={arrowUndoOutline} style={{pointerEvents: "none"}}/>
             </div>
         }
         {
@@ -51,7 +51,7 @@ export const Tools:React.FC<Props> = ({msg,isChecked,showPin, onReplay,
                 // onHide();
                 onEdit(msg)
             }}>
-                <IonIcon size="small" src={createOutline}/>
+                <IonIcon size="small" src={createOutline} style={{pointerEvents: "none"}}/>
             </div>
         }
         {
@@ -60,7 +60,7 @@ export const Tools:React.FC<Props> = ({msg,isChecked,showPin, onReplay,
                 // onHide();
                 onDelete(msg)
             }}>
-                <IonIcon size="small" src={trashOutline} />
+                <IonIcon size="small" src={trashOutline}  style={{pointerEvents: "none"}}/>
             </div>
         }
         {
@@ -69,7 +69,7 @@ export const Tools:React.FC<Props> = ({msg,isChecked,showPin, onReplay,
                 // onHide();
                 onShare(msg)
             }}>
-                <IonIcon size="small" src={shareOutline} />
+                <IonIcon size="small" src={shareOutline}   style={{pointerEvents: "none"}}/>
             </div>
         }
     </div>

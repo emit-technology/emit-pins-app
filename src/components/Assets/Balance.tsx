@@ -19,7 +19,6 @@ import {Factor} from "@emit-technology/emit-lib";
 import {utils} from "../../common";
 import {closeCircleOutline, closeOutline, linkOutline, openOutline, walletOutline} from "ionicons/icons";
 import {NoneData} from "../Data/None";
-import config from "../../common/config";
 
 interface Props {
     isOpen: boolean;

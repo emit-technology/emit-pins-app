@@ -92,6 +92,17 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
         }
     }
 
+    const getStartMsgId = ()=>{
+        if(!latestMsg || latestMsg.length ==0){
+            return ""
+        }
+        if(showHistory){
+            return latestMsg[0].id;
+        }else{
+            return latestMsg[latestMsg.length-1].id
+        }
+    }
+
     const setLastImageId = (shareImageId:string)=>{
         if(!latestMsg || latestMsg.length ==0){
             return
@@ -102,6 +113,7 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
             selfStorage.setItem(`lastShareImgId_${latestMsg[latestMsg.length-1].id}`,shareImageId)
         }
     }
+
     const sharePng = () => {
         const lastShareImgId = getLastImageId();
         if(!lastShareImgId){
@@ -124,7 +136,7 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
                     setLoading(false)
                     console.log(data);
                     const shareImageId = data["filename"].replace(".png", "");
-                    setUrl(`${config.baseUrl}/verse/${tribeInfo.tribeId}/${shareImageId}`)
+                    setUrl(`${config.baseUrl}/verse/${tribeInfo.tribeId}/${shareImageId}/${getStartMsgId()}`)
                     setLastImageId(shareImageId)
                     setShowButtons(true);
                 }).catch(e => {
@@ -133,7 +145,7 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
                 })
             });
         }else{
-            setUrl(`${config.baseUrl}/verse/${tribeInfo.tribeId}/${lastShareImgId}`)
+            setUrl(`${config.baseUrl}/verse/${tribeInfo.tribeId}/${lastShareImgId}/${getStartMsgId()}`)
             setShowButtons(true);
         }
     }

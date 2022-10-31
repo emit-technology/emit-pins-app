@@ -24,6 +24,7 @@ import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import tribeWorker from "../../worker/imWorker";
 import {utils} from "../../common";
 import {App} from "@capacitor/app";
+import walletWorker from "../../worker/walletWorker";
 // import WebSocket from 'ws';
 
 const W3CWebSocket = require('websocket').w3cwebsocket;
@@ -179,6 +180,9 @@ class TribeService implements ITribe {
     getAccountAndLogin = async (): Promise<string> => {
         const accountLocal = await emitBoxSdk.getAccount();
 
+        if(utils.useInjectAccount()){
+            return await tribeService.accountLogin(accountLocal)
+        }
         const rest: { error: string, result: AccountModel } = await emitBoxSdk.emitBox.requestAccount(accountLocal && accountLocal.accountId);
         if(!rest || rest.error){
             return Promise.reject(rest.error)
@@ -207,6 +211,20 @@ class TribeService implements ITribe {
 
         return Promise.reject("Login failed");
 
+    }
+
+    accountLogin = async (account: AccountModel): Promise<string>=>{
+        const sig: any = await walletWorker.personSignMsg(ChainType.EMIT.valueOf(),
+            {data: "0x" + Buffer.from("emit-trib login msg").toString("hex")},
+            account.accountId)
+        const authToken = await tribeService.userLogin({
+            r: sig["r"] as string,
+            s: sig["s"] as string,
+            v: sig["v"] as string
+        });
+        await emitBoxSdk.setAccount(account)
+        tribeService.setAuthToken(authToken);
+        return authToken;
     }
 
     userLogout = async (): Promise<boolean> => {

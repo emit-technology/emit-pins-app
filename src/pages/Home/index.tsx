@@ -12,7 +12,6 @@ import {AccountModel} from "@emit-technology/emit-lib";
 import {emitBoxSdk} from "../../service/emitBox";
 import {TribeLayout} from "../../components/Tribe/TribeLayout";
 import selfStorage from "../../common/storage";
-import {fontSize} from "html2canvas/dist/types/css/property-descriptors/font-size";
 
 interface State {
     segment: string
@@ -28,7 +27,7 @@ interface State {
 }
 
 interface Props {
-
+    router: any;
 }
 
 export class HomePage extends React.Component<Props, State> {
@@ -134,14 +133,8 @@ export class HomePage extends React.Component<Props, State> {
                     {/*<IonMenuToggle>*/}
                     {/*    <IonButton>Click to close the menu</IonButton>*/}
                     {/*</IonMenuToggle>*/}
-                    <SideBar onRequestAccount={() => {
-                        tribeService.getAccountAndLogin().then(() => {
-                            this.init().catch(e => {
-                                const err = typeof e == 'string' ? e : e.message;
-                                this.setShowToast(true, err)
-                                console.error(e)
-                            })
-                        }).catch(e => {
+                    <SideBar router={this.props.router} onRequestAccount={() => {
+                        this.init().catch(e => {
                             const err = typeof e == 'string' ? e : e.message;
                             this.setShowToast(true, err)
                             console.error(e)

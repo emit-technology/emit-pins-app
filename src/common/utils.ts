@@ -81,6 +81,11 @@ export const utils = {
         // return date.toString();
     },
 
+    dateFormatStr(date: Date) {
+        // return format("MM/dd hh:mm", date);
+        return date.toString();
+    },
+
     toHash(v: string): string {
         return Buffer.alloc(32, 0)
             .fill(Buffer.from(v), 0, Buffer.from(v).length)
@@ -176,8 +181,24 @@ export const utils = {
         return false;
     },
 
-    isSafari: ():boolean =>{
+    isAndroid: (): boolean => {
+        //@ts-ignore
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        //@ts-ignore
+        if (/android/i.test(navigator.userAgent) && !window.MSStream) {
+            return true
+        }
+        return false;
+    },
+
+    isSafari: (): boolean => {
         return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    },
+
+    useInjectAccount: (): boolean => {
+        // return true;
+        // TODO For Test
+        return utils.isIos() || utils.isAndroid() || utils.isSafari();
     },
 
     formatCategoryString: (category: Category): string => {
@@ -185,8 +206,8 @@ export const utils = {
         return name;
     },
 
-    assetUrl :():string =>{
-        if(utils.isSafari() || utils.isIos()){
+    assetUrl: (): string => {
+        if (utils.isSafari() || utils.isIos()) {
             return "https://pins.emit.technology/asset/"
         }
         return "https://assets.emit.technology/";

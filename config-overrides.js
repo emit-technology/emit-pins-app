@@ -1,5 +1,5 @@
 const webpack = require('webpack');
-const WorkerPlugin = require("worker-plugin");
+// const WorkerPlugin = require("worker-plugin");
 const path = require('path');
 
 const {
@@ -8,7 +8,8 @@ const {
     addWebpackPlugin,
     adjustStyleLoaders,
     addWebpackModuleRule,
-    setWebpackPublicPath
+    setWebpackPublicPath,
+    addWebpackAlias
 } = require("customize-cra");
 
 
@@ -22,13 +23,13 @@ const publicPathPlugin = (config, env) => {
 const config = override(
     // setWebpackPublicPath("./"),
     addWebpackResolve({
-        fallback:  {
+        fallback: {
             "buffer": require.resolve('buffer'),
             "fs": false,
             "tls": false,
             "net": false,
             "http": require.resolve("stream-http"),
-            "zlib": require.resolve("browserify-zlib") ,
+            "zlib": require.resolve("browserify-zlib"),
             "path": require.resolve("path-browserify"),
             "stream": require.resolve("stream-browserify"),
             // "util": require.resolve("util/"),
@@ -40,17 +41,39 @@ const config = override(
         }
     }),
     addWebpackPlugin(new webpack.ProvidePlugin({
-        Buffer: ['buffer','Buffer'],
-    }),new WorkerPlugin()),
+        Buffer: ['buffer', 'Buffer'],
+    })),
+
+    addWebpackPlugin(new webpack.ProvidePlugin({
+        process: 'process/browser',
+    })),
+
+
+    addWebpackAlias({
+        process: "process/browser"
+    }),
+
+    addWebpackPlugin(new webpack.DefinePlugin({
+        process: {env: {}}
+    })),
+
+    // addWebpackPlugin(new WorkerPlugin()),
 
     addWebpackModuleRule(
         {
-            test: /\.worker\.js$/,
-            use: { loader: 'worker-loader' }
+            test: /\.worker\.(c|m)?js$/i,
+            loader: "worker-loader",
         }
     ),
 
-    adjustStyleLoaders(({ use: [ , css, postcss, resolve, processor ] }) => {
+    addWebpackModuleRule(
+        {
+            test: /\.(ts|tsx)$/,
+            use: {loader: 'ts-loader'},
+        }
+    ),
+
+    adjustStyleLoaders(({use: [, css, postcss, resolve, processor]}) => {
         css.options.sourceMap = true;         // css-loader
         postcss.options.sourceMap = true;     // postcss-loader
         // when enable pre-processor,

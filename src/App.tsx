@@ -48,7 +48,7 @@ const App: React.FC = () => {
     // const Tip = ()=>  mobileWidth?<img src="./assets/img/snaptip2.png" style={{height:'100%', width:'100%'}}/>:<img src="./assets/img/snaptip.png"  style={{height:'100%', width:'100%'}}/>
     // console.log("page show tips",showTip);
     const baseURL = process.env.NODE_ENV === 'production' ? config.baseUrl : process.env.REACT_APP_DEV_API_URL;
-
+    const routerRef = useRef<HTMLIonRouterOutletElement | null>(null);
     return <>
         {
             <div className={`page`}>
@@ -57,12 +57,19 @@ const App: React.FC = () => {
                         <Provider store={store}>
                             <Router basename={baseURL}>
                                 <Switch>
-
                                     <Route exact path="/:tribeId" component={(props: any) => {
                                         const tribeId = props.match.params.tribeId;
                                         config.tribeId = tribeId;
-                                        return <Dashboard tribeId={tribeId}/>
+                                        return <Dashboard tribeId={tribeId} router={routerRef.current}/>
                                     }}/>
+
+                                    <Route exact path="/:tribeId/:msgId" component={(props: any) => {
+                                        const tribeId = props.match.params.tribeId;
+                                        const msgId = props.match.params.msgId;
+                                        config.tribeId = tribeId;
+                                        return <Dashboard tribeId={tribeId} router={routerRef.current} msgId={msgId}/>
+                                    }}/>
+
 
                                     {/*<Route exact path="/home" component={(props:any)=>{*/}
                                     {/*    return <HomePage />*/}
@@ -73,7 +80,7 @@ const App: React.FC = () => {
                                         //     window.location.href = `./4E6BFunxNE5`
                                         // },500)
                                         // config.tribeId = tribeId;
-                                        return <HomePage />
+                                        return <HomePage  router={routerRef.current}/>
                                     }}/>
                                 </Switch>
                             </Router>

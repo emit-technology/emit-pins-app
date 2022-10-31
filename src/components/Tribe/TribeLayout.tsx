@@ -4,6 +4,8 @@ import {utils} from "../../common";
 import {XBlock, XMasonry} from "react-xmasonry";
 import config from "../../common/config";
 import {Airdrop} from "../ChatRoom/Room/Message/Types";
+import {IonIcon} from "@ionic/react";
+import {gitBranchOutline, gitBranchSharp} from "ionicons/icons";
 
 interface Props {
     data: Array<TribeInfo>
@@ -37,7 +39,11 @@ export const TribeLayout: React.FC<Props> = ({data,tribeTimeMap}) => {
                                     <div style={{padding: "0px 0 3px 0",position: "relative"}}>{v.title} {
                                         v.tribeId == config.defaultTribes &&
                                         <div className="cert-icon"><img src="./assets/img/cert.png" className="cert-icon" width="100%" height="100%"/></div>
-                                    }</div>
+                                     }
+                                        {
+                                            v.forked && v.forked.length>0 && <IonIcon src={gitBranchSharp} color="primary"/>
+                                        }
+                                    </div>
                                     {/*<div>{v.theme.themeTag}</div>*/}
                                     <div>{v.tribeId}</div>
                                 </div>
