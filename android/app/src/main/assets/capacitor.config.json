@@ -1,0 +1,6 @@
+{
+	"appId": "technology.emit.pins",
+	"appName": "EMIT PINs",
+	"webDir": "build",
+	"bundledWebRuntime": false
+}
