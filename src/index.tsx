@@ -34,7 +34,7 @@ AppPlugin.addListener("appUrlOpen",(appUrlOpen)=>{
 //   </React.StrictMode>,
 //   document.getElementById('root')
 // );
-defineCustomElements(window);
+defineCustomElements(window).catch(e=>console.error("defineCustomElements error: ",e));
 
 // console.log=(function (oriLogFunc) {
 //     return function () {

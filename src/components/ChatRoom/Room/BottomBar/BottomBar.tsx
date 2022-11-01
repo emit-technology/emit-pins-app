@@ -297,7 +297,7 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                                 }
                                             }
                                             //@ts-ignore
-                                        }} onBlur={emitChanges.bind(this)} id="msgText" autoFocus rows={1} maxLength={1024} ref={textRef} wrap='hard'
+                                        }} onBlur={emitChanges.bind(this)} id="msgText" rows={1} maxLength={1024} ref={textRef} wrap='hard'
                                                           placeholder={tribeInfo && owner !== tribeInfo.keeper && userLimit?`msg (${userLimit && userLimit.msgLeft}/${userLimit && userLimit.maxMsgCount}) , likes (${userLimit && userLimit.supportLeft}/${userLimit && userLimit.maxSupportCount}) `:`Your messages`}
                                                       className="msg-input"/>
 

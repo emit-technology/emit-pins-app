@@ -16,7 +16,7 @@ import walletWorker from "../../../worker/walletWorker";
 import {
     closeOutline,
     createOutline,
-    downloadOutline,
+    downloadOutline, eyeOffOutline, eyeOutline,
     refreshCircleOutline,
 } from "ionicons/icons";
 import './create.css';
@@ -36,6 +36,7 @@ export const CreateModal: React.FC<Props> = ({isOpen, onOk, onClose}) => {
     const [rIndex, setRIndex] = useState(-1);
     const [showTip, setShowTip] = useState(false);
     const [showLoading, setShowLoading] = useState(false);
+    const [showEye, setShowEye] = useState(false);
     const [mnemonic, setMnemonic] = useState([]);
     const [tempMnemonic, setTempMnemonic] = useState([]);
     const passwordRef = React.createRef();
@@ -59,6 +60,22 @@ export const CreateModal: React.FC<Props> = ({isOpen, onOk, onClose}) => {
     }
 
     const confirm = async () => {
+        //@ts-ignore
+        if (!passwordRef || !passwordCfmRef || !passwordRef.current || !passwordCfmRef.current || passwordRef.current && !passwordRef.current.value || passwordCfmRef.current && !passwordCfmRef.current.value) {
+            present({position: "top", duration: 2000, color: "danger", message: "Please input password!"})
+            return
+        }
+        //@ts-ignore
+        if (passwordRef.current.value.length < 8) {
+            present({position: "top", duration: 2000, color: "danger", message: "Password at least 8 characters"})
+            return
+        }
+        //@ts-ignore
+        if (passwordRef.current.value !== passwordCfmRef.current.value) {
+            present({position: "top", duration: 2000, color: "danger", message: "Password don't match!"})
+            return
+        }
+
         //@ts-ignore
         const accountId = await walletWorker.importMnemonic(mnemonic.join(" "), "Account1", passwordRef.current.value, "", "");
         const account: AccountModel = await walletWorker.accountInfo(accountId)
@@ -181,9 +198,17 @@ export const CreateModal: React.FC<Props> = ({isOpen, onOk, onClose}) => {
                 <IonItem>
                     <IonLabel className="ion-text-wrap">
                         <div className="men-title">
-                            Write down these words <IonIcon src={refreshCircleOutline}
+                            Write down these words &nbsp;<IonIcon src={refreshCircleOutline}
                                                             style={{cursor: "pointer", transform: 'translateY(4px)'}}
                                                             color="primary" onClick={() => genMen()}/>
+                            &nbsp; {
+                            !showEye ? <IonIcon src={eyeOffOutline}
+                                               style={{cursor: "pointer", transform: 'translateY(4px)'}}
+                                               color="primary" onClick={() => setShowEye(true)}/>:
+                                <IonIcon src={eyeOutline}
+                                         style={{cursor: "pointer", transform: 'translateY(4px)'}}
+                                         color="primary" onClick={() => setShowEye(false)}/>
+                        }
                         </div>
                         <div className="men-box">
                             <IonRow>
@@ -194,7 +219,7 @@ export const CreateModal: React.FC<Props> = ({isOpen, onOk, onClose}) => {
                                                 <span className="men-num"><IonText
                                                     color="primary">{index + 1}. </IonText></span>
                                                 <span className="men-text">
-                                            <IonText color="dark">{value}</IonText>
+                                            <IonText color="dark">{showEye?value:"***"}</IonText>
                                         </span>
                                             </div>
                                         </IonCol>
@@ -230,7 +255,7 @@ export const CreateModal: React.FC<Props> = ({isOpen, onOk, onClose}) => {
                 <div style={{marginTop: 12}}>
                     <IonButton expand="block" disabled={showLoading} onClick={() => {
                         setShowLoading(true);
-                        preBackup().then(()=>{
+                        confirm().then(()=>{
                             setShowLoading(false);
                         }).catch(e => {
                             setShowLoading(false);

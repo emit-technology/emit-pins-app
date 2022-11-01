@@ -196,8 +196,8 @@ export const utils = {
     },
 
     useInjectAccount: (): boolean => {
-        // return true;
         // TODO For Test
+        // return true;
         return utils.isIos() || utils.isAndroid() || utils.isSafari();
     },
 

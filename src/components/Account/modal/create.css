@@ -31,6 +31,36 @@
         --max-width: 90vw !important;
         --max-height: 250px !important;
     }
+
+    .account-info-modal{
+        --max-width: 90vw;
+        --max-height: 360px !important;
+        --border-radius: 25px;
+    }
+
+    .account-qr-box{
+        height: 280px !important;
+        border-radius: 25px 25px 0 0 !important;
+    }
+
+    .account-address-text {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        word-break: break-all;
+        font-family: SFBold;
+        font-size: 18px;
+        font-weight: 600;
+        padding: 0 0 0 0 !important;
+        text-align: center;
+    }
+}
+
+.account-info-modal{
+    --max-width: 90vw;
+    --max-height: 300px;
+    --border-radius: 25px;
 }
 
 /*.assets-modal{*/
@@ -79,4 +109,62 @@
     align-content: center;
     align-items: center;
     justify-content: space-evenly;
+}
+
+.account-qr-box{
+    background-image: url("../../../img/account-card.png");
+    height: 220px;
+    border-radius: 25px 25px 0 0;
+    background-size: 100% 100%;
+    background-position: center;
+    padding: 6px 12px;
+}
+
+.account-qr-fot {
+    height: 60px;
+    width: 100%;
+}
+
+.account-qr-code{
+    background: #fff;
+    padding: 12px;
+    width: 160px;
+    height: 160px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+}
+
+.account-info-icon{
+    width: 100%;
+    display: flex;
+    padding: 12px 32px 0 12px;
+    justify-content: flex-end;
+}
+
+.account-info-icon div{
+    border: 2px solid #F5F5F5;
+    /*padding: 1px 2px 1px 2px;*/
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+}
+
+.account-address-text{
+    height: 100%;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    word-break: break-all;
+    font-family: SFBold;
+    font-size: 18px;
+    font-weight: 600;
+    padding: 0 18px 0 0;
+}
+
+.account-bt-icon{
+    font-size: 24px !important;
+    transform: translate(4px,4px);
+    cursor: pointer;
 }

@@ -35,14 +35,14 @@ export class BaseRpc {
         try {
             console.log("upload....");
 
-            if (utils.isIos()) {
-                const permissions = await Camera.checkPermissions()
-                console.log(permissions, "permissionsReq")
-                if (permissions.photos != "granted") {
-                    const permissionsReq = await Camera.requestPermissions()
-                    console.log(permissionsReq, "permissionsReq==")
-                }
-            }
+            // if (utils.isIos()) {
+            //     const permissions = await Camera.checkPermissions()
+            //     console.log(permissions, "permissionsReq")
+            //     if (permissions.photos != "granted") {
+            //         const permissionsReq = await Camera.requestPermissions()
+            //         console.log(permissionsReq, "permissionsReq==")
+            //     }
+            // }
 
             const domm = document.querySelector('#_capacitor-camera-input');
             if (domm) {
