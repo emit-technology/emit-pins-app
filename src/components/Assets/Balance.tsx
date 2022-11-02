@@ -33,11 +33,13 @@ export const Balance: React.FC<Props> = ({isOpen, onSelect, factors,onClose}) =>
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} initialBreakpoint={0.5} breakpoints={[0, 0.5, 0.75]}>
             <IonHeader collapse="fade">
                 <IonToolbar>
-                    <IonButtons slot="start">
-                        <IonButton onClick={() => {
-                            window.open(utils.assetUrl())
-                        }}><IonIcon src={openOutline}/>Assets</IonButton>
-                    </IonButtons>
+                    {
+                        !utils.useInjectAccount() && <IonButtons slot="start">
+                            <IonButton onClick={() => {
+                                window.open(utils.assetUrl())
+                            }}><IonIcon src={openOutline}/>Assets</IonButton>
+                        </IonButtons>
+                    }
                     <IonTitle>EMIT Balance</IonTitle>
                     <IonButtons slot="end">
                         <IonButton onClick={() => onClose()}>Close</IonButton>

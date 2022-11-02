@@ -22,20 +22,20 @@ import {
     IonButtons, IonCol,
     IonContent,
     IonFab,
-    IonHeader,IonRow,
+    IonHeader, IonRow,
     IonIcon, IonItem, IonLabel,
     IonModal,
     IonTextarea,
     IonTitle,
     IonToolbar,
-    useIonAlert
+    useIonAlert, IonLoading
 } from '@ionic/react';
 import {
     arrowForwardOutline,
     chatboxEllipsesOutline,
     chevronDownOutline,
     chevronUpOutline,
-    createOutline,
+    createOutline, gitBranchOutline,
     layersOutline
 } from "ionicons/icons";
 import {tribeService} from "../../../../service/tribe";
@@ -62,7 +62,8 @@ interface Props {
     groupMsg?: Array<GroupMsg>
     userLimit?: UserLimit
     selectRole?: TribeRole
-    shareMsgId?:string
+    shareMsgId?: string
+    onFork?: (groupId:string) => Promise<string>;
 }
 
 const pageSize = 1000000;
@@ -131,13 +132,14 @@ const setVisibleStartIndex = (n: number) => {
     visibleStartIndex = n;
 }
 
-export const MessageContentVisual: React.FC<Props> = ({groupMsg, shareMsgId, userLimit,selectRole, pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
+export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMsgId, userLimit, selectRole, pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
     const dispatchData = useAppSelector(state => state.jsonData);
     const dispatch = useAppDispatch();
     const [comments, setComments] = useState([]);
     const [showModifyMsg, setShowModifyMsg] = useState(null);
 
     const [showShareModal, setShowShareModal] = useState(false);
+    const [showLoading, setShowLoading] = useState(false);
     const [shareMsgs, setShareMsgs] = useState([]);
     const [shareRoles, setShareRoles] = useState([]);
 
@@ -351,8 +353,8 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, shareMsgId, use
         if (!pinnedStickies && comments.length > 0) {
             console.log("scroll to last visit max=[%d], current=[%d] ", maxVisibleIndex, currentVisibleIndex)
             if (shouldScroll++ == 0) {
-                const lastId = comments.findIndex(value => (value as PinnedSticky).records && (value as PinnedSticky).records && (value as PinnedSticky).records.length>0 && (value as PinnedSticky).records[0].id == shareMsgId );
-                const last = shareMsgId? lastId-1:getCurrentVisible();
+                const lastId = comments.findIndex(value => (value as PinnedSticky).records && (value as PinnedSticky).records && (value as PinnedSticky).records.length > 0 && (value as PinnedSticky).records[0].id == shareMsgId);
+                const last = shareMsgId ? lastId - 1 : getCurrentVisible();
                 console.log("scroll to last: ", last)
                 if (last >= 0) {
                     setTimeout(() => {
@@ -485,7 +487,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, shareMsgId, use
                     }
                 }
                 dispatch(saveDataState({data: JSON.stringify({refresh: false, checked: false}), tag: 'checkedAllMsg'}))
-            }else if (dispatchData.tag == 'replayMsg' && dispatchData.data) {
+            } else if (dispatchData.tag == 'replayMsg' && dispatchData.data) {
                 let dataObj = JSON.parse(dispatchData.data);
                 if (!dataObj["msg"]) {
                     setReplayMsg(null)
@@ -516,9 +518,9 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, shareMsgId, use
         // console.log("set max visible=[%d]", n)
         setMaxVisibleIndex(n)
         selfStorage.setItem(`maxVisibleIndex_${config.tribeId}`, n)
-        const data:PinnedSticky = comments[n];
-        if(data){
-            selfStorage.setItem(`latest_view_${config.tribeId}`,data.records && data.records.length>0 && data.records[0].timestamp)
+        const data: PinnedSticky = comments[n];
+        if (data) {
+            selfStorage.setItem(`latest_view_${config.tribeId}`, data.records && data.records.length > 0 && data.records[0].timestamp)
         }
     }
 
@@ -599,7 +601,8 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, shareMsgId, use
                         <div className="inner" style={{maxWidth: '100%'}} onMouseOver={() => setCheckedMsgId(v.id)}>
                             {/*<div>{msgIndex}</div>*/}
                             <Text hideTime={!!v["hideTime"] && v["hideTime"] == 1}
-                                  keeper={tribeInfo && tribeInfo.keeper} onSupport={onSupport} checked={checked || v.msgType == MessageType.Airdrop} msg={v}
+                                  keeper={tribeInfo && tribeInfo.keeper} onSupport={onSupport}
+                                  checked={checked || v.msgType == MessageType.Airdrop} msg={v}
                                   owner={owner}
                                   showPin={v.msgStatus == MessageStatus.dashed && showPin}
                             />
@@ -665,8 +668,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, shareMsgId, use
                                     if (pinnedSticky) {
                                         if (pinnedSticky.records && pinnedSticky.records.length > 0
                                             && ((pinnedSticky.records[0].msgStatus !== MessageStatus.removed && pinnedSticky.records[0].msgStatus !== MessageStatus.draft)
-                                                || (!!pinnedStickies && pinnedSticky.records[0].msgStatus == MessageStatus.draft)))
-                                        {
+                                                || (!!pinnedStickies && pinnedSticky.records[0].msgStatus == MessageStatus.draft))) {
                                             const isNewTheme = index > 0 && comments[index - 1] && (comments[index - 1] as PinnedSticky).records && (comments[index - 1] as PinnedSticky).records[0].msgStatus == MessageStatus.pinned
                                                 && pinnedSticky.records && pinnedSticky.records[0].msgStatus == MessageStatus.dashed;
 
@@ -674,6 +676,11 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, shareMsgId, use
                                             const messages = pinnedSticky.records
 
                                             const msgItems = renInboxMsg(messages, index, pinnedSticky.seq)
+
+                                            const isDifTap = index > 0 && comments[index + 1] && (comments[index + 1] as PinnedSticky).records && pinnedSticky.records
+                                                && (comments[index + 1] as PinnedSticky).records[0].groupId != pinnedSticky.records[0].groupId ||
+                                                (index > 0 && !comments[index + 1] && !!pinnedSticky.records[0].groupId)
+
                                             return <div className="visual-msg-box"
                                                         style={{padding: index == comments.length - 1 ? "0 0 44px" : "0"}}
                                                         ref={measureRef} key={`_s_${index}`}>
@@ -701,6 +708,23 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, shareMsgId, use
                                                 }}>
                                                     {msgItems}
                                                 </div>
+                                                {
+                                                    isDifTap && onFork && <div style={{padding: '6px 12px',display: "flex", justifyContent: "center"}}>
+                                                        <IonButtons>
+                                                            <IonButton onClick={() => {
+                                                                setShowLoading(true)
+                                                                onFork(pinnedSticky.records[0].groupId).then((tribeId)=>{
+                                                                    setShowLoading(false)
+                                                                    window.open(`./${tribeId}`)
+                                                                }).catch(e=>{
+                                                                    setShowLoading(false)
+                                                                    console.error(e)
+                                                                })
+                                                            }}><IonIcon src={gitBranchOutline}/> Fork</IonButton>
+                                                        </IonButtons>
+                                                    </div>
+                                                }
+
                                             </div>
                                         }
                                     }
@@ -727,6 +751,14 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, shareMsgId, use
             {/*        </div>*/}
             {/*    </div>*/}
             {/*}*/}
+            <IonLoading
+                cssClass='my-custom-class'
+                isOpen={showLoading}
+                onDidDismiss={() => setShowLoading(false)}
+                message={'Please wait...'}
+                duration={60000}
+            />
+
             {
                 comments.length - 1 > currentVisibleIndex &&
                 <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{
@@ -758,7 +790,8 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, shareMsgId, use
                 </IonFab>
             }
 
-            <ShareEx stickyMsg={stickyMsg} isOpen={showShareModal} showHistory={true} onClose={() => setShowShareModal(false)}
+            <ShareEx stickyMsg={stickyMsg} isOpen={showShareModal} showHistory={true}
+                     onClose={() => setShowShareModal(false)}
                      tribeInfo={tribeInfo} latestMsg={shareMsgs} roles={shareRoles as Array<TribeRole>} owner={owner}/>
 
             <IonModal isOpen={!!showModifyMsg} className="role-select-list" onDidDismiss={() => setShowModifyMsg(null)}>
@@ -787,41 +820,48 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, shareMsgId, use
 
                                                     <IonCol size="5">
                                                         {
-                                                            (showModifyMsg as Message).actor ? <div style={{position: "relative"}}>
-                                                                <IonItem lines="none" color="light" style={{borderRadius: 12}}>
-                                                                    <IonAvatar className="ion-avatar2">
-                                                                        <img src={utils.getDisPlayUrl((showModifyMsg as Message).actor.avatar)}/>
-                                                                    </IonAvatar>
-                                                                    <IonLabel className="ion-text-wrap" >
-                                                                        <b style={{fontSize: '12px'}}>&nbsp;{(showModifyMsg as Message).actor.name}</b>
-                                                                    </IonLabel>
-                                                                </IonItem>
-                                                            </div>: <div style={{position: "relative"}}>
-                                                                <IonItem lines="none" color="light" style={{borderRadius: 12}}>
-                                                                    <IonAvatar className="ion-avatar2">
-                                                                        <img src={"./assets/img/default-avatar.png"}/>
-                                                                    </IonAvatar>
-                                                                    <IonLabel className="ion-text-wrap" >
-                                                                        <b style={{fontSize: '12px'}}>&nbsp;Narrator</b>
-                                                                    </IonLabel>
-                                                                </IonItem>
-                                                            </div>
+                                                            (showModifyMsg as Message).actor ?
+                                                                <div style={{position: "relative"}}>
+                                                                    <IonItem lines="none" color="light"
+                                                                             style={{borderRadius: 12}}>
+                                                                        <IonAvatar className="ion-avatar2">
+                                                                            <img
+                                                                                src={utils.getDisPlayUrl((showModifyMsg as Message).actor.avatar)}/>
+                                                                        </IonAvatar>
+                                                                        <IonLabel className="ion-text-wrap">
+                                                                            <b style={{fontSize: '12px'}}>&nbsp;{(showModifyMsg as Message).actor.name}</b>
+                                                                        </IonLabel>
+                                                                    </IonItem>
+                                                                </div> : <div style={{position: "relative"}}>
+                                                                    <IonItem lines="none" color="light"
+                                                                             style={{borderRadius: 12}}>
+                                                                        <IonAvatar className="ion-avatar2">
+                                                                            <img src={"./assets/img/default-avatar.png"}/>
+                                                                        </IonAvatar>
+                                                                        <IonLabel className="ion-text-wrap">
+                                                                            <b style={{fontSize: '12px'}}>&nbsp;Narrator</b>
+                                                                        </IonLabel>
+                                                                    </IonItem>
+                                                                </div>
                                                         }
                                                     </IonCol>
-                                                    <IonCol  size="2">
-                                                        <div className="Swlwn"><IonIcon src={arrowForwardOutline} size="large"/></div>
+                                                    <IonCol size="2">
+                                                        <div className="Swlwn"><IonIcon src={arrowForwardOutline}
+                                                                                        size="large"/></div>
                                                     </IonCol>
                                                 </>
                                             }
-                                            <IonCol size={selectRole && selectRole.id != (showModifyMsg as Message).role?"5":"12"}>
+                                            <IonCol
+                                                size={selectRole && selectRole.id != (showModifyMsg as Message).role ? "5" : "12"}>
                                                 {
-                                                    selectRole &&  <div style={{position: "relative"}}>
+                                                    selectRole && <div style={{position: "relative"}}>
                                                         <IonItem lines="none" color="light" style={{borderRadius: 12}}>
                                                             <IonAvatar className="ion-avatar2">
                                                                 <img src={utils.getDisPlayUrl(selectRole.avatar)}/>
                                                             </IonAvatar>
-                                                            <IonLabel className="ion-text-wrap" >
-                                                                &nbsp;<b style={{fontSize: '12px'}}>{selectRole.name}</b>
+                                                            <IonLabel className="ion-text-wrap">
+                                                                &nbsp;<b
+                                                                style={{fontSize: '12px'}}>{selectRole.name}</b>
                                                             </IonLabel>
                                                         </IonItem>
                                                     </div>
@@ -830,7 +870,9 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, shareMsgId, use
                                         </IonRow>
                                     </div>
 
-                                    <div className="create-title">Message <IonIcon src={createOutline} color="medium" style={{transform:"translateY(2px)"}}/></div>
+                                    <div className="create-title">Message <IonIcon src={createOutline} color="medium"
+                                                                                   style={{transform: "translateY(2px)"}}/>
+                                    </div>
                                     <IonTextarea className="msg-input" rows={1} placeholder="Input your message"
                                                  autoGrow value={showModifyMsg.content.content}
                                                  onIonChange={(e) => {
@@ -844,7 +886,9 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, shareMsgId, use
                                             replayMsg && <ReplayText msg={replayMsg}/>
                                         }
                                     </div>
-                                    <div className="create-title">Image <IonIcon src={createOutline} color="medium" style={{transform:"translateY(2px)"}}/></div>
+                                    <div className="create-title">Image <IonIcon src={createOutline} color="medium"
+                                                                                 style={{transform: "translateY(2px)"}}/>
+                                    </div>
                                     <div style={{
                                         borderRadius: '5px',
                                         // border: '1px solid var(--ion-color-medium)',
@@ -854,23 +898,24 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, shareMsgId, use
                                         flexDirection: 'row',
                                         justifyContent: 'center'
                                     }}>
-                                        <UploadImage borderRadio={12} defaultIcon={add} width={showModifyMsg && showModifyMsg.content && !showModifyMsg.content.image["url"]?"100%":""}
+                                        <UploadImage borderRadio={12} defaultIcon={add}
+                                                     width={showModifyMsg && showModifyMsg.content && !showModifyMsg.content.image["url"] ? "100%" : ""}
                                                      imgUrl={showModifyMsg && showModifyMsg.content && showModifyMsg.content.image["url"] && utils.getDisPlayUrl(showModifyMsg.content.image)}
                                                      setImgUrl={(url, w, h) => {
                                                          const msgCopy = JSON.parse(JSON.stringify(showModifyMsg))
                                                          msgCopy.content.image = {url: url, width: w, height: h}
                                                          setShowModifyMsg(msgCopy)
                                                      }}/>
-                                                     {/*<div style={{position: "absolute",top: 16 , right: 26}} onClick={(e)=>{*/}
-                                                     {/*e.persist()}*/}
-                                                     {/*}>*/}
-                                                     {/*    <IonIcon src={createOutline} size="large" color="medium"/>*/}
-                                                     {/*</div>*/}
+                                        {/*<div style={{position: "absolute",top: 16 , right: 26}} onClick={(e)=>{*/}
+                                        {/*e.persist()}*/}
+                                        {/*}>*/}
+                                        {/*    <IonIcon src={createOutline} size="large" color="medium"/>*/}
+                                        {/*</div>*/}
                                     </div>
 
                                     <IonButton expand="block" onClick={() => {
                                         tribeService.updateMsg(showModifyMsg.id, '0x' + Buffer.from(JSON.stringify(showModifyMsg.content)).toString('hex'),
-                                            selectRole && selectRole.id,replayMsg && replayMsg.id
+                                            selectRole && selectRole.id, replayMsg && replayMsg.id
                                         ).then(() => {
                                             setShowModifyMsg(null)
                                         }).catch(e => {

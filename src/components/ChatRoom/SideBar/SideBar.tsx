@@ -122,11 +122,11 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account,router, onLo
             }
             {
                 !!account &&  <IonAvatar slot="start">
-                    <Avatar name={account.name} round size={"36"}/>
+                    {account.name?<Avatar name={account.name} round size={"36"}/>:<IonIcon src={personOutline} size="large"/>}
                 </IonAvatar>
             }
             <IonLabel className="ion-text-wrap">
-                <b>{!!account ? account.name : 'Person'}</b>
+                <b>{!!account&&account.name ? account.name : 'Person'}</b>
                 <p>
                     <small>{!!account && utils.ellipsisStr(account && account.addresses && account.addresses[ChainType.EMIT], 3)}</small>
                 </p>

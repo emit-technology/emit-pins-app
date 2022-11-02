@@ -77,7 +77,7 @@ export const CreateModal: React.FC<Props> = ({isOpen, onOk, onClose}) => {
         }
 
         //@ts-ignore
-        const accountId = await walletWorker.importMnemonic(mnemonic.join(" "), "Account1", passwordRef.current.value, "", "");
+        const accountId = await walletWorker.importMnemonic(mnemonic.join(" "), "", passwordRef.current.value, "", "");
         const account: AccountModel = await walletWorker.accountInfo(accountId)
         setShowBackupModal(false);
         onOk(account)
@@ -109,10 +109,10 @@ export const CreateModal: React.FC<Props> = ({isOpen, onOk, onClose}) => {
         let accountId
         if (segment == "mnemonic") {
             //@ts-ignore
-            accountId = await walletWorker.importMnemonic(textRef.current.value, "Account1", passwordRef.current.value, "", "");
+            accountId = await walletWorker.importMnemonic(textRef.current.value, "", passwordRef.current.value, "", "");
         } else {
             //@ts-ignore
-            accountId = await walletWorker.importPrivateKey(textRef.current.value, "Account1", passwordRef.current.value, "", "");
+            accountId = await walletWorker.importPrivateKey(textRef.current.value, "", passwordRef.current.value, "", "");
         }
         if(accountId){
             const account: AccountModel = await walletWorker.accountInfo(accountId)
@@ -265,6 +265,13 @@ export const CreateModal: React.FC<Props> = ({isOpen, onOk, onClose}) => {
                         });
                     }}>Next</IonButton>
                 </div>
+                <IonLoading
+                    cssClass='my-custom-class'
+                    isOpen={showLoading}
+                    onDidDismiss={() => setShowLoading(false)}
+                    message={'Please wait...'}
+                    duration={60000}
+                />
             </IonContent>
         </IonModal>
 

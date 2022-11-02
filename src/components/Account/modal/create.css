@@ -118,6 +118,7 @@
     background-size: 100% 100%;
     background-position: center;
     padding: 6px 12px;
+    position: relative;
 }
 
 .account-qr-fot {
@@ -167,4 +168,20 @@
     font-size: 24px !important;
     transform: translate(4px,4px);
     cursor: pointer;
+}
+
+.account-backup-filter{
+    background: rgba(109, 72, 220, .1);
+    -webkit-backdrop-filter: saturate(150%) blur(30px);
+    backdrop-filter: saturate(150%) blur(8px);
+    position: absolute;
+    width: 100%;
+    height: 120%;
+    z-index: 100;
+    transform: translate(-12px,29px);
+    border-radius: 12px 12px 25px 25px;
+    display: flex;
+    justify-items: center;
+    align-items: center;
+    justify-content: center;
 }

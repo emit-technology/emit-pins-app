@@ -421,6 +421,24 @@ export class Dashboard extends React.Component<Props, State> {
         }
     }
 
+    fork = async (groupId: string):Promise<string> => {
+        if (utils.useInjectAccount()) {
+            const isLock = await walletWorker.isLocked();
+            if (isLock) {
+                const accounts = await walletWorker.accounts();
+                if (!accounts || accounts.length == 0) {
+                    this.setState({showCreate: true})
+                    return Promise.reject("Please create an account!");
+                } else {
+                    this.setState({showUnlock: true})
+                    return Promise.reject("Account is locked!");
+                }
+            }
+            // await this.checkAccount();
+        }
+        return await tribeService.forkTribe(config.tribeId, groupId , this.state.tribeInfo)
+    }
+
     render() {
         const {
             owner, showActionSheet, isSessionAvailable,showCreate, buttons, toastMsg, showShare, latestMgs, showToast, showPinnedMsg, userLimit,
@@ -556,6 +574,7 @@ export class Dashboard extends React.Component<Props, State> {
                                                  tribeInfo={tribeInfo}/>
                                     </div>
                                     <MessageContentVisual
+                                        onFork={this.fork}
                                         loaded={!!tribeInfo}
                                         showPinnedMsgDetail={(groupId) => {
                                             this.showPinnedMsgDetail(groupId).catch(e => {

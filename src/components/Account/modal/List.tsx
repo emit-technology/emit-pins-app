@@ -18,13 +18,15 @@ import walletWorker from "../../../worker/walletWorker";
 import {
     chevronForwardOutline, closeOutline,
     copyOutline,
-    documentOutline, downloadOutline,
+    documentOutline, downloadOutline, personCircleOutline, personOutline,
     trashOutline
 } from "ionicons/icons";
 import Avatar from "react-avatar";
 import copy from "copy-to-clipboard";
 import {utils} from "../../../common";
 import {QRCodeSVG} from 'qrcode.react';
+import selfStorage from "../../../common/storage";
+import {BackupModal} from "./Backup";
 interface Props {
     isOpen: boolean;
     onOk: (account: AccountModel) => void;
@@ -34,12 +36,17 @@ interface Props {
 export const AccountList: React.FC<Props> = ({isOpen, onClose, onOk}) => {
 
     const [accounts, setAccounts] = useState([]);
-    const [showCreate, setShowCreate] = useState(false);
+    // const [showBackupModal, setShowBackupModal] = useState(false);
+
     const [showAlert, setShowAlert] = useState(false);
     const [words, setWords] = useState("");
+    const [selectedAccount, setSelectedAccount] = useState(null);
+    // const [mnemonic, setMnemonic] = useState("");
+
     const [present, dismiss] = useIonToast();
 
     const [presentAlert, dismissAlert] = useIonAlert();
+
 
     useEffect(() => {
         getAccounts().catch(e => console.error(e));
@@ -94,7 +101,41 @@ export const AccountList: React.FC<Props> = ({isOpen, onClose, onOk}) => {
                     accounts && accounts.map((account:AccountModel,index)=>{
                         return <div>
 
-                            <div className="account-qr-box">
+                            <div  className="account-qr-box">
+                                {
+                                    !account.backedUp && <div className="account-backup-filter">
+                                        <div>
+                                            <IonButton onClick={()=>{
+                                                presentAlert({
+                                                    header: 'Backup Account',
+                                                    subHeader: 'Export Mnemonic or Private Key.',
+                                                    buttons: [
+                                                        {
+                                                            text: 'Cancel',
+                                                            role: 'cancel',
+                                                            handler: () => {
+                                                            },
+                                                        },
+                                                        {
+                                                            text: 'OK',
+                                                            role: 'confirm',
+                                                            handler: (e) => {
+                                                                setSelectedAccount(account.accountId)
+                                                                exportMnem(account.accountId, e[0] as string)
+                                                            }
+                                                        }
+                                                    ],
+                                                    inputs: [
+                                                        {
+                                                            type: 'password',
+                                                            placeholder: 'Password',
+                                                        }
+                                                    ],
+                                                })
+                                            }}>Backup Account</IonButton>
+                                        </div>
+                                    </div>
+                                }
                                 <div style={{display: "flex", justifyContent: "flex-end",height: 32}}>
                                             <IonButtons >
                                                 <IonButton onClick={() => onClose()}>
@@ -102,23 +143,25 @@ export const AccountList: React.FC<Props> = ({isOpen, onClose, onOk}) => {
                                                 </IonButton>
                                             </IonButtons>
                                 </div>
-                                <IonRow>
-                                    <IonCol sizeMd="2" sizeXs="3">
-                                        <div style={{marginLeft: 20}}><img src="./assets/icon/icon.png" width="32"/></div>
-                                    </IonCol>
-                                    <IonCol sizeMd="3" sizeXs="5">
-                                        <div className="account-qr-code">
-                                            <div>
-                                                <QRCodeSVG value={account.addresses[ChainType.EMIT]} />
+                                <div>
+                                    <IonRow>
+                                        <IonCol sizeMd="2" sizeXs="3">
+                                            <div style={{marginLeft: 20}}><img src="./assets/icon/icon.png" width="32"/></div>
+                                        </IonCol>
+                                        <IonCol sizeMd="3" sizeXs="5">
+                                            <div className="account-qr-code">
+                                                <div>
+                                                    <QRCodeSVG value={account.addresses[ChainType.EMIT]} />
+                                                </div>
                                             </div>
-                                        </div>
-                                    </IonCol>
-                                    <IonCol sizeMd="6" sizeXs="10" offset="1">
-                                        <div className="account-address-text">
-                                            <div>{account.addresses[ChainType.EMIT]}</div>
-                                        </div>
-                                    </IonCol>
-                                </IonRow>
+                                        </IonCol>
+                                        <IonCol sizeMd="6" sizeXs="10" offset="1">
+                                            <div className="account-address-text">
+                                                <div>{account.addresses[ChainType.EMIT]}</div>
+                                            </div>
+                                        </IonCol>
+                                    </IonRow>
+                                </div>
                             </div>
                             <div className="account-qr-fot">
                                 <IonRow>
@@ -126,7 +169,9 @@ export const AccountList: React.FC<Props> = ({isOpen, onClose, onOk}) => {
                                         <div style={{padding: "12px 0 0 12px"}}>
                                             <IonItem lines="none">
                                                 <IonAvatar slot='start'>
-                                                    <Avatar name={account.name} round size={"40"}/>
+                                                    {
+                                                        // account && account.name ?<Avatar name={account.name} round size={"40"}/>:<IonIcon src={personCircleOutline} size="large"/>
+                                                    }
                                                 </IonAvatar>
                                                 <IonLabel><div>{account.name}</div></IonLabel>
                                             </IonItem>
@@ -158,6 +203,7 @@ export const AccountList: React.FC<Props> = ({isOpen, onClose, onOk}) => {
                                                         text: 'OK',
                                                         role: 'confirm',
                                                         handler: (e) => {
+                                                            setSelectedAccount(account.accountId)
                                                             exportMnem(account.accountId, e[0] as string)
                                                         }
                                                     }
@@ -187,6 +233,7 @@ export const AccountList: React.FC<Props> = ({isOpen, onClose, onOk}) => {
                                                         role: 'confirm',
                                                         handler: (e) => {
                                                             walletWorker.removeAccount(account.accountId, e[0] as string).then(()=>{
+                                                                selfStorage.removeItem("ACCOUNT");
                                                                 present({
                                                                     position: "top",
                                                                     color: "primary",
@@ -353,13 +400,19 @@ export const AccountList: React.FC<Props> = ({isOpen, onClose, onOk}) => {
                             text: 'Copy',
                             role: 'confirm',
                             handler: () => {
+                                walletWorker.setBackedUp(selectedAccount.accountId);
                                 copy(words)
-                                present({
-                                    position: "top",
-                                    color: "primary",
-                                    message: "Copied to clipboard!",
-                                    duration: 2000
-                                })
+                                setWords("")
+                                setAccounts([]);
+                                setTimeout(()=>{
+                                    getAccounts().catch(e => console.error(e));
+                                    present({
+                                        position: "top",
+                                        color: "primary",
+                                        message: "Copied to clipboard!",
+                                        duration: 2000
+                                    })
+                                },100)
                             }
                         }
                     ]}

@@ -1,9 +1,9 @@
 import * as React from 'react';
 import {
-    IonHeader, IonModal, IonPage, IonSearchbar, IonContent, IonToolbar, IonSegment, IonLabel, IonSegmentButton, IonItem,
-    IonButtons, IonIcon,IonText, IonToast, IonTitle, IonLoading, IonMenu, IonMenuToggle
+    IonHeader, IonModal,IonButton, IonPage, IonSearchbar, IonContent, IonToolbar, IonSegment, IonLabel, IonSegmentButton, IonItem,
+    IonButtons, IonIcon,IonRow,IonCol,IonText, IonToast, IonTitle, IonLoading, IonMenu, IonMenuToggle
 } from "@ionic/react";
-import {arrowBackOutline, listOutline, personCircleOutline, searchOutline} from "ionicons/icons";
+import {addOutline, arrowBackOutline, listOutline, personCircleOutline, searchOutline} from "ionicons/icons";
 import {tribeService} from "../../service/tribe";
 import {TribeInfo} from "../../types";
 import './index.scss';
@@ -12,6 +12,7 @@ import {AccountModel} from "@emit-technology/emit-lib";
 import {emitBoxSdk} from "../../service/emitBox";
 import {TribeLayout} from "../../components/Tribe/TribeLayout";
 import selfStorage from "../../common/storage";
+import {TribeEditModal} from "../../components/Tribe";
 
 interface State {
     segment: string
@@ -23,7 +24,8 @@ interface State {
     showLoading: boolean
     showToast: boolean;
     toastMsg?: string
-    tribeTimeMap: Map<string,number>
+    tribeTimeMap: Map<string,number>;
+    showCreateModal: boolean
 }
 
 interface Props {
@@ -41,7 +43,8 @@ export class HomePage extends React.Component<Props, State> {
         showLoading: false,
         showToast: false,
         toastMsg: "",
-        tribeTimeMap: new Map<string,number>
+        tribeTimeMap: new Map<string,number>() ,
+        showCreateModal: false
     }
 
     componentDidMount() {
@@ -115,8 +118,11 @@ export class HomePage extends React.Component<Props, State> {
         }
     }
 
+    setShowCreateModal = (f:boolean) =>{
+        this.setState({showCreateModal: f})
+    }
     render() {
-        const {segment, account, isSessionAvailable,tribeTimeMap, data, layout, showLoading, showToast, toastMsg} = this.state;
+        const {segment, account, isSessionAvailable, showCreateModal ,tribeTimeMap, data, layout, showLoading, showToast, toastMsg} = this.state;
         return <>
             <IonMenu contentId="main-home">
                 <IonHeader>
@@ -171,16 +177,20 @@ export class HomePage extends React.Component<Props, State> {
                             </div>
                         </IonTitle>
 
-                        <IonIcon src={searchOutline} id="open-custom-dialog" size="large" slot="end"/>
+                        <IonButtons slot="end">
+                            <IonButton onClick={()=>{
+                                this.setState({showCreateModal: true})
+                            }}><IonIcon src={addOutline} id="open-custom-dialog" size="large" color="dark"/></IonButton>
+                        </IonButtons>
                         {/*<IonPopover trigger="hover-trigger" triggerAction="click">*/}
                         {/*        <IonSearchbar placeholder="Input keyword"/>*/}
                         {/*</IonPopover>*/}
-                        <IonModal trigger="open-custom-dialog" className="searchbar-modal">
-                            <IonSearchbar showClearButton="focus" id="search-input" placeholder="Input keyword"
-                                          onIonChange={(e) => {
-                                              this.searchText(e.detail.value)
-                                          }}/>
-                        </IonModal>
+                        {/*<IonModal trigger="open-custom-dialog" className="searchbar-modal">*/}
+                        {/*    <IonSearchbar showClearButton="focus" id="search-input" placeholder="Input keyword"*/}
+                        {/*                  onIonChange={(e) => {*/}
+                        {/*                      this.searchText(e.detail.value)*/}
+                        {/*                  }}/>*/}
+                        {/*</IonModal>*/}
 
                     </IonToolbar>
                 </IonHeader>
@@ -202,7 +212,14 @@ export class HomePage extends React.Component<Props, State> {
                         </IonSegmentButton>
                         {/*<IonSegmentButton color="dark" className="segment-button" value="recentView">Recent View</IonSegmentButton>*/}
                     </IonSegment>
-
+                    <IonRow>
+                        <IonCol offsetLg="3" sizeLg="6" offsetSm="1" sizeSm="10">
+                            <IonSearchbar showClearButton="focus" id="search-input" placeholder="Search"
+                                          onIonChange={(e) => {
+                                              this.searchText(e.detail.value)
+                                          }}/>
+                        </IonCol>
+                    </IonRow>
                     <div>
                         {/*{*/}
                         {/*    layout && layout.length>0&&<TribeRecommend data={data} layout={layout}/>*/}
@@ -226,6 +243,11 @@ export class HomePage extends React.Component<Props, State> {
                         position="top"
                         color="danger"
                     />
+
+                    <TribeEditModal isOpen={showCreateModal} onClose={()=>this.setShowCreateModal(false)} onOk={(tribeId)=>{
+                        this.setShowCreateModal(false);
+                        window.open(`/${tribeId}`)
+                    }} />
 
                 </IonContent>
             </IonPage>

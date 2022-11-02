@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkemit_pins=self.webpackChunkemit_pins||[]).push([[791],{81791:(e,t,n)=>{n.r(t),n.d(t,{ToastWeb:()=>a});var s=n(66477);class a extends s.Uw{async show(e){if("undefined"!==typeof document){let t=2e3;e.duration&&(t="long"===e.duration?3500:2e3);const n=document.createElement("pwa-toast");n.duration=t,n.message=e.text,document.body.appendChild(n)}}}}}]);
