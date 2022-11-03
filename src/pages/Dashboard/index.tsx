@@ -3,25 +3,29 @@ import {
     IonActionSheet,
     IonButton,
     IonButtons,
-    IonCol, IonToast,
+    IonCol,
     IonContent,
     IonHeader,
     IonIcon,
-    IonLoading,
+    IonMenu,
+    IonMenuToggle,
     IonPage,
-    IonText,
     IonRow,
+    IonText,
     IonTitle,
-    IonToolbar, IonMenu, IonMenuToggle
+    IonToast,
+    IonToolbar
 } from "@ionic/react";
 import {GroupMsg, Message, PinnedSticky, TribeInfo, TribeRole, TribeTheme, UserLimit, WsStatus} from "../../types";
 import {emitBoxSdk, tribeService} from "../../service";
 import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import {
-    addOutline, arrowBackOutline,
-    close, colorPaletteOutline,
-    ellipsisVertical, listOutline, menuOutline,
-    personCircleOutline,
+    addOutline,
+    arrowBackOutline,
+    close,
+    colorPaletteOutline,
+    ellipsisVertical,
+    listOutline,
     pinOutline,
     share
 } from "ionicons/icons";
@@ -38,7 +42,6 @@ import tribeWorker from "../../worker/imWorker";
 import {ToolBar} from "../../components/ChatRoom/Room/ToolBar";
 import {MessageContentVisual} from "../../components/ChatRoom/Room/Message";
 // import {MessageContentWindow as MessageContentVisual} from "../../components/ChatRoom/Room/Message";
-import Avatar from "react-avatar";
 import {ShareEx} from "../../components/utils/ShareEx";
 import {SideBar} from "../../components/ChatRoom/SideBar";
 import {AccountUnlock} from "../../components/Account/modal/Unlock";
@@ -79,6 +82,7 @@ interface State {
 
     showPinnedMsgDetailModal: boolean;
     showCreateTribe: boolean;
+    showForkModal: boolean;
     groupPinnedMsg: Array<PinnedSticky>;
 
     userLimit?: UserLimit
@@ -92,6 +96,10 @@ interface State {
     showList: boolean;
     showReset: boolean;
     showCreate: boolean
+
+    forkGroupId: string;
+
+    forkTribeInfo?: TribeInfo
 
 }
 
@@ -121,6 +129,7 @@ export class Dashboard extends React.Component<Props, State> {
         showPinnedMsg: false,
         showPinnedMsgDetailModal: false,
         showCreateTribe: false,
+        showForkModal: false,
         groupPinnedMsg: [],
 
         showAlert: false,
@@ -132,7 +141,8 @@ export class Dashboard extends React.Component<Props, State> {
         showUnlock: false,
         showReset: false,
         showList: false,
-        showCreate: false
+        showCreate: false,
+        forkGroupId: ""
 
     }
 
@@ -384,12 +394,21 @@ export class Dashboard extends React.Component<Props, State> {
         this.setState({showCreateTribe: f})
     }
 
+    setShowForkModal = (f: boolean) => {
+        this.setState({showForkModal: f})
+    }
+
     setShowToast = (f: boolean, msg?: string) => {
         this.setState({showToast: f, toastMsg: msg})
     }
 
     onAccount = async (account: AccountModel) => {
-        await tribeService.accountLogin(account)
+        const {isSessionAvailable} = this.state;
+        if(!isSessionAvailable){
+            await tribeService.accountLogin(account)
+        }else{
+            await tribeService.userLogout()
+        }
         await this.initData();
     }
 
@@ -421,29 +440,34 @@ export class Dashboard extends React.Component<Props, State> {
         }
     }
 
-    fork = async (groupId: string):Promise<string> => {
-        if (utils.useInjectAccount()) {
-            const isLock = await walletWorker.isLocked();
-            if (isLock) {
-                const accounts = await walletWorker.accounts();
-                if (!accounts || accounts.length == 0) {
-                    this.setState({showCreate: true})
-                    return Promise.reject("Please create an account!");
-                } else {
-                    this.setState({showUnlock: true})
-                    return Promise.reject("Account is locked!");
-                }
-            }
-            // await this.checkAccount();
-        }
-        return await tribeService.forkTribe(config.tribeId, groupId , this.state.tribeInfo)
+    fork = async (groupId: string,tribeInfo: TribeInfo):Promise<string> => {
+        // if (utils.useInjectAccount()) {
+        //     const isLock = await walletWorker.isLocked();
+        //     if (isLock) {
+        //         const accounts = await walletWorker.accounts();
+        //         if (!accounts || accounts.length == 0) {
+        //             this.setState({showCreate: true})
+        //             return Promise.reject("Please create an account!");
+        //         } else {
+        //             this.setState({showUnlock: true})
+        //             return Promise.reject("Account is locked!");
+        //         }
+        //     }else{
+        //         //TODO
+        //         if(this.state.isConnecting == WsStatus.inactive){
+        //             this.setState({showList: true})
+        //         }
+        //     }
+        // }
+        this.setState({showForkModal: true, forkGroupId: groupId, forkTribeInfo: tribeInfo})
+        return;
     }
 
     render() {
         const {
-            owner, showActionSheet, isSessionAvailable,showCreate, buttons, toastMsg, showShare, latestMgs, showToast, showPinnedMsg, userLimit,
-            showCreateTribe, isUpdating, isConnecting, groupMsgs, showMenusModal, groupPinnedMsg, showPinnedMsgDetailModal,
-            account, roles, tribeInfo, latestRole, datas, showTribeEdit, showPin, showList, showReset, showUnlock
+            owner, showActionSheet, isSessionAvailable,showCreate,forkGroupId, buttons, toastMsg, showShare, latestMgs, showToast, showPinnedMsg, userLimit,
+            showCreateTribe, isUpdating, isConnecting, groupMsgs, showMenusModal,forkTribeInfo, groupPinnedMsg, showPinnedMsgDetailModal,
+            account, roles, tribeInfo, latestRole, datas, showTribeEdit, showPin, showList, showReset, showUnlock,showForkModal
         } = this.state;
 
         return (
@@ -608,7 +632,7 @@ export class Dashboard extends React.Component<Props, State> {
                                         shareMsgId={this.props.msgId}
                                     />
 
-                                    <BottomBar tribeInfo={tribeInfo} owner={owner} userLimit={userLimit}
+                                    <BottomBar isTokenValid={isSessionAvailable} tribeInfo={tribeInfo} owner={owner} userLimit={userLimit}
                                                onRoleCheck={(v) => {
                                                    this.setLatestRole(v)
                                                }} roles={roles} selectRole={latestRole} showPin={showPin} onPin={() => {
@@ -648,6 +672,12 @@ export class Dashboard extends React.Component<Props, State> {
                                                     window.open(`./${tribeId}`)
                                                 }}/>
 
+                                <TribeEditModal forkGroupId={forkGroupId} tribeInfo={forkTribeInfo} isOpen={showForkModal} onClose={() => this.setShowForkModal(false)}
+                                                onOk={(tribeId) => {
+                                                    this.setShowForkModal(false)
+                                                    window.open(`/${tribeId}`)
+                                                }}/>
+
                                 <IonToast
                                     isOpen={showToast}
                                     onDidDismiss={() => this.setShowToast(false)}
@@ -685,7 +715,7 @@ export class Dashboard extends React.Component<Props, State> {
                     this.setState({showPinnedMsgDetailModal: false})
                 }} data={{data: groupPinnedMsg, total: groupPinnedMsg.length}} tribeInfo={tribeInfo}/>
 
-                <AccountList isOpen={showList} onOk={(account) => {
+                <AccountList isLogin={isConnecting == WsStatus.active} isOpen={showList} onOk={(account) => {
                     this.onAccount(account).then(() => {
                         this.setState({showList: false})
                     }).catch(e => {

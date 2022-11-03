@@ -39,8 +39,6 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
         }
     },[dispatchData.data])
     const fetch = async ()=>{
-        console.log("stickyMsg", stickyMsg);
-
         if(tribeInfo){
             if(!stickyMsg || !stickyMsg.groupId){
                 const rest =  await tribeWorker.getPinnedMessageArray(config.tribeId,1, 100000,[
@@ -68,33 +66,34 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
         }
     }
     return <>
-        <div className="head-item">
-            <div style={{cursor:"pointer"}}>
-                <IonItem lines="none">
-                    {
-                        (stickyMsg && stickyMsg.groupId && stickyMsg.seq >1 || stickyMsg && !stickyMsg.groupId ) ? <IonIcon src={chevronBackOutline} slot="start" color="medium" onClick={()=>{
-                                console.log("stickyMsg.seq - 1",stickyMsg, stickyMsg.seq - 1)
-                                dispatch(saveDataState({data: JSON.stringify({forward: 1, refresh: stickyMsg.groupId ?new BigNumber(stickyMsg.seq).minus(1).toNumber(): 666666}), tag: 'scrollToItem'}))
-                            }}/>:
-                            <IonIcon src={chevronBackOutline} slot="start" style={{color:"#ffffff"}}/>
-                    }
-                    <div style={{height: 42, width: 42, borderRadius: 6}} slot={"start"}  onClick={()=>{
-                        fetch().then(()=>{
-                            setShowTribeInfoModal(true)
-                        }).catch(e=>console.error(e))
-                    }}>
+        {
+            stickyMsg && <div className="head-item">
+                <div style={{cursor:"pointer"}}>
+                    <IonItem lines="none">
                         {
-                            (stickyMsg && stickyMsg.theme.image || tribeInfo && tribeInfo.theme ) && <img width="100%" height="100%" src={utils.getDisPlayUrl(stickyMsg && stickyMsg.groupId ? stickyMsg.theme.image: tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image))}
-                                 style={{borderRadius: 6, objectFit:'cover'}}/>
+                            (stickyMsg && stickyMsg.groupId && stickyMsg.seq >1 || stickyMsg && !stickyMsg.groupId ) ? <IonIcon src={chevronBackOutline} slot="start" color="medium" onClick={()=>{
+                                    console.log("stickyMsg.seq - 1",stickyMsg, stickyMsg.seq - 1)
+                                    dispatch(saveDataState({data: JSON.stringify({forward: 1, refresh: stickyMsg.groupId ?new BigNumber(stickyMsg.seq).minus(1).toNumber(): 666666}), tag: 'scrollToItem'}))
+                                }}/>:
+                                <IonIcon src={chevronBackOutline} slot="start" style={{color:"#ffffff"}}/>
                         }
-                    </div>
-                    <IonLabel className="ion-text-nowrap" onClick={()=>{
-                        fetch().then(()=>{
-                            setShowTribeInfoModal(true)
-                        }).catch(e=>console.error(e))
-                    }}>
-                        <div className="head-pin-title">{tribeInfo && tribeInfo.title}</div>
-                        <div style={{overflow: "hidden"}} className="head-sub">
+                        <div style={{height: 42, width: 42, borderRadius: 6}} slot={"start"}  onClick={()=>{
+                            fetch().then(()=>{
+                                setShowTribeInfoModal(true)
+                            }).catch(e=>console.error(e))
+                        }}>
+                            {
+                                (stickyMsg && stickyMsg.theme.image || tribeInfo && tribeInfo.theme ) && <img width="100%" height="100%" src={utils.getDisPlayUrl(stickyMsg && stickyMsg.groupId ? stickyMsg.theme.image: tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image))}
+                                                                                                              style={{borderRadius: 6, objectFit:'cover'}}/>
+                            }
+                        </div>
+                        <IonLabel className="ion-text-nowrap" onClick={()=>{
+                            fetch().then(()=>{
+                                setShowTribeInfoModal(true)
+                            }).catch(e=>console.error(e))
+                        }}>
+                            <div className="head-pin-title">{tribeInfo && tribeInfo.title}</div>
+                            <div style={{overflow: "hidden"}} className="head-sub">
                             <span style={{fontSize: '11px'}}>
                                 <IonText color="medium">
                                     {
@@ -102,19 +101,20 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
                                     }
                                 </IonText>
                             </span>
-                        </div>
-                    </IonLabel>
-                    {
-                        (stickyMsg && stickyMsg.groupId && stickyMsg.seq > 0) ? <IonIcon src={chevronForwardOutline} slot="end" color="medium"  onClick={()=>{
-                            console.log("stickyMsg.seq + 1",stickyMsg, stickyMsg.seq + 1);
-                                dispatch(saveDataState({data: JSON.stringify({forward: 2,refresh: stickyMsg.groupId ? new BigNumber(stickyMsg.seq).plus(1).toNumber():888888}), tag: 'scrollToItem'}))
-                            }}/>:
-                            <IonIcon src={chevronForwardOutline} slot="end" style={{color:"#ffffff"}}/>
-                    }
+                            </div>
+                        </IonLabel>
+                        {
+                            (stickyMsg && stickyMsg.groupId && stickyMsg.seq > 0) ? <IonIcon src={chevronForwardOutline} slot="end" color="medium"  onClick={()=>{
+                                    console.log("stickyMsg.seq + 1",stickyMsg, stickyMsg.seq + 1);
+                                    dispatch(saveDataState({data: JSON.stringify({forward: 2,refresh: stickyMsg.groupId ? new BigNumber(stickyMsg.seq).plus(1).toNumber():888888}), tag: 'scrollToItem'}))
+                                }}/>:
+                                <IonIcon src={chevronForwardOutline} slot="end" style={{color:"#ffffff"}}/>
+                        }
 
-                </IonItem>
+                    </IonItem>
+                </div>
             </div>
-        </div>
+        }
 
         <TribeInfoModal onReladData={onReladData} isOpen={showTribeInfoModal} stickies={stickies} onClose={()=>setShowTribeInfoModal(false)} tribeInfo={tribeInfo} roles={roles} stickyMsg={stickyMsg}/>
     </>

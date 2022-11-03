@@ -214,6 +214,9 @@ class TribeService implements ITribe {
     }
 
     accountLogin = async (account: AccountModel): Promise<string>=>{
+        if(!account){
+            return Promise.reject("No account is available. Please create a new account first!")
+        }
         const sig: any = await walletWorker.personSignMsg(ChainType.EMIT.valueOf(),
             {data: "0x" + Buffer.from("emit-trib login msg").toString("hex")},
             account.accountId)
@@ -230,6 +233,8 @@ class TribeService implements ITribe {
     userLogout = async (): Promise<boolean> => {
         const rest: TribeResult<boolean> = await this._rpc.post('/user/logout', null);
         if (rest && rest.code == 0) {
+            tribeService.setAuthToken("logout token");
+            await tribeWorker.logout()
             return Promise.resolve(true)
         }
         return Promise.reject(rest.message);
@@ -451,16 +456,16 @@ class TribeService implements ITribe {
         if (!groupIds) {
             return []
         }
-        const unFetchGroupIds = [];
+        const unFetchGroupIds = [...groupIds];
         const ret: Array<GroupMsg> = [];
-        for(let groupId of groupIds){
-            const rest = selfStorage.getItem(this._groupMsgKey(groupId))
-            if(rest){
-                ret.push(rest)
-            }else{
-                unFetchGroupIds.push(groupId);
-            }
-        }
+        // for(let groupId of groupIds){
+            // const rest = selfStorage.getItem(this._groupMsgKey(groupId))
+            // if(rest){
+            //     ret.push(rest)
+            // }else{
+            //     unFetchGroupIds.push(groupId);
+            // }
+        // }
         if(unFetchGroupIds.length>0){
             const rest: TribeResult<Array<GroupMsg>> = await this._rpc.post('/tribe/groupedMsg', {
                 groupIds: unFetchGroupIds,
@@ -469,7 +474,7 @@ class TribeService implements ITribe {
             if (rest && rest.code == 0) {
                 for(let i =0;i<rest.data.length;i++){
                     const groupMsg = rest.data[i];
-                    selfStorage.setItem(this._groupMsgKey(unFetchGroupIds[i]),groupMsg)
+                    // selfStorage.setItem(this._groupMsgKey(unFetchGroupIds[i]),groupMsg)
                     ret.push(groupMsg)
                 }
             }else{

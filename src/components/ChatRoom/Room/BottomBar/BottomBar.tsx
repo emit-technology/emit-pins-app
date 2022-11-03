@@ -43,6 +43,7 @@ interface Props {
     userLimit: UserLimit;
     tribeInfo: TribeInfo
     owner: string;
+    isTokenValid: boolean;
 }
 
 
@@ -53,7 +54,7 @@ const lorem = new LoremIpsum({
     }
 });
 
-export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, userLimit, onRoleCheck, onPin, selectRole}) => {
+export const BottomBar: React.FC<Props> = ({showPin, roles,isTokenValid, tribeInfo, owner, userLimit, onRoleCheck, onPin, selectRole}) => {
     const textRef = React.useRef("")
     const [present, dismiss] = useIonToast();
     const [replayMsg, setReplayMsg] = useState(null);
@@ -234,25 +235,36 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                              onClick={(e) => {
                                                  console.log("click upload");
                                                  e.stopPropagation();
-                                                 if(userLimit && userLimit.msgLeft <=0){
-                                                     present({
-                                                         message: `Sending messages has reached the maximum limit ${userLimit.maxMsgCount}`,
-                                                         duration: 2000,
-                                                         position: "top",
-                                                         color: "danger"
-                                                     })
-                                                     return;
-                                                 }
-                                                 tribeService.picUpload().then(({url, themeColors}) => {
-                                                     const displayImage = utils.convertImgDisplay(themeColors.width, themeColors.height, url);
-                                                     setDisplayImage({
-                                                         url: url,
-                                                         width: displayImage.width,
-                                                         height: displayImage.height
-                                                     });
+                                                 tribeService.userCheckAuth().then(()=>{
+                                                     if(userLimit && userLimit.msgLeft <=0){
+                                                         present({
+                                                             message: `Sending messages has reached the maximum limit ${userLimit.maxMsgCount}`,
+                                                             duration: 2000,
+                                                             position: "top",
+                                                             color: "danger"
+                                                         })
+                                                         return;
+                                                     }
+                                                     tribeService.picUpload().then(({url, themeColors}) => {
+                                                         const displayImage = utils.convertImgDisplay(themeColors.width, themeColors.height, url);
+                                                         setDisplayImage({
+                                                             url: url,
+                                                             width: displayImage.width,
+                                                             height: displayImage.height
+                                                         });
 
-                                                     setThemeColor(themeColors)
+                                                         setThemeColor(themeColors)
+                                                     }).catch(e=>{
+                                                         const err = typeof e == 'string'?e:e.message;
+                                                         present({
+                                                             message: err,
+                                                             duration: 2000,
+                                                             position: "top",
+                                                             color: "danger"
+                                                         })
+                                                     })
                                                  }).catch(e=>{
+                                                     console.error(e)
                                                      const err = typeof e == 'string'?e:e.message;
                                                      present({
                                                          message: err,
@@ -277,7 +289,16 @@ export const BottomBar: React.FC<Props> = ({showPin, roles, tribeInfo, owner, us
                                         e.stopPropagation();
                                         tribeService.userCheckAuth().then(()=>{
                                             setShowAirdropModal(true)
-                                        }).catch(e=>console.error(e))
+                                        }).catch(e=>{
+                                            console.error(e)
+                                            const err = typeof e == 'string'?e:e.message;
+                                            present({
+                                                message: err,
+                                                duration: 2000,
+                                                position: "top",
+                                                color: "danger"
+                                            })
+                                        })
 
                                     }}/>
                                 </div>

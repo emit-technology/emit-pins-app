@@ -3,7 +3,6 @@ import {IonButton, IonButtons, IonIcon,IonContent,IonItem,IonLabel,IonRow,IonCol
 import { PinnedSticky, TribeInfo, TribeRole} from "../../types";
 import {ThemeItem} from "../Role/ThemeItem";
 import {useEffect, useState} from "react";
-import tribeWorker from "../../worker/imWorker";
 import {MessageContentVisual} from "../ChatRoom/Room/Message";
 import config from "../../common/config";
 import {createOutline, gitBranchOutline, openOutline} from "ionicons/icons";
@@ -30,7 +29,7 @@ export const TribeInfoModal:React.FC<Props> = ({isOpen,stickies,onReladData,onCl
 
     useEffect(()=>{
         emitBoxSdk.getAccount().then(act=>{
-            setOwner(act.addresses[ChainType.EMIT])
+            setOwner(act && act.addresses[ChainType.EMIT])
         })
     },[])
 

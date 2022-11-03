@@ -18,6 +18,7 @@ import {useEffect, useState} from "react";
 import {tribeService} from "../../service/tribe";
 import add from "../../img/add.png";
 import TextareaAutosize from "react-textarea-autosize";
+import config from "../../common/config";
 
 interface Props {
     isOpen: boolean;
@@ -26,9 +27,11 @@ interface Props {
 
     tribeInfo?: TribeInfo
 
+    forkGroupId?:string
+
 }
 
-export const TribeEditModal: React.FC<Props> = ({isOpen, tribeInfo, onOk, onClose}) => {
+export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, onOk, onClose}) => {
     // const nullImage:ImageType = {url:"", width:0, height:0};
     const [imgUrl, setImgUrl] = useState(null);
     const [title, setTitle] = useState(tribeInfo && tribeInfo.title);
@@ -48,22 +51,40 @@ export const TribeEditModal: React.FC<Props> = ({isOpen, tribeInfo, onOk, onClos
         setThemeTag(tribeInfo && tribeInfo.theme.themeTag)
         setShowLoading(false)
     },[tribeInfo])
+
     const createTribe = async (): Promise<string> => {
         if(!imgUrl || !(imgUrl as MsgTextImage).url){
             present({message:"Please upload the image!", color: "danger", duration: 2000})
             return
         }
         if (tribeInfo) {
-            await tribeService.updateTribe({
-                tribeId: tribeInfo.tribeId,
-                image: imgUrl as ImageType,
-                color: color,
-                backgroundColor: background,
-                themeTag: themeTag,
-                themeDesc: themeDesc,
-                title: tribeInfo.title,
-                desc: themeDesc
-            })
+            let tribeId:string ;
+            if(!forkGroupId){
+                await tribeService.updateTribe({
+                    tribeId: tribeInfo.tribeId,
+                    image: imgUrl as ImageType,
+                    color: color,
+                    backgroundColor: background,
+                    themeTag: themeTag,
+                    themeDesc: themeDesc,
+                    title: tribeInfo.title,
+                    desc: themeDesc
+                })
+                tribeId = tribeInfo.tribeId;
+            }else{
+                const tribeInfoCopy:TribeInfo = JSON.parse(JSON.stringify(tribeInfo));
+                tribeInfoCopy.theme = {
+                    tribeId: tribeInfo.tribeId,
+                    image: imgUrl as ImageType,
+                    color: color,
+                    backgroundColor: background,
+                    themeTag: themeTag,
+                    themeDesc: themeDesc,
+                    title: tribeInfo.title,
+                    desc: themeDesc
+                };
+                tribeId = await tribeService.forkTribe(config.tribeId,forkGroupId,tribeInfoCopy)
+            }
             setTitle("")
             setImgUrl(null)
             setDesc("")
@@ -72,7 +93,7 @@ export const TribeEditModal: React.FC<Props> = ({isOpen, tribeInfo, onOk, onClos
             setShowLoading(false)
             setThemeDesc("")
             setThemeTag("")
-            return tribeInfo.tribeId;
+            return tribeId;
         } else {
             const rest = await tribeService.creatTribe({
                 title: title,
@@ -98,7 +119,7 @@ export const TribeEditModal: React.FC<Props> = ({isOpen, tribeInfo, onOk, onClos
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal">
             <IonHeader collapse="fade">
                 <IonToolbar>
-                    <IonTitle>{tribeInfo ? `Update ${tribeInfo.title}` : `Create Verse`}</IonTitle>
+                    <IonTitle>{forkGroupId? `Fork  ${tribeInfo.title} `: (tribeInfo ? `Update ${tribeInfo.title}` : `Create Verse`)}</IonTitle>
                     <IonButtons slot="end">
                         <IonButton onClick={() => onClose()}>Close</IonButton>
                     </IonButtons>

@@ -7,7 +7,7 @@ import {
     MessageType,
     PinnedSticky,
     TribeInfo,
-    TribeRole,
+    TribeRole, TribeTheme,
     UserLimit
 } from "../../../../types";
 import {Airdrop, Dice, Expression, Text} from "./Types";
@@ -63,7 +63,7 @@ interface Props {
     userLimit?: UserLimit
     selectRole?: TribeRole
     shareMsgId?: string
-    onFork?: (groupId:string) => Promise<string>;
+    onFork?: (groupId:string, forkTribeInfo: TribeInfo) => Promise<string>;
 }
 
 const pageSize = 1000000;
@@ -212,7 +212,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
                                 const comment = messages[index];
 
                                 // remove all unpinned msg when pin type
-                                if (comment.records && comment.records.length > 0 && comment.records[0].msgType == MessageType.Pin) {
+                                if (comment && comment.records && comment.records.length > 0 && comment.records[0].msgType == MessageType.Pin) {
                                     // commentsCopy = commentsCopy.filter(v => v.groupId !== "")
                                     // fetchNewPin(groupMsg,pageNo,setComments).then(()=>{
                                     //     onReload(false);
@@ -229,7 +229,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
                                     // }
                                     onReload(false);
                                 } else {
-                                    const _index = commentsCopy.findIndex(v => (v.records && v.records.length > 0 && comment.records.length > 0 && v.records[0].id == comment.records[0].id))
+                                    const _index = commentsCopy.findIndex(v => (v.records && v.records.length > 0 && comment && comment.records &&comment.records.length > 0 && v.records[0].id == comment.records[0].id))
                                     //new message
                                     if (_index == -1) {
                                         if (comment.records && comment.records[0].msgStatus !== MessageStatus.removed) {
@@ -709,19 +709,28 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
                                                     {msgItems}
                                                 </div>
                                                 {
-                                                    isDifTap && onFork && <div style={{padding: '6px 12px',display: "flex", justifyContent: "center"}}>
-                                                        <IonButtons>
-                                                            <IonButton onClick={() => {
-                                                                setShowLoading(true)
-                                                                onFork(pinnedSticky.records[0].groupId).then((tribeId)=>{
-                                                                    setShowLoading(false)
-                                                                    window.open(`./${tribeId}`)
-                                                                }).catch(e=>{
-                                                                    setShowLoading(false)
-                                                                    console.error(e)
-                                                                })
-                                                            }}><IonIcon src={gitBranchOutline}/> Fork</IonButton>
-                                                        </IonButtons>
+                                                    isDifTap && onFork && <div style={{padding: '6px 12px',display: "flex", justifyContent: "flex-end"}}>
+                                                        <div className="fork-icon">
+                                                            <IonButtons>
+                                                                <IonButton onClick={() => {
+                                                                    // setShowLoading(true)
+                                                                    onFork(pinnedSticky.records[0].groupId, {
+                                                                        tribeId: config.tribeId,
+                                                                        keeper:"",
+                                                                        lastPinedSeq:0,
+                                                                        onlineUser: 0,
+                                                                        theme:  pinnedSticky.theme,
+                                                                        title: "",
+                                                                        desc: "",
+                                                                        themeTag: pinnedSticky.theme.themeTag,
+                                                                        themeDesc: pinnedSticky.theme.themeDesc,
+                                                                    }).catch(e=>{
+                                                                        // setShowLoading(false)
+                                                                        console.error(e)
+                                                                    })
+                                                                }}><IonIcon src={gitBranchOutline} style={{color: "#4C89F8",fontSize:"24px"}}/></IonButton>
+                                                            </IonButtons>
+                                                        </div>
                                                     </div>
                                                 }
 

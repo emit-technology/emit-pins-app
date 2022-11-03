@@ -21,7 +21,7 @@ interface Props{
     onClose: ()=>void;
     onOK: ()=>void;
     account: AccountModel;
-    mnemonic: string;
+    mnemonic: Array<string>;
 }
 export const BackupModal:React.FC<Props> = ({isOpen,mnemonic,onClose,onOK,account}) =>{
 
@@ -59,7 +59,7 @@ export const BackupModal:React.FC<Props> = ({isOpen,mnemonic,onClose,onOK,accoun
     const confirmBackup = async (v) => {
         if (v == mnemonic[rIndex]) {
             await walletWorker.setBackedUp(account.accountId);
-            onClose();
+            onOK();
         } else {
             await preload()
             return Promise.reject("Wrong values selected, please try again!")
@@ -75,11 +75,12 @@ export const BackupModal:React.FC<Props> = ({isOpen,mnemonic,onClose,onOK,accoun
         swipeToClose={true}
         onDidDismiss={() => {
             onClose()
-        }} className="role-select-list">
+        }} initialBreakpoint={0.6}
+        breakpoints={[0, 0.6, 0.75]}>
         <IonHeader collapse="fade">
             <IonToolbar color="white">
                 <IonTitle>
-                   Backup Account
+                    Verification
                 </IonTitle>
                 <IonIcon slot="end" src={closeOutline} size="large" onClick={() => {
                     onClose()
@@ -113,12 +114,12 @@ export const BackupModal:React.FC<Props> = ({isOpen,mnemonic,onClose,onOK,accoun
             </IonItem>
         </IonContent>
 
-        <IonLoading
-            cssClass='my-custom-class'
-            isOpen={showLoading}
-            onDidDismiss={() => setShowLoading(false)}
-            message={'Please wait...'}
-            duration={60000}
-        />
+        {/*<IonLoading*/}
+        {/*    cssClass='my-custom-class'*/}
+        {/*    isOpen={showLoading}*/}
+        {/*    onDidDismiss={() => setShowLoading(false)}*/}
+        {/*    message={'Please wait...'}*/}
+        {/*    duration={60000}*/}
+        {/*/>*/}
     </IonModal>
 }

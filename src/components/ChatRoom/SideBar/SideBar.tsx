@@ -80,7 +80,11 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account,router, onLo
     }
 
     const onAccount = async (account: AccountModel) => {
-        await tribeService.accountLogin(account)
+        if(isSessionAvailable){
+            await tribeService.userLogout()
+        }else{
+            await tribeService.accountLogin(account)
+        }
         onRequestAccount()
     }
 
@@ -176,7 +180,7 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account,router, onLo
             setShowCreateModal(false);
         }}/>
 
-        <AccountList isOpen={showList} onOk={(account) => {
+        <AccountList isLogin={isSessionAvailable} isOpen={showList} onOk={(account) => {
             setShowLoading(true)
             onAccount(account).then(() => {
                 setShowLoading(false)

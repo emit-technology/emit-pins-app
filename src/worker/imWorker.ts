@@ -1,7 +1,6 @@
 import service from 'imWorker';
 import {PinnedSticky, WsStatus} from "../types";
 import {tribeService} from "../service/tribe";
-import selfStorage from "../common/storage";
 import {emitBoxSdk} from "../service/emitBox";
 
 class ImWorker {
@@ -44,6 +43,13 @@ class ImWorker {
         })
     }
 
+    async logout():Promise<void> {
+        return new Promise((resolve, reject)=>{
+            service.logout(function (){
+                resolve()
+            })
+        })
+    }
     async getPinnedMessageArray(tribeId: string, pageNo:number,pageSize:number,conditions?:Array<any>):Promise<{data: Array<PinnedSticky>, total: number}> {
         return new Promise((resolve, reject)=>{
             service.getPinnedMessageArray(tribeId,pageNo,pageSize,conditions?conditions:[],function (data:any){
