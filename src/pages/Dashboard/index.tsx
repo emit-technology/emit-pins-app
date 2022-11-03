@@ -670,12 +670,14 @@ export class Dashboard extends React.Component<Props, State> {
                                                 onOk={(tribeId) => {
                                                     this.setShowCreateTribe(false)
                                                     window.open(`./${tribeId}`)
+                                                    // window.location.href = `./${tribeId}`;
                                                 }}/>
 
                                 <TribeEditModal forkGroupId={forkGroupId} tribeInfo={forkTribeInfo} isOpen={showForkModal} onClose={() => this.setShowForkModal(false)}
                                                 onOk={(tribeId) => {
                                                     this.setShowForkModal(false)
-                                                    window.open(`/${tribeId}`)
+                                                    // window.open(`/${tribeId}`)
+                                                    window.location.href = `./${tribeId}`;
                                                 }}/>
 
                                 <IonToast

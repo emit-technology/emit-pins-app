@@ -43,7 +43,9 @@ export const TribeInfoModal:React.FC<Props> = ({isOpen,stickies,onReladData,onCl
                         stickyMsg&&stickyMsg.groupId ? <IonButtons slot="start">
                             <IonButton onClick={() => {
                                 tribeService.forkTribe(config.tribeId,stickyMsg.groupId,tribeInfo).then((tribeId)=>{
-                                    window.open(`./${tribeId}`)
+                                    // window.open(`./${tribeId}`)
+                                    window.location.href = `./${tribeId}`;
+
                                 }).catch(e=>{
                                     console.error(e)
                                 })

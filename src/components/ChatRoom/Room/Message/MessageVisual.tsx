@@ -132,6 +132,11 @@ const setVisibleStartIndex = (n: number) => {
     visibleStartIndex = n;
 }
 
+let scrollEvent = null;
+const setScrollEvent = (e:any) => {
+    scrollEvent = e;
+}
+
 export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMsgId, userLimit, selectRole, pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
     const dispatchData = useAppSelector(state => state.jsonData);
     const dispatch = useAppDispatch();
@@ -148,15 +153,57 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
     const [currentVisibleIndex, setCurrentVisibleIndex] = useState(0);
     const [maxVisibleIndex, setMaxVisibleIndex] = useState(0);
     const [replayMsg, setReplayMsg] = useState(null);
-    // const [visibleStartIndex, setVisibleStartIndex] = useState(0);
     const [checkedMsgId, setCheckedMsgId] = useState("");
-    // const [checkedAll, setCheckedAll] = useState(false)
-    // const [shouldScroll,setShouldScroll] = useState(0) //1 scroll to page ,2 scroll to bottom
-    const [presentAlert] = useIonAlert();
-    // const [newMsgs, setNewMsgs] = useState([]);
-    // const stickies: Array<PinnedSticky> = [...pinnedStickies.data];
-    // const dataLength = comments.length;
+    // const [scrollEvent, setScrollEvent] = useState(null);
 
+    // useEffect(()=>{
+    //     doScrollEvent()
+    // },[])
+    const doScrollEvent = (e:any) =>{
+        try{
+            // const e = scrollEvent;
+            if(e){
+                // console.log("---------------> scroll")
+                if (!pinnedStickies) {
+                    setVisibleStartIndex(e.visibleStartIndex);
+                    setCurrentTimeout();
+                }
+                if (!pinnedStickies && currentVisibleIndex !== e.visibleStopIndex) {
+                    setCurrentVisibleIndex(e.visibleStopIndex);
+                    // if (!e.scrollForward && e.scrollOffset < 100 && shouldFetchData) {
+                    //     // setTimeout(() => {
+                    //     //     fetchData(++pageNo, setComments).catch(e => console.error(e));
+                    //     // }, 100)
+                    // }
+
+                    if (e.visibleStopIndex >= maxVisibleIndex) {
+                        setMaxVisible(e.visibleStopIndex);
+                    }
+                    const data = comments[e.visibleStartIndex + 1];
+
+                    if (e.visibleStopIndex >= comments.length - 1) {
+                        const data = comments[e.visibleStopIndex];
+                        dispatchTheme(data);
+                    } else if (e.visibleStartIndex == 0) {
+                        const data = comments[e.visibleStartIndex];
+                        dispatchTheme(data);
+                    } else {
+                        // const condition = data && stickyMsg && (stickyMsg.seq != data.seq);
+                        if (!stickyMsg && data || stickyMsg && data && (stickyMsg.seq != data.seq)) {
+                            dispatchTheme(data);
+                        }
+                    }
+
+                }
+            }
+        }catch (e){
+            console.error(e)
+        }finally {
+            // setTimeout(()=>{
+            //     doScrollEvent()
+            // },200)
+        }
+    }
 
     const setCurrentTimeout = () => {
         if (visibleStartIndex >= 0 && delaySaveCurrentVisibleIndex++ == 0) {
@@ -312,40 +359,10 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
     const {outerRef, innerRef, items, scrollToItem, scrollTo, startItem} = useVirtual({
         itemCount: comments.length,
 
-        itemSize: 50,
+        itemSize: 100,
+        scrollDuration: 500,
         onScroll: (e) => {
-            if (!pinnedStickies) {
-                setVisibleStartIndex(e.visibleStartIndex);
-                setCurrentTimeout();
-            }
-            if (!pinnedStickies && currentVisibleIndex !== e.visibleStopIndex) {
-                setCurrentVisibleIndex(e.visibleStopIndex);
-                // if (!e.scrollForward && e.scrollOffset < 100 && shouldFetchData) {
-                //     // setTimeout(() => {
-                //     //     fetchData(++pageNo, setComments).catch(e => console.error(e));
-                //     // }, 100)
-                // }
-
-                if (e.visibleStopIndex >= maxVisibleIndex) {
-                    setMaxVisible(e.visibleStopIndex);
-                }
-                const data = comments[e.visibleStartIndex + 1];
-
-                if (e.visibleStopIndex >= comments.length - 1) {
-                    const data = comments[e.visibleStopIndex];
-                    dispatchTheme(data);
-                } else if (e.visibleStartIndex == 0) {
-                    const data = comments[e.visibleStartIndex];
-                    dispatchTheme(data);
-                } else {
-                    // const condition = data && stickyMsg && (stickyMsg.seq != data.seq);
-                    if (!stickyMsg && data || stickyMsg && data && (stickyMsg.seq != data.seq)) {
-                        dispatchTheme(data);
-                    }
-                }
-
-            }
-
+            doScrollEvent(e)
         },
     })
 

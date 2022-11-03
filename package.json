@@ -10,6 +10,7 @@
     "@capacitor/camera": "1.3.1",
     "@capacitor/core": "^3.6.0",
     "@capacitor/ios": "3.6.0",
+    "@capacitor/push-notifications": "1.0.9",
     "@capacitor/toast": "1.0.8",
     "@emit-technology/emit-account-node-sdk": "1.2.3",
     "@emit-technology/emit-lib": "1.1.0",

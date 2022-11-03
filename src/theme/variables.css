@@ -12,31 +12,45 @@ http://ionicframework.com/docs/theming/ */
   src: url('./fonts/Abel/Abel-Regular.ttf');
 }
 
+/*@font-face {*/
+/*  font-family: 'SFProText-Regular';*/
+/*  src: url('./fonts/SF/FontsFree-Net-SFProText-Regular.ttf');*/
+/*}*/
+
 @font-face {
   font-family: 'SFProText-Regular';
-  src: url('./fonts/SF/FontsFree-Net-SFProText-Regular.ttf');
+  src: url('./fonts/SF/sf-pro-text-regular.eot?#iefix') format('embedded-opentype'),
+  url('./fonts/SF/sf-pro-text-regular.eot') format('woff'),
+  url('./fonts/SF/sf-pro-text-regular.ttf')  format('truetype'),
+  url('./fonts/SF/sf-pro-text-regular.svg#svgFontName') format('svg');
 }
+
 @font-face {
   font-family: 'SFProText-Semibold';
-  src: url('./fonts/SF/FontsFree-Net-SFProText-Semibold.ttf');
+  src: url('./fonts/SF/sf-pro-text-bold.eot?#iefix') format('embedded-opentype'),
+  url('./fonts/SF/sf-pro-text-bold.eot') format('woff'),
+  url('./fonts/SF/sf-pro-text-bold.ttf')  format('truetype'),
+  url('./fonts/SF/sf-pro-text-bold.svg#svgFontName') format('svg');
 }
 @font-face {
   font-family: 'SFProText-Bold';
-  src: url('./fonts/SF/FontsFree-Net-SFProText-Bold.ttf');
-}
-@font-face {
-  font-family: 'SFProText-Regular';
-  src: url('./fonts/SF/FontsFree-Net-SFProText-Regular.ttf');
+  src: url('./fonts/SF/sf-pro-text-bold.eot?#iefix') format('embedded-opentype'),
+  url('./fonts/SF/sf-pro-text-bold.eot') format('woff'),
+  url('./fonts/SF/sf-pro-text-bold.ttf')  format('truetype'),
+  url('./fonts/SF/sf-pro-text-bold.svg#svgFontName') format('svg');
 }
 @font-face {
   font-family: 'SFProText-Medium';
-  src: url('./fonts/SF/FontsFree-Net-SFProText-Medium.ttf');
+  src: url('./fonts/SF/sf-pro-text-medium.eot?#iefix') format('embedded-opentype'),
+  url('./fonts/SF/sf-pro-text-medium.eot') format('woff'),
+  url('./fonts/SF/sf-pro-text-medium.ttf')  format('truetype'),
+  url('./fonts/SF/sf-pro-text-medium.svg#svgFontName') format('svg');
 }
 
 /** Ionic CSS Variables **/
 :root {
 
-  --ion-font-family: "SFRegular";
+  --ion-font-family: "SFProText-Regular";
   /*--border-radius: 20px;*/
 
   --ion-color-primary: #0620F9;
