@@ -71,9 +71,12 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
                 <div style={{cursor:"pointer"}}>
                     <IonItem lines="none">
                         {
-                            (stickyMsg && stickyMsg.groupId && stickyMsg.seq >1 || stickyMsg && !stickyMsg.groupId ) ? <IonIcon src={chevronBackOutline} slot="start" color="medium" onClick={()=>{
-                                    console.log("stickyMsg.seq - 1",stickyMsg, stickyMsg.seq - 1)
-                                    dispatch(saveDataState({data: JSON.stringify({forward: 1, refresh: stickyMsg.groupId ?new BigNumber(stickyMsg.seq).minus(1).toNumber(): 666666}), tag: 'scrollToItem'}))
+                            (stickyMsg && stickyMsg.groupId && stickyMsg.seq >1 || stickyMsg && !stickyMsg.groupId && stickyMsg.index>0 ) ? <IonIcon src={chevronBackOutline} slot="start" color="medium" onClick={()=>{
+                                    let refresh = stickyMsg.groupId ?new BigNumber(stickyMsg.seq).minus(1).toNumber(): 666666;
+                                    if(!stickyMsg.groupId && stickyMsg.index>0 && stickyMsg.seq == -1){
+                                        refresh = stickyMsg.index;
+                                    }
+                                    dispatch(saveDataState({data: JSON.stringify({forward: 1, refresh: refresh}), tag: 'scrollToItem'}))
                                 }}/>:
                                 <IonIcon src={chevronBackOutline} slot="start" style={{color:"#ffffff"}}/>
                         }
@@ -105,7 +108,6 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
                         </IonLabel>
                         {
                             (stickyMsg && stickyMsg.groupId && stickyMsg.seq > 0) ? <IonIcon src={chevronForwardOutline} slot="end" color="medium"  onClick={()=>{
-                                    console.log("stickyMsg.seq + 1",stickyMsg, stickyMsg.seq + 1);
                                     dispatch(saveDataState({data: JSON.stringify({forward: 2,refresh: stickyMsg.groupId ? new BigNumber(stickyMsg.seq).plus(1).toNumber():888888}), tag: 'scrollToItem'}))
                                 }}/>:
                                 <IonIcon src={chevronForwardOutline} slot="end" style={{color:"#ffffff"}}/>

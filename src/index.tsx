@@ -6,7 +6,8 @@ import reportWebVitals from './reportWebVitals';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import {App as AppPlugin} from "@capacitor/app";
 import { Toast } from '@capacitor/toast';
-
+import {addListeners, getDeliveredNotifications, registerNotifications} from './service/app'
+import {utils} from "./common";
 const rootElement = document.getElementById("root");
 if (rootElement.hasChildNodes()) {
     hydrate(<React.StrictMode>
@@ -27,6 +28,22 @@ AppPlugin.addListener("appUrlOpen",(appUrlOpen)=>{
         text: JSON.stringify(appUrlOpen),
     });
 })
+
+if(utils.isIos() || utils.isAndroid()){
+    addListeners().catch(e=>{
+        console.error("notification listen error",e)
+    })
+
+    registerNotifications().catch(e=>{
+        console.error("notification register error",e)
+    })
+
+    getDeliveredNotifications().catch(e=>{
+        console.error("notification getDeliveredNotifications error",e);
+    })
+}
+
+
 
 // ReactDOM.render(
 //   <React.StrictMode>

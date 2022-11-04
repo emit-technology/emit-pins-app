@@ -15,11 +15,11 @@
 }
 
 .msg-sender .inner {
-  width: 100%;
+  max-width: 100%;
 }
 
 .msg-receive .inner {
-  width: 100%;
+  max-width: 100%;
 }
 
 
@@ -1078,4 +1078,14 @@ ion-radio.radio-checked::part(mark) {
   justify-content: center;
   align-items: center;
   padding: 2px 0 0 6px;
+}
+
+.role-sp{
+  justify-content: center;
+  align-items: center;
+}
+
+.role-sp .tool-no-role{
+  position: absolute ;
+  right: 0px ;
 }

@@ -55,10 +55,14 @@ pre {
   }
 
 
-
 }
 
 @media (max-width: 768px) {
+  .role-sp .tool-no-role{
+    position: relative !important;
+    right: 0 !important;
+  }
+
   .share-node{
 
     width: 200% !important;
@@ -129,6 +133,7 @@ pre {
   .box-max-width {
     max-width: 72% !important;
   }
+
 }
 
 
@@ -198,15 +203,15 @@ pre {
   }
 
   .msg-no-role-rec .inner{
-    width: 75% !important;
+    max-width: 75% !important;
   }
 
   .msg-sender .inner {
-    width: 75% !important;
+    max-width: 75% !important;
   }
 
   .msg-receive .inner{
-    width: 75% !important;
+    max-width: 75% !important;
   }
 
   .pinned-fix{
@@ -222,8 +227,8 @@ pre {
   }
 
   .tool-no-role{
-    position: absolute;
-    right: 0;
+    //position: absolute;
+    //left: 70%;
     max-width: 150px;
     display: flex;
   }

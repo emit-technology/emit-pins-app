@@ -123,7 +123,7 @@ function setCurrentVisible(visibleStartIndex: number) {
 
 function getCurrentVisible(): number {
     const itm = selfStorage.getItem(`current_visible_index_${config.tribeId}`)
-    return itm == null ? 0 : itm;
+    return itm == null ? 999999999 : itm;
 }
 
 let visibleStartIndex = 0;
@@ -156,9 +156,16 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
     const [checkedMsgId, setCheckedMsgId] = useState("");
     // const [scrollEvent, setScrollEvent] = useState(null);
 
-    // useEffect(()=>{
-    //     doScrollEvent()
-    // },[])
+    useEffect(()=>{
+        if(!pinnedStickies && comments.length == 0 && tribeInfo){
+            dispatchTheme({
+                roles: tribeInfo.roles,
+                theme: tribeInfo.theme,
+                records: [], index: 0, groupId: "", seq: -1
+            })
+        }
+    },[tribeInfo])
+
     const doScrollEvent = (e:any) =>{
         try{
             // const e = scrollEvent;
@@ -183,7 +190,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
 
                     if (e.visibleStopIndex >= comments.length - 1) {
                         const data = comments[e.visibleStopIndex];
-                        dispatchTheme(data);
+                        displayBottomMsg(data);
                     } else if (e.visibleStartIndex == 0) {
                         const data = comments[e.visibleStartIndex];
                         dispatchTheme(data);
@@ -375,15 +382,28 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
                 console.log("scroll to last: ", last)
                 if (last >= 0) {
                     setTimeout(() => {
-                        const itm = last > 1 ? last + 1 : last;
-                        const data = comments[itm];
-                        setStickyMsg(data)
-                        dispatchTheme(data);
-                        startItem(itm);
-                        scrollToItem({
-                            index: itm,
-                            align: "start"
-                        });
+                        if(last == 999999999){
+                            const itm = comments.length - 1;
+                            const data = comments[itm];
+                            // setStickyMsg(data)
+                            dispatchTheme(data);
+                            startItem(itm);
+                            scrollToItem({
+                                index: itm,
+                                align: "start"
+                            });
+                        }else{
+                            const itm = last > 1 ? last + 1 : last;
+                            const data = comments[itm];
+                            // setStickyMsg(data)
+                            dispatchTheme(data);
+                            startItem(itm);
+                            scrollToItem({
+                                index: itm,
+                                align: "start"
+                            });
+                        }
+
                     }, 100)
                 } else {
                     setTimeout(() => {
@@ -431,7 +451,6 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
 
     const goToTheme = (seq: number, forward: any) => {
         const index = comments.findIndex(v => v.seq == seq)
-        // console.log("-->>>>>>>>. index: ", index)
         if (index > -1) {
             if (forward && forward == 1 && index > visibleStartIndex) {
                 goToTheme(seq - 1, forward)
@@ -440,6 +459,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
                 //     goToTheme(seq + 1, forward)
             // }
             else {
+                dispatchTheme(comments[index])
                 startItem(index);
                 scrollToItem({index: index, align: "start"})
             }
@@ -453,7 +473,6 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
         if (!pinnedStickies && dispatchData) {
             if (dispatchData.tag == 'scrollToItem' && dispatchData.data) {
                 let dataObj = JSON.parse(dispatchData.data);
-                console.log("-->>>>>>>>. scroll to item: ", dataObj)
                 if (dataObj.refresh > -1) {
                     if (dataObj.refresh == 0) {
                         shouldScrollToBottom = true;
@@ -524,10 +543,26 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
             setMaxVisible(dataLength);
             setVisibleStartIndex(dataLength);
             setCurrentTimeout();
-            dispatchTheme(comments[dataLength])
+
+            displayBottomMsg(comments[dataLength])
 
             shouldScrollToBottom = false;
 
+        }
+    }
+
+    const displayBottomMsg = (data: PinnedSticky) => {
+        console.log("displayBottomMsg")
+        if(!!data.groupId){
+            const dataCopy:PinnedSticky = JSON.parse(JSON.stringify(data))
+            dataCopy.theme = tribeInfo.theme;
+            dataCopy.roles = tribeInfo.roles;
+            dataCopy.seq = -1 ;
+            dataCopy.groupId = "";
+            dataCopy.index = new BigNumber(data.seq).toNumber();
+            dispatchTheme(dataCopy)
+        }else {
+            dispatchTheme(data)
         }
     }
 
@@ -597,12 +632,12 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
                     if (v.role) {
                         className = owner == v.owner && !v.groupId ? "msg-sender" : "msg-receive"
                     }
+                    if(v.msgType == MessageType.Role){
+                        className = `${className} role-sp`
+                    }
                     const checked = checkedMsgArr.indexOf(v.id) > -1;
                     //@ts-ignore
-                    item = <div className={className} style={{
-                        justifyContent: v.msgType == MessageType.Role && "center",
-                        alignItems: v.msgType == MessageType.Role && "center"
-                    }} key={index} onClick={(e) => {
+                    item = <div className={className} key={index} onClick={(e) => {
                         if (showPin) {
                             e.stopPropagation();
                             const checkedCopy = [...checkedMsgArr]
@@ -687,7 +722,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
                                             && ((pinnedSticky.records[0].msgStatus !== MessageStatus.removed && pinnedSticky.records[0].msgStatus !== MessageStatus.draft)
                                                 || (!!pinnedStickies && pinnedSticky.records[0].msgStatus == MessageStatus.draft))) {
                                             const isNewTheme = index > 0 && comments[index - 1] && (comments[index - 1] as PinnedSticky).records && (comments[index - 1] as PinnedSticky).records[0].msgStatus == MessageStatus.pinned
-                                                && pinnedSticky.records && pinnedSticky.records[0].msgStatus == MessageStatus.dashed;
+                                                && pinnedSticky.records && pinnedSticky.records[0].msgStatus == MessageStatus.dashed
 
                                             // const theme = stickyMsg.theme;
                                             const messages = pinnedSticky.records
@@ -718,7 +753,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
                                                     e.persist();
                                                     const sticky = comments[index];
                                                     if (sticky && stickyMsg && sticky.seq != stickyMsg.seq) {
-                                                        setStickyMsg(sticky)
+                                                        // setStickyMsg(sticky)
                                                         dispatchTheme(sticky);
                                                     }
                                                     // setCheckedMsgId(sticky && (sticky as PinnedSticky).records && (sticky as PinnedSticky).records.length>0 && (sticky as PinnedSticky).records[0].id)
@@ -750,7 +785,11 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
                                                         </div>
                                                     </div>
                                                 }
-
+                                                {
+                                                    (index == comments.length - 1 && !!pinnedSticky.groupId) && <div className="strike">
+                                                        <span>New Tape</span>
+                                                    </div>
+                                                }
                                             </div>
                                         }
                                     }

@@ -563,7 +563,7 @@ export class Dashboard extends React.Component<Props, State> {
                                             {/*</div>*/}
                                             <IonIcon src={ellipsisVertical} color="medium" size="large" slot="end"
                                                      onClick={(e) => {
-                                                         e.stopPropagation();
+                                                         e.persist();
                                                          this.setShowActionSheet(true)
                                                      }}/>
                                         </IonToolbar>
