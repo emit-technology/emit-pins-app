@@ -226,10 +226,12 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
                                     </div>
                                     <div className="share-left-bottom">
                                         <div className="share-left-bottom-info-box">
-                                            <div className="share-left-bottom-info">
-                                                <img src={utils.getDisPlayUrl(tribeInfo && tribeInfo.theme.image)}
-                                                     width="100%"
-                                                     height="100%" style={{borderRadius: '8px'}}/>
+                                            <div>
+                                                <div className="share-left-bottom-info">
+                                                    <img src={utils.getDisPlayUrl(tribeInfo && tribeInfo.theme.image)}
+                                                         width="100%"
+                                                         height="100%" style={{borderRadius: '8px',objectFit:"cover"}}/>
+                                                </div>
                                             </div>
                                             <div>
                                                 <div style={{
