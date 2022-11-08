@@ -15,11 +15,11 @@
 }
 
 .msg-sender .inner {
-  max-width: 100%;
+  width: 100%;
 }
 
 .msg-receive .inner {
-  max-width: 100%;
+  width: 100%;
 }
 
 
@@ -676,6 +676,24 @@
   overflow-y: scroll;
 }
 
+.role-avatar-modal {
+  overflow-y: scroll;
+  --background: var(--ion-color-light);
+  --border-radius: 16px;
+  --max-width: 512px;
+  --max-height: 300px;
+}
+
+.avatar-col {
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ion-avatar2:focus {
+ border: 1px solid #ddd;
+}
+
 .tribe-edit-modal {
   overflow-y: scroll;
   --background: var(--ion-color-light);
@@ -949,7 +967,7 @@ ion-radio.radio-checked::part(mark) {
   font-family: SFProText-Medium;
 }
 
-.balance-hd{
+.balance-hd {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -976,7 +994,7 @@ ion-radio.radio-checked::part(mark) {
   position: relative;
 }
 
-.balance-tl{
+.balance-tl {
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -994,7 +1012,7 @@ ion-radio.radio-checked::part(mark) {
   --backgroud: #F5F7F9;
 }
 
-.item-ion{
+.item-ion {
   border-radius: 12px;
   margin-bottom: 12px;
 }
@@ -1021,7 +1039,7 @@ ion-radio.radio-checked::part(mark) {
 }
 
 
-.ssowSdc{
+.ssowSdc {
   color: rgb(0, 0, 0);
   padding: 6px 12px;
   height: 120px;
@@ -1036,7 +1054,7 @@ ion-radio.radio-checked::part(mark) {
   //width: 300px;
 }
 
-.Swlwn{
+.Swlwn {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1045,7 +1063,7 @@ ion-radio.radio-checked::part(mark) {
   height: 100%;
 }
 
-.airdrop-title{
+.airdrop-title {
   overflow: hidden;
   -webkit-box-orient: vertical;
   text-overflow: ellipsis;
@@ -1057,7 +1075,7 @@ ion-radio.radio-checked::part(mark) {
   font-family: SFProText-Medium;
 }
 
-.airdrop-amount{
+.airdrop-amount {
   position: relative;
   font-family: SFBold;
   font-size: 24px;
@@ -1080,12 +1098,12 @@ ion-radio.radio-checked::part(mark) {
   padding: 2px 0 0 6px;
 }
 
-.role-sp{
+.role-sp {
   justify-content: center;
   align-items: center;
 }
 
-.role-sp .tool-no-role{
-  position: absolute ;
-  right: 0px ;
+.role-sp .tool-no-role {
+  position: absolute;
+  right: 0px;
 }

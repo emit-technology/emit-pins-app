@@ -14,7 +14,6 @@ import {
 } from "@ionic/react";
 import {addCircleOutline, createOutline, personOutline} from "ionicons/icons";
 import {RoleEditModal} from "./RoleEditModal";
-import {tribeService} from "../../service/tribe";
 import {utils} from "../../common";
 
 interface Props {

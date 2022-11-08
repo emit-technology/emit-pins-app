@@ -1,12 +1,15 @@
 import { PushNotifications } from '@capacitor/push-notifications';
+import selfStorage from "../../common/storage";
 
 export const addListeners = async () => {
     await PushNotifications.addListener('registration', token => {
         console.info('Registration token: ', token.value);
+        selfStorage.setItem("pushToken", token.value)
     });
 
     await PushNotifications.addListener('registrationError', err => {
         console.error('Registration error: ', err.error);
+        selfStorage.setItem("pushTokenErr", err.error)
     });
 
     await PushNotifications.addListener('pushNotificationReceived', notification => {
@@ -34,5 +37,5 @@ export const registerNotifications = async () => {
 
 export const getDeliveredNotifications = async () => {
     const notificationList = await PushNotifications.getDeliveredNotifications();
-    console.log('delivered notifications', notificationList);
+    console.log('delivered notifications', JSON.stringify(notificationList));
 }

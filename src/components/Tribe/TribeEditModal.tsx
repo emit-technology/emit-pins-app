@@ -6,12 +6,12 @@ import {
     IonToolbar,
     IonTitle,
     IonButtons,
-    IonButton,IonText,
+    IonButton, IonText,
     IonContent,
     IonTextarea,
     IonRow,
-    IonCol,IonItemDivider,
-    IonLoading, useIonToast, IonInput
+    IonCol, IonItemDivider,
+    IonLoading, useIonToast, IonInput, IonIcon
 } from '@ionic/react';
 import UploadImage from "../utils/UploadImage";
 import {useEffect, useState} from "react";
@@ -19,6 +19,7 @@ import {tribeService} from "../../service/tribe";
 import add from "../../img/add.png";
 import TextareaAutosize from "react-textarea-autosize";
 import config from "../../common/config";
+import {informationCircleOutline} from "ionicons/icons";
 
 interface Props {
     isOpen: boolean;
@@ -119,15 +120,16 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal">
             <IonHeader collapse="fade">
                 <IonToolbar>
-                    <IonTitle>{forkGroupId? `Fork  ${tribeInfo.title} `: (tribeInfo ? `Update ${tribeInfo.title}` : `Create Verse`)}</IonTitle>
+                    <IonTitle>{forkGroupId? `Create a new Fork  ${tribeInfo.title} `: (tribeInfo ? `Update ${tribeInfo.title}` : `Create Verse`)}</IonTitle>
                     <IonButtons slot="end">
                         <IonButton onClick={() => onClose()}>Close</IonButton>
                     </IonButtons>
                 </IonToolbar>
             </IonHeader>
             <IonContent className="ion-padding">
-                <div className="about-info">
+                <div >
                     <div style={{borderRadius: 14, padding: "0 22px"}}>
+
                         <div>
                             {
                                 !tribeInfo?<>
@@ -155,6 +157,11 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                                     <IonInput value={themeTag} placeholder="Theme Tag"
                                               onIonChange={e => setThemeTag(e.detail.value!)}/>
                                 </div>
+                                {
+                                    !!forkGroupId && <div className="fork-title">
+                                        By default, forks are tag the same as their upstream verse. You can customize the tag to distinguish it further.
+                                    </div>
+                                }
                             </>
                         }
 
@@ -183,7 +190,11 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                                          }}/>
                         </div>
 
-
+                        {
+                            !!forkGroupId && <div className="fork-title" style={{padding: "12px 0 0"}}>
+                                <IonIcon src={informationCircleOutline} style={{transform: 'translateY(3px)'}}/> You are creating a fork in your personal account.<br/> A fork is a copy of a verse. Forking a pin allows you to freely experiment with changes without affecting the original verse.
+                            </div>
+                        }
                     </div>
                     <div className="modal-btn">
                         <IonRow>
@@ -191,12 +202,12 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                                 <IonButton fill="outline" expand="block" onClick={() => onClose()}>Cancel</IonButton>
                             </IonCol>
                             <IonCol size="8">
-                                <IonButton expand="block" onClick={() => {
-                                    // setShowLoading(true)
+                                <IonButton expand="block" disabled={showLoading} onClick={() => {
+                                    setShowLoading(true)
                                     createTribe().then((tribeId: string) => {
                                         onOk(tribeId)
                                     }).catch(e => {
-                                        // setShowLoading(false)
+                                        setShowLoading(false)
                                         const err = typeof e == 'string' ? e : e.message;
                                         present({
                                             duration: 2000,

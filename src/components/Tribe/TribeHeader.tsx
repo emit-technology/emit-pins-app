@@ -71,7 +71,7 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
                 <div style={{cursor:"pointer"}}>
                     <IonItem lines="none">
                         {
-                            (stickyMsg && stickyMsg.groupId && stickyMsg.seq >1 || stickyMsg && !stickyMsg.groupId && stickyMsg.index>0 ) ? <IonIcon src={chevronBackOutline} slot="start" color="medium" onClick={()=>{
+                            (stickyMsg && stickyMsg.groupId && stickyMsg.seq >1 || stickyMsg && !stickyMsg.groupId && stickyMsg.index>=0 ) ? <IonIcon src={chevronBackOutline} slot="start" color="medium" onClick={()=>{
                                     let refresh = stickyMsg.groupId ?new BigNumber(stickyMsg.seq).minus(1).toNumber(): 666666;
                                     if(!stickyMsg.groupId && stickyMsg.index>0 && stickyMsg.seq == -1){
                                         refresh = stickyMsg.index;

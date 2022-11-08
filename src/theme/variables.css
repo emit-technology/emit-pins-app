@@ -20,7 +20,7 @@ http://ionicframework.com/docs/theming/ */
 @font-face {
   font-family: 'SFProText-Regular';
   src: url('./fonts/SF/sf-pro-text-regular.eot?#iefix') format('embedded-opentype'),
-  url('./fonts/SF/sf-pro-text-regular.eot') format('woff'),
+  url('./fonts/SF/sf-pro-text-regular.woff') format('woff'),
   url('./fonts/SF/sf-pro-text-regular.ttf')  format('truetype'),
   url('./fonts/SF/sf-pro-text-regular.svg#svgFontName') format('svg');
 }
@@ -28,21 +28,21 @@ http://ionicframework.com/docs/theming/ */
 @font-face {
   font-family: 'SFProText-Semibold';
   src: url('./fonts/SF/sf-pro-text-bold.eot?#iefix') format('embedded-opentype'),
-  url('./fonts/SF/sf-pro-text-bold.eot') format('woff'),
+  url('./fonts/SF/sf-pro-text-bold.woff') format('woff'),
   url('./fonts/SF/sf-pro-text-bold.ttf')  format('truetype'),
   url('./fonts/SF/sf-pro-text-bold.svg#svgFontName') format('svg');
 }
 @font-face {
   font-family: 'SFProText-Bold';
   src: url('./fonts/SF/sf-pro-text-bold.eot?#iefix') format('embedded-opentype'),
-  url('./fonts/SF/sf-pro-text-bold.eot') format('woff'),
+  url('./fonts/SF/sf-pro-text-bold.woff') format('woff'),
   url('./fonts/SF/sf-pro-text-bold.ttf')  format('truetype'),
   url('./fonts/SF/sf-pro-text-bold.svg#svgFontName') format('svg');
 }
 @font-face {
   font-family: 'SFProText-Medium';
   src: url('./fonts/SF/sf-pro-text-medium.eot?#iefix') format('embedded-opentype'),
-  url('./fonts/SF/sf-pro-text-medium.eot') format('woff'),
+  url('./fonts/SF/sf-pro-text-medium.woff') format('woff'),
   url('./fonts/SF/sf-pro-text-medium.ttf')  format('truetype'),
   url('./fonts/SF/sf-pro-text-medium.svg#svgFontName') format('svg');
 }

@@ -50,6 +50,7 @@ import {ResetModal} from "../../components/Account/modal/Reset";
 import walletWorker from "../../worker/walletWorker";
 import {utils} from "../../common";
 import {CreateModal} from "../../components/Account/modal";
+import {RolesAvatarModal} from "../../components/Role/RolesAvatarModal";
 
 
 interface State {
@@ -73,7 +74,7 @@ interface State {
     showMenusModal: boolean
 
     isConnecting: WsStatus
-    isUpdating: boolean;
+    showRoleAvatar: boolean;
     defaultTheme?: TribeTheme
     showPinnedMsg: boolean
     showShare: boolean
@@ -101,6 +102,8 @@ interface State {
 
     forkTribeInfo?: TribeInfo
 
+    alreadySelectRole:boolean;
+
 }
 
 interface Props {
@@ -125,7 +128,7 @@ export class Dashboard extends React.Component<Props, State> {
         groupMsgs: [],
         showMenusModal: false,
         isConnecting: WsStatus.inactive,
-        isUpdating: false,
+        showRoleAvatar: !selfStorage.getItem("alreadySelectRole"),
         showPinnedMsg: false,
         showPinnedMsgDetailModal: false,
         showCreateTribe: false,
@@ -142,7 +145,9 @@ export class Dashboard extends React.Component<Props, State> {
         showReset: false,
         showList: false,
         showCreate: false,
-        forkGroupId: ""
+        forkGroupId: "",
+        alreadySelectRole: !!selfStorage.getItem("alreadySelectRole"),
+
 
     }
 
@@ -170,7 +175,6 @@ export class Dashboard extends React.Component<Props, State> {
             });
         }, 2000)
 
-        selfStorage.setItem("checkInterVal", checkInterVal)
     }
 
     checkWsAlive = async () => {
@@ -214,35 +218,6 @@ export class Dashboard extends React.Component<Props, State> {
         for (let ps of rest.data) {
             latestMgs.push(...ps.records)
         }
-        // if (messages && messages.length > 0 && messages[0].records.length > 0) {
-        //     for(let msg of messages[0].records){
-        //         if (latestMgs.length >= 10) {
-        //             break;
-        //         }
-        //         const m = JSON.parse(JSON.stringify(msg))
-        //         m.actor = roles.find(role=>role.id == m.role)
-        //         latestMgs.push(m)
-        //     }
-        // }
-        // if (latestMgs.length < 10) {
-        //     const groupIds = await tribeService.groupIds(config.tribeId);
-        //     for (let groupId of groupIds) {
-        //         if (latestMgs.length >= 10) {
-        //             break;
-        //         }
-        //         const groupMsg = await tribeService.groupedMsg([groupId]);
-        //         if (groupMsg && groupMsg.length > 0 && groupMsg[0].records.length > 0) {
-        //             for(let msg of groupMsg[0].records){
-        //                 if (latestMgs.length >= 10) {
-        //                     break;
-        //                 }
-        //                 const m = JSON.parse(JSON.stringify(msg))
-        //                 m.actor = groupMsg[0].roles.find(role=>role.id == m.role)
-        //                 latestMgs.push(m)
-        //             }
-        //         }
-        //     }
-        // }
         this.setState({showShare: true, latestMgs: latestMgs})
     }
 
@@ -295,8 +270,6 @@ export class Dashboard extends React.Component<Props, State> {
         const roles = await tribeService.tribeRoles(tribeId);
         const groupIds = await tribeService.groupIds(tribeId);
         const groupTribes = await tribeService.groupedMsg(groupIds);
-        //
-        // await tribeService.setCacheMsg(tribeId,undefined,roles,groupIds);
         groupTribes.push({
             theme: tribeInfo.theme,
             records: [],
@@ -343,9 +316,22 @@ export class Dashboard extends React.Component<Props, State> {
     }
 
     setLatestRole = (v: TribeRole) => {
+        const {latestRole} = this.state;
+        let alreadySelectRole = selfStorage.getItem("alreadySelectRole")
+        if(latestRole && !!latestRole.id){
+            alreadySelectRole = true
+        }else{
+            if(!alreadySelectRole){
+                alreadySelectRole = !!v.id;
+            }
+        }
         this.setState({
-            latestRole: v
+            latestRole: v,
+            alreadySelectRole: alreadySelectRole,
+            showRoleAvatar: !alreadySelectRole
         })
+
+        selfStorage.setItem("alreadySelectRole",alreadySelectRole)
         selfStorage.setItem("latestRoleId", v.id)
     }
 
@@ -441,33 +427,15 @@ export class Dashboard extends React.Component<Props, State> {
     }
 
     fork = async (groupId: string,tribeInfo: TribeInfo):Promise<string> => {
-        // if (utils.useInjectAccount()) {
-        //     const isLock = await walletWorker.isLocked();
-        //     if (isLock) {
-        //         const accounts = await walletWorker.accounts();
-        //         if (!accounts || accounts.length == 0) {
-        //             this.setState({showCreate: true})
-        //             return Promise.reject("Please create an account!");
-        //         } else {
-        //             this.setState({showUnlock: true})
-        //             return Promise.reject("Account is locked!");
-        //         }
-        //     }else{
-        //         //TODO
-        //         if(this.state.isConnecting == WsStatus.inactive){
-        //             this.setState({showList: true})
-        //         }
-        //     }
-        // }
         this.setState({showForkModal: true, forkGroupId: groupId, forkTribeInfo: tribeInfo})
         return;
     }
 
     render() {
         const {
-            owner, showActionSheet, isSessionAvailable,showCreate,forkGroupId, buttons, toastMsg, showShare, latestMgs, showToast, showPinnedMsg, userLimit,
-            showCreateTribe, isUpdating, isConnecting, groupMsgs, showMenusModal,forkTribeInfo, groupPinnedMsg, showPinnedMsgDetailModal,
-            account, roles, tribeInfo, latestRole, datas, showTribeEdit, showPin, showList, showReset, showUnlock,showForkModal
+            owner, showActionSheet, isSessionAvailable,showCreate,forkGroupId,showRoleAvatar,buttons, toastMsg, showShare, latestMgs, showToast, userLimit,
+            showCreateTribe,  isConnecting, groupMsgs, alreadySelectRole,forkTribeInfo, groupPinnedMsg, showPinnedMsgDetailModal,
+            account, roles, tribeInfo, latestRole, showTribeEdit, showPin, showList, showReset, showUnlock,showForkModal
         } = this.state;
 
         return (
@@ -524,26 +492,6 @@ export class Dashboard extends React.Component<Props, State> {
                                                             <IonIcon src={listOutline} size="large"/>
                                                         </IonMenuToggle>
                                                     </div>
-
-                                                    {/*{*/}
-                                                    {/*    account && account.name ? <div slot="start" onClick={() => {*/}
-                                                    {/*            tribeService.getAccountAndLogin().then(() => {*/}
-                                                    {/*                this.initData().catch(e => console.error(e))*/}
-                                                    {/*            }).catch(e => {*/}
-                                                    {/*            })*/}
-
-                                                    {/*        }}>*/}
-                                                    {/*            <Avatar name={account.name} round size="30"/>*/}
-                                                    {/*        </div> :*/}
-                                                    {/*        <IonIcon size="large" slot="start" src={personCircleOutline}*/}
-                                                    {/*                 onClick={() => {*/}
-                                                    {/*                     tribeService.getAccountAndLogin().then(() => {*/}
-                                                    {/*                         this.initData().catch(e => console.error(e))*/}
-                                                    {/*                     }).catch(e => {*/}
-                                                    {/*                     })*/}
-
-                                                    {/*                 }}/>*/}
-                                                    {/*}*/}
                                                 </div>
                                             </div>
                                             <IonTitle className="font-style-bold" onClick={() => {
@@ -555,12 +503,6 @@ export class Dashboard extends React.Component<Props, State> {
                                                     })
                                                 }} tribeInfo={tribeInfo} roles={roles} wsStatus={isConnecting}/>
                                             </IonTitle>
-                                            {/*<div slot="end" className="menus-list-button">*/}
-                                            {/*    <IonIcon src={listOutline} color="medium" size="large" slot="end"*/}
-                                            {/*             onClick={() => {*/}
-                                            {/*                 this.setShowMenusModal(true)*/}
-                                            {/*             }}/>*/}
-                                            {/*</div>*/}
                                             <IonIcon src={ellipsisVertical} color="medium" size="large" slot="end"
                                                      onClick={(e) => {
                                                          e.persist();
@@ -632,7 +574,7 @@ export class Dashboard extends React.Component<Props, State> {
                                         shareMsgId={this.props.msgId}
                                     />
 
-                                    <BottomBar isTokenValid={isSessionAvailable} tribeInfo={tribeInfo} owner={owner} userLimit={userLimit}
+                                    <BottomBar alreadySelectRole={alreadySelectRole} isTokenValid={isSessionAvailable} tribeInfo={tribeInfo} owner={owner} userLimit={userLimit}
                                                onRoleCheck={(v) => {
                                                    this.setLatestRole(v)
                                                }} roles={roles} selectRole={latestRole} showPin={showPin} onPin={() => {
@@ -642,10 +584,7 @@ export class Dashboard extends React.Component<Props, State> {
                                             console.error(e)
                                         })
                                     }}/>
-
-
                                 </div>
-
 
                                 <IonActionSheet
                                     isOpen={showActionSheet}
@@ -754,6 +693,12 @@ export class Dashboard extends React.Component<Props, State> {
                 }} onClose={() => {
                     this.setState({showCreate: false})
                 }}/>
+
+                {
+                    roles && roles.length >0 && <RolesAvatarModal defaultRole={latestRole} roles={roles} onRoleCheck={(v)=>this.setLatestRole(v)} isOpen={showRoleAvatar && ( !latestRole || latestRole && !latestRole.id) } onClose={()=>{
+                        this.setState({showRoleAvatar: false})
+                    }}/>
+                }
             </>
         );
     }

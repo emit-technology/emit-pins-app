@@ -185,7 +185,7 @@ export const utils = {
         //@ts-ignore
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
         //@ts-ignore
-        if (/android/i.test(navigator.userAgent) && !window.MSStream) {
+        if (/android/i.test(userAgent) && !window.MSStream) {
             return true
         }
         return false;

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "640928409309",
+    "project_id": "emit-pins",
+    "storage_bucket": "emit-pins.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:640928409309:android:ba62fa9c56a6a80a895d34",
+        "android_client_info": {
+          "package_name": "technology.emit.pins"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "640928409309-gsi0pif32fqot3i1hq4qdfclmpalr65a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBd4P2Cs9yy1zmHre-OtgJPquCG36ZzIY0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "640928409309-gsi0pif32fqot3i1hq4qdfclmpalr65a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -19,6 +19,7 @@ if (rootElement.hasChildNodes()) {
     </React.StrictMode>, rootElement);
 }
 console.log("added app url open listener.")
+
 AppPlugin.addListener("appUrlOpen",(appUrlOpen)=>{
     console.log("app open pins: ", JSON.stringify(appUrlOpen));
     Toast.show({
@@ -28,6 +29,7 @@ AppPlugin.addListener("appUrlOpen",(appUrlOpen)=>{
         text: JSON.stringify(appUrlOpen),
     });
 })
+console.log("utils.isAndroid():: ",utils.isAndroid());
 
 if(utils.isIos() || utils.isAndroid()){
     addListeners().catch(e=>{

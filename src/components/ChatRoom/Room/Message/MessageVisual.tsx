@@ -366,7 +366,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
     const {outerRef, innerRef, items, scrollToItem, scrollTo, startItem} = useVirtual({
         itemCount: comments.length,
 
-        itemSize: 100,
+        itemSize: 50,
         scrollDuration: 500,
         onScroll: (e) => {
             doScrollEvent(e)
@@ -552,8 +552,8 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
     }
 
     const displayBottomMsg = (data: PinnedSticky) => {
-        console.log("displayBottomMsg")
-        if(!!data.groupId){
+        console.log("===>>>>  displayBottomMsg",data, stickyMsg)
+        if(!!data.groupId ){
             const dataCopy:PinnedSticky = JSON.parse(JSON.stringify(data))
             dataCopy.theme = tribeInfo.theme;
             dataCopy.roles = tribeInfo.roles;

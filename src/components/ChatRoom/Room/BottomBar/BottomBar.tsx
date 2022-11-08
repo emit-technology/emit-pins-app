@@ -44,6 +44,7 @@ interface Props {
     tribeInfo: TribeInfo
     owner: string;
     isTokenValid: boolean;
+    alreadySelectRole:boolean;
 }
 
 
@@ -54,7 +55,7 @@ const lorem = new LoremIpsum({
     }
 });
 
-export const BottomBar: React.FC<Props> = ({showPin, roles,isTokenValid, tribeInfo, owner, userLimit, onRoleCheck, onPin, selectRole}) => {
+export const BottomBar: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTokenValid, tribeInfo, owner, userLimit, onRoleCheck, onPin, selectRole}) => {
     const textRef = React.useRef("")
     const [present, dismiss] = useIonToast();
     const [replayMsg, setReplayMsg] = useState(null);
@@ -170,7 +171,7 @@ export const BottomBar: React.FC<Props> = ({showPin, roles,isTokenValid, tribeIn
                             <IonCol size="7">
                                 {
                                     selectRole && <div className="bottom-role">
-                                        <div className="avatar" onClick={() => {
+                                        <div className={`avatar ${(!alreadySelectRole && selectRole && !selectRole.id) && "avatarn"}`} onClick={() => {
                                             setShowSelectRole(true)
                                         }}>
                                             <IonAvatar slot="start">
