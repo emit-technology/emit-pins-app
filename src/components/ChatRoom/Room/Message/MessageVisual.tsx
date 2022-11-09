@@ -67,17 +67,14 @@ interface Props {
 }
 
 const pageSize = 1000000;
-let shouldFetchData = true;
 let pageNo = 1;
 let count = 0;
 let total = 0;
 let shouldScroll = 0;
 let error_fetch_count = 0;
 let shouldScrollToBottom = false;
-let scrollInterVal: any;
 
 let delaySaveCurrentVisibleIndex = 0;
-let delaySaveMaxVisibleIndex = 0;
 
 const mutexify = require('mutexify/promise')
 const _lock = mutexify()
@@ -572,7 +569,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
         selfStorage.setItem(`maxVisibleIndex_${config.tribeId}`, n)
         const data: PinnedSticky = comments[n];
         if (data) {
-            selfStorage.setItem(`latest_view_${config.tribeId}`, data.records && data.records.length > 0 && data.records[0].timestamp)
+            // selfStorage.setItem(`latest_view_${config.tribeId}`, data.records && data.records.length > 0 && data.records[0].timestamp)
         }
     }
 

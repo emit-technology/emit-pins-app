@@ -6,6 +6,7 @@ import config from "../../common/config";
 import {Airdrop} from "../ChatRoom/Room/Message/Types";
 import {IonIcon} from "@ionic/react";
 import {gitBranchOutline, gitBranchSharp} from "ionicons/icons";
+import selfStorage from "../../common/storage";
 
 interface Props {
     data: Array<TribeInfo>
@@ -29,6 +30,8 @@ export const TribeLayout: React.FC<Props> = ({data,tribeTimeMap}) => {
 
                     return <XBlock key={i}>
                         <div className="recmt-content card" onClick={() => {
+                            selfStorage.setItem(`latest_view_${v.tribeId}`,Math.floor(Date.now()/1000));
+
                             window.location.href = `./${v.tribeId}`
                         }}>
                             <div className="recmt-head">

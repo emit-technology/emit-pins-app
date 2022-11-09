@@ -149,50 +149,64 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                             {/*</div>*/}
                         </div>
 
-                        {/*<IonItemDivider color="light">Theme</IonItemDivider>*/}
                         {
-                            tribeInfo && <>
-                                <div className='create-title'>Tag</div>
+                            !!forkGroupId && <div>
+                                <div className='create-title'>Name</div>
                                 <div className='radius-6' style={{background: '#F1F3F5'}}>
-                                    <IonInput value={themeTag} placeholder="Theme Tag"
-                                              onIonChange={e => setThemeTag(e.detail.value!)}/>
+                                    <IonInput value={tribeInfo && title} placeholder="Verse Name"
+                                              onIonChange={e => setTitle(e.detail.value!)}/>
                                 </div>
                                 {
                                     !!forkGroupId && <div className="fork-title">
-                                        By default, forks are tag the same as their upstream verse. You can customize the tag to distinguish it further.
+                                        By default, forks are named the same as their upstream verse. You can customize the name to distinguish it further.
                                     </div>
                                 }
+                            </div>
+                        }
+                        {
+                            !forkGroupId && <>
+                                {/*<IonItemDivider color="light">Theme</IonItemDivider>*/}
+                                {
+                                    tribeInfo && <>
+                                        <div className='create-title'>Tag</div>
+                                        <div className='radius-6' style={{background: '#F1F3F5'}}>
+                                            <IonInput value={themeTag} placeholder="Theme Tag"
+                                                      onIonChange={e => setThemeTag(e.detail.value!)}/>
+                                        </div>
+                                    </>
+                                }
+
+                                <div className='create-title'>Note</div>
+                                <div color='medium' className='radius-6' style={{background: '#F1F3F5'}}>
+                                    {/*<IonTextarea className='common-input' rows={2}*/}
+                                    {/*             value={themeDesc} placeholder="Description"*/}
+                                    {/*             onIonChange={e => setThemeDesc(e.detail.value!)}/>*/}
+
+                                    <TextareaAutosize maxRows={3} rows={2} maxLength={1024} value={themeDesc} onChange={(e)=>{
+                                        setThemeDesc(e.target.value);
+                                    }}
+                                                      placeholder="Note" className="msg-input"/>
+                                </div>
+
+
+                                <div className='create-title'>Image</div>
+
+                                <div className="tribe-info-img">
+                                    <UploadImage defaultIcon={add}  width='100%' imgUrl={imgUrl && imgUrl.url} setImgUrl={(url, width, height)=>setImgUrl({
+                                        url: url,height: height,width: width
+                                    })}
+                                                 setColor={(bg, font, badge, text) => {
+                                                     setBackground(bg);
+                                                     setColor(font);
+                                                 }}/>
+                                </div>
                             </>
                         }
 
-                        <div className='create-title'>Note</div>
-                        <div color='medium' className='radius-6' style={{background: '#F1F3F5'}}>
-                            {/*<IonTextarea className='common-input' rows={2}*/}
-                            {/*             value={themeDesc} placeholder="Description"*/}
-                            {/*             onIonChange={e => setThemeDesc(e.detail.value!)}/>*/}
-
-                            <TextareaAutosize maxRows={3} rows={2} maxLength={1024} value={themeDesc} onChange={(e)=>{
-                                setThemeDesc(e.target.value);
-                            }}
-                                               placeholder="Note" className="msg-input"/>
-                        </div>
-
-
-                        <div className='create-title'>Image</div>
-
-                        <div className="tribe-info-img">
-                            <UploadImage defaultIcon={add}  width='100%' imgUrl={imgUrl && imgUrl.url} setImgUrl={(url, width, height)=>setImgUrl({
-                                url: url,height: height,width: width
-                            })}
-                                         setColor={(bg, font, badge, text) => {
-                                             setBackground(bg);
-                                             setColor(font);
-                                         }}/>
-                        </div>
-
                         {
                             !!forkGroupId && <div className="fork-title" style={{padding: "12px 0 0"}}>
-                                <IonIcon src={informationCircleOutline} style={{transform: 'translateY(3px)'}}/> You are creating a fork in your personal account.<br/> A fork is a copy of a verse. Forking a pin allows you to freely experiment with changes without affecting the original verse.
+                                <IonIcon src={informationCircleOutline} style={{transform: 'translateY(3px)'}}/> You are creating a fork in your personal account.<br/>
+                                {/*A fork is a copy of a verse. Forking a pin allows you to freely experiment with changes without affecting the original verse.*/}
                             </div>
                         }
                     </div>

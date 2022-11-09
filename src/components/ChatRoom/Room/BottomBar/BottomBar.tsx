@@ -171,7 +171,7 @@ export const BottomBar: React.FC<Props> = ({showPin,alreadySelectRole, roles,isT
                             <IonCol size="7">
                                 {
                                     selectRole && <div className="bottom-role">
-                                        <div className={`avatar ${(!alreadySelectRole && selectRole && !selectRole.id) && "avatarn"}`} onClick={() => {
+                                        <div className={`avatar ${(!alreadySelectRole && roles.length > 1 && selectRole && !selectRole.id) && "avatarn"}`} onClick={() => {
                                             setShowSelectRole(true)
                                         }}>
                                             <IonAvatar slot="start">

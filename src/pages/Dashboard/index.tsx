@@ -695,7 +695,7 @@ export class Dashboard extends React.Component<Props, State> {
                 }}/>
 
                 {
-                    roles && roles.length >0 && <RolesAvatarModal defaultRole={latestRole} roles={roles} onRoleCheck={(v)=>this.setLatestRole(v)} isOpen={showRoleAvatar && ( !latestRole || latestRole && !latestRole.id) } onClose={()=>{
+                    roles && roles.length >1 && <RolesAvatarModal defaultRole={latestRole} roles={roles} onRoleCheck={(v)=>this.setLatestRole(v)} isOpen={showRoleAvatar && ( !latestRole || latestRole && !latestRole.id) } onClose={()=>{
                         this.setState({showRoleAvatar: false})
                     }}/>
                 }
