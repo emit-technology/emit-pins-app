@@ -488,7 +488,7 @@ class TribeService implements ITribe {
     forkTribe = async (tribeId: string, groupId: string,tribeInfo: TribeInfo): Promise<string> => {
         await this.userCheckAuth()
         const data:any = { groupId: groupId,
-            FromTribeId: tribeId,};
+            FromTribeId: tribeId,title: tribeInfo.title};
         const keys = Object.keys(tribeInfo.theme);
         for(let key of keys){
             data[key]=tribeInfo.theme[key]

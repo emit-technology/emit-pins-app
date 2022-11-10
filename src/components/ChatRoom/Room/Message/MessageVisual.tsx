@@ -769,7 +769,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
                                                                         lastPinedSeq:0,
                                                                         onlineUser: 0,
                                                                         theme:  pinnedSticky.theme,
-                                                                        title: "",
+                                                                        title: tribeInfo.title,
                                                                         desc: "",
                                                                         themeTag: pinnedSticky.theme.themeTag,
                                                                         themeDesc: pinnedSticky.theme.themeDesc,

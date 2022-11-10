@@ -8,6 +8,7 @@ import {App as AppPlugin} from "@capacitor/app";
 import { Toast } from '@capacitor/toast';
 import {addListeners, getDeliveredNotifications, registerNotifications} from './service/app'
 import {utils} from "./common";
+
 const rootElement = document.getElementById("root");
 if (rootElement.hasChildNodes()) {
     hydrate(<React.StrictMode>
@@ -43,6 +44,7 @@ if(utils.isIos() || utils.isAndroid()){
     getDeliveredNotifications().catch(e=>{
         console.error("notification getDeliveredNotifications error",e);
     })
+
 }
 
 

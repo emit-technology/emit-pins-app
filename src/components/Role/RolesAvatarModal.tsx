@@ -29,14 +29,12 @@ export const RolesAvatarModal: React.FC<Props> = ({roles,isOpen,onClose, default
 
     return <>
         <IonModal isOpen={isOpen} className="role-avatar-modal" onDidDismiss={() => onClose()}>
-            <IonHeader collapse="fade">
-                <IonToolbar>
-                    <IonTitle>Select a role to actor</IonTitle>
-                    <IonButtons slot="end">
-                        <IonButton onClick={() => onClose()}>Close</IonButton>
-                    </IonButtons>
-                </IonToolbar>
-            </IonHeader>
+            <IonToolbar color="secondary">
+                <IonTitle>Select a role to actor</IonTitle>
+                <IonButtons slot="end">
+                    <IonButton onClick={() => onClose()}>Close</IonButton>
+                </IonButtons>
+            </IonToolbar>
             <IonContent className="ion-padding" fullscreen >
                     <div style={{overflow: "scroll", height:'90%'}}>
                         <IonRow>

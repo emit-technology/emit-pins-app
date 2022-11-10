@@ -246,7 +246,7 @@ export class HomePage extends React.Component<Props, State> {
 
                     <TribeEditModal isOpen={showCreateModal} onClose={()=>this.setShowCreateModal(false)} onOk={(tribeId)=>{
                         this.setShowCreateModal(false);
-                        window.open(`/${tribeId}`)
+                        window.location.href = `/${tribeId}`;
                     }} />
 
                 </IonContent>

@@ -45,6 +45,8 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
     const [present, dismiss] = useIonToast();
 
     useEffect(()=>{
+        console.log("tribeInfo==> ",tribeInfo);
+
         setTitle(tribeInfo && tribeInfo.title)
         setImgUrl(tribeInfo && tribeInfo.theme.image)
         setDesc(tribeInfo && tribeInfo.desc)
@@ -81,7 +83,7 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                     backgroundColor: background,
                     themeTag: themeTag,
                     themeDesc: themeDesc,
-                    title: tribeInfo.title,
+                    title: title,
                     desc: themeDesc
                 };
                 tribeId = await tribeService.forkTribe(config.tribeId,forkGroupId,tribeInfoCopy)

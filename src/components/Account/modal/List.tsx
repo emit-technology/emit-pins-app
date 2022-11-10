@@ -16,7 +16,7 @@ import walletWorker from "../../../worker/walletWorker";
 import {
     closeOutline,
     copyOutline,
-    downloadOutline, eyeOffOutline, eyeOutline, refreshCircleOutline,
+    downloadOutline, eyeOffOutline, eyeOutline, lockOpenOutline, refreshCircleOutline,
     trashOutline
 } from "ionicons/icons";
 import copy from "copy-to-clipboard";
@@ -181,6 +181,12 @@ export const AccountList: React.FC<Props> = ({isOpen, isLogin, onClose, onOk}) =
                                     </IonCol>
                                     <IonCol size="7">
                                         <div className="account-info-icon">
+                                            &nbsp;&nbsp;
+                                            <div onClick={() => {
+                                               walletWorker.lockWallet().then(()=>{
+                                                   onClose();
+                                               })
+                                            }}><IonIcon src={lockOpenOutline} className="account-bt-icon"/></div>
                                             &nbsp;&nbsp;
                                             <div onClick={() => {
                                                 copy(account && account.addresses[ChainType.EMIT])

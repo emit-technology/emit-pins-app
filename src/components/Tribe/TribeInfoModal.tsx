@@ -40,17 +40,19 @@ export const TribeInfoModal:React.FC<Props> = ({isOpen,stickies,onReladData,onCl
             <IonHeader collapse="fade">
                 <IonToolbar>
                     {
-                        stickyMsg&&stickyMsg.groupId ? <IonButtons slot="start">
-                            <IonButton onClick={() => {
-                                tribeService.forkTribe(config.tribeId,stickyMsg.groupId,tribeInfo).then((tribeId)=>{
-                                    // window.open(`./${tribeId}`)
-                                    window.location.href = `./${tribeId}`;
-
-                                }).catch(e=>{
-                                    console.error(e)
-                                })
-                            } }><IonIcon src={gitBranchOutline}/>Fork</IonButton>
-                        </IonButtons>:
+                        stickyMsg&&stickyMsg.groupId ?<div></div>
+                        //     <IonButtons slot="start">
+                        //     <IonButton onClick={() => {
+                        //         tribeService.forkTribe(config.tribeId,stickyMsg.groupId,tribeInfo).then((tribeId)=>{
+                        //             // window.open(`./${tribeId}`)
+                        //             window.location.href = `./${tribeId}`;
+                        //
+                        //         }).catch(e=>{
+                        //             console.error(e)
+                        //         })
+                        //     } }><IonIcon src={gitBranchOutline}/>Fork</IonButton>
+                        // </IonButtons>
+                            :
                             tribeInfo && tribeInfo.keeper == owner && <IonButtons slot="start">
                                 <IonButton onClick={() => {
                                     setUpdateTribeModal(true);
@@ -64,7 +66,7 @@ export const TribeInfoModal:React.FC<Props> = ({isOpen,stickies,onReladData,onCl
                                 tribeInfo && tribeInfo.forked  && tribeInfo.forked.length>0 && <div>
                                     <IonText color="medium"><small style={{fontWeight:700}}>Forked from {tribeInfo.forked[0].tribeId}</small></IonText>
                                     <IonIcon style={{transform:'translateY(3px)',cursor:'pointer'}} size="small" src={openOutline} color="medium" onClick={()=>{
-                                        window.open(`./${tribeInfo.forked[0].tribeId}`)
+                                        window.location.href = `./${tribeInfo.forked[0].tribeId}`
                                     }}/>
                                 </div>
                             }

@@ -181,106 +181,103 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
     return <>
         {/*//initialBreakpoint={0.4} breakpoints={[0, 0.4, 0.6]}*/}
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-share-modal">
-            <IonPage>
-                <IonHeader collapse="fade">
-                    <IonToolbar>
-                        <IonButtons slot="end">
-                            <IonButton onClick={() => sharePng()}><IonIcon src={shareOutline}/> Share</IonButton>
-                        </IonButtons>
-                        <IonTitle>Share {tribeInfo && tribeInfo.title}</IonTitle>
-                        <IonButtons slot="start">
-                            <IonButton onClick={() => onClose()}>Close</IonButton>
-                        </IonButtons>
-                    </IonToolbar>
-                </IonHeader>
-                <IonContent className="ion-padding">
-                    <div id="my-node" className="share-node">
-                        <div className="visual-msg-box share-page" style={{
-                            height: '100%',
-                            backgroundImage: backImg
-                        }}>
-                            <div className="share-box">
-                                <div className="share-left">
-                                    <div className="share-left-top">
-                                        <div className="share-left-top-in">
-                                            {
-                                                roleImgs && roleImgs.length > 0 && roleImgs.map((img, i) => {
-                                                    if (i >= 4) {
-                                                        return <div key={i}
-                                                                    className="pinned-msg-roles pinned-msg-rolesi">
-                                                            +{roleImgs[i]}
-                                                        </div>
-                                                    }
-                                                    return <div key={i} className="pinned-msg-roles"
-                                                                style={{
-                                                                    right: 20 + (i + 1) * 22,
-                                                                    zIndex: 10000 - i * 2
-                                                                }}>
-                                                        <IonAvatar className="ion-avatar2">
-                                                            <img src={img} width="100%" height="100%"/>
-                                                        </IonAvatar>
+            <IonToolbar color="secondary">
+                <IonButtons slot="end">
+                    <IonButton onClick={() => sharePng()}><IonIcon src={shareOutline}/> Share</IonButton>
+                </IonButtons>
+                <IonTitle>Share {tribeInfo && tribeInfo.title}</IonTitle>
+                <IonButtons slot="start">
+                    <IonButton onClick={() => onClose()}>Close</IonButton>
+                </IonButtons>
+            </IonToolbar>
+            <IonContent className="ion-padding">
+
+                <div id="my-node" className="share-node">
+                    <div className="visual-msg-box share-page" style={{
+                        height: '100%',
+                        backgroundImage: backImg
+                    }}>
+                        <div className="share-box">
+                            <div className="share-left">
+                                <div className="share-left-top">
+                                    <div className="share-left-top-in">
+                                        {
+                                            roleImgs && roleImgs.length > 0 && roleImgs.map((img, i) => {
+                                                if (i >= 4) {
+                                                    return <div key={i}
+                                                                className="pinned-msg-roles pinned-msg-rolesi">
+                                                        +{roleImgs[i]}
                                                     </div>
-                                                })
-                                            }
-                                        </div>
-                                    </div>
-                                    <div className="share-left-bottom">
-                                        <div className="share-left-bottom-info-box">
-                                            <div>
-                                                <div className="share-left-bottom-info">
-                                                    <img src={utils.getDisPlayUrl(tribeInfo && tribeInfo.theme.image)}
-                                                         width="100%"
-                                                         height="100%" style={{borderRadius: '8px',objectFit:"cover"}}/>
+                                                }
+                                                return <div key={i} className="pinned-msg-roles"
+                                                            style={{
+                                                                right: 20 + (i + 1) * 22,
+                                                                zIndex: 10000 - i * 2
+                                                            }}>
+                                                    <IonAvatar className="ion-avatar2">
+                                                        <img src={img} width="100%" height="100%"/>
+                                                    </IonAvatar>
                                                 </div>
-                                            </div>
-                                            <div>
-                                                <div style={{
-                                                    fontFamily: 'SFBold',
-                                                    fontSize: '24px'
-                                                }}>{tribeInfo && tribeInfo.title}</div>
-                                                <div
-                                                    className="share-ic-itext">{tribeInfo && tribeInfo.theme.themeTag}</div>
-                                            </div>
-                                        </div>
-                                        <div style={{width: '58px'}}>
-                                            <img src={`${config.baseUrl}/pic/display?url=https://pic.emit.technology/img/596b38a47d086a32a5804ea7a4da9868.png&w=299&h=119&op=resize&upscale=1`} width="100%"/>
-                                        </div>
+                                            })
+                                        }
                                     </div>
                                 </div>
-                                <div className="share-right">
-                                    <div className="share-right-msg-box"
-                                         style={{backgroundImage: backImg}}>
-                                        <div className="share-right-msg" id="msg-bb-xbo">
-                                            <div className="share-right-msg-inner" style={{justifyContent: showHistory?"flex-start" : "flex-end"}}>
-                                                {
-                                                    latestMsg && latestMsg.map((v, i) => {
-                                                        return renMessage(v, i)
-                                                    })
-                                                }
+                                <div className="share-left-bottom">
+                                    <div className="share-left-bottom-info-box">
+                                        <div>
+                                            <div className="share-left-bottom-info">
+                                                <img src={utils.getDisPlayUrl(tribeInfo && tribeInfo.theme.image)}
+                                                     width="100%"
+                                                     height="100%" style={{borderRadius: '8px',objectFit:"cover"}}/>
                                             </div>
+                                        </div>
+                                        <div>
+                                            <div style={{
+                                                fontFamily: 'SFBold',
+                                                fontSize: '24px'
+                                            }}>{tribeInfo && tribeInfo.title}</div>
+                                            <div
+                                                className="share-ic-itext">{tribeInfo && tribeInfo.theme.themeTag}</div>
+                                        </div>
+                                    </div>
+                                    <div style={{width: '58px'}}>
+                                        <img src={`${config.baseUrl}/pic/display?url=https://pic.emit.technology/img/596b38a47d086a32a5804ea7a4da9868.png&w=299&h=119&op=resize&upscale=1`} width="100%"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="share-right">
+                                <div className="share-right-msg-box"
+                                     style={{backgroundImage: backImg}}>
+                                    <div className="share-right-msg" id="msg-bb-xbo">
+                                        <div className="share-right-msg-inner" style={{justifyContent: showHistory?"flex-start" : "flex-end"}}>
+                                            {
+                                                latestMsg && latestMsg.map((v, i) => {
+                                                    return renMessage(v, i)
+                                                })
+                                            }
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <IonLoading
-                        isOpen={loading}
-                        onDidDismiss={() => setLoading(false)}
-                        message={'Loading...'}
-                        duration={50000}
-                    />
+                <IonLoading
+                    isOpen={loading}
+                    onDidDismiss={() => setLoading(false)}
+                    message={'Loading...'}
+                    duration={50000}
+                />
 
-                    <IonLoading
-                        isOpen={genning}
-                        onDidDismiss={() => setGenning(false)}
-                        message={'Please wait...'}
-                        duration={50000}
-                    />
+                <IonLoading
+                    isOpen={genning}
+                    onDidDismiss={() => setGenning(false)}
+                    message={'Please wait...'}
+                    duration={50000}
+                />
 
-                </IonContent>
-            </IonPage>
+            </IonContent>
         </IonModal>
 
 

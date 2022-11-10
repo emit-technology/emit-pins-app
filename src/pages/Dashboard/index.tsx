@@ -608,8 +608,7 @@ export class Dashboard extends React.Component<Props, State> {
                                 <TribeEditModal isOpen={showCreateTribe} onClose={() => this.setShowCreateTribe(false)}
                                                 onOk={(tribeId) => {
                                                     this.setShowCreateTribe(false)
-                                                    window.open(`./${tribeId}`)
-                                                    // window.location.href = `./${tribeId}`;
+                                                    window.location.href = `./${tribeId}`;
                                                 }}/>
 
                                 <TribeEditModal forkGroupId={forkGroupId} tribeInfo={forkTribeInfo} isOpen={showForkModal} onClose={() => this.setShowForkModal(false)}

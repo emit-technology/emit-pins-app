@@ -8,7 +8,7 @@ import {
     IonContent,
     IonHeader,
     IonIcon,
-    IonModal,
+    IonModal,IonPage,
     IonTitle,
     IonToolbar,
     IonRow, IonCol, IonText, useIonToast,
@@ -42,16 +42,14 @@ export const AccountUnlock: React.FC<Props> = ({isOpen,onForgot, onClose, onOk})
         <IonModal isOpen={isOpen} className="unlock-modal" onDidDismiss={() => {
             onClose()
         }}>
-            <IonHeader collapse="fade">
-                <IonToolbar>
-                    <IonTitle>Unlock Account</IonTitle>
-                    <IonButtons slot="end">
-                        <IonButton onClick={() => onClose()}>
-                            <IonIcon src={closeOutline} size="large" color='dark'/>
-                        </IonButton>
-                    </IonButtons>
-                </IonToolbar>
-            </IonHeader>
+            <IonToolbar color="secondary">
+                <IonTitle>Unlock Account</IonTitle>
+                <IonButtons slot="end">
+                    <IonButton onClick={() => onClose()}>
+                        <IonIcon src={closeOutline} size="large" color='dark'/>
+                    </IonButton>
+                </IonButtons>
+            </IonToolbar>
             <IonContent className="ion-padding">
                 <IonItem>
                     <IonLabel position="stacked">Password</IonLabel>
