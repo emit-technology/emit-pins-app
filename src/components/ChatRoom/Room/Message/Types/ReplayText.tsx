@@ -17,7 +17,7 @@ export const ReplayText: React.FC<Props> = ({msg,onClose}) => {
             <IonItem className="replay-item" lines="none" color="secondary">
             {
                 msg.actor && <IonAvatar slot="start">
-                    <img src={utils.getDisPlayUrl(msg.actor.avatar)}/>
+                    <img src={utils.getDisPlayUrl(msg.actor.avatar)} />
                 </IonAvatar>
             }
             <IonLabel>
@@ -38,7 +38,7 @@ export const ReplayText: React.FC<Props> = ({msg,onClose}) => {
                 <IonItem className="replay-item" lines="none" color="secondary">
                     {
                         msg.actor && <IonAvatar slot="start">
-                            <img src={utils.getDisPlayUrl(msg.actor.avatar)}/>
+                            <img src={utils.getDisPlayUrl(msg.actor.avatar)} />
                         </IonAvatar>
                     }
                     <IonLabel>

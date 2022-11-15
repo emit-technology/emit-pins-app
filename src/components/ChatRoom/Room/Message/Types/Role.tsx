@@ -67,7 +67,7 @@ export const Role:React.FC<Props> = ({msg,isOwner}) =>{
                                                            {
                                                                content.origin && content.origin.avatar && <PhotoProvider maskOpacity={0.8}>
                                                                    <PhotoView src={utils.getDisPlayUrl(content.origin.avatar)}>
-                                                                       <img src= {utils.getDisPlayUrl(content.origin.avatar)}  width={36} height={36}/>
+                                                                       <img src= {utils.getDisPlayUrl(content.origin.avatar)}  width={36} height={36} />
                                                                    </PhotoView>
                                                                </PhotoProvider>
                                                            }
@@ -103,7 +103,7 @@ export const Role:React.FC<Props> = ({msg,isOwner}) =>{
                                                         {
                                                             content && content.avatar && <PhotoProvider maskOpacity={0.8}>
                                                                 <PhotoView src={utils.getDisPlayUrl(content.avatar)}>
-                                                                    <img src= {utils.getDisPlayUrl(content.avatar)} width={36} height={36}/>
+                                                                    <img src= {utils.getDisPlayUrl(content.avatar)} width={36} height={36} />
                                                                 </PhotoView>
                                                             </PhotoProvider>
                                                         }

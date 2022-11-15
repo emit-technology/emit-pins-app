@@ -51,7 +51,7 @@ const App: React.FC = () => {
     const routerRef = useRef<HTMLIonRouterOutletElement | null>(null);
     return <>
         {
-            <div className={`page`}>
+            <div className={`page`} id="page">
                 <div className="page-inner">
                     <IonApp>
                         <Provider store={store}>

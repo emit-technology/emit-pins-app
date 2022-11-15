@@ -25,12 +25,15 @@ import tribeWorker from "../../worker/imWorker";
 import {utils} from "../../common";
 import {App} from "@capacitor/app";
 import walletWorker from "../../worker/walletWorker";
+import {DeviceInfo, Device} from "@capacitor/device";
+import assert from "assert";
 // import WebSocket from 'ws';
 
 const W3CWebSocket = require('websocket').w3cwebsocket;
 // const ws = require('ws');
 
 const mutexify = require('mutexify/promise')
+
 class TribeService implements ITribe {
 
     _rpc: BaseRpc;
@@ -41,13 +44,14 @@ class TribeService implements ITribe {
     _wsIntervalId: any;
 
     _lock: any;
+
     constructor() {
         this._rpc = new BaseRpc(config.tribeNode);
         this._picRpc = new BaseRpc(config.tribePic);
         this._lock = mutexify()
     }
 
-    checkWorkerIsAlive = async ()=>{
+    checkWorkerIsAlive = async () => {
         return await tribeWorker.checkAlive(config.tribeId);
     }
 
@@ -60,7 +64,7 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
-    creatTribe = async (tribeInfo: { title: string, desc: string, color: string, backgroundColor: string, image: ImageType,themeTag:string,themeDesc:string }): Promise<string> => {
+    creatTribe = async (tribeInfo: { title: string, desc: string, color: string, backgroundColor: string, image: ImageType, themeTag: string, themeDesc: string }): Promise<string> => {
         await this.userCheckAuth()
         // tribeInfo["themeTag"] = tribeInfo.title;
         // tribeInfo["themeDesc"] = tribeInfo.desc;
@@ -133,7 +137,7 @@ class TribeService implements ITribe {
             name: "Narrator",
             id: "",
             tribeId: config.tribeId
-    }
+        }
         if (rest && rest.code == 0) {
             if (rest.data) {
                 const ret = rest.data.reverse();
@@ -145,7 +149,7 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
-    isSessionAvailable = async () : Promise<boolean> =>{
+    isSessionAvailable = async (): Promise<boolean> => {
         const rest = await this._rpc.post('/user/checkAuth', null)
         if (rest && rest.code == 0) {
             return true
@@ -162,29 +166,83 @@ class TribeService implements ITribe {
         if (rest.code == 40000) {
             authToken = await this.getAccountAndLogin();
         }
-        if(authToken){
+        if (authToken) {
             await tribeWorker.checkAlive(config.tribeId)
             return Promise.resolve(authToken as string)
         }
         return Promise.reject(rest.message);
     }
 
+    isApp = async () =>{
+        try {
+            const deviceInfo = await Device.getInfo();
+            return deviceInfo.platform == "ios" || deviceInfo.platform == "android"
+        }catch (e){
+            console.error(e)
+        }
+        return false;
+    }
+
     userLogin = async (signRet: { r: string, s: string, v: string }): Promise<string> => {
-        const rest: TribeResult<string> = await this._rpc.post('/user/login', signRet);
+        const params:any = signRet ;
+
+        if(await this.isApp()){
+            params["deviceInfo"] = await this._genDeviceInfo();
+        }else{
+            // params["deviceInfo"] = await Device.getInfo();
+        }
+        const rest: TribeResult<string> = await this._rpc.post('/user/login', params);
         if (rest && rest.code == 0) {
             return Promise.resolve(rest.data)
         }
         return Promise.reject(rest.message);
     }
 
+    _genDeviceInfo = async (pushTokenValue?: string) => {
+        if(await this.isApp()){
+            const deviceInfo = await Device.getInfo();
+            const deviceId = await Device.getId();
+            const appInfo = await App.getInfo();
+            const params: any = deviceInfo;
+            if (!pushTokenValue) {
+                pushTokenValue = selfStorage.getItem("pushTokenValue")
+            }
+            params["uuid"] = deviceId.uuid;
+            params["appVersion"] = appInfo.version;
+            params["pushTokenValue"] = pushTokenValue;
+            console.log("=====> genned device info: ", params)
+            return params;
+        }
+        return null;
+    }
+
+    registerDevice = async (pushTokenValue?: string): Promise<string> => {
+        const params = await this._genDeviceInfo(pushTokenValue);
+        if(!params){
+            return Promise.reject("Only in ios or android!")
+        }
+        const cacheParams:any = selfStorage.getItem("deviceInfo")
+        if(!cacheParams || (cacheParams["uuid"] != params["uuid"]
+            || cacheParams["appVersion"] != params["appVersion"]
+            || cacheParams["pushTokenValue"] != params["pushTokenValue"])){
+
+            const rest: TribeResult<string> = await this._rpc.post('/user/registerDevice', params);
+            if (rest && rest.code == 0) {
+                selfStorage.setItem("deviceInfo",params)
+                return Promise.resolve(rest.data)
+            }
+            return Promise.reject(rest.message);
+        }
+    }
+
     getAccountAndLogin = async (): Promise<string> => {
         const accountLocal = await emitBoxSdk.getAccount();
 
-        if(utils.useInjectAccount()){
+        if (utils.useInjectAccount()) {
             return await tribeService.accountLogin(accountLocal)
         }
         const rest: { error: string, result: AccountModel } = await emitBoxSdk.emitBox.requestAccount(accountLocal && accountLocal.accountId);
-        if(!rest || rest.error){
+        if (!rest || rest.error) {
             return Promise.reject(rest.error)
         }
         const account = rest.result;
@@ -195,7 +253,7 @@ class TribeService implements ITribe {
                 address: account.addresses[ChainType.EMIT.valueOf()]
             }
         ])
-        if(signResult && signResult[0]){
+        if (signResult && signResult[0]) {
             const sig = signResult[0];
             // config.authToken = "T-9d-2qQeHYaK9zn3L9rVLsnZulR26D2FV05XvczLic="
             const authToken = await tribeService.userLogin({
@@ -213,8 +271,8 @@ class TribeService implements ITribe {
 
     }
 
-    accountLogin = async (account: AccountModel): Promise<string>=>{
-        if(!account){
+    accountLogin = async (account: AccountModel): Promise<string> => {
+        if (!account) {
             return Promise.reject("No account is available. Please create a new account first!")
         }
         const sig: any = await walletWorker.personSignMsg(ChainType.EMIT.valueOf(),
@@ -258,105 +316,105 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
-    setAuthToken = (authToken:string) =>{
+    setAuthToken = (authToken: string) => {
         // selfStorage.setItem(`authToken_${config.tribeId}`, authToken)
         selfStorage.setItem(`authToken`, authToken)
     }
 
-    getAuthToken = () =>{
+    getAuthToken = () => {
         // return selfStorage.getItem(`authToken_${config.tribeId}`)
         return selfStorage.getItem(`authToken`)
     }
 
-    connectW3C = (tribeId: string, cb: Function) =>{
+    connectW3C = (tribeId: string, cb: Function) => {
         console.log("connect....")
         const authToken = tribeService.getAuthToken();
         this._wsW3C = new W3CWebSocket(config.tribeWs, 'echo-protocol');
 
-        this._wsW3C.onerror = ()=> {
+        this._wsW3C.onerror = () => {
             console.log('Connection Error');
         };
 
-        this._wsW3C.onopen = ()=> {
+        this._wsW3C.onopen = () => {
             console.log('WebSocket Client Connected');
 
             console.log("opened")
             this._wsW3C.send(JSON.stringify({tribeId: tribeId, authToken: authToken}))
         };
 
-        this._wsW3C.onclose = ()=> {
+        this._wsW3C.onclose = () => {
             console.log('echo-protocol Client Closed');
-            this.connectW3C(tribeId,cb)
+            this.connectW3C(tribeId, cb)
         };
 
-        this._wsW3C.onmessage = (e)=> {
+        this._wsW3C.onmessage = (e) => {
             if (typeof e.data === 'string') {
-                cb(e.data) ;
+                cb(e.data);
             }
         };
 
-        if(this._wsIntervalId){
+        if (this._wsIntervalId) {
             clearInterval(this._wsIntervalId)
         }
-        this._wsIntervalId = setInterval(()=>{
-            if(this._wsW3C){
+        this._wsIntervalId = setInterval(() => {
+            if (this._wsW3C) {
                 console.log("ping...")
                 this._wsW3C.send('ping');
             }
-        },30*1000)
+        }, 30 * 1000)
     }
 
-    connectOrigin = (tribeId: string, cb: Function) =>{
+    connectOrigin = (tribeId: string, cb: Function) => {
         console.log("connect origin....")
         const authToken = tribeService.getAuthToken();
 
         this._wsOrigin = new WebSocket(config.tribeWs);
 
-        this._wsOrigin.addEventListener('open',()=>{
+        this._wsOrigin.addEventListener('open', () => {
             console.log("opened")
             this._wsOrigin.send(JSON.stringify({tribeId: tribeId, authToken: authToken}))
         })
 
-        this._wsOrigin.addEventListener('close',()=>{
+        this._wsOrigin.addEventListener('close', () => {
             console.log("closed")
-            this.connectOrigin(tribeId,cb);
+            this.connectOrigin(tribeId, cb);
         });
 
-        this._wsOrigin.addEventListener('ping',()=>{
+        this._wsOrigin.addEventListener('ping', () => {
             console.log("pong...")
             this._wsOrigin.send('pong')
         });
 
-        this._wsOrigin.addEventListener('error',()=>{
+        this._wsOrigin.addEventListener('error', () => {
             console.log("error")
-            setTimeout(()=>{
-                this.connectOrigin(tribeId,cb);
-            },10 * 1000)
+            setTimeout(() => {
+                this.connectOrigin(tribeId, cb);
+            }, 10 * 1000)
         });
 
-        this._wsOrigin.addEventListener('message',(ev)=>{
+        this._wsOrigin.addEventListener('message', (ev) => {
             cb(ev.data);
         });
 
-        if(this._wsIntervalId){
+        if (this._wsIntervalId) {
             clearInterval(this._wsIntervalId)
         }
-        this._wsIntervalId = setInterval(()=>{
-            if(this._wsOrigin){
+        this._wsIntervalId = setInterval(() => {
+            if (this._wsOrigin) {
                 console.log("ping...")
-               this._wsOrigin.send('ping');
+                this._wsOrigin.send('ping');
             }
-        },30*1000)
+        }, 30 * 1000)
     }
 
     connect = (tribeId: string, cb: Function) => {
         console.log("connect....")
         const authToken = tribeService.getAuthToken();
-        if (this._ws){
+        if (this._ws) {
             // this._ws.close();
             // this._ws = null;
             this._ws.send(JSON.stringify({tribeId: tribeId, authToken: authToken}))
-        }else{
+        } else {
             this._ws = new WebsocketBuilder(config.tribeWs)
                 .onOpen((i, ev) => {
                     console.log("opened")
@@ -373,7 +431,7 @@ class TribeService implements ITribe {
                     })
                 })
                 .onError((i, ev) => {
-                    console.log(i,ev)
+                    console.log(i, ev)
                     console.log("error")
                     this._ws = null
                 })
@@ -387,22 +445,22 @@ class TribeService implements ITribe {
                 })
                 .build();
 
-            if(this._wsIntervalId){
+            if (this._wsIntervalId) {
                 clearInterval(this._wsIntervalId)
             }
-            this._wsIntervalId = setInterval(()=>{
-                if(this._ws && this._wsIntervalId){
-                    console.log(this._ws.underlyingWebsocket.readyState,"this._ws.underlyingWebsocket.readyState")
+            this._wsIntervalId = setInterval(() => {
+                if (this._ws && this._wsIntervalId) {
+                    console.log(this._ws.underlyingWebsocket.readyState, "this._ws.underlyingWebsocket.readyState")
                 }
-                if(this._ws && (!this._ws.underlyingWebsocket || this._ws.underlyingWebsocket.readyState != 1)){
+                if (this._ws && (!this._ws.underlyingWebsocket || this._ws.underlyingWebsocket.readyState != 1)) {
                     console.log("reconnect....")
                     this.connect(tribeId, cb);
                 }
-            },30*1000)
+            }, 30 * 1000)
         }
     };
 
-    getCacheMsg = (tribeId: string): { msgs: Array<Message>, roles: Array<TribeRole> ,groupIds:Array<string>} => {
+    getCacheMsg = (tribeId: string): { msgs: Array<Message>, roles: Array<TribeRole>, groupIds: Array<string> } => {
         return {
             msgs: selfStorage.getItem(`tribe_msg_${tribeId}`) as Array<Message>,
             roles: selfStorage.getItem(`tribe_role_${tribeId}`) as Array<TribeRole>,
@@ -410,14 +468,14 @@ class TribeService implements ITribe {
         };
     }
 
-    setCacheMsg = (tribeId: string, msgs?: Array<Message>, roles?: Array<TribeRole>,groupIds?:Array<string>) => {
-        if(msgs){
+    setCacheMsg = (tribeId: string, msgs?: Array<Message>, roles?: Array<TribeRole>, groupIds?: Array<string>) => {
+        if (msgs) {
             selfStorage.setItem(`tribe_msg_${tribeId}`, msgs);
         }
-        if(roles){
+        if (roles) {
             selfStorage.setItem(`tribe_role_${tribeId}`, roles);
         }
-        if(groupIds){
+        if (groupIds) {
             selfStorage.setItem(`tribe_groupIds_${tribeId}`, groupIds);
         }
         return
@@ -431,7 +489,7 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
-    _groupMsgKey = (groupId:string) =>{
+    _groupMsgKey = (groupId: string) => {
         return `tribe_group_${groupId}`;
     }
 
@@ -459,25 +517,25 @@ class TribeService implements ITribe {
         const unFetchGroupIds = [...groupIds];
         const ret: Array<GroupMsg> = [];
         // for(let groupId of groupIds){
-            // const rest = selfStorage.getItem(this._groupMsgKey(groupId))
-            // if(rest){
-            //     ret.push(rest)
-            // }else{
-            //     unFetchGroupIds.push(groupId);
-            // }
+        // const rest = selfStorage.getItem(this._groupMsgKey(groupId))
+        // if(rest){
+        //     ret.push(rest)
+        // }else{
+        //     unFetchGroupIds.push(groupId);
         // }
-        if(unFetchGroupIds.length>0){
+        // }
+        if (unFetchGroupIds.length > 0) {
             const rest: TribeResult<Array<GroupMsg>> = await this._rpc.post('/tribe/groupedMsg', {
                 groupIds: unFetchGroupIds,
                 withDraft
             });
             if (rest && rest.code == 0) {
-                for(let i =0;i<rest.data.length;i++){
+                for (let i = 0; i < rest.data.length; i++) {
                     const groupMsg = rest.data[i];
                     // selfStorage.setItem(this._groupMsgKey(unFetchGroupIds[i]),groupMsg)
                     ret.push(groupMsg)
                 }
-            }else{
+            } else {
                 return Promise.reject(rest.message);
             }
         }
@@ -485,13 +543,15 @@ class TribeService implements ITribe {
 
     }
 
-    forkTribe = async (tribeId: string, groupId: string,tribeInfo: TribeInfo): Promise<string> => {
+    forkTribe = async (tribeId: string, groupId: string, tribeInfo: TribeInfo): Promise<string> => {
         await this.userCheckAuth()
-        const data:any = { groupId: groupId,
-            FromTribeId: tribeId,title: tribeInfo.title};
+        const data: any = {
+            groupId: groupId,
+            FromTribeId: tribeId, title: tribeInfo.title
+        };
         const keys = Object.keys(tribeInfo.theme);
-        for(let key of keys){
-            data[key]=tribeInfo.theme[key]
+        for (let key of keys) {
+            data[key] = tribeInfo.theme[key]
         }
         const rest: TribeResult<string> = await this._rpc.post('/tribe/forkTribe', data);
         if (rest && rest.code == 0) {
@@ -509,9 +569,14 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
-    updateMsg = async (msgId: string, content: string, role?: string,replayToMsgId?:string): Promise<string> => {
+    updateMsg = async (msgId: string, content: string, role?: string, replayToMsgId?: string): Promise<string> => {
         await this.userCheckAuth()
-        const rest: TribeResult<string> = await this._rpc.post('/tribe/updateMsg', {msgId,role, content,replayToMsgId});
+        const rest: TribeResult<string> = await this._rpc.post('/tribe/updateMsg', {
+            msgId,
+            role,
+            content,
+            replayToMsgId
+        });
         if (rest && rest.code == 0) {
             return Promise.resolve(rest.data)
         }
@@ -530,7 +595,7 @@ class TribeService implements ITribe {
     myTribes = async (): Promise<Array<TribeInfo>> => {
         const account = await emitBoxSdk.getAccount();
         const address = account.addresses[ChainType.EMIT]
-        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/myTribes', {userId:address});
+        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/myTribes', {userId: address});
         if (rest && rest.code == 0) {
             return Promise.resolve(rest.data)
         }
@@ -539,8 +604,8 @@ class TribeService implements ITribe {
 
     involvedTribes = async (): Promise<Array<TribeInfo>> => {
         const account = await emitBoxSdk.getAccount();
-        const address = account && account.addresses &&  account.addresses[ChainType.EMIT]
-        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/involvedTribes', {userId:address});
+        const address = account && account.addresses && account.addresses[ChainType.EMIT]
+        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/involvedTribes', {userId: address});
         if (rest && rest.code == 0) {
             return Promise.resolve(rest.data)
         }
@@ -551,9 +616,9 @@ class TribeService implements ITribe {
         const stickies: Array<PinnedSticky> = [];
         let i = 0;
         let j = 0;
-        const _sort = (m1:Message,m2:Message)=> m1.timestamp - m2.timestamp;
+        const _sort = (m1: Message, m2: Message) => m1.timestamp - m2.timestamp;
         for (let gt of groupTribes) {
-            if(gt.records && gt.records.length == 0){
+            if (gt.records && gt.records.length == 0) {
                 continue;
             }
             i++;
@@ -570,7 +635,7 @@ class TribeService implements ITribe {
             })
             gt.records.sort(_sort)
             for (let r of gt.records) {
-                if(r.msgStatus == MessageStatus.removed){
+                if (r.msgStatus == MessageStatus.removed) {
                     continue
                 }
                 r.actor = gt.roles.find(role => role.id == r.role);
@@ -600,8 +665,8 @@ class TribeService implements ITribe {
                     id: "",
                     tribeId: config.tribeId,
                     owner: "",
-                    timestamp: Math.floor(Date.now()/1000) ,
-                    content: {content:""} as MsgText,
+                    timestamp: Math.floor(Date.now() / 1000),
+                    content: {content: ""} as MsgText,
                     groupId: "",
                     msgStatus: MessageStatus.dashed,
                     role: "",
@@ -613,7 +678,7 @@ class TribeService implements ITribe {
                 groupId: "",
                 index: copy.length + (i++)
             })
-            if(data && data.length >0){
+            if (data && data.length > 0) {
                 for (let msg of data) {
                     copy.push({
                         theme: tribeInfo.theme,
@@ -631,7 +696,7 @@ class TribeService implements ITribe {
         return []
     }
 
-    convertMessagesToPinnedSticky = (messages:Array<Message>,roles:Array<TribeRole>,tribeInfo:TribeInfo): Array<PinnedSticky> => {
+    convertMessagesToPinnedSticky = (messages: Array<Message>, roles: Array<TribeRole>, tribeInfo: TribeInfo): Array<PinnedSticky> => {
         if (messages && tribeInfo && roles) {
             const copy = [];
             let i = 0;
@@ -651,16 +716,16 @@ class TribeService implements ITribe {
         return []
     }
 
-    uploadFile = async (file:File)=>{
+    uploadFile = async (file: File) => {
         return await this._picRpc.uploadFile(file);
     }
 
     setConnectWs = (cb: Function) => {
         let count = 0;
-        tribeService.connectOrigin(config.tribeId,async (newMessage) => {
-            let messagesCopy:Array<Message> = [];
+        tribeService.connectOrigin(config.tribeId, async (newMessage) => {
+            let messagesCopy: Array<Message> = [];
             const release = await this._lock()
-            try{
+            try {
                 const isFirst = count++ == 0;
                 const coverData = JSON.parse(newMessage);
                 const msgs: Array<Message> = coverData["msgs"];
@@ -678,9 +743,9 @@ class TribeService implements ITribe {
                     data = [];
                 }
 
-                const isPinned = (!msgs || msgs.length ==0) && rest && groupIds &&  rest.groupIds.length < groupIds.length ;
+                const isPinned = (!msgs || msgs.length == 0) && rest && groupIds && rest.groupIds.length < groupIds.length;
 
-                messagesCopy = isFirst || isPinned  ? [] : [...data];
+                messagesCopy = isFirst || isPinned ? [] : [...data];
                 if (roles && roles.length > 0 && msgs && msgs.length > 0) {
                     const msgb = msgs.map(v => {
                         v.actor = roles.find(r => r.id == v.role);
@@ -688,9 +753,9 @@ class TribeService implements ITribe {
                         return v;
                     })
                     const delMsgArr: Array<string> = [];
-                    for (let value of msgb){
+                    for (let value of msgb) {
                         if (value.msgType == MessageType.Support) {
-                           continue;
+                            continue;
                         }
                         let msgId = value.id;
                         if (value.msgStatus == MessageStatus.removed) {
@@ -700,12 +765,12 @@ class TribeService implements ITribe {
                         // if (value.msgType == MessageType.Support) {
                         //     msgId = (value.content as Support).msgId;
                         // }
-                        if ( index > -1) {
+                        if (index > -1) {
                             const msg = messagesCopy[index]
-                            if(value.timestamp >= msg.timestamp){
+                            if (value.timestamp >= msg.timestamp) {
                                 messagesCopy.splice(index, 1, value);
-                            }else{
-                                console.log("msg is outdated >",value, msg)
+                            } else {
+                                console.log("msg is outdated >", value, msg)
                             }
                         } else {
                             messagesCopy.push(value)
@@ -718,10 +783,10 @@ class TribeService implements ITribe {
                     })
                 }
                 // const msg = messagesCopy; // messagesCopy.filter(v => new BigNumber(v.seq).comparedTo(new BigNumber(tribeInfo.lastPinedSeq)) > 0 )
-                tribeService.setCacheMsg(config.tribeId, messagesCopy, roles,groupIds)
-            }catch (e){
+                tribeService.setCacheMsg(config.tribeId, messagesCopy, roles, groupIds)
+            } catch (e) {
                 console.error(e);
-            }finally {
+            } finally {
                 cb(messagesCopy)
                 release()
                 console.log("release ...")

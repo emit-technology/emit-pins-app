@@ -1,7 +1,8 @@
 import BigNumber from 'bignumber.js';
 import config from "./config";
-import {ImageType, MsgTextImage} from "../types";
-import {Category, ChainType} from "@emit-technology/emit-lib";
+import {ImageType, Message, MessageType, MsgText, MsgTextImage, TribeRole} from "../types";
+import {Category} from "@emit-technology/emit-lib";
+import selfStorage from "./storage";
 
 const format = require('date-format');
 const BN = require("bn.js");
@@ -157,8 +158,9 @@ export const utils = {
 // console.log(width, height ,url, "getHeight")
         const h = _getHeight();
         const w = Math.floor(h * width / height);
+        const webPath = url && (url.indexOf("blob") == 0 || url.indexOf("data") == 0) ? url : `${config.tribePic}/display?url=${url}&w=${w}&h=${h}&op=resize&upscale=1`;
         return {
-            width: w, height: h, displayUrl: `${config.tribePic}/display?url=${url}&w=${w}&h=${h}&op=resize&upscale=1`
+            width: w, height: h, displayUrl: webPath
         }
     },
 
@@ -172,23 +174,27 @@ export const utils = {
     },
 
     isIos: (): boolean => {
+        const deviceInfo = selfStorage.getItem("deviceInfo")
+        if(!!deviceInfo){
+            return deviceInfo["platform"] == "ios";
+        }
         //@ts-ignore
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
         //@ts-ignore
-        if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-            return true
-        }
-        return false;
+        return /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+
     },
 
     isAndroid: (): boolean => {
+        const deviceInfo = selfStorage.getItem("deviceInfo")
+        if(!!deviceInfo){
+            return deviceInfo["platform"] == "android";
+        }
         //@ts-ignore
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
         //@ts-ignore
-        if (/android/i.test(userAgent) && !window.MSStream) {
-            return true
-        }
-        return false;
+        return /android/i.test(userAgent) && !window.MSStream;
+
     },
 
     isSafari: (): boolean => {
@@ -211,6 +217,51 @@ export const utils = {
             return "https://pins.emit.technology/asset/"
         }
         return "https://assets.emit.technology/";
+    },
+
+    toLocalImageUrl: async (url: string): Promise<any> => {
+        if (!!url) {
+            const rest = await fetch(url)
+            const blob = await rest.blob();
+            return new Promise(resolve => {
+                const reader = new FileReader();
+                reader.addEventListener("load", function () {
+                    resolve(reader.result as string);
+                }, false);
+
+                reader.readAsDataURL(blob)
+            })
+            //@ts-ignore
+            // const urlCreator = window.URL || window.webkitURL;
+            // return urlCreator.createObjectURL(blob);
+        }
+    },
+
+    useBase64Img: ():boolean =>{
+        // return true;
+        return utils.isIos()// || utils.isSafari();
+    },
+
+    convertMsgImage: async (m: Message): Promise<Message> => {
+        if(utils.useBase64Img()){
+            const msg:Message = JSON.parse(JSON.stringify(m));
+            if (msg.msgType == MessageType.Text) {
+                const url = (msg.content as MsgText).image.url;
+                if (!!url ) {
+                    msg.content["image"]["url"] = await utils.toLocalImageUrl(url)
+                }
+            }else if(msg.msgType == MessageType.Airdrop){
+
+            }else if(msg.msgType == MessageType.Role){
+                const url = (msg.content as TribeRole).avatar["url"];
+                msg.content["avatar"]["url"] = await utils.toLocalImageUrl(url as string)
+            }
+            if(msg.actor){
+                msg.actor.avatar["url"] = await utils.toLocalImageUrl(msg.actor.avatar["url"])
+            }
+            return msg;
+        }
+        return m;
     }
 
 }

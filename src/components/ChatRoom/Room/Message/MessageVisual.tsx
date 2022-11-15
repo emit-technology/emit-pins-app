@@ -7,10 +7,10 @@ import {
     MessageType,
     PinnedSticky,
     TribeInfo,
-    TribeRole, TribeTheme,
+    TribeRole,
     UserLimit
 } from "../../../../types";
-import {Airdrop, Dice, Expression, Text} from "./Types";
+import {Dice, Expression, Text} from "./Types";
 
 import './message.scss';
 import {useAppDispatch, useAppSelector} from "../../../../common/state/app/hooks";
@@ -19,24 +19,27 @@ import {saveDataState} from "../../../../common/state/slice/dataSlice";
 import {
     IonAvatar,
     IonButton,
-    IonButtons, IonCol,
+    IonButtons,
+    IonCol,
     IonContent,
     IonFab,
-    IonHeader, IonRow,
-    IonIcon, IonItem, IonLabel,
+    IonHeader,
+    IonIcon,
+    IonItem,
+    IonLabel,
+    IonLoading,
     IonModal,
+    IonRow,
     IonTextarea,
     IonTitle,
-    IonToolbar,
-    useIonAlert, IonLoading
+    IonToolbar
 } from '@ionic/react';
 import {
     arrowForwardOutline,
-    chatboxEllipsesOutline,
     chevronDownOutline,
     chevronUpOutline,
-    createOutline, gitBranchOutline,
-    layersOutline
+    createOutline,
+    gitBranchOutline, scaleOutline
 } from "ionicons/icons";
 import {tribeService} from "../../../../service/tribe";
 import UploadImage from "../../../utils/UploadImage";
@@ -49,6 +52,8 @@ import {Tools} from "./Types/Tools";
 import {utils} from "../../../../common";
 import {ShareEx} from "../../../utils/ShareEx";
 import {ReplayText} from "./Types/ReplayText";
+import {StatusBar} from "@capacitor/status-bar";
+import {isApp} from "../../../../service/app";
 
 interface Props {
     pinnedStickies?: { data: Array<PinnedSticky>, total: number }
@@ -63,7 +68,9 @@ interface Props {
     userLimit?: UserLimit
     selectRole?: TribeRole
     shareMsgId?: string
-    onFork?: (groupId:string, forkTribeInfo: TribeInfo) => Promise<string>;
+    onFork?: (groupId: string, forkTribeInfo: TribeInfo) => Promise<string>;
+
+    setHideMenu?: (f: boolean) => void;
 }
 
 const pageSize = 1000000;
@@ -130,11 +137,11 @@ const setVisibleStartIndex = (n: number) => {
 }
 
 let scrollEvent = null;
-const setScrollEvent = (e:any) => {
+const setScrollEvent = (e: any) => {
     scrollEvent = e;
 }
 
-export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMsgId, userLimit, selectRole, pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
+export const MessageContentVisual: React.FC<Props> = ({groupMsg, setHideMenu, onFork, shareMsgId, userLimit, selectRole, pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
     const dispatchData = useAppSelector(state => state.jsonData);
     const dispatch = useAppDispatch();
     const [comments, setComments] = useState([]);
@@ -153,24 +160,25 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
     const [checkedMsgId, setCheckedMsgId] = useState("");
     // const [scrollEvent, setScrollEvent] = useState(null);
 
-    useEffect(()=>{
-        if(!pinnedStickies && comments.length == 0 && tribeInfo){
+    useEffect(() => {
+        if (!pinnedStickies && comments.length == 0 && tribeInfo) {
             dispatchTheme({
                 roles: tribeInfo.roles,
                 theme: tribeInfo.theme,
                 records: [], index: 0, groupId: "", seq: -1
             })
         }
-    },[tribeInfo])
+    }, [tribeInfo])
 
-    const doScrollEvent = (e:any) =>{
-        try{
+    const doScrollEvent = async (e: any) => {
+        try {
             // const e = scrollEvent;
-            if(e){
-                // console.log("---------------> scroll")
+            if (e) {
                 if (!pinnedStickies) {
                     setVisibleStartIndex(e.visibleStartIndex);
-                    setCurrentTimeout();
+                    setCurrentTimeout(e.userScroll);
+
+                    // setFullScreen(e.userScroll)
                 }
                 if (!pinnedStickies && currentVisibleIndex !== e.visibleStopIndex) {
                     setCurrentVisibleIndex(e.visibleStopIndex);
@@ -200,16 +208,43 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
 
                 }
             }
-        }catch (e){
+        } catch (e) {
             console.error(e)
-        }finally {
-            // setTimeout(()=>{
-            //     doScrollEvent()
-            // },200)
+        } finally {
         }
     }
 
-    const setCurrentTimeout = () => {
+    const setStatusBarHide = async (f: boolean) => {
+        if (!await isApp()) {
+            return;
+        }
+        if (f) {
+            StatusBar.hide().catch(e => console.error(e))
+        } else {
+            StatusBar.show().catch(e => console.error(e))
+        }
+
+    }
+
+    const setFullScreen = (scrollForward:boolean) =>{
+        try {
+            if (!!setHideMenu && (utils.isAndroid() || utils.isIos())) {
+                console.log("=====>  hide menu", scrollForward && (visibleStartIndex < comments.length - 10), scrollForward, visibleStartIndex)
+                if (scrollForward) {
+                    setHideMenu(true)
+                    setStatusBarHide(true)
+                } else {
+                    setHideMenu(false)
+                    setStatusBarHide(false)
+                }
+            }
+        } catch (e) {
+            console.error(e)
+        }
+
+    }
+
+    const setCurrentTimeout = (scrollForward: boolean) => {
         if (visibleStartIndex >= 0 && delaySaveCurrentVisibleIndex++ == 0) {
 
             setTimeout(() => {
@@ -280,7 +315,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
                                     // }
                                     onReload(false);
                                 } else {
-                                    const _index = commentsCopy.findIndex(v => (v.records && v.records.length > 0 && comment && comment.records &&comment.records.length > 0 && v.records[0].id == comment.records[0].id))
+                                    const _index = commentsCopy.findIndex(v => (v.records && v.records.length > 0 && comment && comment.records && comment.records.length > 0 && v.records[0].id == comment.records[0].id))
                                     //new message
                                     if (_index == -1) {
                                         if (comment.records && comment.records[0].msgStatus !== MessageStatus.removed) {
@@ -365,8 +400,19 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
 
         itemSize: 50,
         scrollDuration: 500,
+        // useIsScrolling: (speed => {
+        //     if(speed >1){
+        //         setFullScreen(true)
+        //         return true
+        //     }
+        //     setFullScreen(false)
+        //     return false;
+        // }),
         onScroll: (e) => {
-            doScrollEvent(e)
+            // if(!e.userScroll){
+            //     console.log("userScrolluserScrolluserScrolluserScroll",e);
+            // }
+            doScrollEvent(e).catch(e => console.log(e))
         },
     })
 
@@ -379,7 +425,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
                 console.log("scroll to last: ", last)
                 if (last >= 0) {
                     setTimeout(() => {
-                        if(last == 999999999){
+                        if (last == 999999999) {
                             const itm = comments.length - 1;
                             const data = comments[itm];
                             // setStickyMsg(data)
@@ -389,7 +435,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
                                 index: itm,
                                 align: "start"
                             });
-                        }else{
+                        } else {
                             const itm = last > 1 ? last + 1 : last;
                             const data = comments[itm];
                             // setStickyMsg(data)
@@ -539,7 +585,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
             setCurrentVisibleIndex(dataLength)
             setMaxVisible(dataLength);
             setVisibleStartIndex(dataLength);
-            setCurrentTimeout();
+            setCurrentTimeout(false);
 
             displayBottomMsg(comments[dataLength])
 
@@ -549,16 +595,16 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
     }
 
     const displayBottomMsg = (data: PinnedSticky) => {
-        console.log("===>>>>  displayBottomMsg",data, stickyMsg)
-        if(!!data.groupId ){
-            const dataCopy:PinnedSticky = JSON.parse(JSON.stringify(data))
+        console.log("===>>>>  displayBottomMsg", data, stickyMsg)
+        if (!!data.groupId) {
+            const dataCopy: PinnedSticky = JSON.parse(JSON.stringify(data))
             dataCopy.theme = tribeInfo.theme;
             dataCopy.roles = tribeInfo.roles;
-            dataCopy.seq = -1 ;
+            dataCopy.seq = -1;
             dataCopy.groupId = "";
             dataCopy.index = new BigNumber(data.seq).toNumber();
             dispatchTheme(dataCopy)
-        }else {
+        } else {
             dispatchTheme(data)
         }
     }
@@ -629,7 +675,7 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
                     if (v.role) {
                         className = owner == v.owner && !v.groupId ? "msg-sender" : "msg-receive"
                     }
-                    if(v.msgType == MessageType.Role){
+                    if (v.msgType == MessageType.Role) {
                         className = `${className} role-sp`
                     }
                     const checked = checkedMsgArr.indexOf(v.id) > -1;
@@ -758,32 +804,40 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, onFork, shareMs
                                                     {msgItems}
                                                 </div>
                                                 {
-                                                    isDifTap && onFork && <div style={{padding: '6px 12px',display: "flex", justifyContent: "flex-end"}}>
+                                                    isDifTap && onFork && <div style={{
+                                                        padding: '6px 12px',
+                                                        display: "flex",
+                                                        justifyContent: "flex-end"
+                                                    }}>
                                                         <div className="fork-icon">
                                                             <IonButtons>
                                                                 <IonButton onClick={() => {
                                                                     // setShowLoading(true)
                                                                     onFork(pinnedSticky.records[0].groupId, {
                                                                         tribeId: config.tribeId,
-                                                                        keeper:"",
-                                                                        lastPinedSeq:0,
+                                                                        keeper: "",
+                                                                        lastPinedSeq: 0,
                                                                         onlineUser: 0,
-                                                                        theme:  pinnedSticky.theme,
+                                                                        theme: pinnedSticky.theme,
                                                                         title: tribeInfo.title,
                                                                         desc: "",
                                                                         themeTag: pinnedSticky.theme.themeTag,
                                                                         themeDesc: pinnedSticky.theme.themeDesc,
-                                                                    }).catch(e=>{
+                                                                    }).catch(e => {
                                                                         // setShowLoading(false)
                                                                         console.error(e)
                                                                     })
-                                                                }}><IonIcon src={gitBranchOutline} style={{color: "#4C89F8",fontSize:"24px"}}/></IonButton>
+                                                                }}><IonIcon src={gitBranchOutline} style={{
+                                                                    color: "#4C89F8",
+                                                                    fontSize: "24px"
+                                                                }}/></IonButton>
                                                             </IonButtons>
                                                         </div>
                                                     </div>
                                                 }
                                                 {
-                                                    (index == comments.length - 1 && !!pinnedSticky.groupId) && <div className="strike">
+                                                    (index == comments.length - 1 && !!pinnedSticky.groupId) &&
+                                                    <div className="strike">
                                                         <span>New Tape</span>
                                                     </div>
                                                 }

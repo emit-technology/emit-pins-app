@@ -45,8 +45,6 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
     const [present, dismiss] = useIonToast();
 
     useEffect(()=>{
-        console.log("tribeInfo==> ",tribeInfo);
-
         setTitle(tribeInfo && tribeInfo.title)
         setImgUrl(tribeInfo && tribeInfo.theme.image)
         setDesc(tribeInfo && tribeInfo.desc)

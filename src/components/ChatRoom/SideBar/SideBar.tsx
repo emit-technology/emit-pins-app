@@ -149,7 +149,7 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account,router, onLo
         </IonItem>
 
         <IonItem onClick={() => {
-            const pushToken = selfStorage.getItem("pushToken")
+            const pushToken = selfStorage.getItem("pushTokenValue")
             if(pushToken){
                 copy(pushToken)
                 alert(pushToken)

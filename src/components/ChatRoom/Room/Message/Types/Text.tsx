@@ -100,7 +100,7 @@ export const Text: React.FC<Props> = ({
     //     isOwner:isOwner
     // });
 
-    const Keeper = () => <img src="/assets/img/keeper.png" height={14} style={{transform: 'translateY(1px)'}}/>
+    const Keeper = () => <img src="/assets/img/keeper.png" height={14} style={{transform: 'translateY(1px)'}} />
 
 
     // console.log("replayCtn.content",replayCtn && replayCtn.content , msg && msg.replayMsg && msg.replayMsg.msgType)
@@ -200,7 +200,7 @@ export const Text: React.FC<Props> = ({
                                 {
                                     !hideTime && msg && msg.actor && !!msg.actor.avatar ?
                                         <IonAvatar className="ion-avatar">
-                                            <img src={utils.getDisPlayUrl(msg.actor && msg.actor.avatar)} width={30}/>
+                                            <img src={utils.getDisPlayUrl(msg.actor && msg.actor.avatar)} width={30} />
                                         </IonAvatar> : <div style={{width: '48px'}}></div>
                                 }
                             </div>

@@ -52,7 +52,6 @@ import {utils} from "../../common";
 import {CreateModal} from "../../components/Account/modal";
 import {RolesAvatarModal} from "../../components/Role/RolesAvatarModal";
 
-
 interface State {
     datas: Array<Message>;
     owner: string;
@@ -103,7 +102,7 @@ interface State {
     forkTribeInfo?: TribeInfo
 
     alreadySelectRole:boolean;
-
+    hideMenu: boolean
 }
 
 interface Props {
@@ -147,7 +146,7 @@ export class Dashboard extends React.Component<Props, State> {
         showCreate: false,
         forkGroupId: "",
         alreadySelectRole: !!selfStorage.getItem("alreadySelectRole"),
-
+        hideMenu:false
 
     }
 
@@ -431,9 +430,33 @@ export class Dashboard extends React.Component<Props, State> {
         return;
     }
 
+    setHideMenu = (f:boolean) =>{
+        if(f){
+           const nodes = document.getElementsByClassName("msg-content");
+           if(nodes && nodes.length>0){
+               document.getElementsByClassName("msg-content")[0].className = "msg-content msg-content-height-0"
+           }
+           //@ts-ignore
+           //  document.documentElement.webkitRequestFullscreen();
+           try{
+               //@ts-ignore
+               // toggleFullScreen()
+           }catch (e){
+               this.setShowToast(true,e.message)
+           }
+        }else{
+            const nodes = document.getElementsByClassName("msg-content");
+            if(nodes && nodes.length>0){
+                document.getElementsByClassName("msg-content")[0].className = "msg-content"
+            }
+        }
+        // this.toggleFullScreen()
+        this.setState({hideMenu: f})
+    }
+
     render() {
         const {
-            owner, showActionSheet, isSessionAvailable,showCreate,forkGroupId,showRoleAvatar,buttons, toastMsg, showShare, latestMgs, showToast, userLimit,
+            owner, showActionSheet, isSessionAvailable,hideMenu, showCreate,forkGroupId,showRoleAvatar,buttons, toastMsg, showShare, latestMgs, showToast, userLimit,
             showCreateTribe,  isConnecting, groupMsgs, alreadySelectRole,forkTribeInfo, groupPinnedMsg, showPinnedMsgDetailModal,
             account, roles, tribeInfo, latestRole, showTribeEdit, showPin, showList, showReset, showUnlock,showForkModal
         } = this.state;
@@ -464,7 +487,7 @@ export class Dashboard extends React.Component<Props, State> {
                         </IonMenu>
 
                         <IonPage id="main-content">
-                            <IonHeader mode="ios" color="primary">
+                            <IonHeader mode="ios" color="primary" className={!hideMenu?"":"hide-title"}>
                                 {
                                     showPin ? <IonToolbar className="msg-toolbar">
                                             <IonButtons slot="end">
@@ -520,26 +543,33 @@ export class Dashboard extends React.Component<Props, State> {
 
                                 <div className="msg-box">
                                     {
-                                        isConnecting == WsStatus.tokenInvalid &&
-                                        <div className="not-connect" onClick={() => {
-                                            this.requestAccount();
-                                        }}><IonText color="primary">No connection , <span style={{
-                                            textDecoration: "underline",
-                                            textUnderlineOffset: '4px',
-                                            cursor: "pointer"
-                                        }}>login</span></IonText></div>
+                                        !hideMenu && <>
+                                            {
+                                                isConnecting == WsStatus.tokenInvalid &&
+                                                <div className="not-connect" onClick={() => {
+                                                    this.requestAccount();
+                                                }}><IonText color="primary">No connection , <span style={{
+                                                    textDecoration: "underline",
+                                                    textUnderlineOffset: '4px',
+                                                    cursor: "pointer"
+                                                }}>login</span></IonText></div>
+                                            }
+                                            {
+                                                isConnecting == WsStatus.inactive &&
+                                                <div className="not-connect">Connecting...</div>
+                                            }
+                                            <div className="msg-toolbar">
+                                                <ToolBar/>
+                                                <ShareEx owner={owner} roles={roles} latestMsg={latestMgs} isOpen={showShare}
+                                                         onClose={() => this.setState({showShare: false})}
+                                                         tribeInfo={tribeInfo}/>
+                                            </div>
+                                        </>
                                     }
-                                    {
-                                        isConnecting == WsStatus.inactive &&
-                                        <div className="not-connect">Connecting...</div>
-                                    }
-                                    <div className="msg-toolbar">
-                                        <ToolBar/>
-                                        <ShareEx owner={owner} roles={roles} latestMsg={latestMgs} isOpen={showShare}
-                                                 onClose={() => this.setState({showShare: false})}
-                                                 tribeInfo={tribeInfo}/>
-                                    </div>
                                     <MessageContentVisual
+                                        setHideMenu={(f)=>{
+                                            this.setHideMenu(f)
+                                        }}
                                         onFork={this.fork}
                                         loaded={!!tribeInfo}
                                         showPinnedMsgDetail={(groupId) => {
@@ -574,16 +604,18 @@ export class Dashboard extends React.Component<Props, State> {
                                         shareMsgId={this.props.msgId}
                                     />
 
-                                    <BottomBar alreadySelectRole={alreadySelectRole} isTokenValid={isSessionAvailable} tribeInfo={tribeInfo} owner={owner} userLimit={userLimit}
-                                               onRoleCheck={(v) => {
-                                                   this.setLatestRole(v)
-                                               }} roles={roles} selectRole={latestRole} showPin={showPin} onPin={() => {
-                                        // tribeService.setCacheMsg(config.tribeId,[])
-                                        this.setState({showPin: false, datas: []})
-                                        this.initData().catch(e => {
-                                            console.error(e)
-                                        })
-                                    }}/>
+                                    <div className={`msg-bottom ${!hideMenu?"":"msg-bottom-height-0"}`}>
+                                        <BottomBar alreadySelectRole={alreadySelectRole} isTokenValid={isSessionAvailable} tribeInfo={tribeInfo} owner={owner} userLimit={userLimit}
+                                                   onRoleCheck={(v) => {
+                                                       this.setLatestRole(v)
+                                                   }} roles={roles} selectRole={latestRole} showPin={showPin} onPin={() => {
+                                            // tribeService.setCacheMsg(config.tribeId,[])
+                                            this.setState({showPin: false, datas: []})
+                                            this.initData().catch(e => {
+                                                console.error(e)
+                                            })
+                                        }}/>
+                                    </div>
                                 </div>
 
                                 <IonActionSheet

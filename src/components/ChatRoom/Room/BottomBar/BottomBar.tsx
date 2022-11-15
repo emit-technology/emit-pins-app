@@ -162,7 +162,7 @@ export const BottomBar: React.FC<Props> = ({showPin,alreadySelectRole, roles,isT
 
     // const avatar = utils.convertImgDisplay()
 
-    return <div className="msg-bottom">
+    return <>
         {
             !showPin ?
                 <IonRow>
@@ -452,5 +452,5 @@ export const BottomBar: React.FC<Props> = ({showPin,alreadySelectRole, roles,isT
 
         <AirdropModal actor={selectRole} onOk={()=>sendAirdrop()} onClose={()=>setShowAirdropModal(false)} owner={owner} isOpen={showAirdropModal} />
 
-    </div>
+    </>
 }

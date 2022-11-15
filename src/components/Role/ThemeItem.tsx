@@ -43,7 +43,7 @@ export const ThemeItem:React.FC<Props> = ({theme,roles,seq}) =>{
                     }
                     return <div key={i} className="pinned-msg-roles" style={{right: 20 + (i+1)*22,zIndex: 10000 - i*2 }}>
                         <IonAvatar className="ion-avatar2">
-                            <img src={img}/>
+                            <img src={img} />
                         </IonAvatar>
                     </div>
                 })

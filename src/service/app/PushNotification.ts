@@ -1,10 +1,31 @@
 import { PushNotifications } from '@capacitor/push-notifications';
 import selfStorage from "../../common/storage";
+import {tribeService} from "../tribe";
+import {Device} from "@capacitor/device";
+
+export const isApp = async () =>{
+    try {
+        const deviceInfo = await Device.getInfo();
+        return deviceInfo.platform == "ios" || deviceInfo.platform == "android"
+    }catch (e){
+        console.error(e)
+    }
+    return false;
+}
 
 export const addListeners = async () => {
+    if(! await isApp()){
+        return;
+    }
     await PushNotifications.addListener('registration', token => {
         console.info('Registration token: ', token.value);
-        selfStorage.setItem("pushToken", token.value)
+        selfStorage.setItem("pushTokenValue", token.value)
+
+        tribeService.registerDevice(token.value).then(rest=>{
+            console.log("registerDevice success");
+        }).catch(e=>{
+            console.error("registerDevice err: ",e)
+        });
     });
 
     await PushNotifications.addListener('registrationError', err => {
@@ -22,6 +43,9 @@ export const addListeners = async () => {
 }
 
 export const registerNotifications = async () => {
+    if(! await isApp()){
+        return;
+    }
     let permStatus = await PushNotifications.checkPermissions();
 
     if (permStatus.receive === 'prompt') {
@@ -36,6 +60,9 @@ export const registerNotifications = async () => {
 }
 
 export const getDeliveredNotifications = async () => {
+    if(! await isApp()){
+        return;
+    }
     const notificationList = await PushNotifications.getDeliveredNotifications();
     console.log('delivered notifications', JSON.stringify(notificationList));
 }
