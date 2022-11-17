@@ -13,6 +13,7 @@ import {emitBoxSdk} from "../../service/emitBox";
 import {TribeLayout} from "../../components/Tribe/TribeLayout";
 import selfStorage from "../../common/storage";
 import {TribeEditModal} from "../../components/Tribe";
+import {utils} from "../../common";
 
 interface State {
     segment: string
@@ -246,7 +247,7 @@ export class HomePage extends React.Component<Props, State> {
 
                     <TribeEditModal isOpen={showCreateModal} onClose={()=>this.setShowCreateModal(false)} onOk={(tribeId)=>{
                         this.setShowCreateModal(false);
-                        window.location.href = `/${tribeId}`;
+                        utils.goTo(tribeId)
                     }} />
 
                 </IonContent>

@@ -27,6 +27,7 @@ import {App} from "@capacitor/app";
 import walletWorker from "../../worker/walletWorker";
 import {DeviceInfo, Device} from "@capacitor/device";
 import assert from "assert";
+import {MsgStaticInfo} from "../../../../emit-im-worker/src/types";
 // import WebSocket from 'ws';
 
 const W3CWebSocket = require('websocket').w3cwebsocket;
@@ -489,6 +490,22 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
+    groupedInfos = async (tribeId: string) : Promise<Array<{[groupId: string]:MsgStaticInfo}>> =>{
+        const rest: TribeResult<Array<{[groupId: string]:MsgStaticInfo}>> = await this._rpc.post('/tribe/groupedInfos', {tribeId: tribeId});
+        if (rest && rest.code == 0) {
+            return Promise.resolve(rest.data)
+        }
+        return Promise.reject(rest.message);
+    }
+
+    msgGrouedInfo = async (msgId: string) : Promise<MsgStaticInfo> =>{
+        const rest: TribeResult<MsgStaticInfo> = await this._rpc.post('/tribe/msgGrouedInfo', {msgId: msgId});
+        if (rest && rest.code == 0) {
+            return Promise.resolve(rest.data)
+        }
+        return Promise.reject(rest.message);
+    }
+
     _groupMsgKey = (groupId: string) => {
         return `tribe_group_${groupId}`;
     }
@@ -696,17 +713,17 @@ class TribeService implements ITribe {
         return []
     }
 
-    convertMessagesToPinnedSticky = (messages: Array<Message>, roles: Array<TribeRole>, tribeInfo: TribeInfo): Array<PinnedSticky> => {
-        if (messages && tribeInfo && roles) {
+    convertMessagesToPinnedSticky = (messages: Array<Message>, roles: Array<TribeRole>, theme: TribeTheme): Array<PinnedSticky> => {
+        if (messages && roles) {
             const copy = [];
             let i = 0;
             for (let msg of messages) {
                 copy.push({
-                    theme: tribeInfo.theme,
-                    seq: 0,
+                    theme: theme,
+                    seq: msg.seq,
                     roles: roles,
                     records: [msg],
-                    groupId: "",
+                    groupId: msg.groupId,
                     index: (i++)
                 })
             }

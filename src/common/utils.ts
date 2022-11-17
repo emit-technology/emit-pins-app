@@ -185,6 +185,10 @@ export const utils = {
 
     },
 
+    goTo: (verseId: string) =>{
+        window.location.href = `/v2/${verseId}`
+    },
+
     isAndroid: (): boolean => {
         const deviceInfo = selfStorage.getItem("deviceInfo")
         if(!!deviceInfo){

@@ -40,7 +40,7 @@ import {PinnedMsgModal} from "../../components/ChatRoom/Room/Message/PinnedMsgMo
 import {TribeHeader} from "../../components/Tribe/TribeHeader";
 import tribeWorker from "../../worker/imWorker";
 import {ToolBar} from "../../components/ChatRoom/Room/ToolBar";
-import {MessageContentVisual} from "../../components/ChatRoom/Room/Message";
+import {MessageContentVisualso as MessageContentVisual} from "../../components/ChatRoom/Room/Message/MessageVisualso";
 // import {MessageContentWindow as MessageContentVisual} from "../../components/ChatRoom/Room/Message";
 import {ShareEx} from "../../components/utils/ShareEx";
 import {SideBar} from "../../components/ChatRoom/SideBar";
@@ -113,7 +113,7 @@ interface Props {
 
 let checkInterVal;
 
-export class Dashboard extends React.Component<Props, State> {
+export class DashboardV2 extends React.Component<Props, State> {
 
     state: State = {
         datas: [],

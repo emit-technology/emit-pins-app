@@ -30,6 +30,7 @@ import config from "./common/config";
 import {Provider} from "react-redux";
 import store from "./common/state/app/store";
 import {HomePage} from "./pages/Home";
+import {DashboardV2} from "./pages/Dashboard/index2";
 setupIonicReact({
     mode: "ios",
 });
@@ -60,7 +61,13 @@ const App: React.FC = () => {
                                     <Route exact path="/:tribeId" component={(props: any) => {
                                         const tribeId = props.match.params.tribeId;
                                         config.tribeId = tribeId;
-                                        return <Dashboard tribeId={tribeId} router={routerRef.current}/>
+                                        return <DashboardV2 tribeId={tribeId} router={routerRef.current}/>
+                                    }}/>
+
+                                    <Route exact path="/v2/:tribeId" component={(props: any) => {
+                                        const tribeId = props.match.params.tribeId;
+                                        config.tribeId = tribeId;
+                                        return <DashboardV2 tribeId={tribeId} router={routerRef.current}/>
                                     }}/>
 
                                     <Route exact path="/:tribeId/:msgId" component={(props: any) => {

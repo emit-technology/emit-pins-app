@@ -63,7 +63,7 @@ export const TribeRecommend: React.FC<Props> = ({data,layout}) => {
                     const actor: TribeRole = v.roles.find(vr => vr.id == (v.latestMsg && v.latestMsg.role));
                     return <div key={i}>
                         <div className="recmt-content" onClick={() => {
-                            window.location.href = `./${v.tribeId}`
+                            utils.goTo(v.tribeId)
                         }}>
                             <div className="recmt-head">
                                 <div className="recmt-head-icon">

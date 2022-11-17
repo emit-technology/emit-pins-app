@@ -31,8 +31,7 @@ export const TribeLayout: React.FC<Props> = ({data,tribeTimeMap}) => {
                     return <XBlock key={i}>
                         <div className="recmt-content card" onClick={() => {
                             selfStorage.setItem(`latest_view_${v.tribeId}`,Math.floor(Date.now()/1000));
-
-                            window.location.href = `./${v.tribeId}`
+                            utils.goTo(v.tribeId)
                         }}>
                             <div className="recmt-head">
                                 <div className="recmt-head-icon">

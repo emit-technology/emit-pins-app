@@ -10,6 +10,7 @@ import {tribeService} from "../../service/tribe";
 import {TribeEditModal} from "./TribeEditModal";
 import {emitBoxSdk} from "../../service/emitBox";
 import {ChainType} from "@emit-technology/emit-lib";
+import {utils} from "../../common";
 
 interface Props{
     isOpen: boolean;
@@ -66,7 +67,7 @@ export const TribeInfoModal:React.FC<Props> = ({isOpen,stickies,onReladData,onCl
                                 tribeInfo && tribeInfo.forked  && tribeInfo.forked.length>0 && <div>
                                     <IonText color="medium"><small style={{fontWeight:700}}>Forked from {tribeInfo.forked[0].tribeId}</small></IonText>
                                     <IonIcon style={{transform:'translateY(3px)',cursor:'pointer'}} size="small" src={openOutline} color="medium" onClick={()=>{
-                                        window.location.href = `./${tribeInfo.forked[0].tribeId}`
+                                        utils.goTo(tribeInfo.forked[0].tribeId)
                                     }}/>
                                 </div>
                             }

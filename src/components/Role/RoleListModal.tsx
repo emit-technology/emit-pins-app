@@ -101,7 +101,7 @@ export const RoleListModal: React.FC<Props> = ({
                                 tribeInfo && tribeInfo.forked  && tribeInfo.forked.length>0 && <div>
                                     <IonText color="medium"><small style={{fontWeight:700}}>Forked from {tribeInfo.forked[0].tribeId}</small></IonText>
                                     <IonIcon style={{transform:'translateY(3px)',cursor:'pointer'}} size="small" src={openOutline} color="medium" onClick={()=>{
-                                        window.location.href = `./${tribeInfo.forked[0].tribeId}`
+                                        utils.goTo(tribeInfo.forked[0].tribeId)
                                     }}/>
                                 </div>
                             }
