@@ -81,7 +81,6 @@ const _lock = mutexify()
 const fetchData = async (pageNo, setComments, condition?: Array<any>) => {
 
     try {
-        console.log("fetch data total == %d ,page=%d", total, pageNo)
         const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, pageNo, pageSize, condition)
         total = rest.data.length;
         setComments((prevComments: Array<PinnedSticky>) => [...rest.data, ...[]]);
@@ -186,7 +185,6 @@ export const MessageContentWindow: React.FC<Props> = ({groupMsg, onFork, shareMs
         if (document.hidden !== undefined && !pinnedStickies) {
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden) {
-                    console.log("fetch page data")
                     fetchData(pageNo, setComments)
                 }
             })
@@ -319,11 +317,9 @@ export const MessageContentWindow: React.FC<Props> = ({groupMsg, onFork, shareMs
 
     useEffect(() => {
         if (!pinnedStickies && comments.length > 0) {
-            console.log("scroll to last visit max=[%d], current=[%d] ", maxVisibleIndex, currentVisibleIndex)
             if (shouldScroll++ == 0) {
                 const lastId = comments.findIndex(value => (value as PinnedSticky).records && (value as PinnedSticky).records && (value as PinnedSticky).records.length > 0 && (value as PinnedSticky).records[0].id == shareMsgId);
                 const last = shareMsgId ? lastId - 1 : getCurrentVisible();
-                console.log("scroll to last: ", last)
                 if (last >= 0) {
                     setTimeout(() => {
                         if(last == 999999999){
@@ -496,7 +492,6 @@ export const MessageContentWindow: React.FC<Props> = ({groupMsg, onFork, shareMs
     }
 
     const displayBottomMsg = (data: PinnedSticky) => {
-        console.log("===>>>>  displayBottomMsg",data, stickyMsg)
         if(!!data.groupId && stickyMsg && (stickyMsg as PinnedSticky).seq != data.index ){
             const dataCopy:PinnedSticky = JSON.parse(JSON.stringify(data))
             dataCopy.theme = tribeInfo.theme;

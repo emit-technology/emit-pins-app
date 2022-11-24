@@ -47,7 +47,6 @@ const App: React.FC = () => {
     // },[])
     // const mobileWidth = document.documentElement.clientWidth <=768;
     // const Tip = ()=>  mobileWidth?<img src="./assets/img/snaptip2.png" style={{height:'100%', width:'100%'}}/>:<img src="./assets/img/snaptip.png"  style={{height:'100%', width:'100%'}}/>
-    // console.log("page show tips",showTip);
     const baseURL = process.env.NODE_ENV === 'production' ? config.baseUrl : process.env.REACT_APP_DEV_API_URL;
     const routerRef = useRef<HTMLIonRouterOutletElement | null>(null);
     return <>
@@ -58,13 +57,13 @@ const App: React.FC = () => {
                         <Provider store={store}>
                             <Router basename={baseURL}>
                                 <Switch>
-                                    <Route exact path="/:tribeId" component={(props: any) => {
-                                        const tribeId = props.match.params.tribeId;
-                                        config.tribeId = tribeId;
-                                        return <DashboardV2 tribeId={tribeId} router={routerRef.current}/>
-                                    }}/>
+                                    {/*<Route exact path="/:tribeId" component={(props: any) => {*/}
+                                    {/*    const tribeId = props.match.params.tribeId;*/}
+                                    {/*    config.tribeId = tribeId;*/}
+                                    {/*    return <DashboardV2 tribeId={tribeId} router={routerRef.current}/>*/}
+                                    {/*}}/>*/}
 
-                                    <Route exact path="/v2/:tribeId" component={(props: any) => {
+                                    <Route exact path="/:tribeId" component={(props: any) => {
                                         const tribeId = props.match.params.tribeId;
                                         config.tribeId = tribeId;
                                         return <DashboardV2 tribeId={tribeId} router={routerRef.current}/>
@@ -74,7 +73,7 @@ const App: React.FC = () => {
                                         const tribeId = props.match.params.tribeId;
                                         const msgId = props.match.params.msgId;
                                         config.tribeId = tribeId;
-                                        return <Dashboard tribeId={tribeId} router={routerRef.current} msgId={msgId}/>
+                                        return <DashboardV2 tribeId={tribeId} router={routerRef.current} msgId={msgId}/>
                                     }}/>
 
 

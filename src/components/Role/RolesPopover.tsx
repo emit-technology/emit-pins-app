@@ -104,7 +104,6 @@ export const RolesPopover: React.FC<Props> = ({roles,isOpen,onClose, defaultRole
                     // })
                     setShowRoleModal(false)
                     setRoleInfo(null)
-                    console.log('update role success')
                     onClose();
                 }} roleInfo={roleInfo}/>
             </IonContent>

@@ -155,7 +155,6 @@ export const utils = {
             return 200;
         }
 
-// console.log(width, height ,url, "getHeight")
         const h = _getHeight();
         const w = Math.floor(h * width / height);
         const webPath = url && (url.indexOf("blob") == 0 || url.indexOf("data") == 0) ? url : `${config.tribePic}/display?url=${url}&w=${w}&h=${h}&op=resize&upscale=1`;
@@ -186,7 +185,7 @@ export const utils = {
     },
 
     goTo: (verseId: string) =>{
-        window.location.href = `/v2/${verseId}`
+        window.location.href = `/${verseId}`
     },
 
     isAndroid: (): boolean => {

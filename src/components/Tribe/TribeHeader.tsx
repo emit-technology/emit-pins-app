@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useAppDispatch, useAppSelector} from "../../common/state/app/hooks";
 import {saveDataState} from '../../common/state/slice/dataSlice';
 import {IonIcon, IonItem, IonLabel, IonText} from "@ionic/react";
@@ -17,35 +17,43 @@ interface Props{
     roles:Array<TribeRole>;
     wsStatus: WsStatus;
     onReladData?:()=>void;
-}
-export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatus}) =>{
-    const dispatchData = useAppSelector(state => state.jsonData);
-    const dispatch = useAppDispatch();
 
-    const [stickyMsg,setStickyMsg] = useState(null);
+    stickyMsg?: PinnedSticky
+
+    onChangeMsgIndex?: (msgIndex:number)=>void;
+}
+const TribeHeaderChild:React.FC<Props> = ({tribeInfo,onReladData,onChangeMsgIndex,stickyMsg,roles,wsStatus}) =>{
 
     const [showTribeInfoModal,setShowTribeInfoModal] = useState(false);
     const [stickies,setStickies] = useState({data:[],total:0});
-    useEffect(()=>{
-        if (dispatchData) {
-            if (dispatchData.tag == 'updateTheme' && dispatchData.data) {
-                let dataObj:any = dispatchData.data;
-                if (dataObj.stickyMsgTop) {
-                    setStickyMsg(dataObj.stickyMsgTop)
-                    dispatch(saveDataState({data:  {stickyMsg: dataObj.stickyMsg, stickyMsgTop: null}, tag: 'updateTheme'}))
-                }
 
+    const onClickTheme = useCallback(()=>{
+        if(stickyMsg && !!onChangeMsgIndex){
+            const index = tribeService.groupIdCache().findIndex(v=> v == stickyMsg.groupId)
+            if(index> 0){
+                tribeService.getMsgPositionWithGroupId(tribeService.groupIdCache()[index-1]).then(postion=>{
+                    onChangeMsgIndex(postion)
+                })
             }
         }
-    },[dispatchData.data])
+    },[stickyMsg])
+
+
+    const onClickThemeForward = useCallback(()=>{
+        if(stickyMsg && !!onChangeMsgIndex){
+            const index = tribeService.groupIdCache().findIndex(v=> v == stickyMsg.groupId)
+            if(index < tribeService.groupIdCache().length - 1){
+                tribeService.getMsgPositionWithGroupId(tribeService.groupIdCache()[index+1]).then(postion=>{
+                    onChangeMsgIndex(postion)
+                })
+            }
+        }
+    },[stickyMsg])
+
     const fetch = async ()=>{
         if(tribeInfo){
             if(!stickyMsg || !stickyMsg.groupId){
-                const rest =  await tribeWorker.getPinnedMessageArray(config.tribeId,1, 100000,[
-                    "tribeIdAndGroupId",
-                    [config.tribeId,'']
-                    ,[config.tribeId,''],"next"
-                ])
+                const rest =  await tribeWorker.getPinnedMessageArray(config.tribeId,0, 100000)
                 const data = rest.data.filter(v=>v.records && (v.records.length>0 && v.records[0].msgStatus !== MessageStatus.removed || v.records.length ==0));
                 setStickies({data:data,total: data.length})
             }else{
@@ -62,7 +70,6 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
                 }
 
             }
-
         }
     }
     return <>
@@ -71,14 +78,8 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
                 <div style={{cursor:"pointer"}}>
                     <IonItem lines="none">
                         {
-                            (stickyMsg && stickyMsg.groupId && stickyMsg.seq >1 || stickyMsg && !stickyMsg.groupId && stickyMsg.index>=0 ) ? <IonIcon src={chevronBackOutline} slot="start" color="medium" onClick={()=>{
-                                    let refresh = stickyMsg.groupId ?new BigNumber(stickyMsg.seq).minus(1).toNumber(): 666666;
-                                    if(!stickyMsg.groupId && stickyMsg.index>0 && stickyMsg.seq == -1){
-                                        refresh = stickyMsg.index;
-                                    }
-                                    dispatch(saveDataState({data: JSON.stringify({forward: 1, refresh: refresh}), tag: 'scrollToItem'}))
-                                }}/>:
-                                <IonIcon src={chevronBackOutline} slot="start" style={{color:"#ffffff"}}/>
+                            stickyMsg && tribeService.groupIdCache().indexOf(stickyMsg.groupId)>0
+                            && <IonIcon src={chevronBackOutline} slot="start" color="medium" onClick={onClickTheme}/>
                         }
                         <div style={{height: 42, width: 42, borderRadius: 6}} slot={"start"}  onClick={()=>{
                             fetch().then(()=>{
@@ -86,7 +87,8 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
                             }).catch(e=>console.error(e))
                         }}>
                             {
-                                (stickyMsg && stickyMsg.theme.image || tribeInfo && tribeInfo.theme ) && <img width="100%" height="100%" src={utils.getDisPlayUrl(stickyMsg && stickyMsg.groupId ? stickyMsg.theme.image: tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image))}
+                                (stickyMsg && stickyMsg.theme.image || tribeInfo && tribeInfo.theme )
+                                && <img width="100%" height="100%" src={utils.getDisPlayUrl(stickyMsg && stickyMsg.groupId ? stickyMsg.theme.image: tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image))}
                                                                                                               style={{borderRadius: 6, objectFit:'cover'}}/>
                             }
                         </div>
@@ -107,10 +109,8 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
                             </div>
                         </IonLabel>
                         {
-                            (stickyMsg && stickyMsg.groupId && stickyMsg.seq > 0) ? <IonIcon src={chevronForwardOutline} slot="end" color="medium"  onClick={()=>{
-                                    dispatch(saveDataState({data: JSON.stringify({forward: 2,refresh: stickyMsg.groupId ? new BigNumber(stickyMsg.seq).plus(1).toNumber():888888}), tag: 'scrollToItem'}))
-                                }}/>:
-                                <IonIcon src={chevronForwardOutline} slot="end" style={{color:"#ffffff"}}/>
+                            stickyMsg && tribeService.groupIdCache().indexOf(stickyMsg.groupId) < tribeService.groupIdCache().length-1
+                            &&  <IonIcon src={chevronForwardOutline} slot="end" color="medium" onClick={onClickThemeForward}/>
                         }
 
                     </IonItem>
@@ -121,3 +121,5 @@ export const TribeHeader:React.FC<Props> = ({tribeInfo,onReladData,roles,wsStatu
         <TribeInfoModal onReladData={onReladData} isOpen={showTribeInfoModal} stickies={stickies} onClose={()=>setShowTribeInfoModal(false)} tribeInfo={tribeInfo} roles={roles} stickyMsg={stickyMsg}/>
     </>
 }
+
+export const TribeHeader = React.memo(TribeHeaderChild)

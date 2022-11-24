@@ -11,7 +11,7 @@ import {
     useIonToast,
 } from '@ionic/react'
 import {
-    chatboxEllipsesOutline,
+    chatboxEllipsesOutline, diceOutline,
     happyOutline,
     imageOutline, rocketOutline,
 } from "ionicons/icons";
@@ -55,7 +55,7 @@ const lorem = new LoremIpsum({
     }
 });
 
-export const BottomBar: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTokenValid, tribeInfo, owner, userLimit, onRoleCheck, onPin, selectRole}) => {
+const BottomBarChild: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTokenValid, tribeInfo, owner, userLimit, onRoleCheck, onPin, selectRole}) => {
     const textRef = React.useRef("")
     const [present, dismiss] = useIonToast();
     const [replayMsg, setReplayMsg] = useState(null);
@@ -91,7 +91,6 @@ export const BottomBar: React.FC<Props> = ({showPin,alreadySelectRole, roles,isT
         if (dispatchData) {
             if (dispatchData.tag == 'replayMsg' && dispatchData.data) {
                 let dataObj = JSON.parse(dispatchData.data);
-                console.log("bottom receive data",)
                 if (dataObj["msg"]) {
                     setReplayMsg(dataObj["msg"])
                 }
@@ -234,7 +233,6 @@ export const BottomBar: React.FC<Props> = ({showPin,alreadySelectRole, roles,isT
 
                                     <IonIcon className="footer-icon" src={imageOutline} color="dark" size="large"
                                              onClick={(e) => {
-                                                 console.log("click upload");
                                                  e.stopPropagation();
                                                  tribeService.userCheckAuth().then(()=>{
                                                      if(userLimit && userLimit.msgLeft <=0){
@@ -275,17 +273,6 @@ export const BottomBar: React.FC<Props> = ({showPin,alreadySelectRole, roles,isT
                                                      })
                                                  })
                                              }}/>
-                                    {/*<IonIcon className="footer-icon" src={diceOutline} color="dark" size="large" onClick={(e) => {*/}
-                                    {/*    e.stopPropagation();*/}
-                                    {/*    if (textRef && textRef.current) {*/}
-                                    {/*        //@ts-ignore*/}
-                                    {/*        // const value:any = textRef.current.value;*/}
-                                    {/*        const value = lorem.generateSentences(1);*/}
-                                    {/*        if (value) {*/}
-                                    {/*        }*/}
-
-                                    {/*    }*/}
-                                    {/*}}/>*/}
                                     <IonIcon className="footer-icon" src={rocketOutline} color="dark" size="large" onClick={(e) => {
                                         e.stopPropagation();
                                         tribeService.userCheckAuth().then(()=>{
@@ -301,6 +288,11 @@ export const BottomBar: React.FC<Props> = ({showPin,alreadySelectRole, roles,isT
                                             })
                                         })
 
+                                    }}/>
+
+                                    <IonIcon className="footer-icon" src={diceOutline} color="dark" size="large" onClick={(e) => {
+                                        e.stopPropagation();
+                                        sendMsg(true)
                                     }}/>
                                 </div>
                             </IonCol>
@@ -438,7 +430,7 @@ export const BottomBar: React.FC<Props> = ({showPin,alreadySelectRole, roles,isT
                                 present({
                                     message: err,
                                     duration: 2000,
-                                    position: "top",
+                                    position: "top" ,
                                     color: "danger"
                                 })
                             })
@@ -454,3 +446,5 @@ export const BottomBar: React.FC<Props> = ({showPin,alreadySelectRole, roles,isT
 
     </>
 }
+
+export const BottomBar = React.memo(BottomBarChild);

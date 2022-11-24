@@ -29,7 +29,7 @@ export const RolesAvatarModal: React.FC<Props> = ({roles,isOpen,onClose, default
 
     return <>
         <IonModal isOpen={isOpen} className="role-avatar-modal" onDidDismiss={() => onClose()}>
-            <IonToolbar color="secondary">
+            <IonToolbar>
                 <IonTitle>Select a role to actor</IonTitle>
                 <IonButtons slot="end">
                     <IonButton onClick={() => onClose()}>Close</IonButton>
@@ -41,7 +41,7 @@ export const RolesAvatarModal: React.FC<Props> = ({roles,isOpen,onClose, default
                             {
                                 roleInfoArr && roleInfoArr.map((v, i) => {
                                     if(i>0){
-                                        return <IonCol className="avatar-col" size="2" key="i" onClick={()=>{
+                                        return <IonCol className="avatar-col" size="2" key={i} onClick={()=>{
                                             onRoleCheck(v)
                                         }}>
                                             <IonAvatar className="ion-avatar2">

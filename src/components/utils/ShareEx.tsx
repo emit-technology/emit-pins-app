@@ -91,14 +91,16 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
     const [logo, setLogo] = useState("")
 
     useEffect(()=>{
-            setGenning(true)
-            init().then(()=>{
-                setGenning(false)
-            }).catch(e=>{
-                setGenning(false)
-                console.error(e)
-            })
-    },[latestMsg,roles,stickyMsg, tribeInfo])
+            if(!!isOpen){
+                setGenning(true)
+                init().then(()=>{
+                    setGenning(false)
+                }).catch(e=>{
+                    setGenning(false)
+                    console.error(e)
+                })
+            }
+    },[isOpen,latestMsg])
 
     const init = async ()=>{
         {
@@ -216,7 +218,6 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
                 const file = new File([blob], `file.png`)
                 tribeService.uploadFile(file).then(data => {
                     setLoading(false)
-                    console.log(data);
                     const shareImageId = data["filename"].replace(".png", "");
                     setUrl(`${config.baseUrl}/verse/${tribeInfo.tribeId}/${shareImageId}/${getStartMsgId()}`)
                     setLastImageId(shareImageId)
@@ -255,7 +256,7 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
     return <>
         {/*//initialBreakpoint={0.4} breakpoints={[0, 0.4, 0.6]}*/}
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-share-modal">
-            <IonToolbar color="secondary">
+            <IonToolbar>
                 <IonButtons slot="end">
                     <IonButton disabled={genning} onClick={() => sharePng().catch(e=>console.error(e))}><IonIcon src={shareOutline}/> Share</IonButton>
                 </IonButtons>
@@ -268,7 +269,7 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
                 <div id="my-node" className="share-node">
                     <div className="visual-msg-box share-page" style={{
                         height: '100%',
-                        background: backImage
+                        backgroundImage: backImage
                     }}>
                         <div className="share-box">
                             <div className="share-left">

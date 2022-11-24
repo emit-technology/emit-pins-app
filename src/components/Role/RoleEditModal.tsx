@@ -53,32 +53,6 @@ export const RoleEditModal: React.FC<Props> = ({isOpen, roleInfo, onOk, onClose}
             </IonHeader>
             <IonContent className="ion-padding">
                 <div style={{borderRadius: 14, padding: "0 22px"}}>
-                    {/*<RowItemCenterWrapper style={{width: '100%', marginTop: 20}}>*/}
-                    {/*    <UploadImage imgUrl={imgUrl} setImgUrl={setImgUrl} width={50}/>*/}
-                    {/*    /!*{*!/*/}
-                    {/*    /!*    !!roleInfo && <div className="edit-avatar-icon" onClick={(e)=>{*!/*/}
-                    {/*    /!*        e.persist()*!/*/}
-                    {/*    /!*    }}>*!/*/}
-                    {/*    /!*        <IonIcon src={createOutline}/>*!/*/}
-                    {/*    /!*    </div>*!/*/}
-                    {/*    /!*}*!/*/}
-                    {/*    <div style={{marginLeft: 15, width: '100%'}}>*/}
-
-                    {/*        {*/}
-                    {/*            !roleInfo && <>*/}
-
-                    {/*                <div className={'common-title'}>Name</div>*/}
-                    {/*                <IonTextarea className='input' rows={1} value={roleName}*/}
-                    {/*                         placeholder="Add a Name" readonly={!!roleInfo} style={{borderRadius: 6, paddingLeft: 8}}*/}
-                    {/*                         onIonChange={e => setRoleName(e.detail.value!)}/>*/}
-                    {/*                         </>*/}
-                    {/*        }*/}
-                    {/*        {*/}
-                    {/*            !!roleInfo && <IonLabel>{roleInfo.name}</IonLabel>*/}
-                    {/*        }*/}
-                    {/*    </div>*/}
-                    {/*</RowItemCenterWrapper>*/}
-                    {/*<div className={'common-title'} style={{padding: '12px 0'}}>Avatar</div>*/}
 
                     <div style={{textAlign: "center"}}>
                         <UploadImage defaultIcon={add} imgUrl={utils.getDisPlayUrl(imgUrl)} setImgUrl={(url, width, height) => setImgUrl({url: url,width:width,height:height})} height={200} width={200}  />
@@ -102,7 +76,9 @@ export const RoleEditModal: React.FC<Props> = ({isOpen, roleInfo, onOk, onClose}
                         <IonButton fill="outline" expand="block" onClick={()=>onClose()}>Cancel</IonButton>
                     </IonCol>
                     <IonCol size="8">
-                        <IonButton disabled={showLoading} expand="block" onClick={() => {
+                        <IonButton disabled={showLoading || (roleInfo && roleInfo.avatar == imgUrl &&
+                            roleInfo.name == roleName &&
+                            roleInfo.desc == desc )} expand="block" onClick={() => {
                             if (!imgUrl || !(imgUrl as MsgTextImage).url){
                                 present({message: "Please upload avatar image !", color:"danger", duration: 2000})
                                 return
@@ -138,7 +114,7 @@ export const RoleEditModal: React.FC<Props> = ({isOpen, roleInfo, onOk, onClose}
                             //     id:roleInfo && roleInfo.id
                             // })
 
-                        }}>Ok</IonButton>
+                        }}>{!!roleInfo?"Update":"Create"}</IonButton>
                     </IonCol>
                 </IonRow>
 

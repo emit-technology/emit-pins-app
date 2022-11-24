@@ -29,7 +29,8 @@ export const ImageView:React.FC<Props> = ({url,width, height,disH,disW}) =>{
                     width: `${disW}px`,
                     // height: '100%',
                     height: `${disH}px`,
-                    objectFit: 'cover'
+                    objectFit: 'cover',
+                    verticalAlign: "middle"
                 }}/>
             </PhotoView>
         </PhotoProvider>

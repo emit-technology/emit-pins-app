@@ -39,9 +39,8 @@ export interface Tribe {
     forkedTribeId?: string;
 }
 
-// export type MessageStruct = Dice | Role | MsgText | Expression | Theme
-
 export interface Message {
+    msgIndex?:number;
     id: string;
     tribeId: string
     owner: string;
@@ -118,6 +117,8 @@ export interface PinnedSticky {
     records: Array<Message>;
     groupId: string;
     index: number
+
+    showPin?:{lastPin: PinnedSticky, showPin: boolean};
 }
 
 export enum WsStatus {

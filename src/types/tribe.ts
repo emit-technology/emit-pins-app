@@ -54,6 +54,7 @@ export interface GroupMsg {
     records: Array<Message>;
     roles: Array<TribeRole>;
     theme: TribeTheme;
+    groupId?: string
 }
 
 export interface UserLimit {
@@ -79,4 +80,20 @@ export interface AirdropInfo {
     apportionId: string;
     amount: string;
     txHash: string;
+}
+
+export interface MsgStaticInfo {
+    tribeId: string;
+    groupId: string;
+    messages: number;
+    reads: number;
+    retweets: number;
+    likes: number;
+    seq: number
+}
+
+
+export interface StreamMsg {
+    records: Array<Message>;
+    total: number;
 }

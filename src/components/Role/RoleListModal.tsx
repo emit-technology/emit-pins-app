@@ -1,33 +1,27 @@
 import * as React from 'react';
-import {useEffect, useState} from 'react'
+import {useCallback, useState} from 'react'
 import {
     IonAvatar,
-    IonCheckbox,
     IonHeader,
     IonIcon, IonText,
     IonItem,
     IonLabel,
-    IonPage, IonRow, IonCol,
-    IonContent,
-    IonButtons, IonButton, IonTitle, IonToolbar, IonLoading, useIonToast
+    IonPage,
+    IonContent, IonToolbar, IonLoading
 } from "@ionic/react";
 import {
     addCircleOutline,
-    create,
     createOutline,
     layersOutline,
     openOutline,
-    pencilOutline,
     personOutline
 } from "ionicons/icons";
 import {GroupMsg, PinnedSticky, TribeInfo, TribeRole, TribeTheme} from "../../types";
 import {RoleEditModal} from "./RoleEditModal";
-import {useAppDispatch, useAppSelector} from "../../common/state/app/hooks";
-import {saveDataState} from '../../common/state/slice/dataSlice';
 import {ThemeItem} from "./ThemeItem";
 import {ThemesItems} from "./ThemesItems";
-import {tribeService} from "../../service/tribe";
 import {utils} from "../../common";
+import {tribeService} from "../../service/tribe";
 
 interface Props {
     roles: Array<TribeRole>
@@ -40,55 +34,30 @@ interface Props {
     tribeInfo: TribeInfo
 
     groupMsg: Array<GroupMsg>;
+
+    pinnedSticky?: PinnedSticky
+
+    onChangeMsgIndex?: (msgIndex:number)=>void;
 }
 
-export const RoleListModal: React.FC<Props> = ({
-                               roles,groupMsg,isModal,
+const RoleListModalChild: React.FC<Props> = ({
+                               roles,groupMsg,onChangeMsgIndex, pinnedSticky,isModal,
                                tribeInfo, onRoleCheck, defaultRole, onReloadList
                            }) => {
 
     const [showRoleModal, setShowRoleModal] = React.useState(false);
-    // const [showTribeModal, setShowTribeModal] = React.useState(false);
-    // const [theme, setTheme] = React.useState(tribeInfo && tribeInfo.theme);
-    const [pinnedSticky,setPinnedSticky] = React.useState(null);
+
     const [roleInfo, setRoleInfo] = React.useState(null);
     const [showThemes, setShowThemes] = React.useState(false);
     const [showLoading, setShowLoading] = useState(false);
 
-    const dispatchData = useAppSelector(state => state.jsonData);
-    const dispatch = useAppDispatch();
-
-    useEffect(() => {
-        if (dispatchData) {
-            if (dispatchData.tag == 'updateTheme' && dispatchData.data) {
-                let dataObj:any = dispatchData.data;
-                if (dataObj.stickyMsg) {
-                    // const tm:PinnedSticky = selfStorage.getItem("stickyMsg")
-                    // setTheme(dataObj.stickyMsg.theme);
-                    // setPinnedSticky(null)
-                    // setTimeout(()=>{
-                        setPinnedSticky(dataObj.stickyMsg)
-                    // },100)
-                    dispatch(saveDataState({data: {stickyMsg: null, stickyMsgTop: dataObj.stickyMsgTop}, tag: 'updateTheme'}))
-                }
-
-            }
-        }
-    }, [dispatchData.data]);
-
-    useEffect(() => {
-        if (tribeInfo) {
-            // setTheme(tribeInfo.theme)
-            setPinnedSticky({
-                roles: roles,
-                groupId: "",
-                records: [],
-                theme: tribeInfo.theme,
-                seq: 0,
-                index: 0
+    const onClickTheme = useCallback((groupId: string)=>{
+        if(!!onChangeMsgIndex){
+            tribeService.getMsgPositionWithGroupId(groupId).then(position=>{
+                onChangeMsgIndex(position)
             })
         }
-    }, [tribeInfo]);
+    },[])
 
     return <>
         <IonPage style={{borderRadius: "0 12px 12px 0"}}>
@@ -114,7 +83,7 @@ export const RoleListModal: React.FC<Props> = ({
                     tribeInfo && (!tribeInfo.forked  || tribeInfo.forked.length  == 0)  && <div style={{height: "12px"}}></div>
                 }
                 {
-                    showThemes && <ThemesItems groupMsg={groupMsg}  onClose={()=>{
+                    showThemes && <ThemesItems onClickTheme={onClickTheme} groupMsg={groupMsg}  onClose={()=>{
                         setShowThemes(false)
                     }}/>
                 }
@@ -183,7 +152,6 @@ export const RoleListModal: React.FC<Props> = ({
                                             style={{borderRadius: (i == 0) ? "12px 12px 0 0" : i == roles.length - 1 ? "0 0 12px 12px" : ""}}
                                             color="tertiary" key={i} onClick={(e) => {
                                             e.persist();
-                                            console.log("check role")
                                             onRoleCheck(v)
                                         }}>
                                             <IonAvatar slot="start" className="ion-avatar2">
@@ -200,7 +168,6 @@ export const RoleListModal: React.FC<Props> = ({
                                                 (i > 0 ) &&
                                                 <IonIcon size="small" slot="end" src={createOutline} color="medium"
                                                          onClick={(e) => {
-                                                             console.log("role edit");
                                                              e.stopPropagation();
                                                              setRoleInfo(v);
                                                              setShowRoleModal(true)
@@ -227,3 +194,5 @@ export const RoleListModal: React.FC<Props> = ({
         </IonPage>
     </>
 }
+
+export const RoleListModal = React.memo(RoleListModalChild);

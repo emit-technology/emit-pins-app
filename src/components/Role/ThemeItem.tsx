@@ -8,7 +8,7 @@ interface Props{
     roles: Array<TribeRole>;
     seq: number;
 }
-export const ThemeItem:React.FC<Props> = ({theme,roles,seq}) =>{
+const ThemeItemChild:React.FC<Props> = ({theme,roles,seq}) =>{
 
     const roleImgs:Array<string>=[];
     if(roles){
@@ -30,8 +30,8 @@ export const ThemeItem:React.FC<Props> = ({theme,roles,seq}) =>{
 
              <div className="pinned-msg-title">
                  {seq> 0 && `#${seq}`}
-                 <div>{theme.themeTag}</div>
-                 <div><small>{theme.themeDesc}</small></div>
+                 <div>{theme && theme.themeTag}</div>
+                 <div><small>{theme && theme.themeDesc}</small></div>
              </div>
 
             {
@@ -51,3 +51,5 @@ export const ThemeItem:React.FC<Props> = ({theme,roles,seq}) =>{
         </div>
     </>
 }
+
+export const ThemeItem = React.memo(ThemeItemChild)

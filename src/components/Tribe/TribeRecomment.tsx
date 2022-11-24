@@ -44,7 +44,6 @@ export const TribeRecommend: React.FC<Props> = ({data,layout}) => {
     // }, [])
 
     // data = [...data, ...data, ...data]
-    console.log(layout,"layout=======");
     const onLayoutChange = (layout) => {
         // defaultProps.onLayoutChange(layout);
     }

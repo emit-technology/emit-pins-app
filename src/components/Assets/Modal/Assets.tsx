@@ -65,16 +65,13 @@ export const AssetsModal:React.FC<Props> = ({isOpen,router ,address, onClose}) =
             settles: sets,
             outs: [],
         };
-        console.log(factorSet,"factor set ==== ")
         const data = await emitBoxSdk.emitBox.emitDataNode.genPrepareBlock(
             account.addresses[ChainType.EMIT],
             [],
             factorSet,
             ""
         );
-        console.log(data,account,"factor data ==== ")
         const signData = await walletWorker.signTx(account.accountId,"",ChainType.EMIT.valueOf(),data)
-        console.log(signData,"signData")
         await emitBoxSdk.emitBox.emitDataNode.prepareBlockWithSign(data,{error: null, result: signData});
     }
     return <>

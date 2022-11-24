@@ -41,7 +41,6 @@ interface SimilarColors {
 const getMainColor = async (src: string): Promise<ThemeColors> => {
     const color = await getColor(src, "rgbArray")
     const palette = await getPalette(src, 10, "rgbArray")
-    console.log(color, palette);
     palette.sort(sortRgb);
 
     let isDarkColor = false;

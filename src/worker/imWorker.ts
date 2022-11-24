@@ -50,9 +50,9 @@ class ImWorker {
             })
         })
     }
-    async getPinnedMessageArray(tribeId: string, pageNo:number,pageSize:number,conditions?:Array<any>):Promise<{data: Array<PinnedSticky>, total: number}> {
+    async getPinnedMessageArray(tribeId: string, current: number, limit: number, c?:any):Promise<{data: Array<PinnedSticky>, total: number}> {
         return new Promise((resolve, reject)=>{
-            service.getPinnedMessageArray(tribeId,pageNo,pageSize,conditions?conditions:[],function (data:any){
+            service.getPinnedMessageArray(tribeId,current, limit,function (data:any){
                 if(data.error){
                     reject(data.error);
                 }else{

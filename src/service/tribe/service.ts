@@ -5,9 +5,9 @@ import {
     ImageType,
     Message,
     MessageStatus,
-    MessageType,
+    MessageType, MsgStaticInfo,
     MsgText,
-    PinnedSticky,
+    PinnedSticky, StreamMsg,
     TribeInfo,
     TribeResult,
     TribeRole,
@@ -25,9 +25,7 @@ import tribeWorker from "../../worker/imWorker";
 import {utils} from "../../common";
 import {App} from "@capacitor/app";
 import walletWorker from "../../worker/walletWorker";
-import {DeviceInfo, Device} from "@capacitor/device";
-import assert from "assert";
-import {MsgStaticInfo} from "../../../../emit-im-worker/src/types";
+import {Device} from "@capacitor/device";
 // import WebSocket from 'ws';
 
 const W3CWebSocket = require('websocket').w3cwebsocket;
@@ -37,19 +35,51 @@ const mutexify = require('mutexify/promise')
 
 class TribeService implements ITribe {
 
-    _rpc: BaseRpc;
-    _ws: Websocket;
-    _wsOrigin: WebSocket;
-    _wsW3C: any;
-    _picRpc: BaseRpc;
-    _wsIntervalId: any;
+    private _rpc: BaseRpc;
+    private _ws: Websocket;
+    private _wsOrigin: WebSocket;
+    private _wsW3C: any;
+    private _picRpc: BaseRpc;
+    private _wsIntervalId: any;
 
-    _lock: any;
+    private _lock: any;
+
+    private _groupMap: Array<GroupMsg>
+    private _groupIds: Array<string>;
+    private _groupStatic: { total: number, groupNum: Array<{ groupId: string, num: number }> };
+    private _cacheMsg: Map<string, Message>;
+    private _tribeInfo: TribeInfo = null;
+    private _tribeRole: Array<TribeRole> = [];
 
     constructor() {
         this._rpc = new BaseRpc(config.tribeNode);
         this._picRpc = new BaseRpc(config.tribePic);
         this._lock = mutexify()
+        this._groupMap = [];
+        this._groupIds = [];
+        this._groupStatic = {total: 0, groupNum: []}
+        this._cacheMsg = new Map<string, Message>();
+    }
+
+    public getGroupMap = () => {
+        return this._groupMap;
+    }
+
+    public getGroupIds = () => {
+        if (this._groupIds.length == 0) {
+            tribeService.groupIds(config.tribeId);
+        }
+        return this._groupIds;
+    }
+
+    public getGroupStatic = () => {
+        return this._groupStatic;
+    }
+
+    init = async () => {
+        const groupIds = await tribeService.groupIds(config.tribeId);
+        await tribeService.groupedInfos(config.tribeId);
+        await tribeService.groupedMsgInit(groupIds)
     }
 
     checkWorkerIsAlive = async () => {
@@ -118,6 +148,7 @@ class TribeService implements ITribe {
     tribeInfo = async (tribeId: string): Promise<TribeInfo> => {
         const rest: TribeResult<TribeInfo> = await this._rpc.post('/tribe/tribeInfo', {tribeId});
         if (rest && rest.code == 0) {
+            this._tribeInfo = rest.data;
             return Promise.resolve(rest.data)
         }
         return Promise.reject(rest.message);
@@ -143,11 +174,31 @@ class TribeService implements ITribe {
             if (rest.data) {
                 const ret = rest.data.reverse();
                 ret.unshift(defaultRole)
+                this._tribeRole = ret;
                 return Promise.resolve(ret)
             }
+            this._tribeRole = [defaultRole];
             return [defaultRole]
         }
         return Promise.reject(rest.message);
+    }
+
+    public defaultTheme = async (): Promise<PinnedSticky> => {
+        if (!this._tribeRole) {
+            await tribeService.tribeRoles(config.tribeId);
+        }
+        if (!this._tribeInfo) {
+            await tribeService.tribeInfo(config.tribeId);
+        }
+        return {
+            roles: this._tribeRole,
+            records: [],
+            theme: this._tribeInfo.theme,
+            seq: -1,
+            index: -1,
+            groupId: ""
+        }
+
     }
 
     isSessionAvailable = async (): Promise<boolean> => {
@@ -174,22 +225,22 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
-    isApp = async () =>{
+    isApp = async () => {
         try {
             const deviceInfo = await Device.getInfo();
             return deviceInfo.platform == "ios" || deviceInfo.platform == "android"
-        }catch (e){
+        } catch (e) {
             console.error(e)
         }
         return false;
     }
 
     userLogin = async (signRet: { r: string, s: string, v: string }): Promise<string> => {
-        const params:any = signRet ;
+        const params: any = signRet;
 
-        if(await this.isApp()){
+        if (await this.isApp()) {
             params["deviceInfo"] = await this._genDeviceInfo();
-        }else{
+        } else {
             // params["deviceInfo"] = await Device.getInfo();
         }
         const rest: TribeResult<string> = await this._rpc.post('/user/login', params);
@@ -200,7 +251,7 @@ class TribeService implements ITribe {
     }
 
     _genDeviceInfo = async (pushTokenValue?: string) => {
-        if(await this.isApp()){
+        if (await this.isApp()) {
             const deviceInfo = await Device.getInfo();
             const deviceId = await Device.getId();
             const appInfo = await App.getInfo();
@@ -219,17 +270,17 @@ class TribeService implements ITribe {
 
     registerDevice = async (pushTokenValue?: string): Promise<string> => {
         const params = await this._genDeviceInfo(pushTokenValue);
-        if(!params){
+        if (!params) {
             return Promise.reject("Only in ios or android!")
         }
-        const cacheParams:any = selfStorage.getItem("deviceInfo")
-        if(!cacheParams || (cacheParams["uuid"] != params["uuid"]
+        const cacheParams: any = selfStorage.getItem("deviceInfo")
+        if (!cacheParams || (cacheParams["uuid"] != params["uuid"]
             || cacheParams["appVersion"] != params["appVersion"]
-            || cacheParams["pushTokenValue"] != params["pushTokenValue"])){
+            || cacheParams["pushTokenValue"] != params["pushTokenValue"])) {
 
             const rest: TribeResult<string> = await this._rpc.post('/user/registerDevice', params);
             if (rest && rest.code == 0) {
-                selfStorage.setItem("deviceInfo",params)
+                selfStorage.setItem("deviceInfo", params)
                 return Promise.resolve(rest.data)
             }
             return Promise.reject(rest.message);
@@ -485,20 +536,81 @@ class TribeService implements ITribe {
     groupIds = async (tribeId: string): Promise<Array<string>> => {
         const rest: TribeResult<Array<string>> = await this._rpc.post('/tribe/groupIds', {tribeId: tribeId});
         if (rest && rest.code == 0) {
-            return Promise.resolve(rest.data)
+            if (rest.data) {
+                this._groupIds = rest.data;
+                this._groupIds.push("")
+                return Promise.resolve(rest.data)
+            } else {
+                return []
+            }
         }
         return Promise.reject(rest.message);
     }
 
-    groupedInfos = async (tribeId: string) : Promise<Array<{[groupId: string]:MsgStaticInfo}>> =>{
-        const rest: TribeResult<Array<{[groupId: string]:MsgStaticInfo}>> = await this._rpc.post('/tribe/groupedInfos', {tribeId: tribeId});
+    groupIdCache = (): Array<string> => this._groupIds;
+
+    private groupStaticKey = () => `tribe_${config.tribeId}_static`;
+
+
+    private _groupedInfosFn = async (tribeId: string): Promise<{ total: number, groupNum: Array<{ groupId: string, num: number }> }> => {
+        const rest: TribeResult<Array<{ [groupId: string]: MsgStaticInfo }>> = await this._rpc.post('/tribe/groupedInfos', {tribeId: tribeId});
         if (rest && rest.code == 0) {
-            return Promise.resolve(rest.data)
+            let total = 0;
+            const groupNumArr: Array<{ groupId: string, num: number }> = [];
+            for (let data of rest.data) {
+                const keys = Object.keys(data);
+                const value: MsgStaticInfo = data[keys[0]];
+                groupNumArr.push({groupId: keys[0], num: value.messages});
+                total += value.messages;
+            }
+            this._groupStatic = {total: total, groupNum: groupNumArr}
+            selfStorage.setItem(this.groupStaticKey(), this._groupStatic);
+            return Promise.resolve(this._groupStatic)
         }
         return Promise.reject(rest.message);
     }
 
-    msgGrouedInfo = async (msgId: string) : Promise<MsgStaticInfo> =>{
+    private groupedInfos = async (tribeId: string): Promise<{ total: number, groupNum: Array<{ groupId: string, num: number }> }> => {
+        let cache = selfStorage.getItem(this.groupStaticKey());
+        if (!cache) {
+            cache = await this._groupedInfosFn(tribeId);
+        } else {
+            this._groupedInfosFn(tribeId).catch(e => console.log(e))
+        }
+        return cache;
+    }
+
+    getMsgPosition = async (msgId: string) => {
+        console.log("getMsgPosition pre --> ", msgId, this._groupMap.length)
+        const msgInfo = await tribeService.msgInfo(msgId);
+
+        const groupIndex = this._groupStatic.groupNum.findIndex(v => v.groupId == msgInfo.groupId)
+        let preMsgCount = 0;
+        if (groupIndex > 0) {
+            for (let i = 0; i < groupIndex; i++) {
+                const v = this._groupStatic.groupNum[i];
+                preMsgCount += v.num;
+            }
+        }
+        return preMsgCount + msgInfo.msgIndex;
+    }
+
+    getMsgPositionWithGroupId = async (groupId: string) => {
+        console.log("getMsgPositionWithGroupId --> ", groupId, this._groupStatic, this._groupIds)
+        // const groupMsgArr = await tribeService.groupedMsg([msgStatic.groupId])
+        const groupIndex = this._groupStatic.groupNum.findIndex(v => v.groupId == groupId)
+        let preMsgCount = 0;
+        if (groupIndex > 0) {
+            for (let i = 0; i < groupIndex; i++) {
+                const v = this._groupStatic.groupNum[i];
+                preMsgCount += v.num;
+            }
+        }
+        console.log("preMsgCount:: ", preMsgCount)
+        return preMsgCount;
+    }
+
+    msgGrouedInfo = async (msgId: string): Promise<MsgStaticInfo> => {
         const rest: TribeResult<MsgStaticInfo> = await this._rpc.post('/tribe/msgGrouedInfo', {msgId: msgId});
         if (rest && rest.code == 0) {
             return Promise.resolve(rest.data)
@@ -506,15 +618,28 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
-    _groupMsgKey = (groupId: string) => {
-        return `tribe_group_${groupId}`;
+    streamMsg = async (tribeId: string, current: number, limit: number): Promise<StreamMsg> => {
+        const rest: TribeResult<StreamMsg> = await this._rpc.post('/tribe/streamMsg', {
+            tribeId,
+            current: current,
+            limit
+        });
+        if (rest && rest.code == 0) {
+            return Promise.resolve(rest.data)
+        }
+        console.info("stream msg err: ", rest.message);
+        return {total: 0, records: []}
+        // return Promise.reject(rest.message);
+    }
+
+    private _groupMsgKey = (groupId: string) => {
+        return `tribe_${config.tribeId}_group_${groupId}`;
     }
 
     groupedMsgRemove = async (groupIds: Array<string> = [], withDraft: boolean = false): Promise<Array<GroupMsg>> => {
         if (!groupIds || groupIds.length == 0) {
             return []
         }
-
         const rest: TribeResult<Array<GroupMsg>> = await this._rpc.post('/tribe/groupedMsg', {
             groupIds: groupIds,
             withDraft
@@ -526,30 +651,38 @@ class TribeService implements ITribe {
         }
     }
 
-    groupedMsg = async (groupIds: Array<string> = [], withDraft: boolean = false): Promise<Array<GroupMsg>> => {
+    groupedMsgInit = async (groupIds: Array<string> = [], withDraft: boolean = false): Promise<void> => {
+        this._groupMap = await this.groupedMsg(groupIds, withDraft);
+    }
 
+
+    groupedMsg = async (groupIds: Array<string> = [], withDraft: boolean = false): Promise<Array<GroupMsg>> => {
         if (!groupIds) {
             return []
         }
-        const unFetchGroupIds = [...groupIds];
         const ret: Array<GroupMsg> = [];
-        // for(let groupId of groupIds){
-        // const rest = selfStorage.getItem(this._groupMsgKey(groupId))
-        // if(rest){
-        //     ret.push(rest)
-        // }else{
-        //     unFetchGroupIds.push(groupId);
-        // }
-        // }
-        if (unFetchGroupIds.length > 0) {
+        const unFetchGroupIds = [];
+        for (let str of groupIds) {
+            const data = selfStorage.getItem(this._groupMsgKey(str))
+            if (!data) {
+                unFetchGroupIds.push(str);
+            } else {
+                ret.push(data)
+            }
+        }
+        if (unFetchGroupIds.length > 1) {
             const rest: TribeResult<Array<GroupMsg>> = await this._rpc.post('/tribe/groupedMsg', {
-                groupIds: unFetchGroupIds,
+                tribeId: config.tribeId,
+                groupIds: (unFetchGroupIds.slice(0, unFetchGroupIds.length - 1)),
                 withDraft
             });
             if (rest && rest.code == 0) {
                 for (let i = 0; i < rest.data.length; i++) {
                     const groupMsg = rest.data[i];
-                    // selfStorage.setItem(this._groupMsgKey(unFetchGroupIds[i]),groupMsg)
+                    groupMsg.groupId = groupIds[i];
+                    groupMsg.records = [];
+                    selfStorage.setItem(this._groupMsgKey(unFetchGroupIds[i]), groupMsg)
+                    console.log("======== groupedMsg>> ", groupIds[i], groupMsg)
                     ret.push(groupMsg)
                 }
             } else {
@@ -609,6 +742,14 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
+    msgInfo = async (msgId: string): Promise<Message> => {
+        const rest: TribeResult<Message> = await this._rpc.post('/tribe/msgInfo', {msgId});
+        if (rest && rest.code == 0) {
+            return Promise.resolve(rest.data)
+        }
+        return Promise.reject(rest.message);
+    }
+
     myTribes = async (): Promise<Array<TribeInfo>> => {
         const account = await emitBoxSdk.getAccount();
         const address = account.addresses[ChainType.EMIT]
@@ -625,6 +766,30 @@ class TribeService implements ITribe {
         const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/involvedTribes', {userId: address});
         if (rest && rest.code == 0) {
             return Promise.resolve(rest.data)
+        }
+        return Promise.reject(rest.message);
+    }
+
+    dropTribe = async (): Promise<boolean> => {
+        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/dropTribe', {tribeId: config.tribeId});
+        if (rest && rest.code == 0) {
+            return true
+        }
+        return Promise.reject(rest.message);
+    }
+
+    subscribeTribe = async (): Promise<boolean> => {
+        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/subscribeTribe', {tribeId: config.tribeId});
+        if (rest && rest.code == 0) {
+            return true
+        }
+        return Promise.reject(rest.message);
+    }
+
+    unSubscribeTribe = async (): Promise<boolean> => {
+        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/unSubscribeTribe', {tribeId: config.tribeId});
+        if (rest && rest.code == 0) {
+            return true
         }
         return Promise.reject(rest.message);
     }
@@ -659,6 +824,47 @@ class TribeService implements ITribe {
                 stickies.push({
                     theme: gt.theme,
                     seq: i,
+                    roles: gt.roles,
+                    records: [r],
+                    groupId: r.groupId,
+                    index: j++
+                })
+            }
+
+        }
+        return stickies
+    }
+
+    convertGroupMsgToPinnedStickyWithSeq = (groupTribes: Array<GroupMsg>, seq: number): Array<PinnedSticky> => {
+        const stickies: Array<PinnedSticky> = [];
+        let i = 0;
+        let j = 0;
+        const _sort = (m1: Message, m2: Message) => m1.timestamp - m2.timestamp;
+        for (let gt of groupTribes) {
+            if (gt.records && gt.records.length == 0) {
+                continue;
+            }
+            i++;
+            let tmpMsg: Message = JSON.parse(JSON.stringify(gt.records[0]));
+            tmpMsg.msgType = MessageType.Divide
+            tmpMsg.id = ""
+            stickies.push({
+                theme: gt.theme,
+                seq: seq,
+                roles: gt.roles,
+                records: [tmpMsg],
+                groupId: tmpMsg.groupId,
+                index: j++
+            })
+            gt.records.sort(_sort)
+            for (let r of gt.records) {
+                if (r.msgStatus == MessageStatus.removed) {
+                    continue
+                }
+                r.actor = gt.roles.find(role => role.id == r.role);
+                stickies.push({
+                    theme: gt.theme,
+                    seq: seq,
                     roles: gt.roles,
                     records: [r],
                     groupId: r.groupId,
@@ -713,25 +919,62 @@ class TribeService implements ITribe {
         return []
     }
 
-    convertMessagesToPinnedSticky = (messages: Array<Message>, roles: Array<TribeRole>, theme: TribeTheme): Array<PinnedSticky> => {
-        if (messages && roles) {
+    convertMessagesToPinnedSticky = async (messages: Array<Message>): Promise<Array<PinnedSticky>> => {
+        let groupIds = this.getGroupIds(); //await tribeService.groupIds(config.tribeId);
+        if (groupIds && groupIds.length == 0) {
+            groupIds = await tribeService.groupIds(config.tribeId)
+        }
+        if (messages) {
             const copy = [];
-            let i = 0;
             for (let msg of messages) {
+                let groupMsg: GroupMsg = null;
+                const groupIndex = this._groupMap.findIndex(v => v.groupId == msg.groupId);
+                if (groupIndex == -1) {
+                    if (!!msg.groupId) {
+                        const groups = await tribeService.groupedMsg([msg.groupId])
+                        groupMsg = groups[0];
+                        groupMsg.groupId = msg.groupId;
+                    } else {
+                        if(!this._tribeInfo){
+                            await tribeService.tribeInfo(config.tribeId);
+                        }
+                        if(!this._tribeRole){
+                            await tribeService.tribeRoles(config.tribeId);
+                        }
+                        groupMsg = {
+                            theme: this._tribeInfo.theme,
+                            roles: this._tribeRole,
+                            records: [],
+                            groupId: ""
+                        };
+                    }
+                } else {
+                    groupMsg = this._groupMap[groupIndex];
+                }
+                const seq = groupIds.indexOf(msg.groupId);
+                msg.actor = groupMsg.roles.find(v => v.id == msg.role);
+                if (!!msg.replayToMsgId) {
+                    //TODO cache msg
+                    if (!this._cacheMsg.has(msg.replayToMsgId)) {
+                        const rlyMsg = await tribeService.msgInfo(msg.replayToMsgId)
+                        this._cacheMsg.set(msg.replayToMsgId, rlyMsg);
+                    }
+                    msg.replayMsg = this._cacheMsg.get(msg.replayToMsgId);
+                }
                 copy.push({
-                    theme: theme,
-                    seq: msg.seq,
-                    roles: roles,
+                    theme: groupMsg.theme,
+                    seq: seq + 1,
+                    roles: groupMsg.roles,
                     records: [msg],
                     groupId: msg.groupId,
-                    index: (i++)
+                    index: msg.msgIndex
                 })
             }
-
             return copy
         }
         return []
     }
+
 
     uploadFile = async (file: File) => {
         return await this._picRpc.uploadFile(file);

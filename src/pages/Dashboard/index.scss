@@ -406,7 +406,7 @@ ion-icon:before {
   display: flex;
   flex-direction: column;
   justify-content: space-around;
-  padding: 26px;
+  padding: 0 0 26px 26px;
 }
 .share-left-bottom-info-box{
   display: flex;
@@ -484,9 +484,10 @@ ion-icon:before {
 }
 
 .share-page{
-  background-position: center;
-  background-size: cover;
   height: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100%;
   //border-radius: 12px;
 }
 
@@ -512,10 +513,20 @@ ion-icon:before {
 .share-ic-itext{
   color: rgb(100, 99, 99);
   font-size: 14px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  //white-space: nowrap;
+  //text-overflow: ellipsis;
+  //overflow: hidden;
+  max-width: 260px;
+
+  max-height: 300px;
   overflow: hidden;
-  max-width: 160px;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+
 }
 
 .link-url{

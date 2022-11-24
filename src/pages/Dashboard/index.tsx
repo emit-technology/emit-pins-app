@@ -33,7 +33,6 @@ import './index.scss';
 import selfStorage from "../../common/storage";
 import {RoleListModal} from "../../components/Role";
 import {TribeEditModal} from "../../components/Tribe";
-// import {Share} from '@capacitor/share';
 import config from "../../common/config";
 import {BottomBar} from "../../components/ChatRoom/Room/BottomBar";
 import {PinnedMsgModal} from "../../components/ChatRoom/Room/Message/PinnedMsgModal";
@@ -41,7 +40,6 @@ import {TribeHeader} from "../../components/Tribe/TribeHeader";
 import tribeWorker from "../../worker/imWorker";
 import {ToolBar} from "../../components/ChatRoom/Room/ToolBar";
 import {MessageContentVisual} from "../../components/ChatRoom/Room/Message";
-// import {MessageContentWindow as MessageContentVisual} from "../../components/ChatRoom/Room/Message";
 import {ShareEx} from "../../components/utils/ShareEx";
 import {SideBar} from "../../components/ChatRoom/SideBar";
 import {AccountUnlock} from "../../components/Account/modal/Unlock";
@@ -268,11 +266,12 @@ export class Dashboard extends React.Component<Props, State> {
         }
         const roles = await tribeService.tribeRoles(tribeId);
         const groupIds = await tribeService.groupIds(tribeId);
-        const groupTribes = await tribeService.groupedMsg(groupIds);
+        const groupTribes = []//await tribeService.groupedMsg(groupIds);
         groupTribes.push({
             theme: tribeInfo.theme,
             records: [],
-            roles: roles
+            roles: roles,
+            groupId: ""
         })
         let latestRoleId = selfStorage.getItem("latestRoleId");
         let role;

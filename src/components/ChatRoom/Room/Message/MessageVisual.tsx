@@ -90,10 +90,8 @@ const fetchData = async (pageNo, setComments, condition?: Array<any>) => {
 
     try {
         // pageNo = pageNo < 1 ? 1 : pageNo;
-        console.log("fetch data total == %d ,page=%d", total, pageNo)
         const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, pageNo, pageSize, condition)
         total = rest.data.length;
-        // console.log("fetch data =========> ", rest.data)
         // Pre-pend new items
         setComments((prevComments: Array<PinnedSticky>) => [...rest.data, ...[]]);
         // setComments(rest.data)
@@ -229,7 +227,6 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, setHideMenu, on
     const setFullScreen = (scrollForward:boolean) =>{
         try {
             if (!!setHideMenu && (utils.isAndroid() || utils.isIos())) {
-                console.log("=====>  hide menu", scrollForward && (visibleStartIndex < comments.length - 10), scrollForward, visibleStartIndex)
                 if (scrollForward) {
                     setHideMenu(true)
                     setStatusBarHide(true)
@@ -249,7 +246,6 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, setHideMenu, on
 
             setTimeout(() => {
                 // const stickyMsg:PinnedSticky = comments[currentVisibleIndex];
-                // console.log("visibleStartIndex============ `", visibleStartIndex)
                 if (visibleStartIndex >= 0) {
                     setCurrentVisible(visibleStartIndex);
                 }
@@ -262,7 +258,6 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, setHideMenu, on
         if (document.hidden !== undefined && !pinnedStickies) {
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden) {
-                    console.log("fetch page data")
                     fetchData(pageNo, setComments)
                 }
             })
@@ -270,7 +265,6 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, setHideMenu, on
     }, [])
 
     useEffect(() => {
-        console.log("init component ...")
         if (!pinnedStickies) {
             {
                 const max = selfStorage.getItem(`maxVisibleIndex_${config.tribeId}`);
