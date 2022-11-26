@@ -456,6 +456,7 @@
   flex-direction: column;
   align-content: center;
   justify-content: center;
+  margin: 3px 0;
 }
 
 .bottom-role {
@@ -775,6 +776,10 @@
   //font-family: "SF Pro Text";
   margin: 0 !important;
   line-height: 1.2;
+  -webkit-user-select:text;
+  -moz-user-select:text;
+  -ms-user-select:text;
+  user-select:text;
 }
 
 .pp-offset {

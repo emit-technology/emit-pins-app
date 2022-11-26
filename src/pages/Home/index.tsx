@@ -8,12 +8,13 @@ import {tribeService} from "../../service/tribe";
 import {TribeInfo} from "../../types";
 import './index.scss';
 import {SideBar} from "../../components/ChatRoom/SideBar";
-import {AccountModel} from "@emit-technology/emit-lib";
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import {emitBoxSdk} from "../../service/emitBox";
 import {TribeLayout} from "../../components/Tribe/TribeLayout";
 import selfStorage from "../../common/storage";
 import {TribeEditModal} from "../../components/Tribe";
 import {utils} from "../../common";
+import {useCallback} from "react";
 
 interface State {
     segment: string
@@ -27,6 +28,8 @@ interface State {
     toastMsg?: string
     tribeTimeMap: Map<string,number>;
     showCreateModal: boolean
+    tribeUserInfo: any;
+    address:string
 }
 
 interface Props {
@@ -45,7 +48,9 @@ export class HomePage extends React.Component<Props, State> {
         showToast: false,
         toastMsg: "",
         tribeTimeMap: new Map<string,number>() ,
-        showCreateModal: false
+        showCreateModal: false,
+        tribeUserInfo:null,
+        address: ""
     }
 
     componentDidMount() {
@@ -82,9 +87,10 @@ export class HomePage extends React.Component<Props, State> {
 
         const account = await emitBoxSdk.getAccount();
         const f = await tribeService.isSessionAvailable()
+        // const tribeUserInfo = await tribeService.tribeUserInfo();
 
         await this.initTimeMap(data);
-        this.setState({data: data, dataOrigin: data, account: account, isSessionAvailable: f})
+        this.setState({data: data,address: account && account.addresses[ChainType.EMIT] ,dataOrigin: data, account: account, isSessionAvailable: f})
 
     }
 
@@ -122,8 +128,10 @@ export class HomePage extends React.Component<Props, State> {
     setShowCreateModal = (f:boolean) =>{
         this.setState({showCreateModal: f})
     }
+
+
     render() {
-        const {segment, account, isSessionAvailable, showCreateModal ,tribeTimeMap, data, layout, showLoading, showToast, toastMsg} = this.state;
+        const {segment, account,tribeUserInfo,address, isSessionAvailable, showCreateModal ,tribeTimeMap, data, layout, showLoading, showToast, toastMsg} = this.state;
         return <>
             <IonMenu contentId="main-home">
                 <IonHeader>
@@ -225,7 +233,9 @@ export class HomePage extends React.Component<Props, State> {
                         {/*{*/}
                         {/*    layout && layout.length>0&&<TribeRecommend data={data} layout={layout}/>*/}
                         {/*}*/}
-                        <TribeLayout data={data} tribeTimeMap={tribeTimeMap}/>
+                        <TribeLayout onReload={()=>{
+                            this.init().catch(e=>console.error(e))
+                        }} address={address} tribeUserInfo={tribeUserInfo} data={data} tribeTimeMap={tribeTimeMap}/>
                     </div>
 
                     <IonLoading

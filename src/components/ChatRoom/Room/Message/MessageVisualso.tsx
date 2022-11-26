@@ -8,7 +8,7 @@ import {
     PinnedSticky,
     TribeInfo,
     TribeRole,
-    UserLimit
+    UserLimit, WsStatus
 } from "../../../../types";
 import {Dice, Expression, Text} from "./Types";
 
@@ -73,6 +73,8 @@ interface Props {
     onChangeVisible?: (v: PinnedSticky) => void;
 
     firstIndex: number
+
+    isConnecting?: WsStatus
 }
 
 const pageSize = 30;
@@ -95,7 +97,10 @@ const setVisibleStartIndex = (id: number) => {
     visibleStartId = id
 }
 
-export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstIndex, onChangeVisible, setHideMenu, onFork, shareMsgId, userLimit, selectRole, pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
+const mutexify = require('mutexify/promise')
+const _lock = mutexify()
+
+export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnecting, firstIndex, onChangeVisible, setHideMenu, onFork, shareMsgId, userLimit, selectRole, pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
     const dispatchData = useAppSelector(state => state.jsonData);
     const dispatch = useAppDispatch();
 
@@ -178,6 +183,10 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
 
 
     const combile = (comp: Array<PinnedSticky>) => {
+        if (!comp || comp.length == 0) {
+            return;
+        }
+        let msgIndex = comp[0].records[0].msgIndex;
         let groupByTime: { role: string, timestamp: number, groupId: string, owner: string } = null;
         let lastPin: PinnedSticky = null;
         for (let pMsg of comp) {
@@ -199,6 +208,8 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
                     msg.hideTime = false;
                     groupByTime = null;
                 }
+
+                msg.msgIndex = msgIndex++;
             }
 
 
@@ -231,6 +242,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
                 return rest.total
             });
             setComments(comp)
+            console.log("------> firstItemIndex: [%d]", reqIndex)
             setFirstItemIndex(reqIndex)
 
             if (toBottom) {
@@ -253,17 +265,31 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
             if (latestId == -1) {
                 latestId = pageSize < streamMsg1.total ? streamMsg1.total - pageSize + 1 : 0;
             }
-            console.log("=========initLatestPin >> start=[%d], end=[%d] ", latestId , pageSize);
+            if(latestId >= streamMsg1.total){
+                latestId =  streamMsg1.total - 1;
+            }
+            console.log("=========initLatestPin >> start=[%d], end=[%d] ", latestId, pageSize);
             const data = await tribeWorker.getPinnedMessageArray(config.tribeId, latestId, pageSize);
             const comp = data.data;
             combile(comp)
-            console.log("=========initLatestPin >> start=[%d], end=[%d], data=[%d] ", latestId , pageSize, data.data.length);
+            console.log("=========initLatestPin >> start=[%d], end=[%d], data=[%d] ", latestId, pageSize, data.data.length);
             setComments(comp)
             setTotal(pre => {
                 console.log("------> tribeWorker set total 5 ==  ", pre, data.total)
                 return data.total
             });
+            console.log("------> firstItemIndex: [%d], initLatestPin", latestId)
             setFirstItemIndex(latestId);
+        }
+    }
+
+    const activePage = async () => {
+        console.log("=========activePage >> data=[%d] ", comments.length);
+        if (comments.length > 0) {
+            const lastMsg: PinnedSticky = comments[comments.length - 1];
+            if (lastMsg) {
+                loadMore(lastMsg.records[0].msgIndex)
+            }
         }
     }
 
@@ -276,11 +302,12 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
             } else {
                 reqPageSize = firstItemIndex
             }
-            console.log("=========prependItems >> start=[%d], end=[%d] ", reqIndex , -reqPageSize);
+            console.log("=========prependItems >> start=[%d], end=[%d] ", reqIndex, -reqPageSize);
             tribeWorker.getPinnedMessageArray(config.tribeId, reqIndex, -reqPageSize).then(rest => {
-                console.log("=========prependItems >> start=[%d], end=[%d] , data=[%d]", reqIndex , -reqPageSize, rest.data.length);
+                console.log("=========prependItems >> start=[%d], end=[%d] , data=[%d]", reqIndex, -reqPageSize, rest.data.length);
                 const nextFirstItemIndex = firstItemIndex - pageSize;
-                setFirstItemIndex(nextFirstItemIndex >= 0 ? nextFirstItemIndex : 0 )
+                console.log("------> firstItemIndex: [%d], prependItems", nextFirstItemIndex >= 0 ? nextFirstItemIndex : 0)
+                setFirstItemIndex(nextFirstItemIndex >= 0 ? nextFirstItemIndex : 0)
                 setComments(pre => {
                     const comp = [...rest.data, ...pre];
                     combile(comp);
@@ -297,15 +324,17 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
     const loadMore = useCallback((lastIndex: number) => {
         if (comments.length > 0 && comments.length < total && lastIndex > -1) {
             const lastMsg: PinnedSticky = comments[comments.length - 1];
-            console.log("=========loadMore >> start=[%d], end=[%d] ", lastMsg.records[0].msgIndex + 1 , pageSize, comments);
-
-            if (!!lastMsg && !!lastMsg.records && !!lastMsg.records[0].msgIndex && lastMsg.records[0].msgIndex < total - 1) {
+            console.log("=========loadMore >> start=[%d], end=[%d] ", lastMsg.records[0].msgIndex + 1, pageSize, comments);
+            if ((isConnecting == WsStatus.active && !!lastMsg.records[0].groupId)
+                ||
+                (isConnecting !== WsStatus.active && !!lastMsg && !!lastMsg.records && !!lastMsg.records[0].msgIndex && lastMsg.records[0].msgIndex < total - 1)
+            ) {
                 tribeWorker.getPinnedMessageArray(config.tribeId, lastMsg.records[0].msgIndex + 1, pageSize).then(rest => {
                     if (rest.data.length > 0) {
-                        console.log("=========loadMore >> start=[%d], end=[%d] , data=[%d] ", lastMsg.records[0].msgIndex + 1 , pageSize, rest.data.length);
+                        console.log("=========loadMore >> start=[%d], end=[%d] , data=[%d] ", lastMsg.records[0].msgIndex + 1, pageSize, rest.data.length);
                         setTotal(pre => {
-                            console.log("------> tribeWorker set total 6 ==  ", pre, rest.total)
-                            return rest.total
+                            console.log("=========loadMore >> set total 6 ==  ", pre, rest.total)
+                            return pre < rest.total?rest.total:pre;
                         });
                         setComments(pre => {
                             const comp = [...pre, ...rest.data]
@@ -315,8 +344,6 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
                     }
                 }).catch(e => console.error(e))
             }
-        } else {
-            console.log("=========loadMore >> no more data")
         }
     }, [comments, total, setComments, setTotal])
 
@@ -326,8 +353,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
                 if (!document.hidden) {
                     //TODO
                     // fetchData(pageNo)
-
-                    initLatestPin()
+                    // activePage()
                 }
             })
         }
@@ -346,7 +372,8 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
     }, [loaded])
 
     const dispatchTheme = useCallback((data: PinnedSticky) => {
-        if (data && !!onChangeVisible && (!stickyMsg || data.seq != stickyMsg.seq)) {
+
+        if (data && !!onChangeVisible && (!stickyMsg || data.groupId != stickyMsg.groupId)) {
             setStickyMsg(data);
             onChangeVisible(data)
         }
@@ -422,26 +449,24 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
 
     useEffect(() => {
         if (loaded && count++ == 0) {
-            tribeWorker.addMessageListener(config.tribeId, (data: { total: number, messages: Array<PinnedSticky> }) => {
-                if (!document.hidden) {
+            tribeWorker.addMessageListener(config.tribeId, async (data: { total: number, messages: Array<PinnedSticky> }) => {
+                try{
+                    console.log("======> startcallbutton ", data)
+                    setTotal(data.total)
                     const messages = data.messages;
                     if (messages && messages.length > 0) {
-
-                        setTotal(data.total)
-
                         setComments((preComments) => {
                             const nextComments = [];
                             let commentsCopy: Array<PinnedSticky> = [...preComments];
+
                             // let total = 0 ;
                             for (let index = 0; index < messages.length; index++) {
                                 const _comment = messages[index];
 
                                 // remove all unpinned msg when pin type
                                 if (_comment && _comment.records && _comment.records.length > 0 && _comment.records[0].msgType == MessageType.Pin) {
-                                   if(preComments.findIndex(v=>v.groupId == "")>-1){
-                                       initLatestPin().catch(e=>console.error(e))
-                                   }
-                                   onReload(false);
+                                    onReload(false);
+                                    //TODO
                                 } else if (_comment.records && _comment.records.length > 0 && _comment.records[0].msgType == MessageType.UpdateTribe) {
                                     onReload(false);
                                 } else {
@@ -460,6 +485,8 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
                                                     // total++
                                                 } else {
                                                     const index = commentsCopy.findIndex(msg => msg.records && msg.records.length > 0 && new BigNumber(msg.records[0].seq).comparedTo(latestSeq) == 1)
+                                                    // change seq
+                                                    console.log("=====> change seq", index)
                                                     if (index > -1) {
                                                         commentsCopy.splice(index, 1, ...[_comment, commentsCopy[index]])
                                                     }
@@ -471,11 +498,6 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
                                     } else {
                                         //removed
                                         if (_comment.records && _comment.records.length > 0 && _comment.records[0].msgStatus == MessageStatus.removed) {
-                                            if (commentsCopy[_index + 1] && commentsCopy[_index + 1].records && commentsCopy[_index + 1].records.length > 0) {
-                                                const pinMsg: PinnedSticky = JSON.parse(JSON.stringify(commentsCopy[_index + 1]));
-                                                pinMsg.records[0].hideTime = 0;
-                                                commentsCopy.splice(_index + 1, 1, pinMsg)
-                                            }
                                             commentsCopy.splice(_index, 1)
                                             // total--;
                                         } else { //support or edit
@@ -494,16 +516,19 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
                                 }
 
                             }
-                            // console.log(commentsCopy,"commentsCopy>>>");
-                            const _cIndex = commentsCopy.findIndex(v=>v.records[0].groupId == "");
-                            if(_cIndex >=0){
-                                return [...commentsCopy, ...nextComments]
+                            // console.log("=========> commentsCopy>>>", commentsCopy, nextComments);
+                            const _cIndex = commentsCopy.findIndex(v => v.records[0].groupId == "");
+                            if (_cIndex >= 0) {
+                                const comp = [...commentsCopy, ...nextComments];
+                                combile(comp)
+                                return comp
                             }
-                            return [...commentsCopy]
+                            combile(commentsCopy)
+                            return commentsCopy
                         })
-
                     }
-
+                }catch (e){
+                    console.error(e)
                 }
             });
         }
@@ -547,23 +572,23 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
         }
     }, [dispatchData.data]);
 
-    const displayBottomMsg = (data: PinnedSticky) => {
-        console.log("===>>>>  displayBottomMsg", data, stickyMsg)
-        if (!!data.groupId) {
-            const dataCopy: PinnedSticky = JSON.parse(JSON.stringify(data))
-            dataCopy.theme = tribeInfo.theme;
-            dataCopy.roles = tribeInfo.roles;
-            dataCopy.seq = -1;
-            dataCopy.groupId = "";
-            dataCopy.index = new BigNumber(data.seq).toNumber();
-            dispatchTheme(dataCopy)
-        } else {
-            dispatchTheme(data)
-        }
-    }
+    // const displayBottomMsg = (data: PinnedSticky) => {
+    //     console.log("===>>>>  displayBottomMsg", data, stickyMsg)
+    //     if (!!data.groupId) {
+    //         const dataCopy: PinnedSticky = JSON.parse(JSON.stringify(data))
+    //         dataCopy.theme = tribeInfo.theme;
+    //         dataCopy.roles = tribeInfo.roles;
+    //         dataCopy.seq = -1;
+    //         dataCopy.groupId = "";
+    //         dataCopy.index = new BigNumber(data.seq).toNumber();
+    //         dispatchTheme(dataCopy)
+    //     } else {
+    //         dispatchTheme(data)
+    //     }
+    // }
 
     const setMaxVisible = (n: number) => {
-        console.log("set max visible=[%d]", n)
+        // console.log("set max visible=[%d]", n)
         setMaxVisibleIndex(n)
         selfStorage.setItem(`maxVisibleIndex_${config.tribeId}`, n)
         const data: PinnedSticky = comments[n];
@@ -731,6 +756,8 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
         endIndex: 0,
     })
 
+    const [isScrolling, setIsScrolling] = useState(false);
+
     const Loading = () => <div style={{width: '100%', textAlign: 'center', padding: 12}}>⏳ Loading...</div>;
 
     // useEffect(() => {
@@ -743,17 +770,17 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
 
     // setting 'auto' for behavior does help in this sample, but not in my actual code
     const followOutput = useCallback((isAtBottom) => {
-        console.log('MessagesList: followOutput isAtBottom', isAtBottom);
+        // console.log('MessagesList: followOutput isAtBottom', isAtBottom, atBottom);
         const check = comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex >= total - 5;
-        return isAtBottom && check ? 'auto' : false;
-    }, [comments, total]);
+        return isAtBottom && atBottom && check ? 'auto' : false;
+    }, [comments, atBottom, total]);
 
     const bottomChange = useCallback((bottom) => {
         if (bottom) {
             console.log("bottom")
         }
         setAtBottom(bottom)
-    },[setAtBottom])
+    }, [setAtBottom])
 
     return <>
         <div className={!pinnedStickies ? "msg-content" : "msg-content2"} style={{
@@ -763,26 +790,45 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
                 <div className="inner-box">
                     {loadingData && <Loading/>}
                     <div className="position-top">[{visibleRange.startIndex}] - [{visibleRange.endIndex}]
-                        : [{total}]</div>
+                        : [{total}]
+                    </div>
                     <Virtuoso
                         ref={virtuoso}
                         style={{height: '100%'}}
                         overscan={100}
-                        isScrolling={(f) => {
-                            // setFullScreen(!!f)
-                        }}
+                        isScrolling={(f) => setIsScrolling(f)}
                         firstItemIndex={firstItemIndex}
                         // can't use this prop, it will trigle load more always .initialTopMostItemIndex={total-1}
                         rangeChanged={setVisibleRange}
                         data={comments}
                         endReached={loadMore}
                         startReached={prependItems}
-                        followOutput={(total>0 && visibleRange.startIndex > total - pageSize) && followOutput}
-                        atBottomStateChange={(total>0 && visibleRange.startIndex > total - pageSize) && bottomChange}
+                        followOutput={atBottom && (total > 0 && visibleRange.startIndex > total - pageSize) && followOutput}
+                        atBottomStateChange={(total > 0 && visibleRange.startIndex > total - pageSize) && bottomChange}
                         // initialTopMostItemIndex={getCurrentVisible()}
 
                         itemsRendered={(items) => {
-                            // console.log("itemsRendered=======",items)
+                            if (!isScrolling) {
+                                if(!stickyMsg){
+                                    if (!!tribeInfo) {
+                                        const groupArr = tribeService.getGroupMap();
+                                        const defaultGroup = groupArr[groupArr.length - 1];
+                                        dispatchTheme({
+                                            theme: tribeInfo && tribeInfo.theme,
+                                            seq: -1,
+                                            roles: defaultGroup.roles,
+                                            records: [],
+                                            groupId: "",
+                                            index: -1
+                                        })
+                                    }
+                                    if(items.length > 0){
+                                        setMaxVisible(items[items.length - 1].data.records[0].msgIndex)
+                                    }
+                                }
+                                return
+                            }
+                            // console.log("itemsRendered=======",items, isScrolling)
                             if (items.length > 0) {
                                 // setVisibleRange({startIndex:  items[0].index, endIndex: items[items.length-1].index})
                             }
@@ -850,10 +896,11 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
                                     const msgItems = renInboxMsg(messages)
 
                                     return <div className="visual-msg-box"
-                                                // style={{padding: visibleRange.endIndex == total - 1 ? "0 0 44px" : "0"}}
-                                                key={`_s_${index}`} onClick={() => dispatchTheme(pinnedSticky)}>
+                                                style={{padding: atBottom && index == total - 1 ? "0 0 44px" : "0"}}
+                                                key={`_s_${index}`}>
+                                        {/*{pinnedSticky.records[0].msgIndex}*/}
                                         {
-                                            firstItemIndex == 0 && preIndex == -1 && <div style={{marginTop: 20}}>
+                                            firstItemIndex == 0 && preIndex == -1 && <div style={{paddingTop: 20}}>
                                                 <div className="strike">
                                                     <span>{!pinnedSticky.groupId ? "New Tape" : `#1`}</span>
                                                 </div>
@@ -900,10 +947,9 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
                                         <div className={"visual-msg-content"} onClick={(e) => {
                                             e.stopPropagation();
                                             e.persist();
-                                            const sticky = comments[arrIndex];
-                                            if (sticky && stickyMsg && sticky.seq != stickyMsg.seq) {
+                                            if (pinnedSticky && stickyMsg && pinnedSticky.groupId != stickyMsg.groupId) {
                                                 // setStickyMsg(sticky)
-                                                dispatchTheme(sticky);
+                                                dispatchTheme(pinnedSticky);
                                             }
                                         }}>
                                             {msgItems}
@@ -911,17 +957,43 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
 
                                         {
                                             pinnedSticky.records[0].msgIndex == total - 1 && !!pinnedSticky.records[0].groupId &&
-                                            <div className="strike">
-                                                <span>New Tape</span>
-                                            </div>
+                                            <>
+                                                <div style={{
+                                                    padding: '6px 12px',
+                                                    display: "flex",
+                                                    justifyContent: "flex-end"
+                                                }}>
+                                                    <div className="fork-icon">
+                                                        <IonButtons>
+                                                            <IonButton onClick={() => {
+                                                                onFork(pinnedSticky.records[0].groupId, {
+                                                                    tribeId: config.tribeId,
+                                                                    keeper: "",
+                                                                    lastPinedSeq: 0,
+                                                                    onlineUser: 0,
+                                                                    theme: pinnedSticky.theme,
+                                                                    title: tribeInfo.title,
+                                                                    desc: "",
+                                                                    themeTag: pinnedSticky.theme.themeTag,
+                                                                    themeDesc: pinnedSticky.theme.themeDesc,
+                                                                })
+                                                            }}><IonIcon src={gitBranchOutline} style={{
+                                                                color: "#4C89F8",
+                                                                fontSize: "24px"
+                                                            }}/></IonButton>
+                                                        </IonButtons>
+                                                    </div>
+                                                </div>
+                                                <div className="strike">
+                                                    <span>New Tape</span>
+                                                </div>
+                                            </>
                                         }
                                     </div>
                                 } else {
-                                    console.log("!!!!!!!!! pinnedSticky check false = ", index, data)
                                     return <div></div>
                                 }
                             } else {
-                                console.log("!!!!!!!!! pinnedSticky empty = ", index, data)
                                 return <div></div>
                             }
                         }}
@@ -948,24 +1020,34 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg, firstInd
 
 
                         {
-                            (total - 1 > currentVisibleStopIndex && currentVisibleStopIndex > 10) &&
+                            visibleRange.startIndex > 5 &&
                             <div className="fab-cus" onClick={() => {
-                                fetchMsgByIndex(0)
+                                setAtBottom(false);
+                                if (firstItemIndex < 1) {
+                                    scrollToItem({index: 0, align: "start"})
+                                } else {
+                                    fetchMsgByIndex(0).catch(e => console.error(e))
+                                }
                             }}>
                                 <img src="assets/img/toTop.png" width={32} height={32}
                                      style={{verticalAlign: "middle"}}/>
                             </div>
                         }
                         {
-                            total - 1 - maxVisibleIndex > 0 && maxVisibleIndex > 0 &&
-                            <div className="fab-cus-dig">
-                                <small>{total - 1 - maxVisibleIndex < 0 ? 0 : total - 1 - maxVisibleIndex}</small>
+                            (showButton || visibleRange.startIndex < 5) &&
+                            <div className="fab-cus-dig"
+                                 style={(total - 1 - maxVisibleIndex <= 0)? {
+                                     background: "transparent",
+                                     height: 12
+                                 }:{}}>
+                                <small>{total - 1 - maxVisibleIndex <= 0 ? "" : total - 1 - maxVisibleIndex}</small>
                             </div>
                         }
 
                         {
-                            showButton && (
+                            (showButton || visibleRange.startIndex < 5) && (
                                 <div className="fab-cus" onClick={() => {
+                                    setAtBottom(true);
                                     if (comments && comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex == total - 1) {
                                         scrollToItem({index: total - 1, align: "end"})
                                     } else {

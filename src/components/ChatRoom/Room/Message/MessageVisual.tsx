@@ -657,8 +657,8 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, setHideMenu, on
                         if (v && !!v.groupId) {
                             // v["hideTime"] = 2;
                         } else if (preMsg && !v.groupId && (
-                            preMsg.owner == tribeInfo.keeper && v.owner !== tribeInfo.keeper ||
-                            preMsg.owner != tribeInfo.keeper && v.owner == tribeInfo.keeper
+                            preMsg.owner == tribeInfo.keeper && v.owner !== tribeInfo && tribeInfo.keeper ||
+                            preMsg.owner != tribeInfo.keeper && v.owner == tribeInfo && tribeInfo.keeper
                         )) {
                             v["hideTime"] = 2;
                         }

@@ -7,6 +7,7 @@ import {Role} from "./Role";
 import 'react-photo-view/dist/react-photo-view.css';
 import {ImageView} from "../../../../utils/ImageView";
 import {Airdrop} from "./AirDrop";
+import {useMemo} from "react";
 
 
 interface Props {
@@ -99,8 +100,6 @@ export const Text: React.FC<Props> = ({
     //     owner:owner,
     //     isOwner:isOwner
     // });
-
-    const Keeper = () => <img src="/assets/img/keeper.png" height={14} style={{transform: 'translateY(1px)'}} />
 
 
     // console.log("replayCtn.content",replayCtn && replayCtn.content , msg && msg.replayMsg && msg.replayMsg.msgType)
@@ -274,7 +273,7 @@ export const Text: React.FC<Props> = ({
                             {
                                 !hideTime ? <div>
                                 <span style={{fontSize: '11px'}}>
-                                    {keeper && msg.owner == keeper && !msg.groupId && <Keeper/>} <IonText
+                                    {keeper && msg.owner == keeper && !msg.groupId && <img src="/assets/img/keeper.png" height={14} style={{transform: 'translateY(1px)'}} />} <IonText
                                     color="medium">{utils.dateFormat(new Date(msg.timestamp * 1000))}</IonText>
                                 </span>
                                 </div> : <div style={{height: "1px"}}></div>

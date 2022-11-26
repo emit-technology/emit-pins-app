@@ -107,10 +107,11 @@ const RoleListModalChild: React.FC<Props> = ({
                             </IonItem>
 
                             <div style={{height: 180}}>
-                                {
-                                    isModal && tribeInfo ? <ThemeItem theme={tribeInfo.theme} roles={roles} seq={0} />
-                                    :pinnedSticky && <ThemeItem theme={pinnedSticky && pinnedSticky.groupId?pinnedSticky.theme:tribeInfo&&tribeInfo.theme} roles={pinnedSticky.groupId?pinnedSticky.roles:roles} seq={pinnedSticky.groupId ?pinnedSticky.seq:0} />
-                                }
+                                <ThemeItem
+                                    theme={isModal && tribeInfo ?tribeInfo.theme: pinnedSticky && pinnedSticky.groupId?pinnedSticky.theme:tribeInfo&&tribeInfo.theme}
+                                    roles={pinnedSticky && pinnedSticky.groupId?pinnedSticky.roles:roles}
+                                    seq={pinnedSticky&&pinnedSticky.groupId ?pinnedSticky.seq:0}
+                                />
                             </div>
                             <div style={{padding: "0 12px"}}>
                                 {

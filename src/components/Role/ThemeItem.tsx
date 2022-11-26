@@ -2,6 +2,7 @@ import * as React from 'react';
 import {TribeRole, TribeTheme} from "../../types";
 import {IonAvatar} from '@ionic/react';
 import {utils} from "../../common";
+import {useMemo} from "react";
 
 interface Props{
     theme: TribeTheme;
@@ -10,26 +11,31 @@ interface Props{
 }
 const ThemeItemChild:React.FC<Props> = ({theme,roles,seq}) =>{
 
-    const roleImgs:Array<string>=[];
-    if(roles){
-        for(let i=0;i<roles.length;i++){
-            if(i>3 && roles.length>4){
-                roleImgs.push(`${roles.length - 4}`)
-                break;
-            }else{
-                roleImgs.push(utils.getDisPlayUrl(roles[i].avatar))
+    const roleImgs = useMemo(()=>{
+        const roleImgs = [];
+        if(roles){
+            for(let i=0;i<roles.length;i++){
+                if(i>3 && roles.length>4){
+                    roleImgs.push(`${roles.length - 4}`)
+                    break;
+                }else{
+                    roleImgs.push(utils.getDisPlayUrl(roles[i].avatar))
+                }
             }
         }
-    }
+        return roleImgs
+    },[roles])
+
+
     return <>
         <div style={{padding: '8px 20px', height: 180 ,position: "relative"}}>
-            {theme && <div style={{position:"relative",width:'100%',height:'100%',backgroundImage: `url(${utils.getDisPlayUrl(theme.image)})`}} className="theme-img">
+            <div style={{position:"relative",width:'100%',height:'100%',backgroundImage: `url(${theme && utils.getDisPlayUrl(theme.image)})`}} className="theme-img">
                 {/*<img src={theme.image} className="theme-img"/>*/}
                 <div className="pinned-img-shade"></div>
-            </div>}
+            </div>
 
              <div className="pinned-msg-title">
-                 {seq> 0 && `#${seq}`}
+                 <div>{seq> 0 && `#${seq}`}</div>
                  <div>{theme && theme.themeTag}</div>
                  <div><small>{theme && theme.themeDesc}</small></div>
              </div>

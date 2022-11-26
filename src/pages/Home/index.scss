@@ -45,6 +45,37 @@
   border-radius: 50%;
 }
 
+.subop-icon{
+  vertical-align: middle;
+  color: #b4b9be;
+  width: 24px;
+  height: 24px;
+}
+
+.subpo-div:hover .subop-icon{
+  color: var(--ion-color-primary);
+}
+
+.subpo-div:hover {
+  color: var(--ion-color-primary) !important;
+  font-weight: 600;
+}
+
+.subop {
+  width: 100%;
+  display: flex;
+  align-content: center;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 20px;
+}
+
+.subpo-div{
+  display: flex;
+  align-items: center;
+  color: #536471;
+}
+
 .cert-icon {
   position: absolute;
   width: 20px;

@@ -750,6 +750,20 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
+
+    tribeUserInfo = async (): Promise<{limit: UserLimit, subscribed:boolean}> => {
+        const account = await emitBoxSdk.getAccount();
+        if(!!account){
+            const address = account.addresses[ChainType.EMIT]
+            const rest: TribeResult<{limit: UserLimit, subscribed:boolean}> = await this._rpc.post('/tribe/tribeUserInfo', {tribeId:config.tribeId,user: address});
+            if (rest && rest.code == 0) {
+                return Promise.resolve(rest.data)
+            }
+            return Promise.reject(rest.message);
+        }
+        return null;
+    }
+
     myTribes = async (): Promise<Array<TribeInfo>> => {
         const account = await emitBoxSdk.getAccount();
         const address = account.addresses[ChainType.EMIT]
@@ -770,24 +784,24 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
-    dropTribe = async (): Promise<boolean> => {
-        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/dropTribe', {tribeId: config.tribeId});
+    dropTribe = async (tribeId: string): Promise<boolean> => {
+        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/dropTribe', {tribeId: tribeId});
         if (rest && rest.code == 0) {
             return true
         }
         return Promise.reject(rest.message);
     }
 
-    subscribeTribe = async (): Promise<boolean> => {
-        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/subscribeTribe', {tribeId: config.tribeId});
+    subscribeTribe = async (tribeId: string): Promise<boolean> => {
+        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/subscribeTribe', {tribeId: tribeId});
         if (rest && rest.code == 0) {
             return true
         }
         return Promise.reject(rest.message);
     }
 
-    unSubscribeTribe = async (): Promise<boolean> => {
-        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/unSubscribeTribe', {tribeId: config.tribeId});
+    unSubscribeTribe = async (tribeId:string): Promise<boolean> => {
+        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/unSubscribeTribe', {tribeId: tribeId});
         if (rest && rest.code == 0) {
             return true
         }

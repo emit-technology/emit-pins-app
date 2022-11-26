@@ -14,7 +14,7 @@ import {
     IonText,
     IonTitle,
     IonToast,
-    IonToolbar, useIonToast
+    IonToolbar, useIonAlert, useIonToast
 } from "@ionic/react";
 import {GroupMsg, Message, PinnedSticky, TribeInfo, TribeRole, WsStatus} from "../../types";
 import {emitBoxSdk, tribeService} from "../../service";
@@ -50,7 +50,7 @@ import walletWorker from "../../worker/walletWorker";
 import {utils} from "../../common";
 import {CreateModal} from "../../components/Account/modal";
 import {RolesAvatarModal} from "../../components/Role/RolesAvatarModal";
-import {useCallback, useEffect, useLayoutEffect, useState} from "react";
+import {useCallback, useEffect, useLayoutEffect, useMemo, useState} from "react";
 
 interface Props {
     tribeId: string
@@ -59,6 +59,7 @@ interface Props {
 }
 
 let checkInterVal = null;
+let count = 0;
 
 export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
 
@@ -70,7 +71,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
     const [roles, setRoles] = useState([]);
     const [buttons, setButtons] = useState([]);
     const [groupMsgs, setGroupMsgs] = useState([]);
-    const [isConnecting, setIsConnecting] = useState(null);
+    const [isConnecting, setIsConnecting] = useState(WsStatus.inactive);
     const [showRoleAvatar, setShowRoleAvatar] = useState(false);
     const [showPinnedMsgDetailModal, setShowPinnedMsgDetailModal] = useState(false);
     const [showCreateTribe, setShowCreateTribe] = useState(false);
@@ -100,23 +101,25 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
     const [forkTribeInfo, setForkTribeInfo] = useState(null);
     const [firstItemIndex, setFirstItemIndex] = useState(-1);
     const [loaded, setLoaded] = useState(false);
+    const [subscribed, setSubscribed] = useState(false);
 
-    const [present,dismiss] = useIonToast();
+    const [presentAlert] = useIonAlert();
+    const [presentToast] = useIonToast();
 
-    const init = async () => {
-        checkInterVal = selfStorage.getItem("checkInterVal")
-        if (checkInterVal) {
-            clearInterval(checkInterVal)
-
-        }
-        checkInterVal = setInterval(() => {
-            checkWsAlive().catch(e => {
-                console.error(e)
-            });
-        }, 2000)
-
-        selfStorage.setItem("checkInterVal",checkInterVal)
-    }
+    // const init = async () => {
+    //     checkInterVal = selfStorage.getItem("checkInterVal")
+    //     if (checkInterVal) {
+    //         clearInterval(checkInterVal)
+    //
+    //     }
+    //     checkInterVal = setInterval(() => {
+    //         checkWsAlive().catch(e => {
+    //             console.error(e)
+    //         });
+    //     }, 2000)
+    //
+    //     selfStorage.setItem("checkInterVal",checkInterVal)
+    // }
 
     const initLayoutData = async () => {
         await tribeService.init();
@@ -133,31 +136,60 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
     }, [])
 
     useEffect(() => {
-        init().catch(e => {
-            console.error(e);
-        })
-    }, [])
+        const interval = setInterval(() => {
+            tribeWorker.checkAlive(config.tribeId).then((rest: any) => {
+                if (rest !== isConnecting) {
+                    setIsConnecting(rest)
+                }
 
-    const checkWsAlive = async () => {
-        const rest: WsStatus = await tribeWorker.checkAlive(config.tribeId);
-        if (rest !== isConnecting) {
-            setIsConnecting(rest)
-        }
+                if (rest == WsStatus.active && (!userLimit || (Math.floor(Date.now() / 1000)) % 9 == 0)) {
+                    tribeService.tribeUserInfo().then(rest => {
+                        config.userLimit = rest.limit;
+                        console.log(!userLimit || userLimit.supportLeft != rest.limit.supportLeft || userLimit.msgLeft != rest.limit.msgLeft)
+                        if (!userLimit || userLimit.supportLeft != rest.limit.supportLeft || userLimit.msgLeft != rest.limit.msgLeft) {
+                            setUserLimit(rest.limit)
+                        }
+                        if (rest.subscribed != subscribed) {
+                            setSubscribed(rest.subscribed)
+                        }
+                    })
 
-        if (rest == WsStatus.active && (!userLimit || (Math.floor(Date.now() / 1000)) % 9 == 0)) {
-            const rest = await tribeService.userLimit(config.tribeId);
-            config.userLimit = rest;
-            if (!userLimit || userLimit.supportLeft != rest.supportLeft || userLimit.msgLeft != rest.msgLeft) {
-                setUserLimit(rest)
-            }
-        }
-    }
+                }
+            })
+        }, 2000);
+        return () => clearInterval(interval);
+    }, [isConnecting, userLimit]);
+
+    // const checkWsAlive = (setLimit,setConnecting) => {
+    //     tribeWorker.checkAlive(config.tribeId).then((rest:any)=>{
+    //         console.log("check status==> ", rest, isConnecting, rest !== isConnecting)
+    //         if (rest !== isConnecting) {
+    //             setConnecting(rest)
+    //         }
+    //
+    //         if (rest == WsStatus.active && (!userLimit || (Math.floor(Date.now() / 1000)) % 9 == 0)) {
+    //             tribeService.userLimit(config.tribeId).then(rest=>{
+    //                 config.userLimit = rest;
+    //                 console.log(!userLimit || userLimit.supportLeft != rest.supportLeft || userLimit.msgLeft != rest.msgLeft)
+    //                 if (!userLimit || userLimit.supportLeft != rest.supportLeft || userLimit.msgLeft != rest.msgLeft) {
+    //                     setLimit(rest)
+    //                 }
+    //             })
+    //
+    //         }
+    //         setTimeout(()=>checkWsAlive(setLimit, setConnecting), 2000)
+    //     })
+    // }
 
     const initOwnerData = async () => {
         {
-            const rest = await tribeService.userLimit(config.tribeId);
-            config.userLimit = rest;
-            setUserLimit(rest);
+            const rest = await tribeService.tribeUserInfo();
+            config.userLimit = rest.limit;
+            setUserLimit(rest.limit);
+
+            if (rest.subscribed != subscribed) {
+                setSubscribed(rest.subscribed)
+            }
         }
     }
 
@@ -178,6 +210,35 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
         const owner = account && account.addresses && account.addresses[ChainType.EMIT.valueOf()]
         const f = await tribeService.isSessionAvailable()
 
+        const roles = await tribeService.tribeRoles(tribeId);
+        // const groupIds = tribeService.groupIdCache(); //await tribeService.groupIds(tribeId);
+        const groupTribes = JSON.parse(JSON.stringify(tribeService.getGroupMap()))//await tribeService.groupedMsg(groupIds);
+        console.log("======> init data groupTribes", groupTribes)
+
+        groupTribes.push({groupId: "", theme: tribeInfo.theme, records: [], roles: roles})
+        let latestRoleId = selfStorage.getItem("latestRoleId");
+        let role;
+        if (!latestRoleId && roles && roles.length > 0) {
+            role = roles[0]
+        } else {
+            if (roles && roles.length > 0) {
+                role = roles.find(v => v.id == latestRoleId)
+            }
+            if (!role) {
+                role = roles[0];
+            }
+        }
+
+        setAccount(account);
+        setOwner(owner);
+        setTribeInfo(tribeInfo);
+        setRoles(roles);
+        setLatestRoleFn(role);
+        setGroupMsgs(groupTribes)
+        setIsSessionAvailable(f);
+    }
+
+    const menuButtons = useMemo(() => {
         const buttons = [
             {
                 text: 'Verse', icon: addOutline, handler: () => {
@@ -205,7 +266,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                     console.log('Cancel clicked');
                 }
             }]
-        if (owner == tribeInfo.keeper) {
+        if (!!tribeInfo &&  owner == tribeInfo.keeper) {
             buttons.unshift({
                     text: 'Pin', icon: pinOutline, handler: () => {
                         setShowPin(true)
@@ -217,45 +278,79 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                         console.log('Favorite clicked');
                     }
                 },
-                // {
-                //     text: 'Subscribe', icon: heartCircleOutline, handler: () => {
-                //         console.log('Share clicked', navigator.share);
-                //         tribeService.subscribeTribe().then(()=>{
-                //             present({position: "top", duration: 2000, color: "primary", message: "Subscribe successfully!"})
-                //         })
-                //     }
-                // }
-                )
+            )
 
-        }
-        const roles = await tribeService.tribeRoles(tribeId);
-        // const groupIds = tribeService.groupIdCache(); //await tribeService.groupIds(tribeId);
-        const groupTribes = tribeService.getGroupMap()//await tribeService.groupedMsg(groupIds);
-        console.log("======> init data groupTribes", groupTribes)
-
-        groupTribes.push({groupId: "", theme: tribeInfo.theme, records: [], roles: roles})
-        let latestRoleId = selfStorage.getItem("latestRoleId");
-        let role;
-        if (!latestRoleId && roles && roles.length > 0) {
-            role = roles[0]
         } else {
-            if (roles && roles.length > 0) {
-                role = roles.find(v => v.id == latestRoleId)
-            }
-            if (!role) {
-                role = roles[0];
+            if (subscribed) {
+                buttons.unshift({
+                        text: 'Unsubscribe', icon: heartCircleOutline, handler: () => {
+                            presentAlert({
+                                header: "Unsubscribe",
+                                subHeader: "It will be dismissed from the home list , are you sure?",
+                                buttons: [
+                                    {
+                                        text: 'Cancel',
+                                        role: 'cancel',
+                                        handler: () => {
+
+                                        },
+                                    },
+                                    {
+                                        text: 'OK',
+                                        role: 'confirm',
+                                        handler: () => {
+                                            tribeService.unSubscribeTribe(config.tribeId).then(() => {
+                                                presentToast({
+                                                    color: "primary",
+                                                    message: "Unsubscribe successfully",
+                                                    duration: 2000
+                                                })
+                                                initOwnerData().catch(e => console.error(e))
+                                            })
+                                        },
+                                    },
+                                ]
+                            })
+                        }
+                    }
+                )
+            } else {
+                buttons.unshift({
+                        text: 'Subscribe', icon: heartCircleOutline, handler: () => {
+                            presentAlert({
+                                header: "Subscribe",
+                                subHeader: "It will be displayed in the home list.",
+                                buttons: [
+                                    {
+                                        text: 'Cancel',
+                                        role: 'cancel',
+                                        handler: () => {
+
+                                        },
+                                    },
+                                    {
+                                        text: 'OK',
+                                        role: 'confirm',
+                                        handler: () => {
+                                            tribeService.subscribeTribe(config.tribeId).then(() => {
+                                                presentToast({
+                                                    color: "primary",
+                                                    message: "Subscribe successfully",
+                                                    duration: 2000
+                                                })
+                                                initOwnerData().catch(e => console.error(e))
+                                            })
+                                        },
+                                    },
+                                ]
+                            })
+                        }
+                    }
+                )
             }
         }
-
-        setAccount(account);
-        setOwner(owner);
-        setButtons(buttons);
-        setTribeInfo(tribeInfo);
-        setRoles(roles);
-        setLatestRoleFn(role);
-        setGroupMsgs(groupTribes)
-        setIsSessionAvailable(f);
-    }
+        return buttons
+    }, [subscribed, owner, tribeInfo])
 
     const onSupport = async (msgId: string, f: boolean) => {
         if (userLimit && userLimit.supportLeft <= 0) {
@@ -488,6 +583,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                                     shareMsgId={msgId}
                                     firstIndex={firstItemIndex}
                                     onChangeVisible={onChangeVisible}
+                                    isConnecting={isConnecting}
                                 />
 
                             }
@@ -503,7 +599,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                             isOpen={showActionSheet}
                             onDidDismiss={() => setShowActionSheet(false)}
                             cssClass='my-custom-class'
-                            buttons={buttons}
+                            buttons={menuButtons}
                         >
 
                         </IonActionSheet>

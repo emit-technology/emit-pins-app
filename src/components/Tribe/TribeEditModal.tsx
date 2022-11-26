@@ -141,6 +141,8 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                                 </>:<div className='create-title'></div>
                             }
 
+
+
                             {/*<div className='create-title'>Description</div>*/}
                             {/*<div color='medium' className='radius-6' style={{background: '#F1F3F5'}}>*/}
                             {/*    <IonTextarea className='common-input' rows={2}*/}
@@ -205,7 +207,7 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
 
                         {
                             !!forkGroupId && <div className="fork-title" style={{padding: "12px 0 0"}}>
-                                <IonIcon src={informationCircleOutline} style={{transform: 'translateY(3px)'}}/> You are creating a fork in your personal account.<br/>
+                                <IonIcon src={informationCircleOutline} style={{transform: 'translateY(3px)'}}/> You are creating a fork of <b>#{tribeService.getGroupIds().indexOf(forkGroupId) + 1} pin</b> in your personal account.<br/>
                                 {/*A fork is a copy of a verse. Forking a pin allows you to freely experiment with changes without affecting the original verse.*/}
                             </div>
                         }
