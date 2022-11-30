@@ -127,6 +127,8 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
     }
 
     useLayoutEffect(() => {
+        setAlreadySelectRole(!!selfStorage.getItem("alreadySelectRole"))
+        setShowRoleAvatar(!!selfStorage.getItem("alreadySelectRole"))
         initLayoutData().then(() => {
             setLoaded(true);
             initData().catch(e => console.error(e))
@@ -213,7 +215,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
         const roles = await tribeService.tribeRoles(tribeId);
         // const groupIds = tribeService.groupIdCache(); //await tribeService.groupIds(tribeId);
         const groupTribes = JSON.parse(JSON.stringify(tribeService.getGroupMap()))//await tribeService.groupedMsg(groupIds);
-        console.log("======> init data groupTribes", groupTribes)
+        // console.log("======> init data groupTribes", groupTribes)
 
         groupTribes.push({groupId: "", theme: tribeInfo.theme, records: [], roles: roles})
         let latestRoleId = selfStorage.getItem("latestRoleId");

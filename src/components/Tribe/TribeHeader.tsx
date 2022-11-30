@@ -53,7 +53,7 @@ const TribeHeaderChild:React.FC<Props> = ({tribeInfo,onReladData,onChangeMsgInde
     const fetch = async ()=>{
         if(tribeInfo){
             if(!stickyMsg || !stickyMsg.groupId){
-                const rest =  await tribeWorker.getPinnedMessageArray(config.tribeId,0, 100000)
+                const rest =  await tribeWorker.getPinnedMessageArray(config.tribeId,tribeService.getGroupStatic().total - tribeService.getGroupStatic().groupNum.find(v=>v.groupId == "").num, 100000)
                 const data = rest.data.filter(v=>v.records && (v.records.length>0 && v.records[0].msgStatus !== MessageStatus.removed || v.records.length ==0));
                 setStickies({data:data,total: data.length})
             }else{

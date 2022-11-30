@@ -3,7 +3,7 @@ import {IonButton, IonButtons, IonIcon,IonContent,IonItem,IonLabel,IonRow,IonCol
 import { PinnedSticky, TribeInfo, TribeRole} from "../../types";
 import {ThemeItem} from "../Role/ThemeItem";
 import {useEffect, useState} from "react";
-import {MessageContentVisual} from "../ChatRoom/Room/Message";
+import {MessageContentVisualso} from "../ChatRoom/Room/Message";
 import config from "../../common/config";
 import {createOutline, gitBranchOutline, openOutline} from "ionicons/icons";
 import {tribeService} from "../../service/tribe";
@@ -111,7 +111,7 @@ export const TribeInfoModal:React.FC<Props> = ({isOpen,stickies,onReladData,onCl
                 </div>
 
                 <div className="tribe-info-modal-box">
-                    <MessageContentVisual tribeInfo={tribeInfo} owner={""} pinnedStickies={stickies}/>
+                    <MessageContentVisualso tribeInfo={tribeInfo} firstIndex={-1} owner={""} pinnedStickies={stickies}/>
                 </div>
 
                 <TribeEditModal isOpen={updateTribeModal}

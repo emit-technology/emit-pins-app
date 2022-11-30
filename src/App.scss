@@ -137,6 +137,25 @@ pre {
     max-width: 72% !important;
   }
 
+  .sender-owner-xs{
+    max-width: 100% !important;
+  }
+
+  .support-outer-owner {
+    flex-direction: column !important;
+  }
+
+  .support-outer-column {
+    flex-direction: column !important;
+  }
+
+  .tools {
+    //flex-direction: column !important;
+  }
+
+  .tool-no-role{
+    //flex-direction: column !important;
+  }
 }
 
 
@@ -204,18 +223,22 @@ pre {
     flex-direction: row-reverse !important;
   }
 
+  .no-role-div {
+    max-width: 70% !important;
+    width: auto !important;
+  }
+
   .msg-no-role-rec .inner {
-    max-width: 75% !important;
-    width: auto !important;
+    width: 100% !important;
   }
 
-  .msg-sender .inner {
-    max-width: 75% !important;
-    width: auto !important;
+  .msg-text-sender {
+    //max-width: 75% !important;
+    //width: auto !important;
   }
 
-  .msg-receive .inner {
-    max-width: 75% !important;
+  .msg-text-receive-parent {
+    max-width: 70% !important;
     width: auto !important;
   }
 

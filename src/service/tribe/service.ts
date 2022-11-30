@@ -165,7 +165,7 @@ class TribeService implements ITribe {
     tribeRoles = async (tribeId: string): Promise<Array<TribeRole>> => {
         const rest: TribeResult<Array<TribeRole>> = await this._rpc.post('/tribe/tribeRoles', {tribeId});
         const defaultRole = {
-            avatar: `${config.baseUrl}/pic/display?url=https://pic.emit.technology/img/3ce83e299e485e006cd9e820ea9c790f.png&w=300&h=300&op=resize&upscale=1`,
+            avatar: {url: `https://pic.emit.technology/img/3ce83e299e485e006cd9e820ea9c790f.png`, height: 300, width: 300},
             name: "Narrator",
             id: "",
             tribeId: config.tribeId
@@ -633,7 +633,7 @@ class TribeService implements ITribe {
     }
 
     private _groupMsgKey = (groupId: string) => {
-        return `tribe_${config.tribeId}_group_${groupId}`;
+        return `tribe_${config.tribeId}_group_v2_${groupId}`;
     }
 
     groupedMsgRemove = async (groupIds: Array<string> = [], withDraft: boolean = false): Promise<Array<GroupMsg>> => {
@@ -679,10 +679,10 @@ class TribeService implements ITribe {
             if (rest && rest.code == 0) {
                 for (let i = 0; i < rest.data.length; i++) {
                     const groupMsg = rest.data[i];
-                    groupMsg.groupId = groupIds[i];
+                    groupMsg.groupId = unFetchGroupIds[i];
                     groupMsg.records = [];
                     selfStorage.setItem(this._groupMsgKey(unFetchGroupIds[i]), groupMsg)
-                    console.log("======== groupedMsg>> ", groupIds[i], groupMsg)
+                    console.log("======== groupedMsg>> ", unFetchGroupIds[i], groupMsg)
                     ret.push(groupMsg)
                 }
             } else {
@@ -818,23 +818,23 @@ class TribeService implements ITribe {
                 continue;
             }
             i++;
-            let tmpMsg: Message = JSON.parse(JSON.stringify(gt.records[0]));
-            tmpMsg.msgType = MessageType.Divide
-            tmpMsg.id = ""
-            stickies.push({
-                theme: gt.theme,
-                seq: i,
-                roles: gt.roles,
-                records: [tmpMsg],
-                groupId: tmpMsg.groupId,
-                index: j++
-            })
+            // let tmpMsg: Message = JSON.parse(JSON.stringify(gt.records[0]));
+            // tmpMsg.msgType = MessageType.Divide
+            // tmpMsg.id = ""
+            // stickies.push({
+            //     theme: gt.theme,
+            //     seq: i,
+            //     roles: gt.roles,
+            //     records: [tmpMsg],
+            //     groupId: tmpMsg.groupId,
+            //     index: j++
+            // })
             gt.records.sort(_sort)
             for (let r of gt.records) {
+                r.actor = gt.roles.find(role => role.id == r.role);
                 if (r.msgStatus == MessageStatus.removed) {
                     continue
                 }
-                r.actor = gt.roles.find(role => role.id == r.role);
                 stickies.push({
                     theme: gt.theme,
                     seq: i,
@@ -846,6 +846,7 @@ class TribeService implements ITribe {
             }
 
         }
+        console.log("stickies>>> ", stickies)
         return stickies
     }
 

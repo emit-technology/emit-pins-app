@@ -4,7 +4,7 @@
 }
 
 .msg-content{
-  background-color: #ffffff;
+  background-color: var(--ion-color-tertiary);
   height: calc(100% - 114px);
   background-position: center;
   background-size: cover;
@@ -17,7 +17,7 @@
 }
 
 .msg-content2{
-  background-color: #ffffff;
+  background-color: var(--ion-color-tertiary);
   height: 100%;
   background-position: center;
   background-size: cover;

@@ -118,7 +118,7 @@ export interface PinnedSticky {
     groupId: string;
     index: number
 
-    showPin?:{lastPin: PinnedSticky, showPin: boolean};
+    showPin?:{lastPin: PinnedSticky, showPin: boolean, showFork: boolean};
 }
 
 export enum WsStatus {

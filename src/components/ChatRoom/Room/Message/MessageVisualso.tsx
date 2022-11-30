@@ -52,6 +52,16 @@ import {ReplayText} from "./Types/ReplayText";
 import {StatusBar} from "@capacitor/status-bar";
 import {isApp} from "../../../../service/app";
 import {Virtuoso} from 'react-virtuoso'
+import {LoremIpsum} from "lorem-ipsum";
+
+
+const lorem = new LoremIpsum({
+    wordsPerSentence: {
+        max: 32,
+        min: 4
+    }
+});
+
 
 interface Props {
     pinnedStickies?: { data: Array<PinnedSticky>, total: number }
@@ -100,7 +110,20 @@ const setVisibleStartIndex = (id: number) => {
 const mutexify = require('mutexify/promise')
 const _lock = mutexify()
 
-export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnecting, firstIndex, onChangeVisible, setHideMenu, onFork, shareMsgId, userLimit, selectRole, pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
+const isAPP = false// utils.isSafari();
+
+let renderCount = 0 ;
+
+export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg
+                                                                 ,isConnecting, firstIndex,
+                                                                 onChangeVisible,
+                                                                 setHideMenu, onFork,
+                                                                 shareMsgId, userLimit,
+                                                                 selectRole, pinnedStickies,
+                                                                 loaded, onReload, showPinnedMsgDetail,
+                                                                 showPin, owner,
+                                                         tribeInfo, onSupport}) => {
+
     const dispatchData = useAppSelector(state => state.jsonData);
     const dispatch = useAppDispatch();
 
@@ -124,9 +147,6 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
 
     const [firstItemIndex, setFirstItemIndex] = useState(0)
     const [total, setTotal] = useState(0)
-
-    // const [visibleRange, setVisibleRange] = useState([0, 0]);
-    const isAPP = (utils.isIos() || utils.isAndroid());
 
     const getCurrentVisible = (): number => {
         const id = selfStorage.getItem(currentMsgIndexKey());
@@ -173,6 +193,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
     }
 
     const setCurrentTimeout = (f: boolean) => {
+        // console.log("visibleStartId == ", visibleStartId)
         if (visibleStartId && delaySaveCurrentVisibleIndex++ == 0) {
             setTimeout(() => {
                 setCurrentVisible(visibleStartId);
@@ -189,7 +210,9 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
         let msgIndex = comp[0].records[0].msgIndex;
         let groupByTime: { role: string, timestamp: number, groupId: string, owner: string } = null;
         let lastPin: PinnedSticky = null;
-        for (let pMsg of comp) {
+        for (let i=0;i<comp.length;i++) {
+            let pMsg = comp[i];
+            const nextMsg = i<comp.length ?comp[i+1]:null
             if ((pMsg as PinnedSticky).records && (pMsg as PinnedSticky).records[0]) {
                 const msg: Message = (pMsg as PinnedSticky).records[0];
                 if (msg.msgType !== MessageType.Role) {
@@ -212,10 +235,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
                 msg.msgIndex = msgIndex++;
             }
 
-
-            if (lastPin && lastPin.groupId !== pMsg.groupId) {
-                pMsg.showPin = {lastPin: lastPin, showPin: true};
-            }
+            pMsg.showPin = {lastPin: pMsg, showPin: lastPin && lastPin.groupId !== pMsg.groupId, showFork: nextMsg && nextMsg.groupId !== pMsg.groupId};
 
             lastPin = pMsg;
         }
@@ -242,8 +262,8 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
                 return rest.total
             });
             setComments(comp)
-            console.log("------> firstItemIndex: [%d]", reqIndex)
             setFirstItemIndex(reqIndex)
+            console.log("------> firstItemIndex: [%d]", reqIndex, comp.length>0 && comp[0])
 
             if (toBottom) {
                 scrollToItem({index: rest.total, align: "end"});
@@ -367,7 +387,11 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
                 setMaxVisibleIndex(max ? max : 0)
             }
         } else {
-            setComments(pinnedStickies.data)
+            const comp = pinnedStickies.data;
+            combile(comp);
+            console.log(comp)
+            setComments(comp)
+            setTotal(pinnedStickies.data.length)
         }
     }, [loaded])
 
@@ -465,6 +489,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
 
                                 // remove all unpinned msg when pin type
                                 if (_comment && _comment.records && _comment.records.length > 0 && _comment.records[0].msgType == MessageType.Pin) {
+                                    tribeService.init();
                                     onReload(false);
                                     //TODO
                                 } else if (_comment.records && _comment.records.length > 0 && _comment.records[0].msgType == MessageType.UpdateTribe) {
@@ -617,72 +642,6 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
         setShareRoles(shareRoles)
     }
 
-    const renInboxMsg = (messages: Array<Message>): Array<any> => {
-        const htmls = [];
-        if (messages && messages.length > 0) {
-            messages.forEach((m, index) => {
-                const v = JSON.parse(JSON.stringify(m));
-                let item;
-                if (v.msgType == MessageType.Text || v.msgType == MessageType.Role || v.msgType == MessageType.Airdrop) {
-                    let className = 'msg-no-role-rec';
-                    if (v.role) {
-                        className = owner == v.owner && !v.groupId ? "msg-sender" : "msg-receive"
-                    }
-                    if (v.msgType == MessageType.Role) {
-                        className = `${className} role-sp`
-                    }
-                    const checked = checkedMsgArr.indexOf(v.id) > -1;
-                    //@ts-ignore
-                    item = <div className={className} key={index} onClick={(e) => {
-                        if (showPin) {
-                            e.stopPropagation();
-                            const checkedCopy = [...checkedMsgArr]
-                            if (checked) {
-                                checkedCopy.splice(checkedMsgArr.findIndex(cv => cv == v.id), 1)
-                            } else {
-                                checkedCopy.push(v.id)
-                            }
-                            setCheckedMsgArr(checkedCopy);
-                            selfStorage.setItem(`tribe_pin_arr`, checkedCopy)
-                        }
-                    }}>
-                        <div className="inner" style={{maxWidth: '100%'}} onMouseOver={() => setCheckedMsgId(v.id)}>
-                            {/*<div>{msgIndex}</div>*/}
-                            <Text hideTime={!!m.hideTime}
-                                  keeper={tribeInfo && tribeInfo.keeper} onSupport={onSupport}
-                                  checked={checked || v.msgType == MessageType.Airdrop} msg={v}
-                                  owner={owner}
-                                  showPin={v.msgStatus == MessageStatus.dashed && showPin}
-                            />
-
-                        </div>
-
-                        <Tools onShare={(msg) => onShare(msg)} msg={v}
-                               showPin={v.msgStatus == MessageStatus.dashed && showPin} owner={owner}
-                               onSupport={userLimit && userLimit.supportLeft > 0 && onSupport}
-                               onReplay={(msg: Message) => {
-                                   onReplay(msg)
-                               }} onEdit={(msg: Message) => {
-                            setShowModifyMsg(msg)
-                        }} onDelete={(msg: Message) => {
-                            tribeService.deleteMsg(msg.id).catch(e => {
-                                console.log(e, "tribe del msg")
-                            })
-                        }} isChecked={checkedMsgId == v.id} keeper={tribeInfo && tribeInfo.keeper}/>
-                    </div>
-                } else if (v.msgType == MessageType.Dice) {
-                    item = <Dice/>
-                } else if (v.msgType == MessageType.Expression) {
-                    item = <Expression/>
-                } else {
-                    // console.log(index, v," divide........." )
-                }
-                htmls.push(item)
-            })
-        }
-
-        return htmls;
-    }
     // const Loading = () => <div style={{width: '100%', textAlign: 'center', padding: 12}}>⏳ Loading...</div>;
 
 
@@ -782,6 +741,81 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
         setAtBottom(bottom)
     }, [setAtBottom])
 
+    const renInboxMsg = (messages:Array<Message>) =>{
+        let item = <div></div>;
+
+        messages && messages.length>0&& messages.forEach((m,index)=>{
+            const v:Message = JSON.parse(JSON.stringify(m));
+
+            if (v.msgType == MessageType.Text || v.msgType == MessageType.Role || v.msgType == MessageType.Airdrop) {
+                let className = 'msg-no-role-rec';
+                if (v.role) {
+                    className = owner == v.owner && !v.groupId ? "msg-sender" : "msg-receive"
+                }
+                if (v.msgType == MessageType.Role) {
+                    className = `${className} role-sp`
+                }
+                const checked = checkedMsgArr.indexOf(v.id) > -1;
+                item = <div className={className} key={index} onClick={(e) => {
+                    if (showPin) {
+                        e.stopPropagation();
+                        const checkedCopy = [...checkedMsgArr]
+                        if (checked) {
+                            checkedCopy.splice(checkedMsgArr.findIndex(cv => cv == v.id), 1)
+                        } else {
+                            checkedCopy.push(v.id)
+                        }
+                        setCheckedMsgArr(checkedCopy);
+                        selfStorage.setItem(`tribe_pin_arr`, checkedCopy)
+                    }
+                }}>
+                    <div className="inner" style={{maxWidth: '100%'}}
+                         onMouseOver={() => {
+                             if(!pinnedStickies){
+                                 setCheckedMsgId(v.id)
+                             }
+                         }}
+                    >
+                        {/*<div style={{backgroundColor: "green", padding: 12}}>{v.msgIndex} - It feels like there are more bot comments than real people on twitter now.</div>*/}
+                        <Text hovered={checkedMsgId == v.id} hideTime={!!m.hideTime}
+                              keeper={tribeInfo && tribeInfo.keeper} onSupport={onSupport}
+                              checked={checked || v.msgType == MessageType.Airdrop} msg={v}
+                              owner={owner}
+                              showPin={v.msgStatus == MessageStatus.dashed && showPin}
+                              >
+                            {
+                                !pinnedStickies && <>
+                                    <Tools onShare={(msg) => onShare(msg)} msg={v}
+                                           showPin={v.msgStatus == MessageStatus.dashed && showPin} owner={owner}
+                                           onSupport={userLimit && userLimit.supportLeft > 0 && onSupport}
+                                           onReplay={(msg: Message) => {
+                                               onReplay(msg)
+                                           }} onEdit={(msg: Message) => {
+                                        setShowModifyMsg(msg)
+                                    }} onDelete={(msg: Message) => {
+                                        tribeService.deleteMsg(msg.id).catch(e => {
+                                            console.log(e, "tribe del msg")
+                                        })
+                                    }} isChecked={checkedMsgId == v.id} keeper={tribeInfo && tribeInfo.keeper}/>
+                                </>
+                            }
+                        </Text>
+
+                    </div>
+
+
+                </div>
+            } else if (v.msgType == MessageType.Dice) {
+                item = <Dice/>
+            } else if (v.msgType == MessageType.Expression) {
+                item = <Expression/>
+            } else {
+                // console.log(index, v," divide........." )
+            }
+        })
+        return item
+    }
+    // console.log("#################### re rendering .... ", renderCount++)
     return <>
         <div className={!pinnedStickies ? "msg-content" : "msg-content2"} style={{
             backgroundImage: `url(${utils.getDisPlayUrl(_url)})`,
@@ -790,15 +824,14 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
                 <div className="inner-box">
                     {loadingData && <Loading/>}
                     <div className="position-top">[{visibleRange.startIndex}] - [{visibleRange.endIndex}]
-                        : [{total}]
+                        : [{firstItemIndex}]..[{total}], [ren: {renderCount}]
                     </div>
                     <Virtuoso
                         ref={virtuoso}
                         style={{height: '100%'}}
-                        overscan={100}
+                        overscan={0}
                         isScrolling={(f) => setIsScrolling(f)}
                         firstItemIndex={firstItemIndex}
-                        // can't use this prop, it will trigle load more always .initialTopMostItemIndex={total-1}
                         rangeChanged={setVisibleRange}
                         data={comments}
                         endReached={loadMore}
@@ -808,7 +841,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
                         // initialTopMostItemIndex={getCurrentVisible()}
 
                         itemsRendered={(items) => {
-                            if (!isScrolling) {
+                            if (!isScrolling && !pinnedStickies) {
                                 if(!stickyMsg){
                                     if (!!tribeInfo) {
                                         const groupArr = tribeService.getGroupMap();
@@ -822,17 +855,13 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
                                             index: -1
                                         })
                                     }
-                                    if(items.length > 0){
+                                    if(items.length > 0 && maxVisibleIndex < items[items.length - 1].data.records[0].msgIndex){
                                         setMaxVisible(items[items.length - 1].data.records[0].msgIndex)
                                     }
                                 }
                                 return
                             }
-                            // console.log("itemsRendered=======",items, isScrolling)
-                            if (items.length > 0) {
-                                // setVisibleRange({startIndex:  items[0].index, endIndex: items[items.length-1].index})
-                            }
-                            if (items && items[0] && items[0].data) {
+                            if (!pinnedStickies && items && items[0] && items[0].data) {
                                 visibleStartId = items[0].index;
                                 setCurrentTimeout(false)
                                 if (!!(items[items.length - 1].data) && maxVisibleIndex < items[items.length - 1].data.records[0].msgIndex) {
@@ -856,33 +885,33 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
                                 }
                             }
                         }}
-                        // context={{  }}
-                        //                        @ts-ignore
-                        //                         components={{ ScrollSeekPlaceholder }}
-                        scrollSeekConfiguration={{
-                            enter: (velocity) => {
-                                // if (visibleRange[1] > comments.length - 5) {
-                                //     setFullScreen(false)
-                                // } else if (visibleRange[1] < comments.length - 6) {
-                                //     if (velocity > 1) {
-                                //         setFullScreen(true)
-                                //     } else if (velocity < 0) {
-                                //         setFullScreen(false)
-                                //     }
-                                // }
-                                return false//isAPP && velocity < 0?Math.abs(velocity) > 100:false
-                            },
-                            exit: (velocity) => {
-                                const shouldExit = isAPP ? Math.abs(velocity) < 10 : true;
-                                if (shouldExit) {
-                                    // setVisibleRange(["-", "-"]);
-                                }
-                                return shouldExit;
-                            },
-                            change: (_velocity, {startIndex, endIndex}) => {
-                                // setVisibleRange([startIndex,endIndex])
-                            }
-                        }}
+//                         context={{  }}
+// //                                               @ts-ignore
+//                         components={{ ScrollSeekPlaceholder }}
+//                         scrollSeekConfiguration={{
+//                             enter: (velocity) => {
+//                                 // if (visibleRange[1] > comments.length - 5) {
+//                                 //     setFullScreen(false)
+//                                 // } else if (visibleRange[1] < comments.length - 6) {
+//                                 //     if (velocity > 1) {
+//                                 //         setFullScreen(true)
+//                                 //     } else if (velocity < 0) {
+//                                 //         setFullScreen(false)
+//                                 //     }
+//                                 // }
+//                                 return isAPP && velocity < 0?Math.abs(velocity) > 100:false
+//                             },
+//                             exit: (velocity) => {
+//                                 const shouldExit = isAPP ? Math.abs(velocity) < 10 : true;
+//                                 if (shouldExit) {
+//                                     // setVisibleRange(["-", "-"]);
+//                                 }
+//                                 return shouldExit;
+//                             },
+//                             change: (_velocity, {startIndex, endIndex}) => {
+//                                 // setVisibleRange([startIndex,endIndex])
+//                             }
+//                         }}
 
                         itemContent={(index, data) => {
                             const pinnedSticky: PinnedSticky = data as PinnedSticky;
@@ -893,14 +922,18 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
                                     const arrIndex = index - firstItemIndex;
                                     const messages = pinnedSticky.records
                                     const preIndex = arrIndex - 1;
+                                    // renInboxMsg(messages)
                                     const msgItems = renInboxMsg(messages)
 
+                                    // return <div style={{backgroundColor: "green", padding: 12}}>{index} - It feels like there are more bot comments than real people on twitter now.</div>
                                     return <div className="visual-msg-box"
                                                 style={{padding: atBottom && index == total - 1 ? "0 0 44px" : "0"}}
                                                 key={`_s_${index}`}>
-                                        {/*{pinnedSticky.records[0].msgIndex}*/}
+
+                                        {/*<small>{pinnedSticky.records[0].msgIndex}</small>*/}
+
                                         {
-                                            firstItemIndex == 0 && preIndex == -1 && <div style={{paddingTop: 20}}>
+                                            firstItemIndex == 0 && preIndex == -1 && !pinnedStickies && <div style={{paddingTop: 20}}>
                                                 <div className="strike">
                                                     <span>{!pinnedSticky.groupId ? "New Tape" : `#1`}</span>
                                                 </div>
@@ -909,41 +942,16 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
 
 
                                         {
-                                            !!pinnedSticky.showPin && onFork && <>
-                                                <div style={{
-                                                    padding: '6px 12px',
-                                                    display: "flex",
-                                                    justifyContent: "flex-end"
-                                                }}>
-                                                    <div className="fork-icon">
-                                                        <IonButtons>
-                                                            <IonButton onClick={() => {
-                                                                // setShowLoading(true)
-                                                                console.log(pinnedSticky.showPin)
-                                                                onFork(pinnedSticky.showPin.lastPin.groupId, {
-                                                                    tribeId: config.tribeId,
-                                                                    keeper: "",
-                                                                    lastPinedSeq: 0,
-                                                                    onlineUser: 0,
-                                                                    theme: pinnedSticky.showPin.lastPin.theme,
-                                                                    title: tribeInfo.title,
-                                                                    desc: "",
-                                                                    themeTag: pinnedSticky.showPin.lastPin.theme.themeTag,
-                                                                    themeDesc: pinnedSticky.showPin.lastPin.theme.themeDesc,
-                                                                })
-                                                            }}><IonIcon src={gitBranchOutline} style={{
-                                                                color: "#4C89F8",
-                                                                fontSize: "24px"
-                                                            }}/></IonButton>
-                                                        </IonButtons>
+                                            !!pinnedSticky.showPin && pinnedSticky.showPin.showPin && <>
+                                                {
+                                                    !pinnedStickies && <div className="strike">
+                                                        <span>{!pinnedSticky.groupId ? "New Tape" : `#${pinnedSticky.showPin.lastPin.seq}`}</span>
                                                     </div>
-                                                </div>
-                                                <div className="strike">
-                                                    <span>{!pinnedSticky.groupId ? "New Tape" : `#${pinnedSticky.showPin.lastPin.seq + 1}`}</span>
-                                                </div>
+                                                }
                                             </>
                                         }
 
+                                        {/*<div>*/}
                                         <div className={"visual-msg-content"} onClick={(e) => {
                                             e.stopPropagation();
                                             e.persist();
@@ -953,6 +961,38 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
                                             }
                                         }}>
                                             {msgItems}
+                                        </div>
+
+
+                                        <div style={{
+                                            padding: '0px 12px',
+                                            display: "flex",
+                                            justifyContent: "flex-end",
+                                            height:  !!pinnedSticky.showPin && pinnedSticky.showPin.showFork && onFork?"100%":"0px",
+                                            overflow: "hidden"
+                                        }}>
+                                            <div className="fork-icon">
+                                                <IonButtons>
+                                                    <IonButton onClick={() => {
+                                                        // setShowLoading(true)
+                                                        // console.log(pinnedSticky.showPin)
+                                                        onFork(pinnedSticky.showPin.lastPin.groupId, {
+                                                            tribeId: config.tribeId,
+                                                            keeper: "",
+                                                            lastPinedSeq: 0,
+                                                            onlineUser: 0,
+                                                            theme: pinnedSticky.showPin.lastPin.theme,
+                                                            title: tribeInfo.title,
+                                                            desc: "",
+                                                            themeTag: pinnedSticky.showPin.lastPin.theme.themeTag,
+                                                            themeDesc: pinnedSticky.showPin.lastPin.theme.themeDesc,
+                                                        })
+                                                    }}><IonIcon src={gitBranchOutline} style={{
+                                                        color: "#4C89F8",
+                                                        fontSize: "24px"
+                                                    }}/></IonButton>
+                                                </IonButtons>
+                                            </div>
                                         </div>
 
                                         {
@@ -1034,7 +1074,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({groupMsg,isConnect
                             </div>
                         }
                         {
-                            (showButton || visibleRange.startIndex < 5) &&
+                            !pinnedStickies && (showButton || visibleRange.startIndex < 5) &&
                             <div className="fab-cus-dig"
                                  style={(total - 1 - maxVisibleIndex <= 0)? {
                                      background: "transparent",

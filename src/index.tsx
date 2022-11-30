@@ -8,10 +8,10 @@ import {App as AppPlugin} from "@capacitor/app";
 import { Toast } from '@capacitor/toast';
 import {addListeners, getDeliveredNotifications, registerNotifications} from './service/app'
 import {utils} from "./common";
-// import {LogLevel} from "react-virtuoso";
+import {LogLevel} from "react-virtuoso";
 // import { SplashScreen } from '@capacitor/splash-screen';
 
-// globalThis.VIRTUOSO_LOG_LEVEL = LogLevel.DEBUG;
+globalThis.VIRTUOSO_LOG_LEVEL = LogLevel.DEBUG;
 
 const rootElement = document.getElementById("root");
 if (rootElement.hasChildNodes()) {
