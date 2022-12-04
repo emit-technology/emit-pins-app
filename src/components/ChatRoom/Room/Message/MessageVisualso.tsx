@@ -87,6 +87,9 @@ interface Props {
     firstIndex: number
 
     isConnecting?: WsStatus
+
+    subscribed?: boolean;
+    onSubscribe?: (f:boolean)=>void;
 }
 
 const pageSize = 30;
@@ -125,7 +128,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                                                  selectRole, pinnedStickies,
                                                                  loaded, onReload, showPinnedMsgDetail,
                                                                  showPin, owner,
-                                                                 tribeInfo, onSupport
+                                                                 tribeInfo, onSupport, subscribed, onSubscribe
                                                              }) => {
 
     const dispatchData = useAppSelector(state => state.jsonData);
@@ -796,6 +799,20 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 }}>
                     <div>
 
+                        {
+                            !!onSubscribe &&
+                            <div className="fab-cus" onClick={() => {
+                                onSubscribe(!subscribed)
+                            }}>
+                                {
+                                    subscribed === false ?<img src="assets/img/fab-icon00004.png" width={32} height={32}
+                                                               style={{verticalAlign: "middle"}}/>
+                                                               :
+                                        <img src="assets/img/fab-icon00001.png" width={32} height={32}
+                                             style={{verticalAlign: "middle"}}/>
+                                }
+                            </div>
+                        }
 
                         {
                             visibleRange.startIndex > 5 &&
@@ -807,7 +824,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                     fetchMsgByIndex(0).catch(e => console.error(e))
                                 }
                             }}>
-                                <img src="assets/img/toTop.png" width={32} height={32}
+                                <img src="assets/img/fab-icon00003.png" width={32} height={32}
                                      style={{verticalAlign: "middle"}}/>
                             </div>
                         }
@@ -816,7 +833,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                             <div className="fab-cus-dig"
                                  style={(total - 1 - maxVisibleIndex <= 0) ? {
                                      background: "transparent",
-                                     height: 12
+                                     height: 0
                                  } : {}}>
                                 <small>{total - 1 - maxVisibleIndex <= 0 ? "" : total - 1 - maxVisibleIndex}</small>
                             </div>
@@ -833,7 +850,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                     }
 
                                 }}>
-                                    <img src="assets/img/toBottom.png" width={32} height={32}
+                                    <img src="assets/img/fab-icon00002.png" width={32} height={32}
                                          style={{verticalAlign: "middle"}}/>
                                 </div>
                             )}

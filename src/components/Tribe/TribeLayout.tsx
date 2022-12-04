@@ -15,6 +15,7 @@ import {
 import selfStorage from "../../common/storage";
 import copy from "copy-to-clipboard";
 import {tribeService} from "../../service/tribe";
+import {Role} from "../ChatRoom/Room/Message/Types/Role";
 
 interface Props {
     data: Array<TribeInfo>
@@ -50,7 +51,7 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                     <img src={utils.getDisPlayUrl(v.theme.image)}/>
                                 </div>
                                 <div className="recmt-head-title">
-                                    <div style={{padding: "0px 0 3px 0", position: "relative"}}>{v.title} {
+                                    <div style={{padding: "0px 0 0 0", position: "relative"}}>{v.title} {
                                         v.tribeId == config.defaultTribes &&
                                         <div className="cert-icon"><img src="./assets/img/cert.png"
                                                                         className="cert-icon" width="100%"
@@ -71,6 +72,11 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                 content && content["image"] && content["image"]["url"] &&
                                 <div className="recmt-img">
                                     <img src={content["image"]["url"]}/>
+                                </div>
+                            }
+                            {
+                                v.latestMsg && v.latestMsg.msgType == MessageType.Role && <div className="recmt-img">
+                                    <img src={(v.latestMsg.content as TribeRole).avatar["url"]}/>
                                 </div>
                             }
                             {
@@ -119,86 +125,93 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                             }
 
                             <div className="recmt-footer">
-                                <div>
-                                    {roles && roles.length + 1} Roles
-                                </div>
                                 <div style={{display: "flex", alignItems: "center"}}>
                                     {actor ? <>
-                                        <div style={{
-                                            padding: '0 6px',
-                                            color: "#000",
-                                            fontSize: '16px'
-                                        }}>
+                                        <div style={{height: 36}}>
+                                            <img className="ava-img" src={utils.getDisPlayUrl(actor.avatar)}/>
+                                        </div>
+                                        <div className="asv-name">
                                             <>{actor.name}</>
                                         </div>
-                                        <div>
-                                            <img src={utils.getDisPlayUrl(actor.avatar)}/>
-                                        </div>
+
                                     </> : <>
-                                        <div style={{
-                                            padding: '0 6px',
-                                            color: "#000",
-                                            fontSize: '16px'
-                                        }}>
+                                        <div style={{height: 36}}>
+                                            <img className="ava-img" src={"./assets/img/default-avatar.png"}/>
+                                        </div>
+                                        <div className="asv-name">
                                             <>Narrator</>
                                         </div>
-                                        <div>
-                                            <img src={"./assets/img/default-avatar.png"}/>
-                                        </div>
+
                                     </>
                                     }
                                 </div>
-                            </div>
-
-                            <div className="subop">
-                                {/*<div><IonIcon className="subop-icon" src={chatbubbleOutline}/></div>*/}
-                                {/*<div className="subpo-div"><IonIcon className="subop-icon" src={peopleCircleOutline}/> {roles && roles.length + 1}</div>*/}
-                                <div className="subpo-div"><IonIcon className="subop-icon" src={linkOutline} onClick={(e)=>{
+                                <div className="iconss">
+                                    <img src="./assets/img/users.png" className="static-icons"/>&nbsp;<span style={{verticalAlign: "middle"}}>{roles && roles.length + 1}</span>
+                                </div>
+                                <div className="iconss">
+                                    <img src="./assets/img/like.png" className="static-icons"/>&nbsp;<span style={{verticalAlign: "middle"}}>{roles && roles.length + 1}</span>
+                                </div>
+                                {/*<div className="iconss">*/}
+                                {/*    <img src="./assets/img/like.png" className="static-icons"/><span style={{verticalAlign: "middle"}}>{roles && roles.length + 1}</span>*/}
+                                {/*</div>*/}
+                                <div className="iconss" onClick={(e)=>{
                                     e.stopPropagation();
                                     copy(`${config.baseUrl}/${v.tribeId}`)
                                     presentToast({color:"primary", message: "Copied to clipboard", duration: 2000})
-                                }}/></div>
-                                <div className="subpo-div"><IonIcon className="subop-icon" color={(v.subscribed||address==v.keeper) && "primary"} src={heartCircleOutline} onClick={(e)=>{
-                                    e.stopPropagation();
-                                    presentAlert({
-                                        header: (v.subscribed||address==v.keeper)?'Unsubscribe':"Subscribe",
-                                        subHeader: (v.subscribed||address==v.keeper)?"It will dismiss from the list , are you sure?":"It will always be displayed in your list.",
-                                        buttons: [
-                                            {
-                                                text: 'Cancel',
-                                                role: 'cancel',
-                                                handler: () => {
-
-                                                },
-                                            },
-                                            {
-                                                text: 'OK',
-                                                role: 'confirm',
-                                                handler: () => {
-                                                    if((v.subscribed||address==v.keeper)){
-                                                        if(address == v.keeper){
-                                                            tribeService.dropTribe(v.tribeId).then(()=>{
-                                                                presentToast({color:"primary", message: "Unsubscribe successfully", duration: 2000})
-                                                                onReload()
-                                                            })
-                                                        }else{
-                                                            tribeService.unSubscribeTribe(v.tribeId).then(()=>{
-                                                                presentToast({color:"primary", message: "Unsubscribe successfully", duration: 2000})
-                                                                onReload()
-                                                            })
-                                                        }
-                                                    }else{
-                                                        tribeService.subscribeTribe(v.tribeId).then(()=>{
-                                                            presentToast({color:"primary", message: "Subscribe successfully", duration: 2000})
-                                                            onReload()
-                                                        })
-                                                    }
-                                                },
-                                            },
-                                        ]
-                                    })
-                                }}/></div>
+                                }}>
+                                    <img src="./assets/img/copy.png" className="static-icons"/>
+                                </div>
                             </div>
+
+                            {/*<div className="subop">*/}
+                            {/*    /!*<div><IonIcon className="subop-icon" src={chatbubbleOutline}/></div>*!/*/}
+                            {/*    /!*<div className="subpo-div"><IonIcon className="subop-icon" src={peopleCircleOutline}/> {roles && roles.length + 1}</div>*!/*/}
+                            {/*    <div className="subpo-div"><IonIcon className="subop-icon" src={linkOutline} onClick={(e)=>{*/}
+                            {/*        e.stopPropagation();*/}
+                            {/*        copy(`${config.baseUrl}/${v.tribeId}`)*/}
+                            {/*        presentToast({color:"primary", message: "Copied to clipboard", duration: 2000})*/}
+                            {/*    }}/></div>*/}
+                            {/*    <div className="subpo-div"><IonIcon className="subop-icon" color={(v.subscribed||address==v.keeper) && "primary"} src={heartCircleOutline} onClick={(e)=>{*/}
+                            {/*        e.stopPropagation();*/}
+                            {/*        presentAlert({*/}
+                            {/*            header: (v.subscribed||address==v.keeper)?'Unsubscribe':"Subscribe",*/}
+                            {/*            subHeader: (v.subscribed||address==v.keeper)?"It will dismiss from the list , are you sure?":"It will always be displayed in your list.",*/}
+                            {/*            buttons: [*/}
+                            {/*                {*/}
+                            {/*                    text: 'Cancel',*/}
+                            {/*                    role: 'cancel',*/}
+                            {/*                    handler: () => {*/}
+
+                            {/*                    },*/}
+                            {/*                },*/}
+                            {/*                {*/}
+                            {/*                    text: 'OK',*/}
+                            {/*                    role: 'confirm',*/}
+                            {/*                    handler: () => {*/}
+                            {/*                        if((v.subscribed||address==v.keeper)){*/}
+                            {/*                            if(address == v.keeper){*/}
+                            {/*                                tribeService.dropTribe(v.tribeId).then(()=>{*/}
+                            {/*                                    presentToast({color:"primary", message: "Unsubscribe successfully", duration: 2000})*/}
+                            {/*                                    onReload()*/}
+                            {/*                                })*/}
+                            {/*                            }else{*/}
+                            {/*                                tribeService.unSubscribeTribe(v.tribeId).then(()=>{*/}
+                            {/*                                    presentToast({color:"primary", message: "Unsubscribe successfully", duration: 2000})*/}
+                            {/*                                    onReload()*/}
+                            {/*                                })*/}
+                            {/*                            }*/}
+                            {/*                        }else{*/}
+                            {/*                            tribeService.subscribeTribe(v.tribeId).then(()=>{*/}
+                            {/*                                presentToast({color:"primary", message: "Subscribe successfully", duration: 2000})*/}
+                            {/*                                onReload()*/}
+                            {/*                            })*/}
+                            {/*                        }*/}
+                            {/*                    },*/}
+                            {/*                },*/}
+                            {/*            ]*/}
+                            {/*        })*/}
+                            {/*    }}/></div>*/}
+                            {/*</div>*/}
 
                             {
                                 tribeTimeMap && (tribeTimeMap.has(v.tribeId) && tribeTimeMap.get(v.tribeId) < v.latestMsg.timestamp || !tribeTimeMap.has(v.tribeId)) && <>

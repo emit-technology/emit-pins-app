@@ -122,6 +122,8 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
     const initLayoutData = async () => {
         await tribeService.init();
         await tribeWorker.init(config.tribeId)
+
+        await tribeService.userLimit(config.tribeId);
     }
 
     useLayoutEffect(() => {
@@ -238,6 +240,70 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
         setIsSessionAvailable(f);
     }
 
+    const onSubscribe = useCallback((f)=>{
+
+        if(!f){
+            presentAlert({
+                header: "Unsubscribe",
+                subHeader: "It will be dismissed from the home list , are you sure?",
+                buttons: [
+                    {
+                        text: 'Cancel',
+                        role: 'cancel',
+                        handler: () => {
+
+                        },
+                    },
+                    {
+                        text: 'OK',
+                        role: 'confirm',
+                        handler: () => {
+                            tribeService.unSubscribeTribe(config.tribeId).then(() => {
+                                presentToast({
+                                    color: "primary",
+                                    message: "Unsubscribe successfully",
+                                    duration: 2000
+                                })
+                                initOwnerData().catch(e => console.error(e))
+                            })
+                        },
+                    },
+                ]
+            })
+        }else{
+
+            presentAlert({
+                header: "Subscribe",
+                subHeader: "It will be displayed in the home list.",
+                buttons: [
+                    {
+                        text: 'Cancel',
+                        role: 'cancel',
+                        handler: () => {
+
+                        },
+                    },
+                    {
+                        text: 'OK',
+                        role: 'confirm',
+                        handler: () => {
+                            tribeService.subscribeTribe(config.tribeId).then(() => {
+                                presentToast({
+                                    color: "primary",
+                                    message: "Subscribe successfully",
+                                    duration: 2000
+                                })
+                                initOwnerData().catch(e => console.error(e))
+                            })
+                        },
+                    },
+                ]
+            })
+        }
+
+    }, [subscribed, setSubscribed])
+
+
     const menuButtons = useMemo(() => {
         const buttons = [
             {
@@ -246,21 +312,6 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                     setShowCreateTribe(true)
                 }
             },
-            // {
-            //     text: 'Share', icon: share, handler: () => {
-            //         console.log('Share clicked', navigator.share);
-            //         showShareModal();
-            //     }
-            // },
-
-            // {
-            //     text: 'Subscribe', icon: heartCircleOutline, handler: () => {
-            //         console.log('Share clicked', navigator.share);
-            //         tribeService.subscribeTribe().then(()=>{
-            //             present({position: "top", duration: 2000, color: "primary", message: "Subscribe successfully!"})
-            //         })
-            //     }
-            // },
             {
                 text: 'Cancel', icon: close, role: 'cancel', handler: () => {
                     console.log('Cancel clicked');
@@ -280,74 +331,6 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                 },
             )
 
-        } else {
-            if (subscribed) {
-                buttons.unshift({
-                        text: 'Unsubscribe', icon: heartCircleOutline, handler: () => {
-                            presentAlert({
-                                header: "Unsubscribe",
-                                subHeader: "It will be dismissed from the home list , are you sure?",
-                                buttons: [
-                                    {
-                                        text: 'Cancel',
-                                        role: 'cancel',
-                                        handler: () => {
-
-                                        },
-                                    },
-                                    {
-                                        text: 'OK',
-                                        role: 'confirm',
-                                        handler: () => {
-                                            tribeService.unSubscribeTribe(config.tribeId).then(() => {
-                                                presentToast({
-                                                    color: "primary",
-                                                    message: "Unsubscribe successfully",
-                                                    duration: 2000
-                                                })
-                                                initOwnerData().catch(e => console.error(e))
-                                            })
-                                        },
-                                    },
-                                ]
-                            })
-                        }
-                    }
-                )
-            } else {
-                buttons.unshift({
-                        text: 'Subscribe', icon: heartCircleOutline, handler: () => {
-                            presentAlert({
-                                header: "Subscribe",
-                                subHeader: "It will be displayed in the home list.",
-                                buttons: [
-                                    {
-                                        text: 'Cancel',
-                                        role: 'cancel',
-                                        handler: () => {
-
-                                        },
-                                    },
-                                    {
-                                        text: 'OK',
-                                        role: 'confirm',
-                                        handler: () => {
-                                            tribeService.subscribeTribe(config.tribeId).then(() => {
-                                                presentToast({
-                                                    color: "primary",
-                                                    message: "Subscribe successfully",
-                                                    duration: 2000
-                                                })
-                                                initOwnerData().catch(e => console.error(e))
-                                            })
-                                        },
-                                    },
-                                ]
-                            })
-                        }
-                    }
-                )
-            }
         }
         return buttons
     }, [subscribed, owner, tribeInfo])
@@ -586,6 +569,8 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                                     firstIndex={firstItemIndex}
                                     onChangeVisible={onChangeVisible}
                                     isConnecting={isConnecting}
+                                    subscribed={subscribed}
+                                    onSubscribe={onSubscribe}
                                 />
 
                             }

@@ -550,7 +550,7 @@ ion-icon:before {
 
 .recmt-head{
   display: flex;
-  padding: 0px 0 12px;
+  //padding: 0px 0 12px;
 }
 
 .recmt-head-icon {
@@ -583,7 +583,7 @@ ion-icon:before {
 }
 
 .recmt-head-title div:last-child {
-  font-size: 14px;
+  font-size: 12px;
   color: #868990;
   //line-height: 16px;
 }
@@ -604,23 +604,29 @@ ion-icon:before {
   max-height: 450px;
 }
 
+
 .recmt-footer {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   margin-top: 12px;
+  flex-direction: row;
+  align-content: center;
+  align-items: center;
+  width: 100%;
 }
 
-.recmt-footer div:first-child {
-  font-size: 14px;
+.recmt-footer .iconss {
+  font-size: 16px;
   color: #868990;
+  display: flex;
+  align-items: center;
 }
 
 .recmt-footer div:last-child {
 
 }
 
-.recmt-footer div:last-child img{
+.recmt-footer .ava-img{
   height: 36px;
   width: 36px;
   object-fit: cover;
@@ -628,7 +634,6 @@ ion-icon:before {
 
   padding: 3px;
   border: 1px solid #ddd;
-  display: flex;
 }
 
 .recmt-context {
@@ -649,8 +654,8 @@ ion-icon:before {
 .recmt-context .sflwf {
 position: absolute;
 /* size: 32px; */
-  right: 18px;
-  bottom: 54px;
+  left: 18px;
+  bottom: 52px;
 }
 
 @keyframes comeIn {
@@ -668,7 +673,7 @@ position: absolute;
 .card {
   margin: 6px;
   background: #ffffff;
-  padding: 12px 12px 0px 12px;
+  padding: 12px 12px 12px 12px;
   border-radius: 12px;
   //cursor: pointer;
   //box-shadow: 0 1px 3px darkgray;

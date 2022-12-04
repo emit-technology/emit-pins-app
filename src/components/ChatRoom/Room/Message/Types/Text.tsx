@@ -259,9 +259,9 @@ export const Text: React.FC<Props> = ({
 
                                         }
                                         {
-                                            msg && (msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&
+                                            msg && !onSupport && !(msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&
                                             <div className="removed">
-                                                UnPin
+                                                <img src="./assets/img/pined.png"/>
                                             </div>
                                         }
                                     </div>
@@ -317,9 +317,9 @@ export const Text: React.FC<Props> = ({
                                 }
 
                                 {
-                                    msg && (msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&
+                                    msg && !onSupport && !(msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&
                                     <div className="removed">
-                                        UnPin
+                                       <img src="./assets/img/pined.png"/>
                                     </div>
                                 }
                             </div>
@@ -334,10 +334,16 @@ export const Text: React.FC<Props> = ({
 
                 <div>
                     <div className={`support-outer  ${hovered && 'support-outer-column'}`}>
-                        <div>
+                        <div style={{position: "relative"}}>
                             {
                                 msg.msgType == MessageType.Role &&
                                 <Role msg={msg} showPin={showPin} isOwner={msg && msg.owner == owner}/>
+                            }
+                            {
+                                msg && !onSupport && !(msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&
+                                <div className="removed-role">
+                                    <img src="./assets/img/pined.png"/>
+                                </div>
                             }
                         </div>
                         <div className="support-tool">
