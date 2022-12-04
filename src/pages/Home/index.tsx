@@ -14,7 +14,6 @@ import {TribeLayout} from "../../components/Tribe/TribeLayout";
 import selfStorage from "../../common/storage";
 import {TribeEditModal} from "../../components/Tribe";
 import {utils} from "../../common";
-import {useCallback} from "react";
 
 interface State {
     segment: string

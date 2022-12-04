@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {PhotoProvider, PhotoView} from "react-photo-view";
 import {utils} from "../../common";
-import { LazyLoadImage } from "react-lazy-load-image-component";
+// import { LazyLoadImage } from "react-lazy-load-image-component";
 import 'react-lazy-load-image-component/src/effects/blur.css';
 
 interface Props{
@@ -26,8 +26,7 @@ const ImageViewChild:React.FC<Props> = ({url,width, height,disH,disW}) =>{
     return <div style={{width: disW, height: disH}}>
         <PhotoProvider maskOpacity={0.8}>
             <PhotoView src={url} width={disW} height={disH}>
-                <LazyLoadImage src={_imgDisplay.displayUrl}
-                               effect="blur"
+                <img src={_imgDisplay.displayUrl}
                                width={disW} height={disH}
                                style={{
                                    borderRadius: "12px",

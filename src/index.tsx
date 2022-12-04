@@ -9,18 +9,25 @@ import { Toast } from '@capacitor/toast';
 import {addListeners, getDeliveredNotifications, registerNotifications} from './service/app'
 import {utils} from "./common";
 import {LogLevel} from "react-virtuoso";
+
+import 'overlayscrollbars/overlayscrollbars.css';
+import {ParallaxProvider} from "react-scroll-parallax";
 // import { SplashScreen } from '@capacitor/splash-screen';
 
-globalThis.VIRTUOSO_LOG_LEVEL = LogLevel.DEBUG;
+// globalThis.VIRTUOSO_LOG_LEVEL = LogLevel.DEBUG;
 
 const rootElement = document.getElementById("root");
 if (rootElement.hasChildNodes()) {
     hydrate(<React.StrictMode>
+        <ParallaxProvider>
         <App />
+        </ParallaxProvider>
     </React.StrictMode>, rootElement);
 } else {
     render(<React.StrictMode>
-        <App />
+        <ParallaxProvider>
+            <App />
+        </ParallaxProvider>
     </React.StrictMode>, rootElement);
 }
 console.log("added app url open listener.")

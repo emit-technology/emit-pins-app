@@ -203,7 +203,7 @@ export const Text: React.FC<Props> = ({
                             {
                                 <div style={{
                                     textAlign: isOwner ? "right" : "left",
-                                    padding: "3px",
+                                    padding: "0px",
                                     width: "auto",
                                     height: !hideTime ? "auto" : 0,
                                     overflow: "hidden"

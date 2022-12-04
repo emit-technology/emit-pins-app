@@ -55,6 +55,7 @@ import {Virtuoso} from 'react-virtuoso'
 import {LoremIpsum} from "lorem-ipsum";
 import {MessageItem} from "./MessageItem";
 import {VirtuosoScroller} from "./VirtuosoScroller";
+import {ViewportList} from "react-viewport-list";
 
 
 const lorem = new LoremIpsum({
@@ -114,19 +115,17 @@ const _lock = mutexify()
 
 const isAPP = false// utils.isSafari();
 
-let renderCount = 0;
+let renderCount = 0 ;
 
-export const MessageContentVisualsoChild: React.FC<Props> = ({
-                                                                 groupMsg
-                                                                 , isConnecting, firstIndex,
+const MessageContentViewportChild: React.FC<Props> = ({groupMsg
+                                                                 ,isConnecting, firstIndex,
                                                                  onChangeVisible,
                                                                  setHideMenu, onFork,
                                                                  shareMsgId, userLimit,
                                                                  selectRole, pinnedStickies,
                                                                  loaded, onReload, showPinnedMsgDetail,
                                                                  showPin, owner,
-                                                                 tribeInfo, onSupport
-                                                             }) => {
+                                                         tribeInfo, onSupport}) => {
 
     const dispatchData = useAppSelector(state => state.jsonData);
     const dispatch = useAppDispatch();
@@ -157,12 +156,12 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         return !id ? -1 : id;
     }
 
-    useLayoutEffect(() => {
+    useLayoutEffect(()=>{
         const doc = document.querySelectorAll('[data-virtuoso-scroller=true]');
-        if (doc && doc.length > 0) {
-            doc[0].className = "customer-scroll";
+        if(doc && doc.length > 0 ){
+            doc[0].className= "customer-scroll";
         }
-    }, [])
+    },[])
 
     useEffect(() => {
         fetchMsgByIndex(firstIndex).catch(e => console.error(e))
@@ -221,9 +220,9 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         let msgIndex = comp[0].records[0].msgIndex;
         let groupByTime: { role: string, timestamp: number, groupId: string, owner: string } = null;
         let lastPin: PinnedSticky = null;
-        for (let i = 0; i < comp.length; i++) {
+        for (let i=0;i<comp.length;i++) {
             let pMsg = comp[i];
-            const nextMsg = i < comp.length ? comp[i + 1] : null
+            const nextMsg = i<comp.length ?comp[i+1]:null
             if ((pMsg as PinnedSticky).records && (pMsg as PinnedSticky).records[0]) {
                 const msg: Message = (pMsg as PinnedSticky).records[0];
                 if (msg.msgType !== MessageType.Role) {
@@ -246,11 +245,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 msg.msgIndex = msgIndex++;
             }
 
-            pMsg.showPin = {
-                lastPin: pMsg,
-                showPin: lastPin && lastPin.groupId !== pMsg.groupId,
-                showFork: nextMsg && nextMsg.groupId !== pMsg.groupId
-            };
+            pMsg.showPin = {lastPin: pMsg, showPin: lastPin && lastPin.groupId !== pMsg.groupId, showFork: nextMsg && nextMsg.groupId !== pMsg.groupId};
 
             lastPin = pMsg;
         }
@@ -278,7 +273,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
             });
             setComments(comp)
             setFirstItemIndex(reqIndex)
-            console.log("------> firstItemIndex: [%d]", reqIndex, comp.length > 0 && comp[0])
+            console.log("------> firstItemIndex: [%d]", reqIndex, comp.length>0 && comp[0])
 
             if (toBottom) {
                 scrollToItem({index: rest.total, align: "end"});
@@ -300,8 +295,8 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
             if (latestId == -1) {
                 latestId = pageSize < streamMsg1.total ? streamMsg1.total - pageSize + 1 : 0;
             }
-            if (latestId >= streamMsg1.total) {
-                latestId = streamMsg1.total - 1;
+            if(latestId >= streamMsg1.total){
+                latestId =  streamMsg1.total - 1;
             }
             console.log("=========initLatestPin >> start=[%d], end=[%d] ", latestId, pageSize);
             const data = await tribeWorker.getPinnedMessageArray(config.tribeId, latestId, pageSize);
@@ -369,7 +364,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                         console.log("=========loadMore >> start=[%d], end=[%d] , data=[%d] ", lastMsg.records[0].msgIndex + 1, pageSize, rest.data.length);
                         setTotal(pre => {
                             console.log("=========loadMore >> set total 6 ==  ", pre, rest.total)
-                            return pre < rest.total ? rest.total : pre;
+                            return pre < rest.total?rest.total:pre;
                         });
                         setComments(pre => {
                             const comp = [...pre, ...rest.data]
@@ -489,7 +484,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     useEffect(() => {
         if (loaded && count++ == 0) {
             tribeWorker.addMessageListener(config.tribeId, async (data: { total: number, messages: Array<PinnedSticky> }) => {
-                try {
+                try{
                     console.log("======> startcallbutton ", data)
                     setTotal(data.total)
                     const messages = data.messages;
@@ -567,7 +562,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                             return commentsCopy
                         })
                     }
-                } catch (e) {
+                }catch (e){
                     console.error(e)
                 }
             });
@@ -612,40 +607,96 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         }
     }, [dispatchData.data]);
 
+    // const displayBottomMsg = (data: PinnedSticky) => {
+    //     console.log("===>>>>  displayBottomMsg", data, stickyMsg)
+    //     if (!!data.groupId) {
+    //         const dataCopy: PinnedSticky = JSON.parse(JSON.stringify(data))
+    //         dataCopy.theme = tribeInfo.theme;
+    //         dataCopy.roles = tribeInfo.roles;
+    //         dataCopy.seq = -1;
+    //         dataCopy.groupId = "";
+    //         dataCopy.index = new BigNumber(data.seq).toNumber();
+    //         dispatchTheme(dataCopy)
+    //     } else {
+    //         dispatchTheme(data)
+    //     }
+    // }
+
     const setMaxVisible = (n: number) => {
         // console.log("set max visible=[%d]", n)
         setMaxVisibleIndex(n)
         selfStorage.setItem(`maxVisibleIndex_${config.tribeId}`, n)
-        // const data: PinnedSticky = comments[n];
-        // if (data) {
-        //     // selfStorage.setItem(`latest_view_${config.tribeId}`, data.records && data.records.length > 0 && data.records[0].timestamp)
-        // }
+        const data: PinnedSticky = comments[n];
+        if (data) {
+            // selfStorage.setItem(`latest_view_${config.tribeId}`, data.records && data.records.length > 0 && data.records[0].timestamp)
+        }
     }
 
 
-    const onShare = useCallback((msg: Message) => {
+    const onShare = async (msg: Message) => {
         // console.log("====> share msg: ", msg, new Date(msg.timestamp * 1000))
-        tribeWorker.getPinnedMessageArray(config.tribeId, msg.msgIndex, 20).then(rest=>{
-            let shareMsgs: Array<Message> = [];
-            let shareRoles: Array<TribeRole> = [];
-            const data = rest.data;
-            // data.reverse();
-            for (let stmsg of data) {
-                shareMsgs.push(stmsg.records[0])
-                if (shareRoles.length == 0) {
-                    shareRoles.push(...stmsg.roles)
-                }
+        const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, msg.msgIndex, 20)
+        let shareMsgs: Array<Message> = [];
+        let shareRoles: Array<TribeRole> = [];
+        const data = rest.data;
+        // data.reverse();
+        for (let stmsg of data) {
+            shareMsgs.push(stmsg.records[0])
+            if (shareRoles.length == 0) {
+                shareRoles.push(...stmsg.roles)
             }
+        }
 
-            setShowShareModal(true);
-            setShareMsgs(shareMsgs);
-            setShareRoles(shareRoles)
-        })
+        setShowShareModal(true);
+        setShareMsgs(shareMsgs);
+        setShareRoles(shareRoles)
+    }
 
-    },[setShowShareModal,setShareMsgs,setShareRoles])
+    // const Loading = () => <div style={{width: '100%', textAlign: 'center', padding: 12}}>⏳ Loading...</div>;
+
+
+    // console.log("total - 1 > currentVisibleIndex : ",total - 1 > currentVisibleIndex, total -1, currentVisibleIndex, maxVisibleIndex )
+    // console.log(" total - 1 - maxVisibleIndex > 0 && maxVisibleIndex > 0: ",  total - 1 - maxVisibleIndex > 0 && maxVisibleIndex > 0);
 
     const _url = stickyMsg && (stickyMsg as PinnedSticky).groupId ? stickyMsg.theme.image :
         pinnedStickies && pinnedStickies.data.length > 0 ? pinnedStickies.data[0].theme.image : tribeInfo && tribeInfo.theme.image
+
+
+// You can use index to randomize
+// and make the placeholder list more organic.
+// the height passed is the one measured for the real item.
+// the placeholder should be the same size.
+    const ScrollSeekPlaceholder = ({height, index}) => {
+        const pinnedSticky: PinnedSticky = comments[index];
+
+        return <div
+            style={{
+                height,
+                padding: "8px",
+                boxSizing: "border-box",
+                overflow: "hidden",
+                borderRadius: 12,
+                margin: 6,
+            }}
+        >
+            <IonItem>
+                <IonThumbnail slot="start">
+                    <IonSkeletonText animated={true}></IonSkeletonText>
+                </IonThumbnail>
+                <IonLabel>
+                    <h3>
+                        <IonSkeletonText animated={true} style={{'width': '80%'}}></IonSkeletonText>
+                    </h3>
+                    <p>
+                        <IonSkeletonText animated={true} style={{'width': '60%'}}></IonSkeletonText>
+                    </p>
+                    <p>
+                        <IonSkeletonText animated={true} style={{'width': '30%'}}></IonSkeletonText>
+                    </p>
+                </IonLabel>
+            </IonItem>
+        </div>
+    }
 
     const [atBottom, setAtBottom] = useState(false)
     const showButtonTimeoutRef = useRef(null)
@@ -667,6 +718,8 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         }
     }, [atBottom, setShowButton])
 
+    // console.log("maxVisibleIndex:: ", total, maxVisibleIndex)
+
     const [visibleRange, setVisibleRange] = useState({
         startIndex: 0,
         endIndex: 0,
@@ -675,6 +728,14 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     const [isScrolling, setIsScrolling] = useState(false);
 
     const Loading = () => <div style={{width: '100%', textAlign: 'center', padding: 12}}>⏳ Loading...</div>;
+
+    // useEffect(() => {
+    //     const ret = comments.length >0  && (comments[comments.length-1] as PinnedSticky).records && (comments[comments.length-1] as PinnedSticky).records[0].msgIndex >= total - 5;
+    //     console.log('MessagesList: followOutput isAtBottom', atBottom, comments.length, ret);
+    //     if (ret) {
+    //         scrollToItem({index: total - 1, align: "end"})
+    //     }
+    // }, [total, comments])
 
     // setting 'auto' for behavior does help in this sample, but not in my actual code
     const followOutput = useCallback((isAtBottom) => {
@@ -690,6 +751,84 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         setAtBottom(bottom)
     }, [setAtBottom])
 
+    const renInboxMsg = (messages:Array<Message>) =>{
+        let item = <div></div>;
+
+        messages && messages.length>0&& messages.forEach((m,index)=>{
+            const v:Message = JSON.parse(JSON.stringify(m));
+
+            if (v.msgType == MessageType.Text || v.msgType == MessageType.Role || v.msgType == MessageType.Airdrop) {
+                let className = 'msg-no-role-rec';
+                if (v.role) {
+                    className = owner == v.owner && !v.groupId ? "msg-sender" : "msg-receive"
+                }
+                if (v.msgType == MessageType.Role) {
+                    className = `${className} role-sp`
+                }
+                const checked = checkedMsgArr.indexOf(v.id) > -1;
+                item = <div className={className} key={index} onClick={(e) => {
+                    if (showPin) {
+                        e.stopPropagation();
+                        const checkedCopy = [...checkedMsgArr]
+                        if (checked) {
+                            checkedCopy.splice(checkedMsgArr.findIndex(cv => cv == v.id), 1)
+                        } else {
+                            checkedCopy.push(v.id)
+                        }
+                        setCheckedMsgArr(checkedCopy);
+                        selfStorage.setItem(`tribe_pin_arr`, checkedCopy)
+                    }
+                }}>
+                    <div className="inner" style={{maxWidth: '100%'}}
+                         onMouseOver={() => {
+                             if(!pinnedStickies){
+                                 setCheckedMsgId(v.id)
+                             }
+                         }}
+                    >
+                        {/*<div style={{backgroundColor: "green", padding: 12}}>{v.msgIndex} - It feels like there are more bot comments than real people on twitter now.</div>*/}
+                        <Text hovered={checkedMsgId == v.id} hideTime={!!m.hideTime}
+                              keeper={tribeInfo && tribeInfo.keeper} onSupport={onSupport}
+                              checked={checked || v.msgType == MessageType.Airdrop} msg={v}
+                              owner={owner}
+                              showPin={v.msgStatus == MessageStatus.dashed && showPin}
+                              />
+                        {/*    {*/}
+                        {/*        !pinnedStickies && <>*/}
+                        {/*            <Tools onShare={(msg) => onShare(msg)} msg={v}*/}
+                        {/*                   showPin={v.msgStatus == MessageStatus.dashed && showPin} owner={owner}*/}
+                        {/*                   onSupport={userLimit && userLimit.supportLeft > 0 && onSupport}*/}
+                        {/*                   onReplay={(msg: Message) => {*/}
+                        {/*                       onReplay(msg)*/}
+                        {/*                   }} onEdit={(msg: Message) => {*/}
+                        {/*                setShowModifyMsg(msg)*/}
+                        {/*            }} onDelete={(msg: Message) => {*/}
+                        {/*                tribeService.deleteMsg(msg.id).catch(e => {*/}
+                        {/*                    console.log(e, "tribe del msg")*/}
+                        {/*                })*/}
+                        {/*            }} isChecked={checkedMsgId == v.id} keeper={tribeInfo && tribeInfo.keeper}/>*/}
+                        {/*        </>*/}
+                        {/*    }*/}
+                        {/*</Text>*/}
+
+                    </div>
+
+
+                </div>
+            } else if (v.msgType == MessageType.Dice) {
+                item = <Dice/>
+            } else if (v.msgType == MessageType.Expression) {
+                item = <Expression/>
+            } else {
+                // console.log(index, v," divide........." )
+            }
+        })
+        return item
+    }
+    // console.log("#################### re rendering .... ", renderCount++)
+
+    const listRef = useRef(null);
+
     return <>
         <div className={!pinnedStickies ? "msg-content" : "msg-content2"} style={{
             backgroundImage: `url(${utils.getDisPlayUrl(_url)})`,
@@ -700,82 +839,23 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                     <div className="position-top">[{visibleRange.startIndex}] - [{visibleRange.endIndex}]
                         : [{firstItemIndex}]..[{total}], [ren: {renderCount}]
                     </div>
-                    <Virtuoso
-                        ref={virtuoso}
-                        style={{height: '100%'}}
-                        overscan={0}
-                        isScrolling={(f) => setIsScrolling(f)}
-                        firstItemIndex={firstItemIndex}
-                        rangeChanged={setVisibleRange}
-                        data={comments}
-                        endReached={loadMore}
-                        startReached={prependItems}
-                        followOutput={atBottom && (total > 0 && visibleRange.startIndex > total - pageSize) && followOutput}
-                        atBottomStateChange={(total > 0 && visibleRange.startIndex > total - pageSize) && bottomChange}
-                        // initialTopMostItemIndex={getCurrentVisible()}
-                        itemsRendered={(items)=>{
-                            if (!isScrolling && !pinnedStickies) {
-                                if (!stickyMsg) {
-                                    if (!!tribeInfo) {
-                                        const groupArr = tribeService.getGroupMap();
-                                        const defaultGroup = groupArr[groupArr.length - 1];
-                                        dispatchTheme({
-                                            theme: tribeInfo && tribeInfo.theme,
-                                            seq: -1,
-                                            roles: defaultGroup.roles,
-                                            records: [],
-                                            groupId: "",
-                                            index: -1
-                                        })
-                                    }
-                                    if (items[items.length - 1] && items.length > 0 && maxVisibleIndex < items[items.length - 1].data.records[0].msgIndex) {
-                                        setMaxVisible(items[items.length - 1].data.records[0].msgIndex)
-                                    }
-                                }
-                                return
-                            }
-                            if (!pinnedStickies && items && items[0] && items[0].data) {
-                                visibleStartId = items[0].index;
-                                setCurrentTimeout(false)
-                                if (!!(items[items.length - 1].data) && maxVisibleIndex < items[items.length - 1].data.records[0].msgIndex) {
-                                    setMaxVisible(items[items.length - 1].data.records[0].msgIndex)
-                                }
-                                if (items[items.length - 1].index == total - 1) {
-                                    if (!!tribeInfo) {
-                                        const groupArr = tribeService.getGroupMap();
-                                        const defaultGroup = groupArr[groupArr.length - 1];
-                                        dispatchTheme({
-                                            theme: tribeInfo && tribeInfo.theme,
-                                            seq: -1,
-                                            roles: defaultGroup.roles,
-                                            records: [],
-                                            groupId: "",
-                                            index: -1
-                                        })
-                                    }
-                                } else {
-                                    dispatchTheme(items[0].data)
-                                }
-                            }
-                        }}
-                        itemSize={(el, field) => {
-                            return el.getBoundingClientRect().height;
-                        }}
-                        itemContent={(index, data) => {
-                            return <MessageItem index={index} pinnedSticky={data as PinnedSticky} total={total}
-                                                atBottom={atBottom} firstItemIndex={firstItemIndex}
-                                                checkedMsgArr={checkedMsgArr} showPin={showPin} owner={owner}
-                                                checkedMsgId={checkedMsgId} pinnedStickies={pinnedStickies}
-                                                onSupport={onSupport} onFork={onFork} tribeInfo={tribeInfo}
-                                                onShare={onShare} stickyMsg={stickyMsg} userLimit={userLimit}
-                                                onEdit={(msg) => setShowModifyMsg(msg)} onReplay={onReplay}
-                                                dispatchTheme={dispatchTheme} setCheckedMsgId={(msgId)=>{
-                                setCheckedMsgId(msgId)
-                            }}
-                                                setCheckedMsgArr={(msgs)=>setCheckedMsgArr(msgs)}
-                            />
-                        }}
-                    />
+
+                    <div ref={listRef} className="viewport-list">
+                        <ViewportList
+                            viewportRef={listRef}
+                            items={comments}
+                            itemMinSize={20}
+                            margin={0}
+                        >
+                            {(data, index) => (
+                                <MessageItem index={index} pinnedSticky={data as PinnedSticky} total={total}
+                                             atBottom={atBottom} firstItemIndex={firstItemIndex}
+                                             checkedMsgArr={checkedMsgArr} showPin={showPin} owner={owner}
+                                             checkedMsgId={checkedMsgId} pinnedStickies={pinnedStickies}
+                                             onSupport={onSupport} onFork={onFork} tribeInfo={tribeInfo} />
+                            )}
+                        </ViewportList>
+                    </div>
 
                 </div>
             </div>
@@ -814,10 +894,10 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                         {
                             !pinnedStickies && (showButton || visibleRange.startIndex < 5) &&
                             <div className="fab-cus-dig"
-                                 style={(total - 1 - maxVisibleIndex <= 0) ? {
+                                 style={(total - 1 - maxVisibleIndex <= 0)? {
                                      background: "transparent",
                                      height: 12
-                                 } : {}}>
+                                 }:{}}>
                                 <small>{total - 1 - maxVisibleIndex <= 0 ? "" : total - 1 - maxVisibleIndex}</small>
                             </div>
                         }
@@ -988,4 +1068,4 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
 }
 
 
-export const MessageContentVisualso = React.memo(MessageContentVisualsoChild);
+export const MessageContentViewport = React.memo(MessageContentViewportChild);

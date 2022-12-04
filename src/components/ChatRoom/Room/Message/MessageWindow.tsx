@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useEffect, useLayoutEffect, useState} from 'react';
+import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import {
     GroupMsg,
     Message,
@@ -7,34 +7,36 @@ import {
     MessageType,
     PinnedSticky,
     TribeInfo,
-    TribeRole, TribeTheme,
-    UserLimit
+    TribeRole,
+    UserLimit, WsStatus
 } from "../../../../types";
-import {Airdrop, Dice, Expression, Text} from "./Types";
+import {Dice, Expression, Text} from "./Types";
 
 import './message.scss';
 import {useAppDispatch, useAppSelector} from "../../../../common/state/app/hooks";
-import useVirtual from "react-cool-virtual";
 import {saveDataState} from "../../../../common/state/slice/dataSlice";
 import {
     IonAvatar,
     IonButton,
-    IonButtons, IonCol,
+    IonButtons,
+    IonCol,
     IonContent,
+    IonIcon, IonSkeletonText,
+    IonItem, IonThumbnail,
     IonFab,
-    IonHeader, IonRow,
-    IonIcon, IonItem, IonLabel,
+    IonHeader,
+    IonLabel,
+    IonLoading,
     IonModal,
+    IonRow,
     IonTextarea,
     IonTitle,
-    IonToolbar,
-    IonLoading
+    IonToolbar
 } from '@ionic/react';
 import {
-    arrowForwardOutline,
-    chevronDownOutline,
-    chevronUpOutline,
-    createOutline, gitBranchOutline,
+    arrowForwardOutline, at,
+    createOutline,
+    gitBranchOutline,
 } from "ionicons/icons";
 import {tribeService} from "../../../../service/tribe";
 import UploadImage from "../../../utils/UploadImage";
@@ -47,6 +49,22 @@ import {Tools} from "./Types/Tools";
 import {utils} from "../../../../common";
 import {ShareEx} from "../../../utils/ShareEx";
 import {ReplayText} from "./Types/ReplayText";
+import {StatusBar} from "@capacitor/status-bar";
+import {isApp} from "../../../../service/app";
+import {Virtuoso} from 'react-virtuoso'
+import {LoremIpsum} from "lorem-ipsum";
+import {MessageItem} from "./MessageItem";
+import {VariableSizeList} from 'react-window';
+import AutoSizer from "react-virtualized-auto-sizer"
+import {StickyList} from "./MessageItemView";
+
+const lorem = new LoremIpsum({
+    wordsPerSentence: {
+        max: 32,
+        min: 4
+    }
+});
+
 
 interface Props {
     pinnedStickies?: { data: Array<PinnedSticky>, total: number }
@@ -61,56 +79,59 @@ interface Props {
     userLimit?: UserLimit
     selectRole?: TribeRole
     shareMsgId?: string
-    onFork?: (groupId:string, forkTribeInfo: TribeInfo) => Promise<string>;
+    onFork?: (groupId: string, forkTribeInfo: TribeInfo) => void;
+
+    setHideMenu?: (f: boolean) => void;
+
+    onChangeVisible?: (v: PinnedSticky) => void;
+
+    firstIndex: number
+
+    isConnecting?: WsStatus
 }
 
-const pageSize = 1000000;
-
+const pageSize = 30;
 let pageNo = 1;
 let count = 0;
-let total = 0;
 let shouldScroll = 0;
-let error_fetch_count = 0;
 let shouldScrollToBottom = false;
-
 let delaySaveCurrentVisibleIndex = 0;
+let loadCount = 0;
+
+const currentMsgIndexKey = () => `current_msg_v2_index_${config.tribeId}`;
+
+function setCurrentVisible(visibleStartId: number) {
+    selfStorage.setItem(currentMsgIndexKey(), visibleStartId)
+}
+
+let visibleStartId = 0;
+
+const setVisibleStartIndex = (id: number) => {
+    visibleStartId = id
+}
 
 const mutexify = require('mutexify/promise')
 const _lock = mutexify()
 
-const fetchData = async (pageNo, setComments, condition?: Array<any>) => {
+const isAPP = false// utils.isSafari();
 
-    try {
-        const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, pageNo, pageSize, condition)
-        total = rest.data.length;
-        setComments((prevComments: Array<PinnedSticky>) => [...rest.data, ...[]]);
-    } catch (err) {
-        if (error_fetch_count++ < 50) {
-            await fetchData(pageNo, setComments);
-        }
-        console.error(err, "fetchData error")
-        // Try again
-    }
-};
+let renderCount = 0;
 
-function setCurrentVisible(visibleStartIndex: number) {
-    selfStorage.setItem(`current_visible_index_${config.tribeId}`, visibleStartIndex)
-}
+export const MessageContentWindowChild: React.FC<Props> = ({
+                                                               groupMsg
+                                                               , isConnecting, firstIndex,
+                                                               onChangeVisible,
+                                                               setHideMenu, onFork,
+                                                               shareMsgId, userLimit,
+                                                               selectRole, pinnedStickies,
+                                                               loaded, onReload, showPinnedMsgDetail,
+                                                               showPin, owner,
+                                                               tribeInfo, onSupport
+                                                           }) => {
 
-function getCurrentVisible(): number {
-    const itm = selfStorage.getItem(`current_visible_index_${config.tribeId}`)
-    return itm == null ? 999999999 : itm;
-}
-
-let visibleStartIndex = 0;
-
-const setVisibleStartIndex = (n: number) => {
-    visibleStartIndex = n;
-}
-
-export const MessageContentWindow: React.FC<Props> = ({groupMsg, onFork, shareMsgId, userLimit, selectRole, pinnedStickies, loaded, onReload, showPinnedMsgDetail, showPin, owner, tribeInfo, onSupport}) => {
     const dispatchData = useAppSelector(state => state.jsonData);
     const dispatch = useAppDispatch();
+
     const [comments, setComments] = useState([]);
     const [showModifyMsg, setShowModifyMsg] = useState(null);
 
@@ -121,266 +142,334 @@ export const MessageContentWindow: React.FC<Props> = ({groupMsg, onFork, shareMs
 
     const [stickyMsg, setStickyMsg] = useState(null);
     const [checkedMsgArr, setCheckedMsgArr] = useState([])
-    const [currentVisibleIndex, setCurrentVisibleIndex] = useState(0);
+    const [currentVisibleStopIndex, setCurrentVisibleStopIndex] = useState(0);
     const [maxVisibleIndex, setMaxVisibleIndex] = useState(0);
     const [replayMsg, setReplayMsg] = useState(null);
     const [checkedMsgId, setCheckedMsgId] = useState("");
+    // const [scrollEvent, setScrollEvent] = useState(null);
+    const virtuoso = useRef(null);
+    const [loadingData, setLoadingData] = useState(false)
 
-    useEffect(()=>{
-        if(!pinnedStickies && comments.length == 0 && tribeInfo){
-            dispatchTheme({
-                roles: tribeInfo.roles,
-                theme: tribeInfo.theme,
-                records: [], index: 0, groupId: "", seq: -1
+    const [firstItemIndex, setFirstItemIndex] = useState(0)
+    const [total, setTotal] = useState(0)
+
+    const getCurrentVisible = (): number => {
+        const id = selfStorage.getItem(currentMsgIndexKey());
+        return !id ? -1 : id;
+    }
+
+    useLayoutEffect(() => {
+        const doc = document.querySelectorAll('[data-virtuoso-scroller=true]');
+        if (doc && doc.length > 0) {
+            doc[0].className = "customer-scroll";
+        }
+    }, [])
+
+    useEffect(() => {
+        fetchMsgByIndex(firstIndex).catch(e => console.error(e))
+    }, [firstIndex])
+
+    useEffect(() => {
+        if (!!shareMsgId) {
+            tribeService.msgInfo(shareMsgId).then(msgInfo => {
+                fetchMsgByIndex(msgInfo.msgIndex).catch(e => console.error(e))
             })
         }
-    },[tribeInfo])
+    }, [shareMsgId])
 
-    const doScrollEvent = (e:any) =>{
-        try{
-            if(e){
-                if (!pinnedStickies) {
-                    setVisibleStartIndex(e.visibleStartIndex);
-                    setCurrentTimeout();
-                }
-                if (!pinnedStickies && currentVisibleIndex !== e.visibleStopIndex) {
-                    setCurrentVisibleIndex(e.visibleStopIndex);
-                    if (e.visibleStopIndex >= maxVisibleIndex) {
-                        setMaxVisible(e.visibleStopIndex);
-                    }
-                    const data = comments[e.visibleStartIndex + 1];
-                    if (e.visibleStopIndex >= comments.length - 1) {
-                        const data = comments[e.visibleStopIndex];
-                        displayBottomMsg(data);
-                    } else if (e.visibleStartIndex == 0) {
-                        const data = comments[e.visibleStartIndex];
-                        dispatchTheme(data).catch(e=>console.error(e));
-                    } else {
-                        // const condition = data && stickyMsg && (stickyMsg.seq != data.seq);
-                        if (!stickyMsg && data || stickyMsg && data && (stickyMsg.seq != data.seq)) {
-                            dispatchTheme(data).catch(e=>console.error(e));
-                        }
-                    }
-
-                }
-            }
-        }catch (e){
-            console.error(e)
-        }finally {
+    const setStatusBarHide = async (f: boolean) => {
+        if (!await isApp()) {
+            return;
+        }
+        if (f) {
+            StatusBar.hide().catch(e => console.error(e))
+        } else {
+            StatusBar.show().catch(e => console.error(e))
         }
     }
 
-    const setCurrentTimeout = () => {
-        if (visibleStartIndex >= 0 && delaySaveCurrentVisibleIndex++ == 0) {
-            setTimeout(() => {
-                if (visibleStartIndex >= 0) {
-                    setCurrentVisible(visibleStartIndex);
+    const setFullScreen = (scrollForward: boolean) => {
+        try {
+            if (!!setHideMenu && (utils.isAndroid() || utils.isIos())) {
+                if (scrollForward) {
+                    setHideMenu(true)
+                    setStatusBarHide(true)
+                } else {
+                    setHideMenu(false)
+                    setStatusBarHide(false)
                 }
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    const setCurrentTimeout = (f: boolean) => {
+        // console.log("visibleStartId == ", visibleStartId)
+        if (visibleStartId && delaySaveCurrentVisibleIndex++ == 0) {
+            setTimeout(() => {
+                setCurrentVisible(visibleStartId);
                 delaySaveCurrentVisibleIndex = 0;
             }, 10)
         }
     }
 
+
+    const combile = (comp: Array<PinnedSticky>) => {
+        if (!comp || comp.length == 0) {
+            return;
+        }
+        let msgIndex = comp[0].records[0].msgIndex;
+        let groupByTime: { role: string, timestamp: number, groupId: string, owner: string } = null;
+        let lastPin: PinnedSticky = null;
+        for (let i = 0; i < comp.length; i++) {
+            let pMsg = comp[i];
+            const nextMsg = i < comp.length ? comp[i + 1] : null
+            if ((pMsg as PinnedSticky).records && (pMsg as PinnedSticky).records[0]) {
+                const msg: Message = (pMsg as PinnedSticky).records[0];
+                if (msg.msgType !== MessageType.Role) {
+                    msg.hideTime = !!groupByTime && groupByTime.role == msg.role && groupByTime.groupId == msg.groupId && (Math.floor(groupByTime.timestamp / 300) == Math.floor(msg.timestamp / 300));
+
+                    if (groupByTime && tribeInfo && (
+                        groupByTime.owner == tribeInfo.keeper && msg.owner !== tribeInfo.keeper ||
+                        groupByTime.owner !== tribeInfo.keeper && msg.owner == tribeInfo.keeper
+                    )) {
+                        if (!msg.groupId) {
+                            msg.hideTime = false;
+                        }
+                    }
+                    groupByTime = {role: msg.role, timestamp: msg.timestamp, groupId: msg.groupId, owner: msg.owner};
+                } else {
+                    msg.hideTime = false;
+                    groupByTime = null;
+                }
+
+                msg.msgIndex = msgIndex++;
+            }
+
+            pMsg.showPin = {
+                lastPin: pMsg,
+                showPin: lastPin && lastPin.groupId !== pMsg.groupId,
+                showFork: nextMsg && nextMsg.groupId !== pMsg.groupId
+            };
+
+            lastPin = pMsg;
+        }
+    }
+
+
+    const fetchMsgByIndex = async (firstIndex: number, toBottom: boolean = false) => {
+        if (firstIndex > -1) {
+            let reqIndex = firstIndex;
+            let reqPageSize = pageSize;
+            if (reqIndex > pageSize) {
+                reqPageSize = pageSize * 2
+                reqIndex = reqIndex - pageSize;
+            } else {
+                reqPageSize = pageSize + reqIndex;
+                reqIndex = 0;
+            }
+            const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, reqIndex, reqPageSize);
+            const comp = rest.data;
+            // console.log("======== comments: ", comments);
+            combile(comp);
+
+            setTotal(pre => {
+                return rest.total
+            });
+            setComments(comp)
+            setFirstItemIndex(reqIndex)
+            console.log("------> firstItemIndex: [%d]", reqIndex, comp.length > 0 && comp[0])
+
+            if (toBottom) {
+                scrollToItem({index: rest.total, align: "end"});
+            } else {
+                scrollToItem({index: firstIndex - reqIndex, align: "start"});
+            }
+
+        }
+    }
+
+    const initLatestPin = async () => {
+
+        const streamMsg1 = await tribeWorker.getPinnedMessageArray(config.tribeId, 0, 2);
+        if (streamMsg1 && streamMsg1.total == 0) {
+            const defaultThem = await tribeService.defaultTheme();
+            dispatchTheme(defaultThem)
+        } else {
+            let latestId = getCurrentVisible();
+            if (latestId == -1) {
+                latestId = pageSize < streamMsg1.total ? streamMsg1.total - pageSize + 1 : 0;
+            }
+            if (latestId >= streamMsg1.total) {
+                latestId = streamMsg1.total - 1;
+            }
+            console.log("=========initLatestPin >> start=[%d], end=[%d] ", latestId, pageSize);
+            const data = await tribeWorker.getPinnedMessageArray(config.tribeId, latestId, pageSize);
+            const comp = data.data;
+            combile(comp)
+            console.log("=========initLatestPin >> start=[%d], end=[%d], data=[%d] ", latestId, pageSize, data.data.length);
+            setComments(comp)
+            setTotal(pre => {
+                console.log("------> tribeWorker set total 5 ==  ", pre, data.total)
+                return data.total
+            });
+            console.log("------> firstItemIndex: [%d], initLatestPin", latestId)
+            setFirstItemIndex(latestId);
+        }
+    }
+
+    const activePage = async () => {
+        console.log("=========activePage >> data=[%d] ", comments.length);
+        if (comments.length > 0) {
+            const lastMsg: PinnedSticky = comments[comments.length - 1];
+            if (lastMsg) {
+                loadMore(lastMsg.records[0].msgIndex)
+            }
+        }
+    }
+
+    const prependItems = useCallback(() => {
+        // setLoadingData(true)
+        if (firstItemIndex > 0) {
+            let reqPageSize = pageSize;
+            let reqIndex = firstItemIndex;
+            if (reqIndex > reqPageSize) {
+            } else {
+                reqPageSize = firstItemIndex
+            }
+            console.log("=========prependItems >> start=[%d], end=[%d] ", reqIndex, -reqPageSize);
+            tribeWorker.getPinnedMessageArray(config.tribeId, reqIndex, -reqPageSize).then(rest => {
+                console.log("=========prependItems >> start=[%d], end=[%d] , data=[%d]", reqIndex, -reqPageSize, rest.data.length);
+                const nextFirstItemIndex = firstItemIndex - pageSize;
+                console.log("------> firstItemIndex: [%d], prependItems", nextFirstItemIndex >= 0 ? nextFirstItemIndex : 0)
+                setFirstItemIndex(nextFirstItemIndex >= 0 ? nextFirstItemIndex : 0)
+                setComments(pre => {
+                    const comp = [...rest.data, ...pre];
+                    combile(comp);
+                    return comp
+                })
+            }).catch(() => {
+                // setLoadingData(false)
+            })
+        }
+
+        return false
+    }, [firstItemIndex, comments, setComments, total])
+
+    const loadMore = useCallback((lastIndex: number) => {
+        if (comments.length > 0 && comments.length < total && lastIndex > -1) {
+            const lastMsg: PinnedSticky = comments[comments.length - 1];
+            console.log("=========loadMore >> start=[%d], end=[%d] ", lastMsg.records[0].msgIndex + 1, pageSize, comments);
+            if ((isConnecting == WsStatus.active && !!lastMsg.records[0].groupId)
+                ||
+                (isConnecting !== WsStatus.active && !!lastMsg && !!lastMsg.records && !!lastMsg.records[0].msgIndex && lastMsg.records[0].msgIndex < total - 1)
+            ) {
+                tribeWorker.getPinnedMessageArray(config.tribeId, lastMsg.records[0].msgIndex + 1, pageSize).then(rest => {
+                    if (rest.data.length > 0) {
+                        console.log("=========loadMore >> start=[%d], end=[%d] , data=[%d] ", lastMsg.records[0].msgIndex + 1, pageSize, rest.data.length);
+                        setTotal(pre => {
+                            console.log("=========loadMore >> set total 6 ==  ", pre, rest.total)
+                            return pre < rest.total ? rest.total : pre;
+                        });
+                        setComments(pre => {
+                            const comp = [...pre, ...rest.data]
+                            combile(comp);
+                            return comp
+                        })
+                    }
+                }).catch(e => console.error(e))
+            }
+        }
+    }, [comments, total, setComments, setTotal])
+
     useEffect(() => {
         if (document.hidden !== undefined && !pinnedStickies) {
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden) {
-                    fetchData(pageNo, setComments)
+                    //TODO
+                    // fetchData(pageNo)
+                    // activePage()
                 }
             })
         }
     }, [])
 
     useEffect(() => {
+        console.log("init component ...")
         if (!pinnedStickies) {
             {
                 const max = selfStorage.getItem(`maxVisibleIndex_${config.tribeId}`);
                 setMaxVisibleIndex(max ? max : 0)
             }
-
-            if (loaded && count++ == 0) {
-                shouldScrollToBottom = true;
-                {
-                    fetchData(pageNo, setComments).catch(e => console.error(e))
-                }
-
-                tribeWorker.addMessageListener(config.tribeId, (messages: Array<PinnedSticky>) => {
-                    if (!document.hidden) {
-                        setComments((preComments) => {
-                            const nextComments = [];
-                            let commentsCopy: Array<PinnedSticky> = [...preComments];
-                            for (let index = 0; index < messages.length; index++) {
-                                const comment = messages[index];
-
-                                // remove all unpinned msg when pin type
-                                if (comment && comment.records && comment.records.length > 0 && comment.records[0].msgType == MessageType.Pin) {
-                                    // commentsCopy = commentsCopy.filter(v => v.groupId !== "")
-                                    // fetchNewPin(groupMsg,pageNo,setComments).then(()=>{
-                                    //     onReload(false);
-                                    // }).catch(e=>console.error(e))
-                                    {
-                                        fetchData(pageNo, setComments).then(() => {
-                                            onReload(false)
-                                            // scrollToBottom();
-                                        }).catch(e => console.error(e))
-                                    }
-                                } else if (comment.records && comment.records.length > 0 && comment.records[0].msgType == MessageType.UpdateTribe) {
-                                    // if(total == 0){
-                                    //     fetchData(pageNo, setComments)
-                                    // }
-                                    onReload(false);
-                                } else {
-                                    const _index = commentsCopy.findIndex(v => (v.records && v.records.length > 0 && comment && comment.records &&comment.records.length > 0 && v.records[0].id == comment.records[0].id))
-                                    //new message
-                                    if (_index == -1) {
-                                        if (comment.records && comment.records[0].msgStatus !== MessageStatus.removed) {
-                                            if (commentsCopy.length > 0) {
-
-                                                const latest: PinnedSticky = commentsCopy[commentsCopy.length - 1];
-                                                const latestSeq = new BigNumber(comment.records && comment.records.length > 0 && comment.records[0].seq);
-                                                if (new BigNumber(latest.records && latest.records.length > 0 && latest.records[0].seq).comparedTo(
-                                                    latestSeq
-                                                ) == -1) {
-                                                    nextComments.push(comment)
-                                                    total++
-                                                } else {
-                                                    const index = commentsCopy.findIndex(msg => msg.records && msg.records.length > 0 && new BigNumber(msg.records[0].seq).comparedTo(latestSeq) == 1)
-                                                    if (index > -1) {
-                                                        commentsCopy.splice(index, 1, ...[comment, commentsCopy[index]])
-                                                    }
-                                                }
-                                            } else {
-                                                nextComments.push(comment)
-                                            }
-                                        }
-                                    } else {
-                                        //removed
-                                        if (comment.records && comment.records.length > 0 && comment.records[0].msgStatus == MessageStatus.removed) {
-                                            if (commentsCopy[_index + 1] && commentsCopy[_index + 1].records && commentsCopy[_index + 1].records.length > 0) {
-                                                const pinMsg: PinnedSticky = JSON.parse(JSON.stringify(commentsCopy[_index + 1]));
-                                                pinMsg.records[0].hideTime = 0;
-                                                commentsCopy.splice(_index + 1, 1, pinMsg)
-                                            }
-                                            commentsCopy.splice(_index, 1)
-                                            total--;
-                                        } else { //support or edit
-                                            commentsCopy.splice(_index, 1, comment);
-                                            total++
-                                        }
-                                    }
-                                }
-
-                                if (comment.records && comment.records.length > 0 && comment.records[0].msgType == MessageType.Role) {
-                                    onReload(false);
-                                }
-
-                                if (comment.records && comment.records.length > 0 && comment.records[0].owner == owner) {
-                                    onReload(true);
-                                }
-
-                            }
-                            // console.log(commentsCopy,"commentsCopy>>>");
-                            return [...commentsCopy, ...nextComments]
-                        })
-                    }
-                });
-
-            }
         } else {
-            setComments(pinnedStickies.data)
+            const comp = pinnedStickies.data;
+            combile(comp);
+            console.log(comp)
+            setComments(comp)
+            setTotal(pinnedStickies.data.length)
         }
     }, [loaded])
 
-    const dispatchTheme = async (data: PinnedSticky) => {
-        const release = await _lock()
-        try {
-            setStickyMsg(data)
-            dispatch(saveDataState({
-                data: {stickyMsg: data, stickyMsgTop: data},
-                tag: 'updateTheme'
-            }))
-        } catch (e) {
-            console.error(e)
-        } finally {
-            release()
-        }
-    }
-    const {outerRef, innerRef, items, scrollToItem, scrollTo, startItem} = useVirtual({
-        itemCount: comments.length,
+    const dispatchTheme = useCallback((data: PinnedSticky) => {
 
-        itemSize: 100,
-        scrollDuration: 500,
-        onScroll: (e) => {
-            doScrollEvent(e)
-        },
-    })
+        if (data && !!onChangeVisible && (!stickyMsg || data.groupId != stickyMsg.groupId)) {
+            setStickyMsg(data);
+            onChangeVisible(data)
+        }
+    }, [stickyMsg])
+
+    const startItem = (index: number) => {
+        virtuoso.current.scrollToIndex({
+            index: index,
+            align: "start",
+            behavior: "auto"
+        })
+    }
+
+    const scrollToItem = (data: { index: number, align: string }) => {
+        virtuoso.current.scrollToIndex({
+            index: data.index,
+            align: data.align,
+            behavior: "auto"
+        })
+    }
 
     useEffect(() => {
         if (!pinnedStickies && comments.length > 0) {
             if (shouldScroll++ == 0) {
-                const lastId = comments.findIndex(value => (value as PinnedSticky).records && (value as PinnedSticky).records && (value as PinnedSticky).records.length > 0 && (value as PinnedSticky).records[0].id == shareMsgId);
-                const last = shareMsgId ? lastId - 1 : getCurrentVisible();
+                // const lastId = comments.findIndex(value => (value as PinnedSticky).records && (value as PinnedSticky).records && (value as PinnedSticky).records.length > 0 && (value as PinnedSticky).records[0].id == shareMsgId);
+                const last = getCurrentVisible();
                 if (last >= 0) {
                     setTimeout(() => {
-                        if(last == 999999999){
+                        if (last == 999999999) {
                             const itm = comments.length - 1;
                             const data = comments[itm];
-                            // setStickyMsg(data)
                             dispatchTheme(data);
                             startItem(itm);
-                            scrollToItem({
-                                index: itm,
-                                align: "start"
-                            });
-                        }else{
-                            const itm = last > 1 ? last + 1 : last;
-                            const data = comments[itm];
-                            // setStickyMsg(data)
+                        } else {
+                            const data = comments[last];
                             dispatchTheme(data);
-                            startItem(itm);
-                            scrollToItem({
-                                index: itm,
-                                align: "start"
-                            });
                         }
 
                     }, 100)
                 } else {
                     setTimeout(() => {
-                        scrollToBottom();
+                        // scrollToBottom();
                     }, 100)
                 }
             } else {
-                if (currentVisibleIndex >= comments.length - 5 || shouldScrollToBottom) {
+                if (currentVisibleStopIndex >= comments.length - 5 || shouldScrollToBottom) {
                     setTimeout(() => {
-                        scrollToBottom();
+                        // scrollToBottom();
                     }, 100)
                 }
             }
 
+        } else {
+
         }
-    }, [comments.length, startItem, scrollToItem]);
-
-    // useEffect(() => {
-    // if (!stickyMsg  && comments.length > 0) {
-    //     const data = comments[0];
-    //     setStickyMsg(data)
-    //     // console.log("set data 5")
-    //     dispatchTheme(data);
-    // }
-
-    // if(comments && comments.length >0){
-    //     const msg:PinnedSticky = comments[comments.length - 1];
-    //     if(msg && msg.records && msg.records.length>0){
-    //         const record = msg.records[0];
-    //         if(record.msgType !== MessageType.Role && record.msgType !== MessageType.Divide){
-    //             groupByTime = {timestamp: record.timestamp, role: record.role}
-    //         }
-    //     }
-    // }
-
-    // }, [comments.length])
-
+    }, []);
 
     const onReplay = (msg: Message) => {
         if (owner) {
@@ -389,59 +478,111 @@ export const MessageContentWindow: React.FC<Props> = ({groupMsg, onFork, shareMs
         }
     }
 
-    const goToTheme = (seq: number, forward: any) => {
-        const index = comments.findIndex(v => v.seq == seq)
-        if (index > -1) {
-            if (forward && forward == 1 && index > visibleStartIndex) {
-                goToTheme(seq - 1, forward)
-            }
-                // else if( forward && forward == 2 && index < currentVisibleIndex ){
-                //     goToTheme(seq + 1, forward)
-            // }
-            else {
-                dispatchTheme(comments[index])
-                startItem(index);
-                scrollToItem({index: index, align: "start"})
-            }
-        } else {
-            scrollToBottom();
+    useEffect(() => {
+        if (loaded && loadCount++ == 0) {
+            initLatestPin().then(() => {
 
+            }).catch(e => console.error(e))
         }
-    }
+    }, [loaded])
 
-    useLayoutEffect(() => {
+
+    useEffect(() => {
+        if (loaded && count++ == 0) {
+            tribeWorker.addMessageListener(config.tribeId, async (data: { total: number, messages: Array<PinnedSticky> }) => {
+                try {
+                    console.log("======> startcallbutton ", data)
+                    setTotal(data.total)
+                    const messages = data.messages;
+                    if (messages && messages.length > 0) {
+                        setComments((preComments) => {
+                            const nextComments = [];
+                            let commentsCopy: Array<PinnedSticky> = [...preComments];
+
+                            // let total = 0 ;
+                            for (let index = 0; index < messages.length; index++) {
+                                const _comment = messages[index];
+
+                                // remove all unpinned msg when pin type
+                                if (_comment && _comment.records && _comment.records.length > 0 && _comment.records[0].msgType == MessageType.Pin) {
+                                    tribeService.init();
+                                    onReload(false);
+                                    //TODO
+                                } else if (_comment.records && _comment.records.length > 0 && _comment.records[0].msgType == MessageType.UpdateTribe) {
+                                    onReload(false);
+                                } else {
+                                    const _index = commentsCopy.findIndex(v => (v.records && v.records.length > 0 && _comment && _comment.records && _comment.records.length > 0 && v.records[0].id == _comment.records[0].id))
+                                    //new message
+                                    if (_index == -1) {
+                                        if (_comment.records && _comment.records[0].msgStatus !== MessageStatus.removed) {
+                                            if (commentsCopy.length > 0) {
+
+                                                const latest: PinnedSticky = commentsCopy[commentsCopy.length - 1];
+                                                const latestSeq = new BigNumber(_comment.records && _comment.records.length > 0 && _comment.records[0].seq);
+                                                if (new BigNumber(latest.records && latest.records.length > 0 && latest.records[0].seq).comparedTo(
+                                                    latestSeq
+                                                ) == -1) {
+                                                    nextComments.push(_comment)
+                                                    // total++
+                                                } else {
+                                                    const index = commentsCopy.findIndex(msg => msg.records && msg.records.length > 0 && new BigNumber(msg.records[0].seq).comparedTo(latestSeq) == 1)
+                                                    // change seq
+                                                    console.log("=====> change seq", index)
+                                                    if (index > -1) {
+                                                        commentsCopy.splice(index, 1, ...[_comment, commentsCopy[index]])
+                                                    }
+                                                }
+                                            } else {
+                                                nextComments.push(_comment)
+                                            }
+                                        }
+                                    } else {
+                                        //removed
+                                        if (_comment.records && _comment.records.length > 0 && _comment.records[0].msgStatus == MessageStatus.removed) {
+                                            commentsCopy.splice(_index, 1)
+                                            // total--;
+                                        } else { //support or edit
+                                            commentsCopy.splice(_index, 1, _comment);
+                                            // total++
+                                        }
+                                    }
+                                }
+
+                                if (_comment.records && _comment.records.length > 0 && _comment.records[0].msgType == MessageType.Role) {
+                                    onReload(false);
+                                }
+
+                                if (_comment.records && _comment.records.length > 0 && _comment.records[0].owner == owner) {
+                                    onReload(true);
+                                }
+
+                            }
+                            // console.log("=========> commentsCopy>>>", commentsCopy, nextComments);
+                            const _cIndex = commentsCopy.findIndex(v => v.records[0].groupId == "");
+                            if (_cIndex >= 0) {
+                                const comp = [...commentsCopy, ...nextComments];
+                                combile(comp)
+                                return comp
+                            }
+                            combile(commentsCopy)
+                            return commentsCopy
+                        })
+                    }
+                } catch (e) {
+                    console.error(e)
+                }
+            });
+        }
+    }, [loaded, setComments, setTotal])
+
+    useEffect(() => {
         if (!pinnedStickies && dispatchData) {
             if (dispatchData.tag == 'scrollToItem' && dispatchData.data) {
-                let dataObj = JSON.parse(dispatchData.data);
-                if (dataObj.refresh > -1) {
-                    if (dataObj.refresh == 0) {
-                        shouldScrollToBottom = true;
-                        // scrollToBottom();
-                    } else if (dataObj.refresh == 9999999) {
-                        const index = comments.findIndex(v => ((v as PinnedSticky).records && (v as PinnedSticky).records.length > 0 && (v as PinnedSticky).records[0].groupId == ""))
-                        if (index > 0) {
-                            startItem(index);
-                            scrollToItem({index: index, align: "start"})
-                        } else {
-                            shouldScrollToBottom = true;
-                            scrollToBottom();
-                        }
-                    } else if (dataObj.refresh == 666666) {
-                        const index = comments.findIndex(v => v.groupId == "")
-                        if (index > 0) {
-                            goToTheme(comments[index - 1].seq, dataObj["forward"]);
-                            //
-                            // const index2 = comments.findIndex(v => v.seq == comments[index - 1].seq)
-                            // // console.log(index,index2,comments[index - 1].seq);
-                            // if (index2 > -1) {
-                            //     startItem(index2);
-                            // }
-                        } else {
-                            scrollToBottom();
-                        }
-                    } else {
-                        goToTheme(dataObj.refresh, dataObj["forward"]);
-                    }
+                // virtuoso.current.scrollToIndex({ index: comments.length - 1, behavior: 'smooth' });
+                if (comments && comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex == total - 1) {
+                    scrollToItem({index: total - 1, align: "end"})
+                } else {
+                    fetchMsgByIndex(total - 1, true);
                 }
                 dispatch(saveDataState({data: JSON.stringify({refresh: -1}), tag: 'scrollToItem'}))
             } else if (dispatchData.tag == 'checkedAllMsg' && dispatchData.data) {
@@ -472,38 +613,20 @@ export const MessageContentWindow: React.FC<Props> = ({groupMsg, onFork, shareMs
         }
     }, [dispatchData.data]);
 
-    const scrollToBottom = () => {
-        const dataLength = comments.length - 1;
-        // console.log('scrollToBottom ====> len=%d, current=%d, max=%d',comments.length, currentVisibleIndex,maxVisibleIndex)
-        if (comments.length > 0) {
-            startItem(dataLength)
-            scrollToItem({index: dataLength, align: "end"})
-
-            setCurrentVisibleIndex(dataLength)
-            setMaxVisible(dataLength);
-            setVisibleStartIndex(dataLength);
-            setCurrentTimeout();
-
-            displayBottomMsg(comments[dataLength])
-
-            shouldScrollToBottom = false;
-
-        }
-    }
-
-    const displayBottomMsg = (data: PinnedSticky) => {
-        if(!!data.groupId && stickyMsg && (stickyMsg as PinnedSticky).seq != data.index ){
-            const dataCopy:PinnedSticky = JSON.parse(JSON.stringify(data))
-            dataCopy.theme = tribeInfo.theme;
-            dataCopy.roles = tribeInfo.roles;
-            dataCopy.seq = -1 ;
-            dataCopy.groupId = "";
-            dataCopy.index = new BigNumber(data.seq).toNumber();
-            dispatchTheme(dataCopy)
-        }else {
-            dispatchTheme(data)
-        }
-    }
+    // const displayBottomMsg = (data: PinnedSticky) => {
+    //     console.log("===>>>>  displayBottomMsg", data, stickyMsg)
+    //     if (!!data.groupId) {
+    //         const dataCopy: PinnedSticky = JSON.parse(JSON.stringify(data))
+    //         dataCopy.theme = tribeInfo.theme;
+    //         dataCopy.roles = tribeInfo.roles;
+    //         dataCopy.seq = -1;
+    //         dataCopy.groupId = "";
+    //         dataCopy.index = new BigNumber(data.seq).toNumber();
+    //         dispatchTheme(dataCopy)
+    //     } else {
+    //         dispatchTheme(data)
+    //     }
+    // }
 
     const setMaxVisible = (n: number) => {
         // console.log("set max visible=[%d]", n)
@@ -511,24 +634,18 @@ export const MessageContentWindow: React.FC<Props> = ({groupMsg, onFork, shareMs
         selfStorage.setItem(`maxVisibleIndex_${config.tribeId}`, n)
         const data: PinnedSticky = comments[n];
         if (data) {
-            selfStorage.setItem(`latest_view_${config.tribeId}`, data.records && data.records.length > 0 && data.records[0].timestamp)
+            // selfStorage.setItem(`latest_view_${config.tribeId}`, data.records && data.records.length > 0 && data.records[0].timestamp)
         }
     }
 
 
     const onShare = async (msg: Message) => {
         // console.log("====> share msg: ", msg, new Date(msg.timestamp * 1000))
-        const condition: Array<any> = [
-            "tribeIdAndTimestamp",
-            [config.tribeId, 2, msg.timestamp],
-            [config.tribeId, 2, Math.floor(Date.now() / 1000) + 3600],
-            false
-        ]
-        const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, 1, 20, condition)
+        const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, msg.msgIndex, 20)
         let shareMsgs: Array<Message> = [];
         let shareRoles: Array<TribeRole> = [];
         const data = rest.data;
-        data.reverse();
+        // data.reverse();
         for (let stmsg of data) {
             shareMsgs.push(stmsg.records[0])
             if (shareRoles.length == 0) {
@@ -541,220 +658,296 @@ export const MessageContentWindow: React.FC<Props> = ({groupMsg, onFork, shareMs
         setShareRoles(shareRoles)
     }
 
-    const renInboxMsg = (messages: Array<Message>, msgIndex: number, seq: number): Array<any> => {
-        const htmls = [];
-        if (messages && messages.length > 0) {
-            messages.forEach((m, index) => {
-                const v = JSON.parse(JSON.stringify(m));
-                let item;
-
-                // console.log("ren msg ==========>  ",v , v["hideTime"])
-                if (msgIndex > 0 && !v["hideTime"]) {
-                    const pre: PinnedSticky = comments[msgIndex - 1];
-                    if (pre && pre.records && pre.records.length > 0) {
-                        const preMsg = pre.records[0];
-                        if (preMsg.msgType != MessageType.Divide && preMsg.msgType != MessageType.Role) {
-                            v["hideTime"] = !!preMsg && preMsg.role == v.role && preMsg.groupId == v.groupId && (Math.floor(preMsg.timestamp / 300) == Math.floor(v.timestamp / 300)) ? 1 : 2;
-                        }
-                        if (v && !!v.groupId) {
-                            // v["hideTime"] = 2;
-                        } else if (preMsg && !v.groupId && (
-                            preMsg.owner == tribeInfo.keeper && v.owner !== tribeInfo.keeper ||
-                            preMsg.owner != tribeInfo.keeper && v.owner == tribeInfo.keeper
-                        )) {
-                            v["hideTime"] = 2;
-                        }
-                    }
-                }
-                if (v.msgType == MessageType.Text || v.msgType == MessageType.Role || v.msgType == MessageType.Airdrop) {
-                    let className = 'msg-no-role-rec';
-                    if (v.role) {
-                        className = owner == v.owner && !v.groupId ? "msg-sender" : "msg-receive"
-                    }
-                    if(v.msgType == MessageType.Role){
-                        className = `${className} role-sp`
-                    }
-                    const checked = checkedMsgArr.indexOf(v.id) > -1;
-                    //@ts-ignore
-                    item = <div className={className} key={index} onClick={(e) => {
-                        if (showPin) {
-                            e.stopPropagation();
-                            const checkedCopy = [...checkedMsgArr]
-                            if (checked) {
-                                checkedCopy.splice(checkedMsgArr.findIndex(cv => cv == v.id), 1)
-                            } else {
-                                checkedCopy.push(v.id)
-                            }
-                            setCheckedMsgArr(checkedCopy);
-                            selfStorage.setItem(`tribe_pin_arr`, checkedCopy)
-                        }
-                    }}>
-                        <div className="inner" style={{maxWidth: '100%'}} onMouseOver={() => setCheckedMsgId(v.id)}>
-                            {/*<div>{msgIndex}</div>*/}
-                            <Text hideTime={!!v["hideTime"] && v["hideTime"] == 1}
-                                  keeper={tribeInfo && tribeInfo.keeper} onSupport={onSupport}
-                                  checked={checked || v.msgType == MessageType.Airdrop} msg={v}
-                                  owner={owner}
-                                  showPin={v.msgStatus == MessageStatus.dashed && showPin}
-                            />
-
-                        </div>
-
-                        <Tools onShare={(msg) => onShare(msg)} msg={v}
-                               showPin={v.msgStatus == MessageStatus.dashed && showPin} owner={owner}
-                               onSupport={userLimit && userLimit.supportLeft > 0 && onSupport}
-                               onReplay={(msg: Message) => {
-                                   onReplay(msg)
-                               }} onEdit={(msg: Message) => {
-                            setShowModifyMsg(msg)
-                        }} onDelete={(msg: Message) => {
-                            tribeService.deleteMsg(msg.id).catch(e => {
-                                console.log(e, "tribe del msg")
-                            })
-                        }} isChecked={checkedMsgId == v.id} keeper={tribeInfo && tribeInfo.keeper}/>
-                    </div>
-                } else if (v.msgType == MessageType.Dice) {
-                    item = <Dice/>
-                } else if (v.msgType == MessageType.Expression) {
-                    item = <Expression/>
-                } else if (v.msgType == MessageType.Divide) {
-                    item = <div className="strike" key={index}>
-                        {v.groupId ? <span>#{seq}</span> : <span>New Tape</span>}
-                    </div>
-                } else {
-                    // console.log(index, v," divide........." )
-                }
-                htmls.push(item)
-            })
-        }
-
-        return htmls;
-    }
     // const Loading = () => <div style={{width: '100%', textAlign: 'center', padding: 12}}>⏳ Loading...</div>;
 
 
-    // console.log("comments.length - 1 > currentVisibleIndex : ",comments.length - 1 > currentVisibleIndex, comments.length -1, currentVisibleIndex, maxVisibleIndex )
-    // console.log(" comments.length - 1 - maxVisibleIndex > 0 && maxVisibleIndex > 0: ",  comments.length - 1 - maxVisibleIndex > 0 && maxVisibleIndex > 0);
+    // console.log("total - 1 > currentVisibleIndex : ",total - 1 > currentVisibleIndex, total -1, currentVisibleIndex, maxVisibleIndex )
+    // console.log(" total - 1 - maxVisibleIndex > 0 && maxVisibleIndex > 0: ",  total - 1 - maxVisibleIndex > 0 && maxVisibleIndex > 0);
 
     const _url = stickyMsg && (stickyMsg as PinnedSticky).groupId ? stickyMsg.theme.image :
         pinnedStickies && pinnedStickies.data.length > 0 ? pinnedStickies.data[0].theme.image : tribeInfo && tribeInfo.theme.image
 
-    return <>
 
+// You can use index to randomize
+// and make the placeholder list more organic.
+// the height passed is the one measured for the real item.
+// the placeholder should be the same size.
+    const ScrollSeekPlaceholder = ({height, index}) => {
+        const pinnedSticky: PinnedSticky = comments[index];
+
+        return <div
+            style={{
+                height,
+                padding: "8px",
+                boxSizing: "border-box",
+                overflow: "hidden",
+                borderRadius: 12,
+                margin: 6,
+            }}
+        >
+            <IonItem>
+                <IonThumbnail slot="start">
+                    <IonSkeletonText animated={true}></IonSkeletonText>
+                </IonThumbnail>
+                <IonLabel>
+                    <h3>
+                        <IonSkeletonText animated={true} style={{'width': '80%'}}></IonSkeletonText>
+                    </h3>
+                    <p>
+                        <IonSkeletonText animated={true} style={{'width': '60%'}}></IonSkeletonText>
+                    </p>
+                    <p>
+                        <IonSkeletonText animated={true} style={{'width': '30%'}}></IonSkeletonText>
+                    </p>
+                </IonLabel>
+            </IonItem>
+        </div>
+    }
+
+    const [atBottom, setAtBottom] = useState(false)
+    const showButtonTimeoutRef = useRef(null)
+    const [showButton, setShowButton] = useState(false)
+
+    useEffect(() => {
+        return () => {
+            clearTimeout(showButtonTimeoutRef.current)
+        }
+    }, [])
+
+    useEffect(() => {
+        clearTimeout(showButtonTimeoutRef.current)
+        if (!atBottom) {
+            //@ts-ignore
+            showButtonTimeoutRef.current = setTimeout(() => setShowButton(true), 500)
+        } else {
+            setShowButton(false)
+        }
+    }, [atBottom, setShowButton])
+
+    // console.log("maxVisibleIndex:: ", total, maxVisibleIndex)
+
+    const [visibleRange, setVisibleRange] = useState({
+        startIndex: 0,
+        endIndex: 0,
+    })
+
+    const [isScrolling, setIsScrolling] = useState(false);
+
+    const Loading = () => <div style={{width: '100%', textAlign: 'center', padding: 12}}>⏳ Loading...</div>;
+
+    // useEffect(() => {
+    //     const ret = comments.length >0  && (comments[comments.length-1] as PinnedSticky).records && (comments[comments.length-1] as PinnedSticky).records[0].msgIndex >= total - 5;
+    //     console.log('MessagesList: followOutput isAtBottom', atBottom, comments.length, ret);
+    //     if (ret) {
+    //         scrollToItem({index: total - 1, align: "end"})
+    //     }
+    // }, [total, comments])
+
+    // setting 'auto' for behavior does help in this sample, but not in my actual code
+    const followOutput = useCallback((isAtBottom) => {
+        // console.log('MessagesList: followOutput isAtBottom', isAtBottom, atBottom);
+        const check = comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex >= total - 5;
+        return isAtBottom && atBottom && check ? 'auto' : false;
+    }, [comments, atBottom, total]);
+
+    const bottomChange = useCallback((bottom) => {
+        if (bottom) {
+            console.log("bottom")
+        }
+        setAtBottom(bottom)
+    }, [setAtBottom])
+
+    const renInboxMsg = (messages: Array<Message>) => {
+        let item = <div></div>;
+
+        messages && messages.length > 0 && messages.forEach((m, index) => {
+            const v: Message = JSON.parse(JSON.stringify(m));
+
+            if (v.msgType == MessageType.Text || v.msgType == MessageType.Role || v.msgType == MessageType.Airdrop) {
+                let className = 'msg-no-role-rec';
+                if (v.role) {
+                    className = owner == v.owner && !v.groupId ? "msg-sender" : "msg-receive"
+                }
+                if (v.msgType == MessageType.Role) {
+                    className = `${className} role-sp`
+                }
+                const checked = checkedMsgArr.indexOf(v.id) > -1;
+                item = <div className={className} key={index} onClick={(e) => {
+                    if (showPin) {
+                        e.stopPropagation();
+                        const checkedCopy = [...checkedMsgArr]
+                        if (checked) {
+                            checkedCopy.splice(checkedMsgArr.findIndex(cv => cv == v.id), 1)
+                        } else {
+                            checkedCopy.push(v.id)
+                        }
+                        setCheckedMsgArr(checkedCopy);
+                        selfStorage.setItem(`tribe_pin_arr`, checkedCopy)
+                    }
+                }}>
+                    <div className="inner" style={{maxWidth: '100%'}}
+                         onMouseOver={() => {
+                             if (!pinnedStickies) {
+                                 setCheckedMsgId(v.id)
+                             }
+                         }}
+                    >
+                        {/*<div style={{backgroundColor: "green", padding: 12}}>{v.msgIndex} - It feels like there are more bot comments than real people on twitter now.</div>*/}
+                        <Text hovered={checkedMsgId == v.id} hideTime={!!m.hideTime}
+                              keeper={tribeInfo && tribeInfo.keeper} onSupport={onSupport}
+                              checked={checked || v.msgType == MessageType.Airdrop} msg={v}
+                              owner={owner}
+                              showPin={v.msgStatus == MessageStatus.dashed && showPin}
+                        />
+                        {/*    {*/}
+                        {/*        !pinnedStickies && <>*/}
+                        {/*            <Tools onShare={(msg) => onShare(msg)} msg={v}*/}
+                        {/*                   showPin={v.msgStatus == MessageStatus.dashed && showPin} owner={owner}*/}
+                        {/*                   onSupport={userLimit && userLimit.supportLeft > 0 && onSupport}*/}
+                        {/*                   onReplay={(msg: Message) => {*/}
+                        {/*                       onReplay(msg)*/}
+                        {/*                   }} onEdit={(msg: Message) => {*/}
+                        {/*                setShowModifyMsg(msg)*/}
+                        {/*            }} onDelete={(msg: Message) => {*/}
+                        {/*                tribeService.deleteMsg(msg.id).catch(e => {*/}
+                        {/*                    console.log(e, "tribe del msg")*/}
+                        {/*                })*/}
+                        {/*            }} isChecked={checkedMsgId == v.id} keeper={tribeInfo && tribeInfo.keeper}/>*/}
+                        {/*        </>*/}
+                        {/*    }*/}
+                        {/*</Text>*/}
+
+                    </div>
+
+
+                </div>
+            } else if (v.msgType == MessageType.Dice) {
+                item = <Dice/>
+            } else if (v.msgType == MessageType.Expression) {
+                item = <Expression/>
+            } else {
+                // console.log(index, v," divide........." )
+            }
+        })
+        return item
+    }
+    // console.log("#################### re rendering .... ", renderCount++)
+
+    return <>
         <div className={!pinnedStickies ? "msg-content" : "msg-content2"} style={{
             backgroundImage: `url(${utils.getDisPlayUrl(_url)})`,
         }}>
+            <div className={`outer-box `}>
+                <div className="inner-box">
+                    {loadingData && <Loading/>}
+                    <div className="position-top">[{visibleRange.startIndex}] - [{visibleRange.endIndex}]
+                        : [{firstItemIndex}]..[{total}], [ren: {renderCount}]
+                    </div>
+                    <StickyList
+                        tribeInfo={tribeInfo} comments={comments} onFork={onFork}
+                        onSupport={onSupport} checkedMsgId={checkedMsgId} checkedMsgArr={checkedMsgArr}
+                        showPin={showPin} owner={owner}
+                    />
 
-            {
-                //@ts-ignore
-                <div ref={outerRef} className={`outer-box `}>
-                    {
-                        //@ts-ignore
-                        <div ref={innerRef} className="inner-box">
-                            {
-                                items && items.map(({index, measureRef, size}) => {
-                                    const showLoading = index === 0 && comments.length < total;
-                                    const pinnedSticky: PinnedSticky = comments[index];
 
-                                    if (pinnedSticky) {
-                                        if (pinnedSticky.records && pinnedSticky.records.length > 0
-                                            && ((pinnedSticky.records[0].msgStatus !== MessageStatus.removed && pinnedSticky.records[0].msgStatus !== MessageStatus.draft)
-                                                || (!!pinnedStickies && pinnedSticky.records[0].msgStatus == MessageStatus.draft))) {
-                                            const isNewTheme = index > 0 && comments[index - 1] && (comments[index - 1] as PinnedSticky).records && (comments[index - 1] as PinnedSticky).records[0].msgStatus == MessageStatus.pinned
-                                                && pinnedSticky.records && pinnedSticky.records[0].msgStatus == MessageStatus.dashed
+                    {/*<Virtuoso*/}
+                    {/*    ref={virtuoso}*/}
+                    {/*    style={{height: '100%'}}*/}
+                    {/*    overscan={0}*/}
+                    {/*    isScrolling={(f) => setIsScrolling(f)}*/}
+                    {/*    firstItemIndex={firstItemIndex}*/}
+                    {/*    rangeChanged={setVisibleRange}*/}
+                    {/*    data={comments}*/}
+                    {/*    endReached={loadMore}*/}
+                    {/*    startReached={prependItems}*/}
+                    {/*    followOutput={atBottom && (total > 0 && visibleRange.startIndex > total - pageSize) && followOutput}*/}
+                    {/*    atBottomStateChange={(total > 0 && visibleRange.startIndex > total - pageSize) && bottomChange}*/}
+                    {/*    // initialTopMostItemIndex={getCurrentVisible()}*/}
 
-                                            // const theme = stickyMsg.theme;
-                                            const messages = pinnedSticky.records
+                    {/*    itemsRendered={(items) => {*/}
+                    {/*        if (!isScrolling && !pinnedStickies) {*/}
+                    {/*            if(!stickyMsg){*/}
+                    {/*                if (!!tribeInfo) {*/}
+                    {/*                    const groupArr = tribeService.getGroupMap();*/}
+                    {/*                    const defaultGroup = groupArr[groupArr.length - 1];*/}
+                    {/*                    dispatchTheme({*/}
+                    {/*                        theme: tribeInfo && tribeInfo.theme,*/}
+                    {/*                        seq: -1,*/}
+                    {/*                        roles: defaultGroup.roles,*/}
+                    {/*                        records: [],*/}
+                    {/*                        groupId: "",*/}
+                    {/*                        index: -1*/}
+                    {/*                    })*/}
+                    {/*                }*/}
+                    {/*                if(items.length > 0 && maxVisibleIndex < items[items.length - 1].data.records[0].msgIndex){*/}
+                    {/*                    setMaxVisible(items[items.length - 1].data.records[0].msgIndex)*/}
+                    {/*                }*/}
+                    {/*            }*/}
+                    {/*            return*/}
+                    {/*        }*/}
+                    {/*        if (!pinnedStickies && items && items[0] && items[0].data) {*/}
+                    {/*            visibleStartId = items[0].index;*/}
+                    {/*            setCurrentTimeout(false)*/}
+                    {/*            if (!!(items[items.length - 1].data) && maxVisibleIndex < items[items.length - 1].data.records[0].msgIndex) {*/}
+                    {/*                setMaxVisible(items[items.length - 1].data.records[0].msgIndex)*/}
+                    {/*            }*/}
+                    {/*            if (items[items.length - 1].index == total - 1) {*/}
+                    {/*                if (!!tribeInfo) {*/}
+                    {/*                    const groupArr = tribeService.getGroupMap();*/}
+                    {/*                    const defaultGroup = groupArr[groupArr.length - 1];*/}
+                    {/*                    dispatchTheme({*/}
+                    {/*                        theme: tribeInfo && tribeInfo.theme,*/}
+                    {/*                        seq: -1,*/}
+                    {/*                        roles: defaultGroup.roles,*/}
+                    {/*                        records: [],*/}
+                    {/*                        groupId: "",*/}
+                    {/*                        index: -1*/}
+                    {/*                    })*/}
+                    {/*                }*/}
+                    {/*            } else {*/}
+                    {/*                dispatchTheme(items[0].data)*/}
+                    {/*            }*/}
+                    {/*        }*/}
+                    {/*    }}*/}
+                    {/*    context={{  }}*/}
+                    {/*    // //                                               @ts-ignore*/}
+                    {/*    //                         components={{ Scroller: VirtuosoScroller }}*/}
+                    {/*    //                         scrollSeekConfiguration={{*/}
+                    {/*    //                             enter: (velocity) => {*/}
+                    {/*    //                                 // if (visibleRange[1] > comments.length - 5) {*/}
+                    {/*    //                                 //     setFullScreen(false)*/}
+                    {/*    //                                 // } else if (visibleRange[1] < comments.length - 6) {*/}
+                    {/*    //                                 //     if (velocity > 1) {*/}
+                    {/*    //                                 //         setFullScreen(true)*/}
+                    {/*    //                                 //     } else if (velocity < 0) {*/}
+                    {/*    //                                 //         setFullScreen(false)*/}
+                    {/*    //                                 //     }*/}
+                    {/*    //                                 // }*/}
+                    {/*    //                                 return isAPP && velocity < 0?Math.abs(velocity) > 100:false*/}
+                    {/*    //                             },*/}
+                    {/*    //                             exit: (velocity) => {*/}
+                    {/*    //                                 const shouldExit = isAPP ? Math.abs(velocity) < 10 : true;*/}
+                    {/*    //                                 if (shouldExit) {*/}
+                    {/*    //                                     // setVisibleRange(["-", "-"]);*/}
+                    {/*    //                                 }*/}
+                    {/*    //                                 return shouldExit;*/}
+                    {/*    //                             },*/}
+                    {/*    //                             change: (_velocity, {startIndex, endIndex}) => {*/}
+                    {/*    //                                 // setVisibleRange([startIndex,endIndex])*/}
+                    {/*    //                             }*/}
+                    {/*    //                         }}*/}
 
-                                            const msgItems = renInboxMsg(messages, index, pinnedSticky.seq)
+                    {/*    itemContent={(index, data) => {*/}
+                    {/*        return <MessageItem index={index} pinnedSticky={data as PinnedSticky} total={total}*/}
+                    {/*                            atBottom={atBottom} firstItemIndex={firstItemIndex}*/}
+                    {/*                            checkedMsgArr={checkedMsgArr} showPin={showPin} owner={owner}*/}
+                    {/*                            checkedMsgId={checkedMsgId} pinnedStickies={pinnedStickies}*/}
+                    {/*                            onSupport={onSupport} onFork={onFork} tribeInfo={tribeInfo} />*/}
+                    {/*    }}*/}
+                    {/*/>*/}
 
-                                            const isDifTap = index > 0 && comments[index + 1] && (comments[index + 1] as PinnedSticky).records && pinnedSticky.records
-                                                && (comments[index + 1] as PinnedSticky).records[0].groupId != pinnedSticky.records[0].groupId ||
-                                                (index > 0 && !comments[index + 1] && !!pinnedSticky.records[0].groupId)
-
-                                            return <div className="visual-msg-box"
-                                                        style={{padding: index == comments.length - 1 ? "0 0 44px" : "0"}}
-                                                        ref={measureRef} key={`_s_${index}`}>
-                                                {/*{showLoading && <Loading/>}*/}
-                                                {
-                                                    isNewTheme &&
-                                                    <div className="strike">
-                                                        <span>New Tape</span>
-                                                    </div>
-                                                }
-                                                {
-                                                    index == 0 && <div style={{height: '20px'}}></div>
-                                                }
-
-                                                <div className={"visual-msg-content"} onClick={(e) => {
-                                                    // console.log("click msg")
-                                                    e.stopPropagation();
-                                                    e.persist();
-                                                    const sticky = comments[index];
-                                                    if (sticky && stickyMsg && sticky.seq != stickyMsg.seq) {
-                                                        // setStickyMsg(sticky)
-                                                        dispatchTheme(sticky);
-                                                    }
-                                                    // setCheckedMsgId(sticky && (sticky as PinnedSticky).records && (sticky as PinnedSticky).records.length>0 && (sticky as PinnedSticky).records[0].id)
-                                                }}>
-                                                    {msgItems}
-                                                </div>
-                                                {
-                                                    isDifTap && onFork && <div style={{padding: '6px 12px',display: "flex", justifyContent: "flex-end"}}>
-                                                        <div className="fork-icon">
-                                                            <IonButtons>
-                                                                <IonButton onClick={() => {
-                                                                    // setShowLoading(true)
-                                                                    onFork(pinnedSticky.records[0].groupId, {
-                                                                        tribeId: config.tribeId,
-                                                                        keeper:"",
-                                                                        lastPinedSeq:0,
-                                                                        onlineUser: 0,
-                                                                        theme:  pinnedSticky.theme,
-                                                                        title: "",
-                                                                        desc: "",
-                                                                        themeTag: pinnedSticky.theme.themeTag,
-                                                                        themeDesc: pinnedSticky.theme.themeDesc,
-                                                                    }).catch(e=>{
-                                                                        // setShowLoading(false)
-                                                                        console.error(e)
-                                                                    })
-                                                                }}><IonIcon src={gitBranchOutline} style={{color: "#4C89F8",fontSize:"24px"}}/></IonButton>
-                                                            </IonButtons>
-                                                        </div>
-                                                    </div>
-                                                }
-                                                {
-                                                    (index == comments.length - 1 && !!pinnedSticky.groupId) && <div className="strike">
-                                                        <span>New Tape</span>
-                                                    </div>
-                                                }
-                                            </div>
-                                        }
-                                    }
-                                })
-                            }
-                        </div>
-                    }
                 </div>
-            }
-            {/*{*/}
-            {/*    stickyMsg&& stickyMsg.groupId && owner && <div className="pinned-fix pinned-img-animation2">*/}
-            {/*        <div className="pinned-fix timg">*/}
-            {/*            <img src={(stickyMsg as PinnedSticky).theme.image} width='100%' height='100%'/>*/}
-            {/*        </div>*/}
-            {/*        <div className="pinned-fix tdesc">*/}
-            {/*            <div className="ttitle">Pinned #{(stickyMsg as PinnedSticky).seq}</div>*/}
-            {/*            <div style={{fontSize: '13px',color:'#868990'}}>*/}
-            {/*                {(stickyMsg as PinnedSticky).records.length} messages,*/}
-            {/*                {(stickyMsg as PinnedSticky).roles.length} roles*/}
-            {/*            </div>*/}
-            {/*            <div className="cot">*/}
-            {/*               <div className="cot-in"></div>*/}
-            {/*            </div>*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*}*/}
+            </div>
             <IonLoading
                 cssClass='my-custom-class'
                 isOpen={showLoading}
@@ -764,32 +957,56 @@ export const MessageContentWindow: React.FC<Props> = ({groupMsg, onFork, shareMs
             />
 
             {
-                comments.length - 1 > currentVisibleIndex &&
+                comments.length - 1 > currentVisibleStopIndex &&
                 <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{
                     bottom: !pinnedStickies ? '145px' : "100px",
                     right: !pinnedStickies ? "" : "35px",
                     cursor: 'pointer'
                 }}>
-                    <div className="fab-cus">
+                    <div>
+
+
                         {
-                            (comments.length - 1 > currentVisibleIndex && currentVisibleIndex > 10) &&
-                            <div style={{paddingTop: '6px'}} onClick={() => {
-                                startItem(0);
+                            visibleRange.startIndex > 5 &&
+                            <div className="fab-cus" onClick={() => {
+                                setAtBottom(false);
+                                if (firstItemIndex < 1) {
+                                    scrollToItem({index: 0, align: "start"})
+                                } else {
+                                    fetchMsgByIndex(0).catch(e => console.error(e))
+                                }
                             }}>
-                                <IonIcon icon={chevronUpOutline} size="small"/>
+                                <img src="assets/img/toTop.png" width={32} height={32}
+                                     style={{verticalAlign: "middle"}}/>
                             </div>
                         }
                         {
-                            comments.length - 1 - maxVisibleIndex > 0 && maxVisibleIndex > 0 &&
-                            <div className="fab-cus-dig">
-                                <small>{comments.length - 1 - maxVisibleIndex < 0 ? 0 : comments.length - 1 - maxVisibleIndex}</small>
+                            !pinnedStickies && (showButton || visibleRange.startIndex < 5) &&
+                            <div className="fab-cus-dig"
+                                 style={(total - 1 - maxVisibleIndex <= 0) ? {
+                                     background: "transparent",
+                                     height: 12
+                                 } : {}}>
+                                <small>{total - 1 - maxVisibleIndex <= 0 ? "" : total - 1 - maxVisibleIndex}</small>
                             </div>
                         }
-                        <div style={{paddingTop: '6px'}} onClick={() => {
-                            scrollToBottom();
-                        }}>
-                            <IonIcon icon={chevronDownOutline} size="small"/>
-                        </div>
+
+                        {
+                            (showButton || visibleRange.startIndex < 5) && (
+                                <div className="fab-cus" onClick={() => {
+                                    setAtBottom(true);
+                                    if (comments && comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex == total - 1) {
+                                        scrollToItem({index: total - 1, align: "end"})
+                                    } else {
+                                        fetchMsgByIndex(total - 1, true).catch(e => console.error(e))
+                                    }
+
+                                }}>
+                                    <img src="assets/img/toBottom.png" width={32} height={32}
+                                         style={{verticalAlign: "middle"}}/>
+                                </div>
+                            )}
+
                     </div>
                 </IonFab>
             }
@@ -938,3 +1155,6 @@ export const MessageContentWindow: React.FC<Props> = ({groupMsg, onFork, shareMs
     </>
 
 }
+
+
+export const MessageContentWindow = React.memo(MessageContentWindowChild);
