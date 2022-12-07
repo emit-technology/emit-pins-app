@@ -860,6 +860,10 @@ export const MessageContentVisualsoTestChild: React.FC<Props> = ({groupMsg
             data={users}
             startReached={prependItems}
             itemContent={(index, user) => {
+                function ii(index) {
+                    console.log("ii----------------------",index);
+                    return index
+                }
                 return (
                     <div
                         style={{ backgroundColor: user.bgColor, padding: "1rem 0.5rem" }}
@@ -871,14 +875,14 @@ export const MessageContentVisualsoTestChild: React.FC<Props> = ({groupMsg
                         </h4>
                         <div style={{ marginTop: "1rem" }}>
                             {
-                                index % 9==0 && <div style={{ marginTop: "1rem" ,backgroundColor: "#ddd"}}>{user.description}</div>
+                                ii(index) % 9==0 && <div style={{ marginTop: "1rem" ,backgroundColor: "#ddd"}}>{user.description}</div>
                             }
                             {
-                                index %3==0 && <div style={{ marginTop: "1rem" ,backgroundColor: "#ddd"}}>{user.description}</div>
+                                ii(index) %3==0 && <div style={{ marginTop: "1rem" ,backgroundColor: "#ddd"}}>{user.description}</div>
                             }
 
                             {
-                                index % 5 && <div style={{backgroundColor: "#f66565"}}>{user.description}</div>
+                                ii(index) % 5 && <div style={{backgroundColor: "#f66565"}}>{user.description}</div>
                             }
                         </div>
                     </div>

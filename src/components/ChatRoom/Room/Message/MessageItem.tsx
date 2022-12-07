@@ -70,15 +70,16 @@ interface Props {
     onReplay?: (msg:Message) =>void;
     onEdit?: (msg: Message)=>void;
     setCheckedMsgArr?:(msg:Array<string>)=>void;
+    visibleRange?: {startIndex: number, endIndex: number}
 }
 
-export const MessageItem:React.FC<Props> = ({ index,onSupport, pinnedSticky,
+const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                                                 total, atBottom, firstItemIndex,
                                                 pinnedStickies, tribeInfo, checkedMsgArr,
                                                 showPin, owner,checkedMsgId,onFork, setSize,windowWidth,
                                                 stickyMsg,dispatchTheme, setCheckedMsgId,
                                                 onReplay,onEdit,setCheckedMsgArr,
-                                                onShare,userLimit}) => {
+                                                onShare,userLimit,visibleRange}) => {
     const arrIndex = index - firstItemIndex;
     const preIndex = arrIndex - 1;
     //
@@ -104,7 +105,7 @@ export const MessageItem:React.FC<Props> = ({ index,onSupport, pinnedSticky,
     if (!!pinnedSticky) {
         return (
             <div ref={target} className="visual-msg-box"
-                 style={{padding: atBottom && index == total - 1 ? "0 0 44px" : "0" }}
+                 style={{padding: atBottom && index >= total - 1 && index == visibleRange.endIndex ? "0 0 44px" : "0" }}
                  key={index}>
 
                 {/*<small>{pinnedSticky.records[0].msgIndex}</small>*/}
@@ -176,6 +177,7 @@ export const MessageItem:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                                               keeper={tribeInfo && tribeInfo.keeper} onSupport={onSupport}
                                               checked={checked || v.msgType == MessageType.Airdrop} msg={v}
                                               owner={owner}
+                                              showTag={!!pinnedStickies}
                                               showPin={v.msgStatus == MessageStatus.dashed && showPin}
                                         >
                                             {
@@ -289,3 +291,5 @@ export const MessageItem:React.FC<Props> = ({ index,onSupport, pinnedSticky,
     }
 
 }
+
+export const MessageItem = React.memo(MessageItemChild);

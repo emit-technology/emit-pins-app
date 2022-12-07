@@ -14,20 +14,21 @@ import 'overlayscrollbars/overlayscrollbars.css';
 import {ParallaxProvider} from "react-scroll-parallax";
 // import { SplashScreen } from '@capacitor/splash-screen';
 
-// globalThis.VIRTUOSO_LOG_LEVEL = LogLevel.DEBUG;
+globalThis.VIRTUOSO_LOG_LEVEL = LogLevel.DEBUG;
 
 const rootElement = document.getElementById("root");
+
 if (rootElement.hasChildNodes()) {
+    console.log("hydrate mode");
     hydrate(<React.StrictMode>
         <ParallaxProvider>
         <App />
         </ParallaxProvider>
     </React.StrictMode>, rootElement);
 } else {
+    console.log("render mode");
     render(<React.StrictMode>
-        <ParallaxProvider>
             <App />
-        </ParallaxProvider>
     </React.StrictMode>, rootElement);
 }
 console.log("added app url open listener.")

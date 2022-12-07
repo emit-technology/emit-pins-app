@@ -156,7 +156,7 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                 {/*</div>*/}
                                 <div className="iconss" onClick={(e)=>{
                                     e.stopPropagation();
-                                    copy(`${config.baseUrl}/${v.tribeId}`)
+                                    copy(`${window.location.href}/${v.tribeId}`)
                                     presentToast({color:"primary", message: "Copied to clipboard", duration: 2000})
                                 }}>
                                     <img src="./assets/img/copy.png" className="static-icons"/>

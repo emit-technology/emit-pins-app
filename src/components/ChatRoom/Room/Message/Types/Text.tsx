@@ -7,7 +7,12 @@ import {Role} from "./Role";
 import 'react-photo-view/dist/react-photo-view.css';
 import {ImageView} from "../../../../utils/ImageView";
 import {Airdrop} from "./AirDrop";
-
+import {useEffect, useLayoutEffect, useState} from "react";
+import {Metadata, parser} from "html-metadata-parser";
+import axios from "axios";
+import config from "../../../../../common/config";
+import {tribeService} from "../../../../../service/tribe";
+import selfStorage from "../../../../../common/storage";
 
 interface Props {
     msg: Message;
@@ -18,67 +23,14 @@ interface Props {
     hideTime?: boolean;
     onSupport?: (msgId: string, f: boolean) => void;
     hovered?:boolean
-}
 
-// const PopoverList: React.FC<{
-//     onHide: () => void;
-//     isSystem:boolean;
-//     msg:Message;
-//     isSupported:boolean;
-//     onSupport?: (msgId: string, f: boolean) => void;
-//     onReplay?: (msg: Message) => void;
-//     onEdit?: (msg: Message) => void;
-//     onDelete?: (msg: Message) => void;
-//     owner: string;
-//     isOwner:boolean;
-// }> = ({ onHide,isSystem,owner,msg,isOwner
-//                              ,isSupported,onDelete,onReplay,onEdit,
-//                              onSupport }) => (
-//     <div style={{width: "100%",display: "flex"}}
-//          className={isSystem || msg.msgType == MessageType.Role ? "flex-center" : ""}>
-//         {
-//             !msg.groupId && <div className={`support-bx ${msg.Supporters && isSupported?"support-bx-owner":""}`}  onClick={() => {
-//                 if (!msg.groupId) {
-//                     onHide();
-//                     onSupport(msg.id, !isSupported   );
-//                 }
-//             }}>
-//                 <IonIcon size="small" src={thumbsUpOutline} style={{transform: 'translateY(2px)'}}/>
-//             </div>
-//         }
-//         {
-//             onReplay && owner && <div className="support-bx" style={{width: '35px'}} onClick={() => {
-//                 onHide();
-//                 onReplay(msg)
-//             }}>
-//                 <IonIcon size="small" src={arrowUndoOutline} style={{transform: 'translate(0px,2px)'}}/>
-//             </div>
-//         }
-//         {
-//             onEdit && msg.msgType == MessageType.Text && isOwner &&
-//             <div className="support-bx" style={{width: '35px'}} onClick={() => {
-//                 onHide();
-//                 onEdit(msg)
-//             }}>
-//                 <IonIcon size="small" src={createOutline} style={{transform: 'translate(0px,1px)'}}/>
-//             </div>
-//         }
-//         {
-//             onDelete && isOwner &&
-//             <div className="support-bx" style={{width: '35px'}} onClick={() => {
-//                 onHide();
-//                 onDelete(msg)
-//             }}>
-//                 <IonIcon size="small" src={trashOutline} style={{transform: 'translate(0px,2px)'}}/>
-//             </div>
-//         }
-//     </div>
-// );
+    showTag?: boolean;
+}
 
 export const Text: React.FC<Props> = ({
                                           msg, onSupport,hovered, keeper, hideTime, checked,
                                           showPin,
-                                          owner,children,
+                                          owner,children, showTag,
                                       }) => {
 
     const content: MsgText = msg.content as MsgText;
@@ -88,19 +40,6 @@ export const Text: React.FC<Props> = ({
     const isOwner = msg && owner == msg.owner && !msg.groupId
     const isOwnerPinned = msg && owner == msg.owner && !!msg.groupId
     const isSupported = msg && msg.Supporters && msg.Supporters.indexOf(owner) > -1;
-    // const [present, dismiss] = useIonPopover(PopoverList, {
-    //     onHide: () => dismiss(),
-    //     isSystem:isSystem,
-    //     msg:msg,
-    //     isSupported:isSupported,
-    //     onSupport:onSupport,
-    //     onReplay:onReplay,
-    //     onEdit:onEdit,
-    //     onDelete:onDelete,
-    //     owner:owner,
-    //     isOwner:isOwner
-    // });
-
 
     // console.log("replayCtn.content",replayCtn && replayCtn.content , msg && msg.replayMsg && msg.replayMsg.msgType)
 
@@ -117,6 +56,45 @@ export const Text: React.FC<Props> = ({
             &nbsp;<IonText color={isSupported ? "primary" : ""}>{msg.support}</IonText></small>
         </div>
     </div>
+
+    const [meta, setMeta] = useState(null);
+    const [link, setLink] = useState("");
+
+
+    useLayoutEffect(()=>{
+        const content: MsgText = msg.content as MsgText;
+
+        if(msg.owner == keeper && content.content){
+            let urlIndex = -1 ;
+            if(content.content && content.content.indexOf("https://")>-1){
+                urlIndex = content.content.indexOf("https://");
+            }else if(content.content && content.content.indexOf("http://")>-1){
+                urlIndex = content.content.indexOf("http://");
+            }
+            if(urlIndex > -1){
+                let _url = content.content.slice(urlIndex);
+                if(_url.indexOf(" ") > -1){
+                    _url = _url.slice(0, _url.indexOf(" "))
+                }
+                setLink(_url);
+                const cache = tribeService.urlMetadata(_url);
+                if(cache){
+                    setMeta(cache)
+                }
+                axios.post(`${config.baseUrl}/verse/metadata/analyze`,{
+                    url: _url
+                }).then((result )=>{
+
+                    const rest:Metadata = result.data;
+                    // console.log(JSON.stringify(rest, null, 3));
+                    selfStorage.setItem(`metadata_${_url}`, rest)
+
+                    setMeta(rest)
+                })
+            }
+        }
+
+    }, [msg, keeper])
 
     const replayItem = replayCtn && msg.replayMsg && <div style={{
         minWidth: replayCtn && replayCtn.image && replayCtn.image.url ? "150px" : "50px",
@@ -173,6 +151,41 @@ export const Text: React.FC<Props> = ({
         }
     </div>
 
+    const genMetadataEl = () =>{
+
+        return meta && <div className="og-card-box">
+                {
+                    (meta as Metadata).og.image && <div className="og-card-image"><img src={(meta as Metadata).og.image} style={{borderRadius: '12px 12px 0 0', verticalAlign: "middle"}}/></div>
+                }
+                <div style={msg.owner == owner && !msg.groupId ?{backgroundImage: "linear-gradient(var(--ion-color-secondary), var(--ion-color-secondary))"}:{}}>
+                    {
+                        !(meta as Metadata).og["title"] && <div>
+                            <div className="og-card-title">{(meta as Metadata).meta.title}</div>
+                            <div className="og-card-desc og-card-text">{(meta as Metadata).meta.description}</div>
+                        </div>
+                    }
+                    {
+                        (meta as Metadata).og.title && <div>
+                            <div className="og-card-title">{(meta as Metadata).meta.title}</div>
+                            <div className="og-card-title">{(meta as Metadata).og.title}</div>
+                            <div className="og-card-desc og-card-text">{(meta as Metadata).og.description}</div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+    }
+
+    const genContent = () =>{
+        return <>
+            {!link && content.content}
+            {!!link  && <>
+                {content.content.slice(0, content.content.indexOf(link))}
+                <div className="text-pre-link" onClick={()=>window.open(link)}>&nbsp;&nbsp;&nbsp;&nbsp;<span className="tex-pre-link-text">{link}</span></div>
+                {content.content.slice(content.content.indexOf(link) + link.length)}
+            </>}
+        </>
+    }
     let contentText = content && content.content;
 
     const isMind = contentText && contentText.indexOf("💭") == 0;
@@ -191,7 +204,7 @@ export const Text: React.FC<Props> = ({
             ) ?(
                 msg && msg.role ?
                     <>
-                        <div className="avatar">
+                        <div className={!hideTime ? "avatar" : ""} style={!!hideTime ?{width: 63}:{}}>
                             {
                                 !hideTime && msg && msg.actor && !!msg.actor.avatar ?
                                     <IonAvatar className="ion-avatar">
@@ -224,21 +237,25 @@ export const Text: React.FC<Props> = ({
                                             msg && msg.msgType == MessageType.Text ?
                                                 <>
                                                     {
-                                                        content.content &&
-                                                        <div style={{
-                                                            // width: '100%',
-                                                            position: "relative",
-                                                            border: isMind ? "1px dashed #000000" : (isOwnerPinned ? "1px solid #D8F20C" : "0"),
-                                                            background: isMind ? "unset" : ""
-                                                        }} className={isOwner ? "msg-text-sender" : "msg-text-receive"}>
-                                                            {replayItem}
-                                                            <div style={{padding: '0px 6px 0px'}}>
-                                                                <div className="text-pre">
-                                                                    {content.content}
+                                                        content.content &&<div>
+                                                            <div style={{
+                                                                // width: '100%',
+                                                                position: "relative",
+                                                                border: isMind ? "1px dashed #000000" : (isOwnerPinned ? "1px solid #D8F20C" : "0"),
+                                                                background: isMind ? "unset" : ""
+                                                            }} className={isOwner ? "msg-text-sender" : "msg-text-receive"}>
+                                                                {replayItem}
+                                                                { genMetadataEl() }
+                                                                <div style={{padding: '6px 6px 4px 6px'}}>
+                                                                    <div className="text-pre">
+                                                                        {genContent()}
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     }
+
+
                                                     {
                                                         content.image && content.image.url && <div style={{
                                                             borderRadius: 12,
@@ -259,7 +276,7 @@ export const Text: React.FC<Props> = ({
 
                                         }
                                         {
-                                            msg && !onSupport && !(msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&
+                                            msg && showTag && !(msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&
                                             <div className="removed">
                                                 <img src="./assets/img/pined.png"/>
                                             </div>
@@ -306,9 +323,10 @@ export const Text: React.FC<Props> = ({
                                         {
                                             content.content && <div style={{padding: '5px'}}>
                                                 {replayItem}
-                                                <div style={{padding: '4px 0 0 0'}}>
+                                                { genMetadataEl() }
+                                                <div style={{padding: '6px 0 0 6px'}}>
                                                     <div className="text-pre">
-                                                        {content.content}
+                                                        {genContent()}
                                                     </div>
                                                 </div>
                                             </div>
@@ -317,7 +335,7 @@ export const Text: React.FC<Props> = ({
                                 }
 
                                 {
-                                    msg && !onSupport && !(msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&
+                                    msg && showTag && !(msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&
                                     <div className="removed">
                                        <img src="./assets/img/pined.png"/>
                                     </div>
@@ -340,7 +358,7 @@ export const Text: React.FC<Props> = ({
                                 <Role msg={msg} showPin={showPin} isOwner={msg && msg.owner == owner}/>
                             }
                             {
-                                msg && !onSupport && !(msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&
+                                msg && showTag && !(msg.msgStatus == MessageStatus.draft || msg.msgStatus == MessageStatus.removed) &&
                                 <div className="removed-role">
                                     <img src="./assets/img/pined.png"/>
                                 </div>

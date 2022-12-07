@@ -799,6 +799,17 @@
   -moz-user-select:text;
   -ms-user-select:text;
   user-select:text;
+  font-size: 14px;
+}
+
+.text-pre-link {
+  background: url('./../../../../img/link.png') no-repeat top left/14px 16px;
+  color: #0064D9;
+}
+.tex-pre-link-text{
+
+  text-decoration: underline;
+  text-underline: #0064D9;
 }
 
 .pp-offset {

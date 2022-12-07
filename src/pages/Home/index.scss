@@ -131,3 +131,51 @@
   text-overflow: ellipsis;
   overflow-wrap: normal;
 }
+
+.og-card-box{
+  //background: #fff;
+  border-radius: 12px;
+  //padding: 12px;
+  background-color: #F2F5F8;
+  background-blend-mode: multiply;
+}
+
+.og-card-box > div:last-child {
+  //border-left: 3px solid var(--ion-color-secondary);
+  //padding: 0 0 0 6px;
+  background-color: #F2F5F8;
+  background-blend-mode: multiply;
+  color: #000;
+  padding: 12px;
+  border-radius: 0 0 12px 12px;
+}
+
+.og-card-title {
+  font-size: 14px;
+  font-weight: 700;
+
+}
+
+.og-card-desc {
+  font-size: 13px;
+}
+
+.og-card-img {
+
+}
+
+.og-card-url {
+
+}
+
+.og-card-text {
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  font-family: SFProText-Medium;
+  line-height: 1.2;
+}

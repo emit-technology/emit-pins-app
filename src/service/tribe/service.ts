@@ -1069,6 +1069,13 @@ class TribeService implements ITribe {
         })
 
     }
+
+    urlMetadata = (url:string) =>{
+       const _cache = selfStorage.getItem(`metadata_${url}`);
+       if(_cache){
+        return _cache
+       }
+    }
 }
 
 export const tribeService = new TribeService();

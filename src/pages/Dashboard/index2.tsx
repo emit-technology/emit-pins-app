@@ -123,7 +123,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
         await tribeService.init();
         await tribeWorker.init(config.tribeId)
 
-        await tribeService.userLimit(config.tribeId);
+        tribeService.userLimit(config.tribeId);
     }
 
     useLayoutEffect(() => {
