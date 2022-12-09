@@ -10,6 +10,7 @@ import {
     TribeRole,
     UserLimit, WsStatus
 } from "../../../../types";
+import {Dice, Expression, Text} from "./Types";
 
 import './message.scss';
 import {useAppDispatch, useAppSelector} from "../../../../common/state/app/hooks";
@@ -53,7 +54,8 @@ import {isApp} from "../../../../service/app";
 import {Virtuoso} from 'react-virtuoso'
 import {LoremIpsum} from "lorem-ipsum";
 import {MessageItem} from "./MessageItem";
-import {VirtuosoScroller} from "./VirtuosoScroller";
+import VirtuosoScroller from "virtual-scroller/react";
+import {ItemComponent} from "./ItemComponent";
 
 
 const lorem = new LoremIpsum({
@@ -91,7 +93,7 @@ interface Props {
     onSubscribe?: (f:boolean)=>void;
 }
 
-const pageSize = 20;
+const pageSize = 200;
 let pageNo = 1;
 let count = 0;
 let shouldScroll = 0;
@@ -118,7 +120,7 @@ const isAPP = false// utils.isSafari();
 
 let renderCount = 0;
 
-export const MessageContentVisualsoChild: React.FC<Props> = ({
+const MessageContentVisualsoChild: React.FC<Props> = ({
                                                                  groupMsg
                                                                  , isConnecting, firstIndex,
                                                                  onChangeVisible,
@@ -271,22 +273,19 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 reqIndex = 0;
             }
             const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, reqIndex, reqPageSize);
-            const {total} = await tribeService.streamMsg(config.tribeId, 0 , 1);
             const comp = rest.data;
             // console.log("======== comments: ", comments);
             combile(comp);
 
             setTotal(pre => {
-                return total
+                return rest.total
             });
             setComments(comp)
             setFirstItemIndex(reqIndex)
             console.log("------> firstItemIndex: [%d]", reqIndex, comp.length > 0 && comp[0])
 
             if (toBottom) {
-                scrollToItem({index: rest.total - 1, align: "end"});
-                // setTimeout(()=>{
-               // }, 100)
+                scrollToItem({index: rest.total, align: "end"});
             } else {
                 scrollToItem({index: firstIndex - reqIndex, align: "start"});
             }
@@ -393,7 +392,6 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 }).catch(e => console.error(e))
             }
         }
-        return false;
     }, [comments, total, setComments, setTotal])
 
     useEffect(() => {
@@ -572,7 +570,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                             }
                             // console.log("=========> commentsCopy>>>", commentsCopy, nextComments);
                             const _cIndex = commentsCopy.findIndex(v => v.records[0].groupId == "");
-                            if (commentsCopy.length == 0 || _cIndex >= 0) {
+                            if (_cIndex >= 0) {
                                 const comp = [...commentsCopy, ...nextComments];
                                 combile(comp)
                                 return comp
@@ -705,317 +703,15 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     }, [setAtBottom])
 
     return <>
-        <div className={!pinnedStickies ? "msg-content" : "msg-content2"} style={{
-            backgroundImage: `url(${utils.getDisPlayUrl(_url)})`,
-        }}>
-            <div className={`outer-box `}>
-                <div className="inner-box">
-                    {loadingData && <Loading/>}
-                    <div className="position-top">[{visibleRange.startIndex}] - [{visibleRange.endIndex}]
-                        : [{firstItemIndex}]..[{total}], [ren: {renderCount}]
-                    </div>
-                    <Virtuoso
-                        ref={virtuoso}
-                        style={{height: '100%'}}
-                        overscan={0}
-                        isScrolling={(f) => setIsScrolling(f)}
-                        firstItemIndex={firstItemIndex}
-                        rangeChanged={setVisibleRange}
-                        data={comments}
-                        endReached={loadMore}
-                        startReached={prependItems}
-                        followOutput={atBottom && (total > 0 && visibleRange.startIndex > total - pageSize) && followOutput}
-                        atBottomStateChange={(total > 0 && visibleRange.startIndex > total - pageSize) && bottomChange}
-                        // initialTopMostItemIndex={getCurrentVisible()}
-                        itemsRendered={(items)=>{
-                            if (!isScrolling && !pinnedStickies) {
-                                if (!stickyMsg) {
-                                    if (!!tribeInfo) {
-                                        const groupArr = tribeService.getGroupMap();
-                                        const defaultGroup = groupArr[groupArr.length - 1];
-                                        dispatchTheme({
-                                            theme: tribeInfo && tribeInfo.theme,
-                                            seq: -1,
-                                            roles: defaultGroup?defaultGroup.roles:[],
-                                            records: [],
-                                            groupId: "",
-                                            index: -1
-                                        })
-                                    }
-                                    if (items[items.length - 1] && items.length > 0 && maxVisibleIndex < items[items.length - 1].data.records[0].msgIndex) {
-                                        setMaxVisible(items[items.length - 1].data.records[0].msgIndex)
-                                    }
-                                }
-                            }
-                            if (!pinnedStickies && items && items[0] && items[0].data) {
-                                visibleStartId = items[0].index;
-                                setCurrentTimeout(false)
-                                if (!!(items[items.length - 1].data) && maxVisibleIndex < items[items.length - 1].index) {
-                                    setMaxVisible(items[items.length - 1].index)
-                                }
-                                if (visibleRange.endIndex >= total - 1) {
-                                    if (!!tribeInfo) {
-                                        const groupArr = tribeService.getGroupMap();
-                                        const defaultGroup = groupArr[groupArr.length - 1];
-                                        dispatchTheme({
-                                            theme: tribeInfo && tribeInfo.theme,
-                                            seq: -1,
-                                            roles: defaultGroup?defaultGroup.roles:[],
-                                            records: [],
-                                            groupId: "",
-                                            index: -1
-                                        })
-                                    }
-                                } else {
-                                    // console.log("items[0].data = ", items[0].data)
-                                    dispatchTheme(items[0].data)
-                                }
-                            }
-                        }}
-                        // itemSize={(el, field) => {
-                        //     return el.getBoundingClientRect().height;
-                        // }}
-                        itemContent={(index, data) => {
-                            return <MessageItem index={index} pinnedSticky={data as PinnedSticky}  total={total}
-                                                atBottom={atBottom} firstItemIndex={firstItemIndex}
-                                                checkedMsgArr={checkedMsgArr} showPin={showPin} owner={owner}
-                                                checkedMsgId={checkedMsgId} pinnedStickies={pinnedStickies}
-                                                onSupport={onSupport} onFork={onFork} tribeInfo={tribeInfo}
-                                                onShare={onShare} stickyMsg={stickyMsg} userLimit={userLimit}
-                                                onEdit={(msg) => setShowModifyMsg(msg)} onReplay={onReplay}
-                                                dispatchTheme={dispatchTheme} setCheckedMsgId={(msgId)=>{
-                                setCheckedMsgId(msgId)
-                            }}
-                                                visibleRange={visibleRange}
-                                                setCheckedMsgArr={(msgs)=>setCheckedMsgArr(msgs)}
 
-                            />
-                        }}
-                    />
-
-                </div>
-            </div>
-            <IonLoading
-                cssClass='my-custom-class'
-                isOpen={showLoading}
-                onDidDismiss={() => setShowLoading(false)}
-                message={'Please wait...'}
-                duration={60000}
-            />
-
-            {
-                comments.length - 1 > currentVisibleStopIndex &&
-                <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{
-                    bottom: !pinnedStickies ? '145px' : "100px",
-                    right: !pinnedStickies ? "" : "35px",
-                    cursor: 'pointer'
-                }}>
-                    <div>
-
-                        {
-                            !!onSubscribe &&
-                            <div className="fab-cus" onClick={() => {
-                                onSubscribe(!subscribed)
-                            }}>
-                                {
-                                    subscribed === false ?<img src="assets/img/fab-icon00004.png" width={32} height={32}
-                                                               style={{verticalAlign: "middle"}}/>
-                                                               :
-                                        <img src="assets/img/fab-icon00001.png" width={32} height={32}
-                                             style={{verticalAlign: "middle"}}/>
-                                }
-                            </div>
-                        }
-
-                        {
-                            visibleRange.startIndex > 5 &&
-                            <div className="fab-cus" onClick={() => {
-                                setAtBottom(false);
-                                if (firstItemIndex < 1) {
-                                    scrollToItem({index: 0, align: "start"})
-                                } else {
-                                    fetchMsgByIndex(0).catch(e => console.error(e))
-                                }
-                            }}>
-                                <img src="assets/img/fab-icon00003.png" width={32} height={32}
-                                     style={{verticalAlign: "middle"}}/>
-                            </div>
-                        }
-                        {
-                            !pinnedStickies && (showButton || visibleRange.startIndex < 5) &&
-                            <div className="fab-cus-dig"
-                                 style={(total - 1 - maxVisibleIndex <= 0) ? {
-                                     background: "transparent",
-                                     height: 0
-                                 } : {}}>
-                                <small>{total - 1 - maxVisibleIndex <= 0 ? "" : total - 1 - maxVisibleIndex}</small>
-                            </div>
-                        }
-
-                        {
-                            (showButton || visibleRange.startIndex < 5) && (
-                                <div className="fab-cus" onClick={() => {
-                                    setAtBottom(true);
-                                    if (comments && comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex == total - 1) {
-                                        scrollToItem({index: total - 1, align: "end"})
-                                    } else {
-                                        fetchMsgByIndex(total - 1, true).catch(e => console.error(e))
-                                    }
-
-                                }}>
-                                    <img src="assets/img/fab-icon00002.png" width={32} height={32}
-                                         style={{verticalAlign: "middle"}}/>
-                                </div>
-                            )}
-
-                    </div>
-                </IonFab>
-            }
-
-            <ShareEx stickyMsg={stickyMsg} isOpen={showShareModal} showHistory={true}
-                     onClose={() => setShowShareModal(false)}
-                     tribeInfo={tribeInfo} latestMsg={shareMsgs} roles={shareRoles as Array<TribeRole>} owner={owner}/>
-
-            <IonModal isOpen={!!showModifyMsg} className="role-select-list" onDidDismiss={() => setShowModifyMsg(null)}>
-                <IonHeader collapse="fade">
-                    <IonToolbar>
-                        <IonTitle>Update messages</IonTitle>
-                        <IonButtons slot="end">
-                            <IonButton onClick={() => setShowModifyMsg(null)}>Close</IonButton>
-                        </IonButtons>
-                    </IonToolbar>
-                </IonHeader>
-                <IonContent className="ion-padding">
-                    {
-                        showModifyMsg && showModifyMsg.content && <div style={{
-                            // display: 'flex',
-                            // flexDirection: 'row',
-                            // justifyContent: 'center'
-                        }}>
-                            {
-                                showModifyMsg.content && <div style={{maxWidth: '100%'}}>
-                                    <div className="create-title">Role</div>
-                                    <div style={{maxWidth: "100%"}}>
-                                        <IonRow>
-                                            {
-                                                selectRole && selectRole.id != (showModifyMsg as Message).role && <>
-
-                                                    <IonCol size="5">
-                                                        {
-                                                            (showModifyMsg as Message).actor ?
-                                                                <div style={{position: "relative"}}>
-                                                                    <IonItem lines="none" color="light"
-                                                                             style={{borderRadius: 12}}>
-                                                                        <IonAvatar className="ion-avatar2">
-                                                                            <img
-                                                                                src={utils.getDisPlayUrl((showModifyMsg as Message).actor.avatar)}/>
-                                                                        </IonAvatar>
-                                                                        <IonLabel className="ion-text-wrap">
-                                                                            <b style={{fontSize: '12px'}}>&nbsp;{(showModifyMsg as Message).actor.name}</b>
-                                                                        </IonLabel>
-                                                                    </IonItem>
-                                                                </div> : <div style={{position: "relative"}}>
-                                                                    <IonItem lines="none" color="light"
-                                                                             style={{borderRadius: 12}}>
-                                                                        <IonAvatar className="ion-avatar2">
-                                                                            <img src={"./assets/img/default-avatar.png"}/>
-                                                                        </IonAvatar>
-                                                                        <IonLabel className="ion-text-wrap">
-                                                                            <b style={{fontSize: '12px'}}>&nbsp;Narrator</b>
-                                                                        </IonLabel>
-                                                                    </IonItem>
-                                                                </div>
-                                                        }
-                                                    </IonCol>
-                                                    <IonCol size="2">
-                                                        <div className="Swlwn"><IonIcon src={arrowForwardOutline}
-                                                                                        size="large"/></div>
-                                                    </IonCol>
-                                                </>
-                                            }
-                                            <IonCol
-                                                size={selectRole && selectRole.id != (showModifyMsg as Message).role ? "5" : "12"}>
-                                                {
-                                                    selectRole && <div style={{position: "relative"}}>
-                                                        <IonItem lines="none" color="light" style={{borderRadius: 12}}>
-                                                            <IonAvatar className="ion-avatar2">
-                                                                <img src={utils.getDisPlayUrl(selectRole.avatar)}/>
-                                                            </IonAvatar>
-                                                            <IonLabel className="ion-text-wrap">
-                                                                &nbsp;<b
-                                                                style={{fontSize: '12px'}}>{selectRole.name}</b>
-                                                            </IonLabel>
-                                                        </IonItem>
-                                                    </div>
-                                                }
-                                            </IonCol>
-                                        </IonRow>
-                                    </div>
-
-                                    <div className="create-title">Message <IonIcon src={createOutline} color="medium"
-                                                                                   style={{transform: "translateY(2px)"}}/>
-                                    </div>
-                                    <IonTextarea className="msg-input" rows={1} placeholder="Input your message"
-                                                 autoGrow value={showModifyMsg.content.content}
-                                                 onIonChange={(e) => {
-
-                                                     const msgCopy = JSON.parse(JSON.stringify(showModifyMsg))
-                                                     msgCopy.content.content = e.target.value;
-                                                     setShowModifyMsg(msgCopy)
-                                                 }}/>
-                                    <div style={{maxWidth: '100%'}}>
-                                        {
-                                            replayMsg && <ReplayText msg={replayMsg}/>
-                                        }
-                                    </div>
-                                    <div className="create-title">Image <IonIcon src={createOutline} color="medium"
-                                                                                 style={{transform: "translateY(2px)"}}/>
-                                    </div>
-                                    <div style={{
-                                        borderRadius: '5px',
-                                        // border: '1px solid var(--ion-color-medium)',
-                                        padding: '0 12px',
-                                        position: "relative",
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        justifyContent: 'center'
-                                    }}>
-                                        <UploadImage borderRadio={12} defaultIcon={add}
-                                                     width={showModifyMsg && showModifyMsg.content && !showModifyMsg.content.image["url"] ? "100%" : ""}
-                                                     imgUrl={showModifyMsg && showModifyMsg.content && showModifyMsg.content.image["url"] && utils.getDisPlayUrl(showModifyMsg.content.image)}
-                                                     setImgUrl={(url, w, h) => {
-                                                         const msgCopy = JSON.parse(JSON.stringify(showModifyMsg))
-                                                         msgCopy.content.image = {url: url, width: w, height: h}
-                                                         setShowModifyMsg(msgCopy)
-                                                     }}/>
-                                        {/*<div style={{position: "absolute",top: 16 , right: 26}} onClick={(e)=>{*/}
-                                        {/*e.persist()}*/}
-                                        {/*}>*/}
-                                        {/*    <IonIcon src={createOutline} size="large" color="medium"/>*/}
-                                        {/*</div>*/}
-                                    </div>
-
-                                    <IonButton expand="block" onClick={() => {
-                                        tribeService.updateMsg(showModifyMsg.id, '0x' + Buffer.from(JSON.stringify(showModifyMsg.content)).toString('hex'),
-                                            selectRole && selectRole.id, replayMsg && replayMsg.id
-                                        ).then(() => {
-                                            setShowModifyMsg(null)
-                                        }).catch(e => {
-                                            console.log(e)
-                                        })
-                                    }}>Commit</IonButton>
-                                </div>
-                            }
-
-                        </div>
-                    }
-
-                </IonContent>
-            </IonModal>
-        </div>
+        <VirtuosoScroller
+            items={comments}
+            itemComponent={ItemComponent}
+            preserveScrollPositionOnPrependItems
+        />
     </>
 
 }
 
 
-export const MessageContentVisualso = React.memo(MessageContentVisualsoChild);
+export const MessageContentVirtualScroller = React.memo(MessageContentVisualsoChild);

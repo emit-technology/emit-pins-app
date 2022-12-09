@@ -216,7 +216,15 @@ class TribeService implements ITribe {
             authToken = tribeService.getAuthToken();
         }
         if (rest.code == 40000) {
-            authToken = await this.getAccountAndLogin();
+            try{
+                authToken = await this.getAccountAndLogin();
+            }catch (e){
+                const err:string = typeof e == 'string'?e: e.message;
+                if(err && err.indexOf("Account locked")>-1){
+                    return Promise.reject("Account not login!")
+                }
+                return Promise.reject(e)
+            }
         }
         if (authToken) {
             await tribeWorker.checkAlive(config.tribeId)
@@ -766,7 +774,7 @@ class TribeService implements ITribe {
 
     myTribes = async (): Promise<Array<TribeInfo>> => {
         const account = await emitBoxSdk.getAccount();
-        const address = account.addresses[ChainType.EMIT]
+        const address = account ?account.addresses[ChainType.EMIT]:""
         const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/myTribes', {userId: address});
         if (rest && rest.code == 0) {
             return Promise.resolve(rest.data)
@@ -793,6 +801,7 @@ class TribeService implements ITribe {
     }
 
     subscribeTribe = async (tribeId: string): Promise<boolean> => {
+        await this.userCheckAuth()
         const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/subscribeTribe', {tribeId: tribeId});
         if (rest && rest.code == 0) {
             return true
@@ -801,6 +810,7 @@ class TribeService implements ITribe {
     }
 
     unSubscribeTribe = async (tribeId:string): Promise<boolean> => {
+        await this.userCheckAuth()
         const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/unSubscribeTribe', {tribeId: tribeId});
         if (rest && rest.code == 0) {
             return true

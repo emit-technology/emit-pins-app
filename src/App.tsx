@@ -34,6 +34,8 @@ import {DashboardV2} from "./pages/Dashboard/index2";
 import {DashboardV2Test} from "./pages/Dashboard/indexTest";
 import {DashboardV3} from "./pages/Dashboard/indexV3";
 import {DashboardV4} from "./pages/Dashboard/indexV4";
+import {DashboardV2Test2} from "./pages/Dashboard/indexTestV2";
+import {DashboardTestScroller} from "./pages/Dashboard/indexVirtualScroller";
 setupIonicReact({
     mode: "ios",
 });
@@ -82,6 +84,17 @@ const App: React.FC = () => {
                                         const tribeId = props.match.params.tribeId;
                                         config.tribeId = tribeId;
                                         return <DashboardV2Test tribeId={tribeId} router={routerRef.current}/>
+                                    }}/>
+                                    <Route exact path="/test2/:tribeId" component={(props: any) => {
+                                        const tribeId = props.match.params.tribeId;
+                                        config.tribeId = tribeId;
+                                        return <DashboardV2Test2 tribeId={tribeId} router={routerRef.current}/>
+                                    }}/>
+
+                                    <Route exact path="/scroller/:tribeId" component={(props: any) => {
+                                        const tribeId = props.match.params.tribeId;
+                                        config.tribeId = tribeId;
+                                        return <DashboardTestScroller tribeId={tribeId} router={routerRef.current}/>
                                     }}/>
 
                                     <Route exact path="/v3/:tribeId" component={(props: any) => {

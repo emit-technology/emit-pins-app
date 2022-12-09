@@ -9,14 +9,32 @@ import { Toast } from '@capacitor/toast';
 import {addListeners, getDeliveredNotifications, registerNotifications} from './service/app'
 import {utils} from "./common";
 import {LogLevel} from "react-virtuoso";
+import ResizeObserver from 'resize-observer-polyfill'
 
 import 'overlayscrollbars/overlayscrollbars.css';
 import {ParallaxProvider} from "react-scroll-parallax";
 // import { SplashScreen } from '@capacitor/splash-screen';
 
-globalThis.VIRTUOSO_LOG_LEVEL = LogLevel.DEBUG;
+// globalThis.VIRTUOSO_LOG_LEVEL = LogLevel.DEBUG;
 
 const rootElement = document.getElementById("root");
+
+if (!window.ResizeObserver)
+    window.ResizeObserver = ResizeObserver
+
+// Virtuoso's resize observer can this error,
+// which is caught by DnD and aborts dragging.
+window.addEventListener("error", (e) => {
+    console.log("stopImmediatePropagation",e)
+    if (
+        e.message ===
+        "ResizeObserver loop completed with undelivered notifications." ||
+        e.message === "ResizeObserver loop limit exceeded"
+    ) {
+        console.log("=====> stopImmediatePropagation")
+        e.stopImmediatePropagation();
+    }
+});
 
 if (rootElement.hasChildNodes()) {
     console.log("hydrate mode");

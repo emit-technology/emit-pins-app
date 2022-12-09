@@ -36,6 +36,9 @@ export interface TribeInfo {
     roles?: Array<TribeRole>
     latestMsg?: Message
     subscribed?:boolean
+    likes?:number;
+    reads?:number;
+    collections?:number;
 }
 
 export interface TribeTheme {

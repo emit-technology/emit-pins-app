@@ -3,19 +3,12 @@ import {MessageType, MsgText, TribeInfo, TribeRole} from "../../types";
 import {utils} from "../../common";
 import {XBlock, XMasonry} from "react-xmasonry";
 import config from "../../common/config";
-import {IonIcon, IonRow, IonChip, IonCol, useIonAlert, useIonToast,} from "@ionic/react";
+import {IonIcon, useIonAlert, useIonToast,} from "@ionic/react";
 import {
-    chatbubbleOutline,
-    ellipsisVerticalOutline,
-    gitBranchOutline,
     gitBranchSharp,
-    heartCircleOutline, linkOutline, peopleCircleOutline, personCircleOutline, removeCircleOutline,
-    shareOutline, trashOutline
 } from "ionicons/icons";
 import selfStorage from "../../common/storage";
 import copy from "copy-to-clipboard";
-import {tribeService} from "../../service/tribe";
-import {Role} from "../ChatRoom/Room/Message/Types/Role";
 
 interface Props {
     data: Array<TribeInfo>
@@ -145,24 +138,25 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                     </>
                                     }
                                 </div>
+
+                            </div>
+
+                            <div style={{display: "flex", alignItems: "center", justifyContent: "space-between",paddingTop:6}}>
+                                <div className="iconss">
+                                    <img src="./assets/img/view.png" className="static-icons"/>&nbsp;<span style={{verticalAlign: "middle"}}>{v.reads}</span>
+                                </div>
+
                                 <div className="iconss">
                                     <img src="./assets/img/users.png" className="static-icons"/>&nbsp;<span style={{verticalAlign: "middle"}}>{roles && roles.length + 1}</span>
                                 </div>
                                 <div className="iconss">
-                                    <img src="./assets/img/like.png" className="static-icons"/>&nbsp;<span style={{verticalAlign: "middle"}}>{roles && roles.length + 1}</span>
+                                    <img src="./assets/img/like.png" className="static-icons"/>&nbsp;<span style={{verticalAlign: "middle"}}>{v.collections}</span>
                                 </div>
-                                {/*<div className="iconss">*/}
-                                {/*    <img src="./assets/img/like.png" className="static-icons"/><span style={{verticalAlign: "middle"}}>{roles && roles.length + 1}</span>*/}
-                                {/*</div>*/}
-                                <div className="iconss" onClick={(e)=>{
-                                    e.stopPropagation();
-                                    copy(`${window.location.href}/${v.tribeId}`)
-                                    presentToast({color:"primary", message: "Copied to clipboard", duration: 2000})
-                                }}>
-                                    <img src="./assets/img/copy.png" className="static-icons"/>
+                                <div className="iconss">
+                                    <img src="./assets/img/likes.png" className="static-icons"/>&nbsp;<span style={{verticalAlign: "middle"}}>{v.likes}</span>
                                 </div>
-                            </div>
 
+                            </div>
                             {/*<div className="subop">*/}
                             {/*    /!*<div><IonIcon className="subop-icon" src={chatbubbleOutline}/></div>*!/*/}
                             {/*    /!*<div className="subpo-div"><IonIcon className="subop-icon" src={peopleCircleOutline}/> {roles && roles.length + 1}</div>*!/*/}
@@ -215,7 +209,18 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
 
                             {
                                 tribeTimeMap && (tribeTimeMap.has(v.tribeId) && tribeTimeMap.get(v.tribeId) < v.latestMsg.timestamp || !tribeTimeMap.has(v.tribeId)) && <>
-                                    <div className="tag-point"></div>
+                                    <div className="tag-point-r"></div>
+                                    <div className="tag-point">
+
+                                        <div className="iconss" onClick={(e)=>{
+                                            e.stopPropagation();
+                                            copy(`${window.location.href}/${v.tribeId}`)
+                                            presentToast({color:"primary", message: "Copied to clipboard", duration: 2000})
+                                        }}>
+                                            <img src="./assets/img/copy.png" width={18}/>
+                                        </div>
+                                    </div>
+
                                 </>
                             }
 

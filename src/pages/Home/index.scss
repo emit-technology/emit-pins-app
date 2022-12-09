@@ -37,10 +37,17 @@
 
 .tag-point {
   position: absolute;
+  top: 14px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+}
+.tag-point-r {
+  position: absolute;
+  top: 12px;
+  left: 14px;
   width: 12px;
   height: 12px;
-  top: 12px;
-  right: 14px;
   background: #FF453A;
   border-radius: 50%;
 }
@@ -52,14 +59,14 @@
   height: 24px;
 }
 
-.iconss:hover > img{
-  color: var(--ion-color-primary);
-}
-
-.iconss:hover {
-  color: var(--ion-color-primary) !important;
-  font-weight: 600;
-}
+//.iconss:hover > img{
+//  color: var(--ion-color-primary);
+//}
+//
+//.iconss:hover {
+//  color: var(--ion-color-primary) !important;
+//  font-weight: 600;
+//}
 
 .subop {
   width: 100%;

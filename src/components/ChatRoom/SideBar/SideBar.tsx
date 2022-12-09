@@ -120,6 +120,13 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account,router, onLo
             </IonItem>
         }
 
+        {/*<IonItem onClick={() => {*/}
+        {/*    window.location.href = "./test2/4E6BFunxNE5"*/}
+        {/*}}>*/}
+        {/*    <IonIcon slot="start" src={homeOutline} size="large"/>*/}
+        {/*    <IonLabel>Test</IonLabel>*/}
+        {/*</IonItem>*/}
+
         <IonItem onClick={() => {
             requestAccount();
         }}>

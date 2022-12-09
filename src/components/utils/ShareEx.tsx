@@ -91,7 +91,7 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
     const [logo, setLogo] = useState("")
 
     useEffect(()=>{
-            if(!!isOpen){
+            if(latestMsg){
                 setGenning(true)
                 init().then(()=>{
                     setGenning(false)
@@ -100,7 +100,7 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
                     console.error(e)
                 })
             }
-    },[isOpen,latestMsg])
+    },[isOpen,latestMsg, roles])
 
     const init = async ()=>{
         {
