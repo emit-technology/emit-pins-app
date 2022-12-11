@@ -32,7 +32,7 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                     if (!roles) {
                         roles = []
                     }
-                    const actor: TribeRole = roles.find(vr => vr.id == (v.latestMsg && v.latestMsg.role));
+                    const actor: TribeRole = roles.find(vr => !!v.latestMsg && vr.id == v.latestMsg.role);
 
                     return <XBlock key={i}>
                         <div className="recmt-content card" onClick={() => {
@@ -66,6 +66,13 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                 <div className="recmt-img">
                                     <img src={content["image"]["url"]}/>
                                 </div>
+                            }
+                            {
+                                !v.latestMsg &&
+                                <div className="recmt-img">
+                                    <img src={v.theme.image["url"]}/>
+                                </div>
+
                             }
                             {
                                 v.latestMsg && v.latestMsg.msgType == MessageType.Role && <div className="recmt-img">
@@ -145,18 +152,24 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                 <div className="iconss">
                                     <img src="./assets/img/view.png" className="static-icons"/>&nbsp;<span style={{verticalAlign: "middle"}}>{v.reads}</span>
                                 </div>
-
-                                <div className="iconss">
-                                    <img src="./assets/img/users.png" className="static-icons"/>&nbsp;<span style={{verticalAlign: "middle"}}>{roles && roles.length + 1}</span>
-                                </div>
+                                {/*<div className="iconss">*/}
+                                {/*    <img src="./assets/img/users.png" className="static-icons"/>&nbsp;<span style={{verticalAlign: "middle"}}>{roles && roles.length + 1}</span>*/}
+                                {/*</div>*/}
                                 <div className="iconss">
                                     <img src="./assets/img/like.png" className="static-icons"/>&nbsp;<span style={{verticalAlign: "middle"}}>{v.collections}</span>
                                 </div>
                                 <div className="iconss">
                                     <img src="./assets/img/likes.png" className="static-icons"/>&nbsp;<span style={{verticalAlign: "middle"}}>{v.likes}</span>
                                 </div>
-
+                                <div className="iconss" onClick={(e)=>{
+                                    e.stopPropagation();
+                                    copy(`${window.location.href}${v.tribeId}`)
+                                    presentToast({color:"primary", message: "Copied to clipboard", duration: 2000})
+                                }}>
+                                    <img src="./assets/img/copylink.png" className="static-icons"/>
+                                </div>
                             </div>
+
                             {/*<div className="subop">*/}
                             {/*    /!*<div><IonIcon className="subop-icon" src={chatbubbleOutline}/></div>*!/*/}
                             {/*    /!*<div className="subpo-div"><IonIcon className="subop-icon" src={peopleCircleOutline}/> {roles && roles.length + 1}</div>*!/*/}
@@ -208,21 +221,19 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                             {/*</div>*/}
 
                             {
-                                tribeTimeMap && (tribeTimeMap.has(v.tribeId) && tribeTimeMap.get(v.tribeId) < v.latestMsg.timestamp || !tribeTimeMap.has(v.tribeId)) && <>
+                                tribeTimeMap && v.latestMsg &&  (tribeTimeMap.has(v.tribeId) && tribeTimeMap.get(v.tribeId) < v.latestMsg.timestamp || !tribeTimeMap.has(v.tribeId)) && <>
                                     <div className="tag-point-r"></div>
-                                    <div className="tag-point">
-
-                                        <div className="iconss" onClick={(e)=>{
-                                            e.stopPropagation();
-                                            copy(`${window.location.href}/${v.tribeId}`)
-                                            presentToast({color:"primary", message: "Copied to clipboard", duration: 2000})
-                                        }}>
-                                            <img src="./assets/img/copy.png" width={18}/>
-                                        </div>
-                                    </div>
-
                                 </>
                             }
+                            {/*<div className="tag-point">*/}
+                            {/*    <div className="iconss" onClick={(e)=>{*/}
+                            {/*        e.stopPropagation();*/}
+                            {/*        copy(`${window.location.href}/${v.tribeId}`)*/}
+                            {/*        presentToast({color:"primary", message: "Copied to clipboard", duration: 2000})*/}
+                            {/*    }}>*/}
+                            {/*        <img src="./assets/img/copylink.png" width={18}/>*/}
+                            {/*    </div>*/}
+                            {/*</div>*/}
 
                         </div>
                     </XBlock>

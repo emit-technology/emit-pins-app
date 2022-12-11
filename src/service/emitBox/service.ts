@@ -4,6 +4,7 @@ import selfStorage from "../../common/storage";
 import config from "../../common/config";
 import Web3 from "web3";
 import {utils} from "../../common";
+import walletWorker from "../../worker/walletWorker";
 
 const dapp = {
     name: "EMIT-IM",
@@ -109,7 +110,14 @@ class EmitBoxSdk {
             },
             undefined
         );
-        await emitBoxSdk.emitBox.emitDataNode.prepareBlock(prepareBlock);
+
+        if(utils.useInjectAccount()){
+            const signData = await walletWorker.signTx(account.accountId,"",ChainType.EMIT.valueOf(),prepareBlock)
+            await emitBoxSdk.emitBox.emitDataNode.prepareBlockWithSign(prepareBlock,{error: null, result: signData});
+        }else{
+            await emitBoxSdk.emitBox.emitDataNode.prepareBlock(prepareBlock);
+        }
+
         return Promise.resolve({
             transactionHash: prepareBlock.blk.parent_hash,
             blockNumber: prepareBlock.blk.num,

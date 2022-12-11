@@ -47,7 +47,7 @@ pre {
   }
 
   .head-sub {
-    max-width: 200px !important;
+    //max-width: 200px !important;
   }
 
   .head-pin-title {
@@ -142,9 +142,15 @@ pre {
   }
 
   .support-outer-owner {
-    flex-direction: column !important;
+    //flex-direction: column !important;
   }
 
+  .support-outer{
+    align-items: start;
+  }
+  .no-role-div-owner{
+    max-width: 100% !important;
+  }
   .support-outer-column {
     flex-direction: column !important;
   }
@@ -164,9 +170,29 @@ pre {
     bottom: 82px !important;
   }
 
+  .slwSS {
+    font-size: 16px !important;
+  }
+
+  .support-outer-owner {
+    align-items: flex-end !important;
+  }
   .share-right-msg-box {
     max-height: 75vw !important;
     overflow: hidden !important;
+  }
+
+  .role-list-col {
+    height: 0 !important;
+    overflow: hidden;
+  }
+
+  .balance-hd .blsl{
+    font-size: 36px !important;
+  }
+
+  .font-style-bold {
+    padding-inline: 50px !important;
   }
 }
 

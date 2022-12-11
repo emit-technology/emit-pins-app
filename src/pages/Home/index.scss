@@ -132,7 +132,7 @@
   padding: 0px 6px;
   color: rgb(0, 0, 0);
   font-size: 16px;
-  width: 100px;
+  width: 250px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -185,4 +185,43 @@
   overflow: hidden;
   font-family: SFProText-Medium;
   line-height: 1.2;
+}
+
+.head-box{
+  display: flex;
+  align-items: center;
+  //justify-content: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.head-box > div{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  //overflow: hidden;
+  //text-overflow: ellipsis;
+  //white-space: nowrap;
+}
+
+.headxs {
+  padding: 0px 0px 0px 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.head-icons{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 100%;
+}
+
+.head-icons2{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
 }

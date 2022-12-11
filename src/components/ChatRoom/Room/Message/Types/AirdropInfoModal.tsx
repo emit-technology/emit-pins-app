@@ -2,9 +2,21 @@ import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {
     IonContent,
-    IonHeader, IonAvatar,
-    IonModal, IonItem,
-    IonBadge, IonLabel, IonRadioGroup, IonRadio, IonText, IonInput, IonIcon, useIonToast
+    IonHeader,
+    IonAvatar,
+    IonModal,
+    IonItem,
+    IonBadge,
+    IonLabel,
+    IonRadioGroup,
+    IonRadio,
+    IonText,
+    IonInput,
+    IonIcon,
+    useIonToast,
+    IonToolbar,
+    IonTitle,
+    IonButtons
 } from "@ionic/react";
 import {AirdropContent, AirdropInfo, AirdropType, Message} from "../../../../../types";
 import {utils} from "../../../../../common";
@@ -35,10 +47,10 @@ export const AirdropInfoModal: React.FC<Props> = ({onClose, isOpen,keeper, owner
         airdropRecord.unshift(_copy)
     }
     return <>
-        <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal">
+        <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="airdrop-info-modal">
             {/*<IonHeader>*/}
             {/*    <IonToolbar color="primary">*/}
-            {/*        <IonTitle>Airdrop Info</IonTitle>*/}
+            {/*        <IonTitle>Airdrop</IonTitle>*/}
             {/*        <IonButtons slot="end">*/}
             {/*            <IonIcon src={closeOutline} onClick={() => onClose()} size="large"/>*/}
             {/*        </IonButtons>*/}
@@ -103,7 +115,7 @@ export const AirdropInfoModal: React.FC<Props> = ({onClose, isOpen,keeper, owner
 
                 </div>
 
-                <div style={{marginBottom: 20, padding: '0 12px 12px'}}>
+                <div style={{margin: '30px 0 20px 0', padding: '0 12px 12px'}}>
                     <div style={{color: "#000", background: "#fff"}} className="ssowSdc text-pre  recmt-context">
                         {content && content.content}
                     </div>

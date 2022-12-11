@@ -155,21 +155,21 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account,router, onLo
             <IonIcon src={utils.useInjectAccount()?chevronForwardOutline:openOutline} color="medium" slot="end" size="small"/>
         </IonItem>
 
-        <IonItem onClick={() => {
-            const pushToken = selfStorage.getItem("pushTokenValue")
-            if(pushToken){
-                copy(pushToken)
-                alert(pushToken)
-            }else{
-                const pushTokenErr = selfStorage.getItem("pushTokenErr")
-                copy(pushTokenErr)
-                alert(pushTokenErr)
-            }
-        }}>
-            <IonIcon slot="start" src={walletOutline} size="large"/>
-            <IonLabel>Push Token</IonLabel>
-            <IonIcon src={utils.useInjectAccount()?chevronForwardOutline:openOutline} color="medium" slot="end" size="small"/>
-        </IonItem>
+        {/*<IonItem onClick={() => {*/}
+        {/*    const pushToken = selfStorage.getItem("pushTokenValue")*/}
+        {/*    if(pushToken){*/}
+        {/*        copy(pushToken)*/}
+        {/*        alert(pushToken)*/}
+        {/*    }else{*/}
+        {/*        const pushTokenErr = selfStorage.getItem("pushTokenErr")*/}
+        {/*        copy(pushTokenErr)*/}
+        {/*        alert(pushTokenErr)*/}
+        {/*    }*/}
+        {/*}}>*/}
+        {/*    <IonIcon slot="start" src={walletOutline} size="large"/>*/}
+        {/*    <IonLabel>Push Token</IonLabel>*/}
+        {/*    <IonIcon src={utils.useInjectAccount()?chevronForwardOutline:openOutline} color="medium" slot="end" size="small"/>*/}
+        {/*</IonItem>*/}
 
         <div style={{height: 30}}>
         </div>

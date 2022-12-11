@@ -380,17 +380,17 @@ const MessageContentCoolChild: React.FC<Props> = ({groupMsg
         }
     }, [comments, total, setComments, setTotal])
 
-    useEffect(() => {
-        if (document.hidden !== undefined && !pinnedStickies) {
-            document.addEventListener('visibilitychange', () => {
-                if (!document.hidden) {
-                    //TODO
-                    // fetchData(pageNo)
-                    // activePage()
-                }
-            })
-        }
-    }, [])
+    // useEffect(() => {
+    //     if (document.hidden !== undefined && !pinnedStickies) {
+    //         document.addEventListener('visibilitychange', () => {
+    //             if (!document.hidden) {
+    //                 //TODO
+    //                 // fetchData(pageNo)
+    //                 // activePage()
+    //             }
+    //         })
+    //     }
+    // }, [])
 
     useEffect(() => {
         console.log("init component ...")

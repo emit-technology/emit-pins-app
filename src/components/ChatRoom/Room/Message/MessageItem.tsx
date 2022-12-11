@@ -223,7 +223,7 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                                 onFork(pinnedSticky.showPin.lastPin.groupId, {
                                     tribeId: config.tribeId,
                                     keeper: "",
-                                    lastPinedSeq: 0,
+                                    lastPinedSeq: pinnedSticky.showPin.lastPin.seq,
                                     onlineUser: 0,
                                     theme: pinnedSticky.showPin.lastPin.theme,
                                     title: tribeInfo.title,
@@ -242,32 +242,32 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                 {
                     pinnedSticky.records[0].msgIndex == total - 1 && !!pinnedSticky.records[0].groupId &&
                     <>
-                        <div style={{
-                            padding: '6px 12px',
-                            display: "flex",
-                            justifyContent: "flex-end"
-                        }}>
-                            <div className="fork-icon">
-                                <IonButtons>
-                                    <IonButton onClick={() => {
-                                        onFork(pinnedSticky.records[0].groupId, {
-                                            tribeId: config.tribeId,
-                                            keeper: "",
-                                            lastPinedSeq: 0,
-                                            onlineUser: 0,
-                                            theme: pinnedSticky.theme,
-                                            title: tribeInfo.title,
-                                            desc: "",
-                                            themeTag: pinnedSticky.theme.themeTag,
-                                            themeDesc: pinnedSticky.theme.themeDesc,
-                                        })
-                                    }}><IonIcon src={gitBranchOutline} style={{
-                                        color: "#4C89F8",
-                                        fontSize: "24px"
-                                    }}/></IonButton>
-                                </IonButtons>
-                            </div>
-                        </div>
+                        {/*<div style={{*/}
+                        {/*    padding: '6px 12px',*/}
+                        {/*    display: "flex",*/}
+                        {/*    justifyContent: "flex-end"*/}
+                        {/*}}>*/}
+                        {/*    <div className="fork-icon">*/}
+                        {/*        <IonButtons>*/}
+                        {/*            <IonButton onClick={() => {*/}
+                        {/*                onFork(pinnedSticky.records[0].groupId, {*/}
+                        {/*                    tribeId: config.tribeId,*/}
+                        {/*                    keeper: "",*/}
+                        {/*                    lastPinedSeq: 0,*/}
+                        {/*                    onlineUser: 0,*/}
+                        {/*                    theme: pinnedSticky.theme,*/}
+                        {/*                    title: tribeInfo.title,*/}
+                        {/*                    desc: "",*/}
+                        {/*                    themeTag: pinnedSticky.theme.themeTag,*/}
+                        {/*                    themeDesc: pinnedSticky.theme.themeDesc,*/}
+                        {/*                })*/}
+                        {/*            }}><IonIcon src={gitBranchOutline} style={{*/}
+                        {/*                color: "#4C89F8",*/}
+                        {/*                fontSize: "24px"*/}
+                        {/*            }}/></IonButton>*/}
+                        {/*        </IonButtons>*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
                         <div className="strike">
                             <span>New Tape</span>
                         </div>

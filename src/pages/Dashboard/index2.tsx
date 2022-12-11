@@ -101,6 +101,8 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
     const [loaded, setLoaded] = useState(false);
     const [subscribed, setSubscribed] = useState(false);
 
+    const [timestamp, setTimestamp] = useState(Date.now());
+
     const [presentAlert] = useIonAlert();
     const [presentToast] = useIonToast();
 
@@ -137,6 +139,19 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
         })
     }, [])
 
+    useEffect(()=>{
+        document.addEventListener('visibilitychange', () => {
+           try{
+               if (!document.hidden) {
+                   console.log("visibilitychange set status")
+                   setTimestamp(Date.now())
+               }
+           }catch (e){
+               console.error(JSON.stringify(e))
+           }
+        })
+    },[])
+
     useEffect(() => {
         const interval = setInterval(() => {
             tribeWorker.checkAlive(config.tribeId).then((rest: any) => {
@@ -160,7 +175,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
             })
         }, 2000);
         return () => clearInterval(interval);
-    }, [isConnecting, userLimit]);
+    }, [isConnecting,timestamp, userLimit]);
 
     // const checkWsAlive = (setLimit,setConnecting) => {
     //     tribeWorker.checkAlive(config.tribeId).then((rest:any)=>{
@@ -633,7 +648,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                     </IonContent>
                 </IonPage>
             </IonCol>
-            <IonCol sizeMd="4" sizeSm="12" sizeXs="12" style={{padding: "unset", height: '100%'}}>
+            <IonCol sizeMd="4" sizeSm="12" sizeXs="12" style={{padding: "unset", height: '100%'}} className="role-list-col">
                 <RoleListModal
                     onChangeMsgIndex={onChangeMsgIndex}
                     pinnedSticky={pinnedSticky}

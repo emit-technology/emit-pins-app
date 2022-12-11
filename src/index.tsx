@@ -6,7 +6,14 @@ import reportWebVitals from './reportWebVitals';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import {App as AppPlugin} from "@capacitor/app";
 import { Toast } from '@capacitor/toast';
-import {addListeners, getDeliveredNotifications, registerNotifications} from './service/app'
+import {
+    addListeners,
+    getDeliveredNotifications,
+    setStatusBarStyleLight,
+    registerNotifications,
+    isApp,
+    setStatusBarStyleDefault, setStatusBarStyleDark
+} from './service/app'
 import {utils} from "./common";
 import {LogLevel} from "react-virtuoso";
 import ResizeObserver from 'resize-observer-polyfill'
@@ -26,14 +33,14 @@ if (!window.ResizeObserver)
 // which is caught by DnD and aborts dragging.
 window.addEventListener("error", (e) => {
     console.log("stopImmediatePropagation",e)
-    if (
-        e.message ===
-        "ResizeObserver loop completed with undelivered notifications." ||
-        e.message === "ResizeObserver loop limit exceeded"
-    ) {
-        console.log("=====> stopImmediatePropagation")
+    // if (
+    //     e.message ===
+    //     "ResizeObserver loop completed with undelivered notifications." ||
+    //     e.message === "ResizeObserver loop limit exceeded"
+    // ) {
+    //     console.log("=====> stopImmediatePropagation")
         e.stopImmediatePropagation();
-    }
+    // }
 });
 
 if (rootElement.hasChildNodes()) {
@@ -52,17 +59,22 @@ if (rootElement.hasChildNodes()) {
 console.log("added app url open listener.")
 
 AppPlugin.addListener("appUrlOpen",(appUrlOpen)=>{
-    console.log("app open pins: ", JSON.stringify(appUrlOpen));
-    Toast.show({
-        text: 'app url open emit pins!',
-    });
-    Toast.show({
-        text: JSON.stringify(appUrlOpen),
-    });
+    // console.log("app open pins: ", JSON.stringify(appUrlOpen));
+    // Toast.show({
+    //     text: 'app url open emit pins!',
+    // });
+    // Toast.show({
+    //     text: JSON.stringify(appUrlOpen),
+    // });
 })
-console.log("utils.isAndroid():: ",utils.isAndroid());
 
 if(utils.isIos() || utils.isAndroid()){
+    if(utils.isIos()){
+        setStatusBarStyleLight();
+    }else{
+        setStatusBarStyleDark()
+    }
+
     addListeners().catch(e=>{
         console.error("notification listen error",e)
     })
@@ -75,6 +87,31 @@ if(utils.isIos() || utils.isAndroid()){
         console.error("notification getDeliveredNotifications error",e);
     })
 
+    let timer;
+
+    isApp().then(f=>{
+        if(!f){
+            timer = setTimeout(() => {
+                // if(utils.isIos()){
+                //     //@ts-ignore
+                //     window.location = "https://testflight.apple.com/join/8smFQVxG";
+                // }else{
+                //     //@ts-ignore
+                //     window.location = "https://testflight.apple.com/join/8smFQVxG";
+                // }
+            }, 3000)
+            window.location.href = 'emitcorepins://'
+        }
+    })
+
+    // if (document.hidden !== undefined) {
+    //     document.addEventListener('visibilitychange', () => {
+    //         if (!document.hidden) {
+    //         }else{
+    //             clearTimeout(timer)
+    //         }
+    //     })
+    // }
 }
 
 

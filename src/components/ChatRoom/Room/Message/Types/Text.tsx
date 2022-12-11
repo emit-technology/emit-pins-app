@@ -141,11 +141,11 @@ export const Text: React.FC<Props> = ({
                 </div>
                 :
                 msg.replayMsg.msgType == MessageType.Role ?
-                    <div style={{maxWidth: '300px'}}>
+                    <div style={{maxWidth: '300px',wordBreak: "break-all"}}>
                         <Role msg={msg.replayMsg} showPin={false}/>
                     </div> :
                     msg.replayMsg.msgType == MessageType.Airdrop &&
-                    <div style={{maxWidth: '300px'}}>
+                    <div style={{maxWidth: '300px',wordBreak: "break-all"}}>
                         <Airdrop msg={msg.replayMsg} keeper={keeper} owner={owner}/>
                     </div>
         }
@@ -315,7 +315,7 @@ export const Text: React.FC<Props> = ({
                                     msg.msgType == MessageType.Airdrop ? <Airdrop msg={msg} owner={owner} keeper={keeper}/> : <>
                                         {
                                             content.image && content.image.url &&
-                                            <div style={{borderRadius: 12, padding: '0px 6px 0 6px'}}>
+                                            <div style={{borderRadius: 12, padding: '6px 6px 0px 6px'}}>
                                                 <ImageView url={content.image.url} width={content.image.width}
                                                            height={content.image.height}/>
                                             </div>
@@ -324,7 +324,7 @@ export const Text: React.FC<Props> = ({
                                             content.content && <div style={{padding: '5px'}}>
                                                 {replayItem}
                                                 { genMetadataEl() }
-                                                <div style={{padding: '6px 0 0 6px'}}>
+                                                <div style={{padding: '0 0 0 0px'}}>
                                                     <div className="text-pre">
                                                         {genContent()}
                                                     </div>

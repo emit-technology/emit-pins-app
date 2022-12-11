@@ -148,7 +148,9 @@ class TribeService implements ITribe {
     tribeInfo = async (tribeId: string): Promise<TribeInfo> => {
         const rest: TribeResult<TribeInfo> = await this._rpc.post('/tribe/tribeInfo', {tribeId});
         if (rest && rest.code == 0) {
-            this._tribeInfo = rest.data;
+            if(config.tribeId && config.tribeId == tribeId){
+                this._tribeInfo = rest.data;
+            }
             return Promise.resolve(rest.data)
         }
         return Promise.reject(rest.message);
@@ -697,6 +699,10 @@ class TribeService implements ITribe {
                 return Promise.reject(rest.message);
             }
         }
+        // for(let msg of ret){
+        //     msg.theme.image["url"] = await utils.toLocalImageUrl(utils.getDisPlayUrl(msg.theme.image))
+        // }
+        // console.log(ret)
         return Promise.resolve(ret);
 
     }
@@ -742,7 +748,7 @@ class TribeService implements ITribe {
     }
 
     airdropRecords = async (msgId: string): Promise<Array<AirdropInfo>> => {
-        await this.userCheckAuth()
+        // await this.userCheckAuth()
         const rest: TribeResult<Array<AirdropInfo>> = await this._rpc.post('/tribe/airdropRecords', {msgId});
         if (rest && rest.code == 0) {
             return Promise.resolve(rest.data)
@@ -759,11 +765,11 @@ class TribeService implements ITribe {
     }
 
 
-    tribeUserInfo = async (): Promise<{limit: UserLimit, subscribed:boolean}> => {
+    tribeUserInfo = async (tribeId?: string): Promise<{limit: UserLimit, subscribed:boolean}> => {
         const account = await emitBoxSdk.getAccount();
         if(!!account){
             const address = account.addresses[ChainType.EMIT]
-            const rest: TribeResult<{limit: UserLimit, subscribed:boolean}> = await this._rpc.post('/tribe/tribeUserInfo', {tribeId:config.tribeId,user: address});
+            const rest: TribeResult<{limit: UserLimit, subscribed:boolean}> = await this._rpc.post('/tribe/tribeUserInfo', {tribeId:tribeId?tribeId:config.tribeId,user: address});
             if (rest && rest.code == 0) {
                 return Promise.resolve(rest.data)
             }

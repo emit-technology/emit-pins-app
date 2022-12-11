@@ -307,7 +307,8 @@ input::placeholder {
 .head-pin-title{
   font-weight: 700;
   font-size: 16px;
-  max-width: 60px;
+  text-align: left;
+  //max-width: 60px;
   overflow: hidden;
   text-overflow: ellipsis;
 }

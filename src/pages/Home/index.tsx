@@ -14,6 +14,8 @@ import {TribeLayout} from "../../components/Tribe/TribeLayout";
 import selfStorage from "../../common/storage";
 import {TribeEditModal} from "../../components/Tribe";
 import {utils} from "../../common";
+import {useEffect} from "react";
+import {isApp} from "../../service/app";
 
 interface State {
     segment: string
@@ -61,35 +63,55 @@ export class HomePage extends React.Component<Props, State> {
             this.setShowLoading(false)
             console.log(e)
         });
+
+
+        if (document.hidden !== undefined) {
+            document.addEventListener('visibilitychange', () => {
+                try{
+                    if (!document.hidden) {
+                        console.log("init... ")
+                        this.init().catch(e=>console.error(e))
+                    }
+                }catch (e){
+                    console.error(JSON.stringify(e))
+                }
+            })
+        }
     }
 
     init = async (seqmt?: string) => {
-        if (!seqmt) {
-            const {segment} = this.state;
-            seqmt = segment;
-        }
-        let data: Array<TribeInfo> = [];
-        if (seqmt == 'forYou') {
-            const rest = await tribeService.involvedTribes();
-            if (rest) {
-                data = [...rest]
+        try{
+            if (!seqmt) {
+                const {segment} = this.state;
+                seqmt = segment;
             }
-        } else if (seqmt == 'myVerse') {
-            const rest = await tribeService.myTribes();
-            if (rest) {
-                data = [...rest]
+            let data: Array<TribeInfo> = [];
+            if (seqmt == 'forYou') {
+                const rest = await tribeService.involvedTribes();
+                if (rest) {
+                    data = [...rest]
+                }
+            } else if (seqmt == 'myVerse') {
+                const rest = await tribeService.myTribes();
+                if (rest) {
+                    data = [...rest]
+                }
             }
+
+            //TODO fot test
+            // data = [...data,...(data.reverse()),...(data.reverse()),...data,...(data.reverse()),]
+
+            const account = await emitBoxSdk.getAccount();
+            const f = await tribeService.isSessionAvailable()
+            // const tribeUserInfo = await tribeService.tribeUserInfo();
+
+            await this.initTimeMap(data);
+            this.setState({data: data,address: account && account.addresses[ChainType.EMIT] ,dataOrigin: data, account: account, isSessionAvailable: f})
+        }catch (e){
+            setTimeout(()=>{
+                this.init(seqmt)
+            }, 500)
         }
-
-        //TODO fot test
-        // data = [...data,...(data.reverse()),...(data.reverse()),...data,...(data.reverse()),]
-
-        const account = await emitBoxSdk.getAccount();
-        const f = await tribeService.isSessionAvailable()
-        // const tribeUserInfo = await tribeService.tribeUserInfo();
-
-        await this.initTimeMap(data);
-        this.setState({data: data,address: account && account.addresses[ChainType.EMIT] ,dataOrigin: data, account: account, isSessionAvailable: f})
 
     }
 
@@ -115,12 +137,34 @@ export class HomePage extends React.Component<Props, State> {
     }
 
     searchText = (value: string) => {
-        const {dataOrigin} = this.state;
+        const {dataOrigin, segment} = this.state;
         if (!value) {
             this.setState({data: dataOrigin})
         } else {
             const data = dataOrigin.filter(v => (v.title.toLowerCase().indexOf(value.toLowerCase()) > -1 || v.tribeId.toLowerCase().indexOf(value.toLowerCase()) > -1))
             this.setState({data: data})
+            if(!data || data.length == 0){
+                try{
+                    let tribeId = value;
+                    if(value && value.indexOf("https://pins.emit.technology/") > -1){
+                        tribeId = value.slice("https://pins.emit.technology/".length)
+                    }else if(value && value.indexOf("http://pins.emit.technology/") > -1){
+                        tribeId = value.slice("http://pins.emit.technology/".length)
+                    }else if(value && value.replace("//"," ").indexOf("/") > -1){
+                        tribeId = value.slice(value.replace("//"," ").indexOf("/")+2)
+                    }
+                    tribeService.tribeInfo(tribeId).then(tribeInfo=>{
+                        tribeInfo.latestMsg = null;
+                        tribeInfo.roles = [];
+                        tribeInfo.subscribed = false;
+
+                        this.setState({data:[tribeInfo]})
+                    }).catch(e=>console.log(e))
+                }catch (e){
+                    console.error(e)
+                }
+
+            }
         }
     }
 
@@ -222,10 +266,20 @@ export class HomePage extends React.Component<Props, State> {
                     </IonSegment>
                     <IonRow>
                         <IonCol offsetLg="3" sizeLg="6" offsetSm="1" sizeSm="10">
-                            <IonSearchbar showClearButton="focus" id="search-input" placeholder="Search"
+                            <IonSearchbar  showClearButton="focus" id="search-input" placeholder="Search"
                                           onIonChange={(e) => {
                                               this.searchText(e.detail.value)
-                                          }}/>
+                                          }}
+                                          // onIonCancel={(e) => {
+                                          //     const value = e.target.value;
+                                          //     if(value && value.indexOf("https://pins.emit.technology/") > -1){
+                                          //         const tribeId = value.slice("https://pins.emit.technology/".length)
+                                          //         window.location.href = `./${tribeId}`
+                                          //     }else{
+                                          //         this.searchText(e.target.value)
+                                          //     }
+                                          // }}
+                            />
                         </IonCol>
                     </IonRow>
                     <div>

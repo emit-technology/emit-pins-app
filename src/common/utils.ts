@@ -131,22 +131,24 @@ export const utils = {
 
     convertImgDisplay: (width: number, height: number, url: string): { width: number, height: number, displayUrl: string } => {
         // content.image.width>content.image.height? 200: content.image.height>300?300:content.image.height
+
+        const base = utils.isIos() || utils.isAndroid() ?250:300;
         function _getHeight() {
             if (width > 0 && height > 0) {
                 if (width > height) {
-                    if (width > 300) {
-                        const ret = Math.floor(300 * height / width)
+                    if (width > base) {
+                        const ret = Math.floor(base * height / width)
                         return ret
                     } else {
-                        if (height > 300) {
-                            return 300;
+                        if (height > base) {
+                            return base;
                         } else {
                             return height;
                         }
                     }
                 } else {
-                    if (height > 300) {
-                        return 300;
+                    if (height > base) {
+                        return base;
                     } else {
                         return height;
                     }

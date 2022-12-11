@@ -28,7 +28,7 @@ export const Role:React.FC<Props> = ({msg,isOwner}) =>{
                         {/*        <IonCheckbox name="pinMsgId" value={msg.id}/>*/}
                         {/*    </div>*/}
                         {/*}*/}
-                        <div style={{maxWidth: '300px'}}>
+                        <div style={{maxWidth: '300px',wordBreak: "break-all"}}>
                             <div style={{padding: '6px 12px',textAlign:"center"}}>
                                 <b style={{fontSize: '12px'}}>{content.op && content.op =='add'?"New role":"Update role"}</b>  <span style={{fontSize: '11px'}}>
                                 <IonText color="medium">{utils.dateFormat(new Date(msg.timestamp * 1000))}</IonText>

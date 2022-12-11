@@ -254,15 +254,15 @@ export const MessageContentVisual: React.FC<Props> = ({groupMsg, setHideMenu, on
         }
     }
 
-    useEffect(() => {
-        if (document.hidden !== undefined && !pinnedStickies) {
-            document.addEventListener('visibilitychange', () => {
-                if (!document.hidden) {
-                    fetchData(pageNo, setComments)
-                }
-            })
-        }
-    }, [])
+    // useEffect(() => {
+    //     if (document.hidden !== undefined && !pinnedStickies) {
+    //         document.addEventListener('visibilitychange', () => {
+    //             if (!document.hidden) {
+    //                 fetchData(pageNo, setComments)
+    //             }
+    //         })
+    //     }
+    // }, [])
 
     useEffect(() => {
         if (!pinnedStickies) {

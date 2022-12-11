@@ -34,6 +34,7 @@ class ImWorker {
         }
         return new Promise((resolve, reject)=>{
             service.checkAlive(tribeId,authToken,function (data:any){
+                // console.log("======= check alive,", authToken, data )
                 if(data.error){
                     reject(data.error);
                 }else{
