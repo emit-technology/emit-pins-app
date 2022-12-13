@@ -60,7 +60,6 @@ const RoleListModalChild: React.FC<Props> = ({
     },[])
 
     return <>
-        <IonPage style={{borderRadius: "0 12px 12px 0"}}>
             {
                 !isModal && tribeInfo && tribeInfo.forked  && tribeInfo.forked.length>0 && <IonHeader mode="ios" collapse="condense">
                     <IonToolbar className="msg-toolbar">
@@ -80,7 +79,7 @@ const RoleListModalChild: React.FC<Props> = ({
             }
             <IonContent >
                 {
-                    tribeInfo && (!tribeInfo.forked  || tribeInfo.forked.length  == 0)  && <div style={{height: "12px"}}></div>
+                    tribeInfo && (!tribeInfo.forked  || tribeInfo.forked.length  == 0)  && <div style={{height: (utils.isIos() || utils.isAndroid()) ?"48px": "12px"}}></div>
                 }
                 <div style={{height: !showThemes?"0":"100%" }}>
                     <ThemesItems onClickTheme={onClickTheme} groupMsg={groupMsg}  onClose={()=>{
@@ -191,7 +190,6 @@ const RoleListModalChild: React.FC<Props> = ({
                     />
                 </div>
             </IonContent>
-        </IonPage>
     </>
 }
 

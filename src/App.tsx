@@ -1,7 +1,7 @@
 import {Redirect, Route, Switch,BrowserRouter as Router} from 'react-router-dom';
 import {
     IonApp, IonContent, IonHeader, IonIcon, IonMenu, IonTitle, IonToolbar,
-    setupIonicReact
+    setupIonicReact,useIonRouter
 } from '@ionic/react';
 // import {IonReactHashRouter as Router} from '@ionic/react-router';
 
@@ -36,10 +36,16 @@ import {DashboardV3} from "./pages/Dashboard/indexV3";
 import {DashboardV4} from "./pages/Dashboard/indexV4";
 import {DashboardV2Test2} from "./pages/Dashboard/indexTestV2";
 import {DashboardTestScroller} from "./pages/Dashboard/indexVirtualScroller";
+import { App as AppPin } from '@capacitor/app';
+import {utils} from "./common";
+import {Toast} from "@capacitor/toast";
 setupIonicReact({
     mode: "ios",
 });
 
+
+let init_count = 0;
+let lastTime = 0;
 const App: React.FC = () => {
     // const [roles,setRoles] = React.useState([]);
     // const [tribeInfo,setTribeInfo,]
@@ -52,6 +58,23 @@ const App: React.FC = () => {
     // },[])
     // const mobileWidth = document.documentElement.clientWidth <=768;
     // const Tip = ()=>  mobileWidth?<img src="./assets/img/snaptip2.png" style={{height:'100%', width:'100%'}}/>:<img src="./assets/img/snaptip.png"  style={{height:'100%', width:'100%'}}/>
+
+
+    if(init_count++ ==0 && (utils.isIos() || utils.isAndroid())){
+        AppPin.addListener("backButton",()=>{
+            if(window.location.pathname == "/"){
+                if(Date.now() - lastTime > 2000){
+                    lastTime = Date.now();
+                    Toast.show({text: "Please click BACK again to exit!", position: "center", duration: "short"})
+                }else{
+                    AppPin.exitApp();
+                }
+            }else{
+                window.location.href = "/"
+            }
+        })
+    }
+
     const baseURL = process.env.NODE_ENV === 'production' ? config.baseUrl : process.env.REACT_APP_DEV_API_URL;
     const routerRef = useRef<HTMLIonRouterOutletElement | null>(null);
     return <>

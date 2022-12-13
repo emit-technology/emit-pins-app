@@ -8,7 +8,7 @@ import {
     IonItem,
     IonLabel,
     IonRow,
-    useIonToast,
+    useIonToast, IonLoading,
 } from '@ionic/react'
 import {
     chatboxEllipsesOutline, diceOutline,
@@ -244,15 +244,21 @@ const BottomBarChild: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTok
                                                          })
                                                          return;
                                                      }
-                                                     tribeService.picUpload().then(({url, themeColors}) => {
-                                                         const displayImage = utils.convertImgDisplay(themeColors.width, themeColors.height, url);
-                                                         setDisplayImage({
-                                                             url: url,
-                                                             width: displayImage.width,
-                                                             height: displayImage.height
-                                                         });
+                                                     tribeService.picUpload().then(photo => {
+                                                         setLoading(true);
+                                                         tribeService.uploadToServer(photo).then(({url, themeColors})=>{
+                                                             setLoading(false)
+                                                             const displayImage = utils.convertImgDisplay(themeColors.width, themeColors.height, url);
+                                                             setDisplayImage({
+                                                                 url: url,
+                                                                 width: displayImage.width,
+                                                                 height: displayImage.height
+                                                             });
 
-                                                         setThemeColor(themeColors)
+                                                             setThemeColor(themeColors)
+                                                         }).catch(e=>{
+                                                             setLoading(false)
+                                                         })
                                                      }).catch(e=>{
                                                          const err = typeof e == 'string'?e:e.message;
                                                          present({
@@ -443,7 +449,13 @@ const BottomBarChild: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTok
         }}/>
 
         <AirdropModal actor={selectRole} onOk={()=>sendAirdrop()} onClose={()=>setShowAirdropModal(false)} owner={owner} isOpen={showAirdropModal} />
-
+        <IonLoading
+            cssClass='my-custom-class'
+            isOpen={loading}
+            onDidDismiss={() => setLoading(false)}
+            message={'Please wait...'}
+            duration={60000}
+        />
     </>
 }
 

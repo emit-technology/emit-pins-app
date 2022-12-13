@@ -9,6 +9,7 @@ import {
     IonIcon,
     IonMenu,
     IonMenuToggle,
+    IonSplitPane,
     IonPage,
     IonRow,
     IonText,
@@ -159,6 +160,10 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                     setIsConnecting(rest)
                 }
 
+                if(rest !== WsStatus.active){
+                    setIsSessionAvailable(false);
+                }
+
                 if (rest == WsStatus.active && (!userLimit || (Math.floor(Date.now() / 1000)) % 9 == 0)) {
                     tribeService.tribeUserInfo().then(rest => {
                         config.userLimit = rest.limit;
@@ -226,6 +231,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
         const tribeInfo = await tribeService.tribeInfo(tribeId);
         const owner = account && account.addresses && account.addresses[ChainType.EMIT.valueOf()]
         const f = await tribeService.isSessionAvailable()
+        setIsSessionAvailable(f);
 
         const roles = await tribeService.tribeRoles(tribeId);
         // const groupIds = tribeService.groupIdCache(); //await tribeService.groupIds(tribeId);
@@ -252,7 +258,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
         setRoles(roles);
         setRoleFunc(role);
         setGroupMsgs(groupTribes)
-        setIsSessionAvailable(f);
+
     }
 
     const onSubscribe = useCallback((f)=>{
@@ -371,7 +377,8 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
     }
 
     const onAccount = async (account: AccountModel) => {
-        if (!isSessionAvailable) {
+        const _isSessionAvailable = await tribeService.isSessionAvailable();
+        if (!_isSessionAvailable) {
             await tribeService.accountLogin(account)
         } else {
             await tribeService.userLogout()
@@ -479,191 +486,252 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
     }, [latestRole, setLatestRole,setAlreadySelectRole, setShowRoleAvatar ])
 
     return <>
-        <IonRow style={{height: '100%'}}>
-            <IonCol sizeMd="8" sizeSm="12" sizeXs="12" style={{height: '100%'}}>
-                <IonMenu contentId="main-content">
-                    <IonHeader>
-                        <IonToolbar className="msg-toolbar">
-                            <IonMenuToggle>
-                                <div style={{paddingLeft: 12}}><IonIcon src={arrowBackOutline}/></div>
-                            </IonMenuToggle>
-                            <IonTitle>
-                                <img height={28} src="./assets/img/pins-logo.png"/>
-                            </IonTitle>
-                        </IonToolbar>
-                    </IonHeader>
-                    <IonContent className="ion-padding">
+        {/*<IonRow style={{height: '100%'}}>*/}
+        {/*    <IonCol sizeMd="8" sizeSm="12" sizeXs="12" style={{height: '100%'}}>*/}
 
-                        <SideBar router={router} onRequestAccount={() => {
-                            initData().catch(e => console.error(e))
-                        }} account={account} onLogout={() => {
-                            initData().catch(e => console.error(e))
-                        }} isSessionAvailable={isSessionAvailable}/>
-                    </IonContent>
-                </IonMenu>
 
-                <IonPage id="main-content">
-                    <IonHeader mode="ios" color="primary" className={!hideMenu ? "" : "hide-title"}>
-                        {
-                            showPin ? <IonToolbar className="msg-toolbar">
-                                    <IonButtons slot="end">
-                                        <IonButton onClick={() => {
-                                            setShowPin(false)
-                                        }}>
-                                            Cancel
-                                        </IonButton>
-                                    </IonButtons>
-                                    <IonTitle className="font-style-bold">
-                                        <TribeHeader onReladData={onReload} tribeInfo={tribeInfo} roles={roles}
-                                                     wsStatus={isConnecting} stickyMsg={pinnedSticky}/>
-                                    </IonTitle>
-                                </IonToolbar> :
+        <IonSplitPane when="lg" contentId="main-content">
+                    <div className="ion-page" id="main-content">
+
+                        <IonMenu contentId="main-content-left" side="start" maxEdgeStart={50}>
+                            <IonHeader>
                                 <IonToolbar className="msg-toolbar">
-                                    <div className="msg-head-avatar">
-                                        <div>
-                                            <div slot="start" id="main-content">
-                                                <IonMenuToggle>
-                                                    <IonIcon src={listOutline} size="large"/>
-                                                </IonMenuToggle>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <IonTitle className="font-style-bold">
-                                        <TribeHeader onChangeMsgIndex={onChangeMsgIndex} onReladData={onReload}
-                                                     tribeInfo={tribeInfo} roles={roles} wsStatus={isConnecting}
-                                                     stickyMsg={pinnedSticky}/>
+                                    <IonMenuToggle>
+                                        <div style={{paddingLeft: 12}}><IonIcon src={arrowBackOutline}/></div>
+                                    </IonMenuToggle>
+                                    <IonTitle>
+                                        <img height={28} src="./assets/img/pins-logo.png"/>
                                     </IonTitle>
-                                    <IonIcon src={ellipsisVertical} color="medium" size="large" slot="end"
-                                             onClick={(e) => {
-                                                 e.persist();
-                                                 setShowActionSheet(true)
-                                             }}/>
                                 </IonToolbar>
-                        }
+                            </IonHeader>
+                            <IonContent className="ion-padding">
+                                <SideBar router={router} onRequestAccount={() => {
+                                    initData().catch(e => console.error(e))
+                                }} account={account} onLogout={() => {
+                                    initData().catch(e => console.error(e))
+                                }} isSessionAvailable={isSessionAvailable}/>
+                            </IonContent>
+                        </IonMenu>
 
-                    </IonHeader>
-                    <IonContent fullscreen>
-                        <div id="container">
-                            <div className="bottom"></div>
-                            <div className="top"></div>
-                        </div>
+                        <IonPage>
+                            <IonHeader mode="ios" color="primary" className={!hideMenu ? "" : "hide-title"}>
+                                {
+                                    showPin ? <IonToolbar className="msg-toolbar">
+                                            <IonButtons slot="end">
+                                                <IonButton onClick={() => {
+                                                    setShowPin(false)
+                                                }}>
+                                                    Cancel
+                                                </IonButton>
+                                            </IonButtons>
+                                            <IonTitle className="font-style-bold">
+                                                <TribeHeader onReladData={onReload} tribeInfo={tribeInfo} roles={roles}
+                                                             wsStatus={isConnecting} stickyMsg={pinnedSticky}/>
+                                            </IonTitle>
+                                        </IonToolbar> :
+                                        <IonToolbar className="msg-toolbar">
+                                            <div className="msg-head-avatar">
+                                                <div slot="start" id="main-content-left">
+                                                    <IonMenuToggle menu="start" autoHide={false}>
+                                                        <IonIcon src={listOutline} size="large"/>
+                                                    </IonMenuToggle>
+                                                </div>
+                                            </div>
+                                            <IonTitle className="font-style-bold">
+                                                <TribeHeader onChangeMsgIndex={onChangeMsgIndex} onReladData={onReload}
+                                                             tribeInfo={tribeInfo} roles={roles} wsStatus={isConnecting}
+                                                             stickyMsg={pinnedSticky}/>
+                                            </IonTitle>
+                                            <IonIcon src={ellipsisVertical} color="medium" size="large" slot="end"
+                                                     onClick={(e) => {
+                                                         e.persist();
+                                                         setShowActionSheet(true)
+                                                     }}/>
+                                        </IonToolbar>
+                                }
 
-                        <div className="msg-box">
-                            {
-                                !hideMenu && <>
+                            </IonHeader>
+                            <IonContent fullscreen>
+                                <div id="container">
+                                    <div className="bottom"></div>
+                                    <div className="top"></div>
+                                </div>
+
+                                <div className="msg-box">
                                     {
-                                        isConnecting == WsStatus.tokenInvalid &&
-                                        <div className="not-connect" onClick={() => {
-                                            requestAccount();
-                                        }}><IonText color="primary">No connection , <span style={{
-                                            textDecoration: "underline",
-                                            textUnderlineOffset: '4px',
-                                            cursor: "pointer"
-                                        }}>login</span></IonText></div>
+                                        !hideMenu && <>
+                                            {
+                                                isConnecting == WsStatus.tokenInvalid &&
+                                                <div className="not-connect" onClick={() => {
+                                                    requestAccount();
+                                                }}><IonText color="primary">No connection , <span style={{
+                                                    textDecoration: "underline",
+                                                    textUnderlineOffset: '4px',
+                                                    cursor: "pointer"
+                                                }}>login</span></IonText></div>
+                                            }
+                                            {
+                                                isConnecting == WsStatus.inactive &&
+                                                <div className="not-connect">Connecting...</div>
+                                            }
+                                            <div className="msg-toolbar">
+                                                <ToolBar/>
+                                                <ShareEx owner={owner} roles={roles} latestMsg={latestMgs} isOpen={showShare}
+                                                         onClose={() => setShowShare(false)}
+                                                         tribeInfo={tribeInfo}/>
+                                            </div>
+                                        </>
                                     }
                                     {
-                                        isConnecting == WsStatus.inactive &&
-                                        <div className="not-connect">Connecting...</div>
+                                        !!loaded && <MessageContentVisual
+                                            onFork={fork}
+                                            loaded={!!loaded}
+                                            showPinnedMsgDetail={showPinnedMsgFn}
+                                            onReload={onReload}
+                                            tribeInfo={tribeInfo}
+                                            owner={owner}
+                                            groupMsg={groupMsgs}
+                                            onSupport={onSupportFn}
+                                            showPin={showPin}
+                                            userLimit={userLimit}
+                                            selectRole={latestRole}
+                                            shareMsgId={msgId}
+                                            firstIndex={firstItemIndex}
+                                            onChangeVisible={onChangeVisible}
+                                            isConnecting={isConnecting}
+                                            subscribed={subscribed}
+                                            onSubscribe={onSubscribe}
+                                        />
+
                                     }
-                                    <div className="msg-toolbar">
-                                        <ToolBar/>
-                                        <ShareEx owner={owner} roles={roles} latestMsg={latestMgs} isOpen={showShare}
-                                                 onClose={() => setShowShare(false)}
-                                                 tribeInfo={tribeInfo}/>
+                                    <div className={`msg-bottom ${!hideMenu ? "" : "msg-bottom-height-0"}`}>
+                                        <BottomBar alreadySelectRole={alreadySelectRole} isTokenValid={isSessionAvailable}
+                                                   tribeInfo={tribeInfo} owner={owner} userLimit={userLimit}
+                                                   onRoleCheck={setLatestRoleFn} roles={roles} selectRole={latestRole}
+                                                   showPin={showPin} onPin={onPinFn}/>
                                     </div>
-                                </>
-                            }
-                            {
-                                !!loaded && <MessageContentVisual
-                                    onFork={fork}
-                                    loaded={!!loaded}
-                                    showPinnedMsgDetail={showPinnedMsgFn}
-                                    onReload={onReload}
-                                    tribeInfo={tribeInfo}
-                                    owner={owner}
-                                    groupMsg={groupMsgs}
-                                    onSupport={onSupportFn}
-                                    showPin={showPin}
-                                    userLimit={userLimit}
-                                    selectRole={latestRole}
-                                    shareMsgId={msgId}
-                                    firstIndex={firstItemIndex}
-                                    onChangeVisible={onChangeVisible}
-                                    isConnecting={isConnecting}
-                                    subscribed={subscribed}
-                                    onSubscribe={onSubscribe}
+                                </div>
+
+                                <IonActionSheet
+                                    isOpen={showActionSheet}
+                                    onDidDismiss={() => setShowActionSheet(false)}
+                                    cssClass='my-custom-class'
+                                    buttons={menuButtons}
+                                >
+
+                                </IonActionSheet>
+                                {
+                                    tribeInfo && <TribeEditModal isOpen={showTribeEdit}
+                                                                 onClose={() => setShowTribeEdit(false)}
+                                                                 onOk={(tribeId) => {
+                                                                     setShowTribeEdit(false);
+                                                                     initData().catch(e => {
+                                                                         console.log(e)
+                                                                     })
+
+                                                                 }} tribeInfo={tribeInfo}/>
+                                }
+                                <TribeEditModal isOpen={showCreateTribe} onClose={() => setShowCreateTribe(false)}
+                                                onOk={(tribeId) => {
+                                                    setShowCreateTribe(false)
+                                                    utils.goTo(tribeId)
+                                                }}/>
+
+                                <TribeEditModal forkGroupId={forkGroupId} tribeInfo={forkTribeInfo} isOpen={showForkModal}
+                                                onClose={() => setShowForkModal(false)}
+                                                onOk={(tribeId) => {
+                                                    setShowForkModal(false)
+                                                    // window.open(`/${tribeId}`)
+                                                    utils.goTo(tribeId)
+                                                }}/>
+
+                                <IonToast
+                                    isOpen={showToast}
+                                    onDidDismiss={() => setShowToast(false)}
+                                    message={toastMsg}
+                                    position="top"
+                                    color={"danger"}
+                                    duration={2000}
                                 />
 
-                            }
-                            <div className={`msg-bottom ${!hideMenu ? "" : "msg-bottom-height-0"}`}>
-                                <BottomBar alreadySelectRole={alreadySelectRole} isTokenValid={isSessionAvailable}
-                                           tribeInfo={tribeInfo} owner={owner} userLimit={userLimit}
-                                           onRoleCheck={setLatestRoleFn} roles={roles} selectRole={latestRole}
-                                           showPin={showPin} onPin={onPinFn}/>
-                            </div>
-                        </div>
+                            </IonContent>
+                        </IonPage>
+                    </div>
 
-                        <IonActionSheet
-                            isOpen={showActionSheet}
-                            onDidDismiss={() => setShowActionSheet(false)}
-                            cssClass='my-custom-class'
-                            buttons={menuButtons}
-                        >
 
-                        </IonActionSheet>
-                        {
-                            tribeInfo && <TribeEditModal isOpen={showTribeEdit}
-                                                         onClose={() => setShowTribeEdit(false)}
-                                                         onOk={(tribeId) => {
-                                                             setShowTribeEdit(false);
-                                                             initData().catch(e => {
-                                                                 console.log(e)
-                                                             })
+                    <IonMenu contentId="main-content" side="end" className="main-content-menu-right">
+                        <RoleListModal
+                            onChangeMsgIndex={onChangeMsgIndex}
+                            pinnedSticky={pinnedSticky}
+                            groupMsg={groupMsgs} tribeInfo={tribeInfo} roles={roles} defaultRole={latestRole}
+                            onRoleCheck={setLatestRoleFn}
+                            onReloadList={() => {
+                                setTimeout(() => {
+                                    initData().catch(e => {
+                                        console.error(e)
+                                    })
+                                }, 500)
+                            }}/>
+                    </IonMenu>
 
-                                                         }} tribeInfo={tribeInfo}/>
-                        }
-                        <TribeEditModal isOpen={showCreateTribe} onClose={() => setShowCreateTribe(false)}
-                                        onOk={(tribeId) => {
-                                            setShowCreateTribe(false)
-                                            utils.goTo(tribeId)
-                                        }}/>
+                </IonSplitPane>
 
-                        <TribeEditModal forkGroupId={forkGroupId} tribeInfo={forkTribeInfo} isOpen={showForkModal}
-                                        onClose={() => setShowForkModal(false)}
-                                        onOk={(tribeId) => {
-                                            setShowForkModal(false)
-                                            // window.open(`/${tribeId}`)
-                                            utils.goTo(tribeId)
-                                        }}/>
+                {/*<IonMenu contentId="main-content">*/}
+                {/*    <IonHeader>*/}
+                {/*        <IonToolbar className="msg-toolbar">*/}
+                {/*            <IonMenuToggle>*/}
+                {/*                <div style={{paddingLeft: 12}}><IonIcon src={arrowBackOutline}/></div>*/}
+                {/*            </IonMenuToggle>*/}
+                {/*            <IonTitle>*/}
+                {/*                <img height={28} src="./assets/img/pins-logo.png"/>*/}
+                {/*            </IonTitle>*/}
+                {/*        </IonToolbar>*/}
+                {/*    </IonHeader>*/}
+                {/*    <IonContent className="ion-padding">*/}
+                {/*        <SideBar router={router} onRequestAccount={() => {*/}
+                {/*            initData().catch(e => console.error(e))*/}
+                {/*        }} account={account} onLogout={() => {*/}
+                {/*            initData().catch(e => console.error(e))*/}
+                {/*        }} isSessionAvailable={isSessionAvailable}/>*/}
+                {/*    </IonContent>*/}
+                {/*</IonMenu>*/}
 
-                        <IonToast
-                            isOpen={showToast}
-                            onDidDismiss={() => setShowToast(false)}
-                            message={toastMsg}
-                            position="top"
-                            color={"danger"}
-                            duration={2000}
-                        />
 
-                    </IonContent>
-                </IonPage>
-            </IonCol>
-            <IonCol sizeMd="4" sizeSm="12" sizeXs="12" style={{padding: "unset", height: '100%'}} className="role-list-col">
-                <RoleListModal
-                    onChangeMsgIndex={onChangeMsgIndex}
-                    pinnedSticky={pinnedSticky}
-                    groupMsg={groupMsgs} tribeInfo={tribeInfo} roles={roles} defaultRole={latestRole}
-                    onRoleCheck={setLatestRoleFn}
-                    onReloadList={() => {
-                        setTimeout(() => {
-                            initData().catch(e => {
-                                console.error(e)
-                            })
-                        }, 500)
-                    }}/>
+                {/*<IonMenu contentId="main-content" side="end">*/}
+                {/*    <IonHeader>*/}
+                {/*        <IonToolbar className="msg-toolbar">*/}
+                {/*            <IonMenuToggle>*/}
+                {/*                <div style={{paddingLeft: 12}}><IonIcon src={arrowBackOutline}/></div>*/}
+                {/*            </IonMenuToggle>*/}
+                {/*            <IonTitle>*/}
+                {/*                <img height={28} src="./assets/img/pins-logo.png"/>*/}
+                {/*            </IonTitle>*/}
+                {/*        </IonToolbar>*/}
+                {/*    </IonHeader>*/}
+                {/*    <IonContent className="ion-padding">*/}
+                {/*        <RoleListModal*/}
+                {/*            onChangeMsgIndex={onChangeMsgIndex}*/}
+                {/*            pinnedSticky={pinnedSticky}*/}
+                {/*            groupMsg={groupMsgs} tribeInfo={tribeInfo} roles={roles} defaultRole={latestRole}*/}
+                {/*            onRoleCheck={setLatestRoleFn}*/}
+                {/*            onReloadList={() => {*/}
+                {/*                setTimeout(() => {*/}
+                {/*                    initData().catch(e => {*/}
+                {/*                        console.error(e)*/}
+                {/*                    })*/}
+                {/*                }, 500)*/}
+                {/*            }}/>*/}
 
-            </IonCol>
-        </IonRow>
+                {/*    </IonContent>*/}
+                {/*</IonMenu>*/}
+
+
+        {/*    </IonCol>*/}
+        {/*    <IonCol sizeMd="4" sizeSm="12" sizeXs="12" style={{padding: "unset", height: '100%'}} className="role-list-col">*/}
+        {/*        */}
+
+        {/*    </IonCol>*/}
+        {/*</IonRow>*/}
         {/*<IonLoading*/}
         {/*    cssClass='my-custom-class'*/}
         {/*    isOpen={isConnecting == WsStatus.inactive}*/}

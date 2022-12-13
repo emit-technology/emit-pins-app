@@ -2,6 +2,8 @@ import { PushNotifications } from '@capacitor/push-notifications';
 import selfStorage from "../../common/storage";
 import {tribeService} from "../tribe";
 import {Device} from "@capacitor/device";
+import {utils} from "../../common";
+import {Toast} from "@capacitor/toast";
 
 export const isApp = async () =>{
     try {
@@ -34,9 +36,13 @@ export const addListeners = async () => {
     });
 
     await PushNotifications.addListener('pushNotificationReceived', notification => {
-
-        selfStorage.setItem("pushNotification", notification)
-
+        if(utils.isAndroid()){
+            Toast.show({
+                text: notification.body,
+                position: "top",
+                duration: "long"
+            });
+        }
         console.log('Push notification received: ', notification);
     });
 
@@ -46,7 +52,7 @@ export const addListeners = async () => {
 }
 
 export const registerNotifications = async () => {
-    if(! await isApp()){
+    if(!await isApp()){
         return;
     }
     let permStatus = await PushNotifications.checkPermissions();

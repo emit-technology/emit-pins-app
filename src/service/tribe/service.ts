@@ -18,7 +18,7 @@ import {BaseRpc} from "../../rpc";
 import config from "../../common/config";
 import {Websocket, WebsocketBuilder} from 'websocket-ts';
 import selfStorage from "../../common/storage";
-import {ThemeColors} from "../../common/getMainColor";
+import getMainColor, {ThemeColors} from "../../common/getMainColor";
 import {emitBoxSdk} from "../emitBox";
 import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import tribeWorker from "../../worker/imWorker";
@@ -26,6 +26,7 @@ import {utils} from "../../common";
 import {App} from "@capacitor/app";
 import walletWorker from "../../worker/walletWorker";
 import {Device} from "@capacitor/device";
+import {Photo} from "@capacitor/camera";
 // import WebSocket from 'ws';
 
 const W3CWebSocket = require('websocket').w3cwebsocket;
@@ -351,6 +352,7 @@ class TribeService implements ITribe {
     }
 
     userLogout = async (): Promise<boolean> => {
+        // const rest: TribeResult<boolean> = await
         const rest: TribeResult<boolean> = await this._rpc.post('/user/logout', null);
         if (rest && rest.code == 0) {
             tribeService.setAuthToken("logout token");
@@ -360,9 +362,21 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
-    picUpload = async (): Promise<{ url: string, themeColors: ThemeColors }> => {
+    picUpload = async (): Promise<Photo> => {
         // await this.userCheckAuth()
         return await this._picRpc.upload()
+    }
+
+    uploadToServer = async (image: any) =>{
+        try{
+            const themeColors = await getMainColor(image.webPath);
+            const file = await fetch(image.webPath).then(r => r.blob()).then(blobFile => new File([blobFile], `file.${image.format}`, {type: blobFile.type}));
+            const data = await this._picRpc.uploadFile(file);
+            return {url: data["url"].replace("http://", "https://"), themeColors: themeColors};
+        } catch (e) {
+            console.error(e)
+            return Promise.reject(e)
+        }
     }
 
     picDisplay = async (imgPath: string, w: number = 100, h: number = 100, upscale = 0): Promise<string> => {

@@ -1,10 +1,7 @@
 import axios from "axios";
-import {Camera, CameraResultType, CameraSource} from "@capacitor/camera";
-import selfStorage from "../common/storage";
+import {Camera, CameraResultType, CameraSource, Photo} from "@capacitor/camera";
 import getMainColor, {ThemeColors} from "../common/getMainColor";
 import {tribeService} from "../service/tribe";
-import {utils} from "../common";
-
 
 export class BaseRpc {
 
@@ -31,37 +28,21 @@ export class BaseRpc {
         return data;
     }
 
-    upload = async (): Promise<{ url: string, themeColors: ThemeColors }> => {
+    upload = async (): Promise<Photo> => {
         try {
             console.log("upload....");
-
-            // if (utils.isIos()) {
-            //     const permissions = await Camera.checkPermissions()
-            //     console.log(permissions, "permissionsReq")
-            //     if (permissions.photos != "granted") {
-            //         const permissionsReq = await Camera.requestPermissions()
-            //         console.log(permissionsReq, "permissionsReq==")
-            //     }
-            // }
-
             const domm = document.querySelector('#_capacitor-camera-input');
             if (domm) {
                 domm.remove();
             }
             console.log("Camera.getPhoto....");
-            const image: any = await Camera.getPhoto({
+            const image = await Camera.getPhoto({
                 webUseInput: true,
                 quality: 100,
                 resultType: CameraResultType.Uri,
                 source: CameraSource.Photos,
             });
-            console.log(image);
-            const themeColors = await getMainColor(image.webPath);
-            console.log(themeColors);
-            const file = await fetch(image.webPath).then(r => r.blob()).then(blobFile => new File([blobFile], `file.${image.format}`, {type: blobFile.type}));
-            const data = await this.uploadFile(file);
-
-            return {url: data["url"].replace("http://", "https://"), themeColors: themeColors};
+            return image;
         } catch (e) {
             console.error(e)
             return Promise.reject(e)

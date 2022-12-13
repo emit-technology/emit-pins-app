@@ -21,7 +21,10 @@ const UploadImage = ({imgUrl, setImgUrl,width = 120,height,setColor,defaultIcon,
     const [showLoading, setShowLoading] = useState(false);
 
     const uploadImage = async () => {
-        const data = await tribeService.picUpload()
+        const photo = await tribeService.picUpload()
+        setShowLoading(true)
+        const data = await tribeService.uploadToServer(photo);
+        setShowLoading(false)
         setImgUrl(data.url, data.themeColors.width, data.themeColors.height)
         if(setColor){
             const palette = data.themeColors;
@@ -38,7 +41,7 @@ const UploadImage = ({imgUrl, setImgUrl,width = 120,height,setColor,defaultIcon,
             isOpen={showLoading}
             onDidDismiss={() => setShowLoading(false)}
             message={'Please wait...'}
-            duration={10000}
+            duration={60000}
         />
         <img onClick={()=>{
             setShowLoading(true)

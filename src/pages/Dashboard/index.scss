@@ -705,3 +705,10 @@ position: absolute;
   height: 0;
   overflow: hidden;
 }
+
+
+.main-content-menu-right {
+  --border: 0px !important;
+  --border-radius: 0 12px 12px 0 !important;
+  border-radius: 0 12px 12px 0 !important;
+}
