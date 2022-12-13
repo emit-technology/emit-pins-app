@@ -31,6 +31,7 @@ import {AssetsModal} from "../../Assets/Modal";
 import Avatar from "react-avatar";
 import copy from "copy-to-clipboard";
 import selfStorage from "../../../common/storage";
+import {getDeliveredNotifications} from "../../../service/app";
 
 interface Props {
     onRequestAccount: () => void;
@@ -155,21 +156,38 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account,router, onLo
             <IonIcon src={utils.useInjectAccount()?chevronForwardOutline:openOutline} color="medium" slot="end" size="small"/>
         </IonItem>
 
-        {/*<IonItem onClick={() => {*/}
-        {/*    const pushToken = selfStorage.getItem("pushTokenValue")*/}
-        {/*    if(pushToken){*/}
-        {/*        copy(pushToken)*/}
-        {/*        alert(pushToken)*/}
-        {/*    }else{*/}
-        {/*        const pushTokenErr = selfStorage.getItem("pushTokenErr")*/}
-        {/*        copy(pushTokenErr)*/}
-        {/*        alert(pushTokenErr)*/}
-        {/*    }*/}
-        {/*}}>*/}
-        {/*    <IonIcon slot="start" src={walletOutline} size="large"/>*/}
-        {/*    <IonLabel>Push Token</IonLabel>*/}
-        {/*    <IonIcon src={utils.useInjectAccount()?chevronForwardOutline:openOutline} color="medium" slot="end" size="small"/>*/}
-        {/*</IonItem>*/}
+        <IonItem onClick={() => {
+            const pushToken = selfStorage.getItem("pushTokenValue")
+            if(pushToken){
+                copy(pushToken)
+                alert(pushToken)
+            }else{
+                const pushTokenErr = selfStorage.getItem("pushTokenErr")
+                copy(pushTokenErr)
+                alert(pushTokenErr)
+            }
+        }}>
+            <IonIcon slot="start" src={walletOutline} size="large"/>
+            <IonLabel>Push Token</IonLabel>
+            <IonIcon src={utils.useInjectAccount()?chevronForwardOutline:openOutline} color="medium" slot="end" size="small"/>
+        </IonItem>
+
+        <IonItem onClick={() => {
+            getDeliveredNotifications().then(rest=>{
+                alert(JSON.stringify(rest))
+            })
+        }}>
+            <IonIcon slot="start" src={homeOutline} size="large"/>
+            <IonLabel>Notify List</IonLabel>
+        </IonItem>
+
+        <IonItem onClick={() => {
+            const notify = selfStorage.getItem("pushNotification")
+            alert(JSON.stringify(notify))
+        }}>
+            <IonIcon slot="start" src={homeOutline} size="large"/>
+            <IonLabel>Notify Latest</IonLabel>
+        </IonItem>
 
         <div style={{height: 30}}>
         </div>

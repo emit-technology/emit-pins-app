@@ -145,21 +145,16 @@ export class HomePage extends React.Component<Props, State> {
             this.setState({data: data})
             if(!data || data.length == 0){
                 try{
-                    let tribeId = value;
-                    if(value && value.indexOf("https://pins.emit.technology/") > -1){
-                        tribeId = value.slice("https://pins.emit.technology/".length)
-                    }else if(value && value.indexOf("http://pins.emit.technology/") > -1){
-                        tribeId = value.slice("http://pins.emit.technology/".length)
-                    }else if(value && value.replace("//"," ").indexOf("/") > -1){
-                        tribeId = value.slice(value.replace("//"," ").indexOf("/")+2)
-                    }
-                    tribeService.tribeInfo(tribeId).then(tribeInfo=>{
-                        tribeInfo.latestMsg = null;
-                        tribeInfo.roles = [];
-                        tribeInfo.subscribed = false;
+                    const tribeId = utils.getTribeIdFromUrl(value)
+                    if(tribeId && tribeId.length>=11){
+                        tribeService.tribeInfo(tribeId).then(tribeInfo=>{
+                            tribeInfo.latestMsg = null;
+                            tribeInfo.roles = [];
+                            tribeInfo.subscribed = false;
 
-                        this.setState({data:[tribeInfo]})
-                    }).catch(e=>console.log(e))
+                            this.setState({data:[tribeInfo]})
+                        }).catch(e=>console.log(e))
+                    }
                 }catch (e){
                     console.error(e)
                 }

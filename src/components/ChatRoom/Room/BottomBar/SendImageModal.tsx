@@ -37,7 +37,7 @@ export const SendImageModal: React.FC<Props> = ({url, onOk, onClose, isOpen,widt
         setTriggerRef,
         visible,
     } = usePopperTooltip({
-        placement: "top-end",
+        placement: "bottom-end",
         interactive: true,
         delayHide: 200,
         closeOnTriggerHidden: true,

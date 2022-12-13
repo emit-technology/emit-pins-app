@@ -267,6 +267,20 @@ export const utils = {
             return msg;
         }
         return m;
+    },
+
+    getTribeIdFromUrl : (value: string) =>{
+        let tribeId = value;
+        if(value && value.indexOf("https://pins.emit.technology/") > -1){
+            tribeId = value.slice("https://pins.emit.technology/".length)
+        }else if(value && value.indexOf("http://pins.emit.technology/") > -1){
+            tribeId = value.slice("http://pins.emit.technology/".length)
+        }else if(value && value.indexOf("emitcorepins://") > -1){
+            tribeId = value.slice("emitcorepins://".length)
+        }else if(value && value.replace("//"," ").indexOf("/") > -1){
+            tribeId = value.slice(value.replace("//"," ").indexOf("/")+2)
+        }
+        return tribeId;
     }
 
 }

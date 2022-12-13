@@ -55,8 +55,10 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
 
     const createTribe = async (): Promise<string> => {
         if(!imgUrl || !(imgUrl as MsgTextImage).url){
-            present({message:"Please upload the image!", color: "danger", duration: 2000})
-            return
+            return Promise.reject("Please upload the image!")
+        }
+        if(themeTag.indexOf("http://") > -1 || themeTag.indexOf("https:") > -1 ){
+            return Promise.reject("Can't set url in the theme tag !")
         }
         if (tribeInfo) {
             let tribeId:string ;
@@ -73,6 +75,9 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                 })
                 tribeId = tribeInfo.tribeId;
             }else{
+                if(title.indexOf("http://") > -1 || title.indexOf("https:") > -1 ) {
+                    return Promise.reject("Can't set url in the title !")
+                }
                 const tribeInfoCopy:TribeInfo = JSON.parse(JSON.stringify(tribeInfo));
                 tribeInfoCopy.theme = {
                     tribeId: tribeInfo.tribeId,

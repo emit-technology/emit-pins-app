@@ -28,7 +28,7 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, onReladData, onChangeMsgI
     const [showTribeInfoModal, setShowTribeInfoModal] = useState(false);
     const [stickies, setStickies] = useState({data: [], total: 0});
 
-    const onClickTheme = useCallback(() => {
+    const onClickThemeBack = useCallback(() => {
         if (stickyMsg && !!onChangeMsgIndex) {
             const index = tribeService.groupIdCache().findIndex(v => v == stickyMsg.groupId)
             if (index > 0) {
@@ -83,7 +83,7 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, onReladData, onChangeMsgI
                                 {
                                     stickyMsg && tribeService.groupIdCache().indexOf(stickyMsg.groupId) > 0
                                     && <IonIcon src={chevronBackOutline} size="large" color="medium"
-                                                onClick={onClickTheme}/>
+                                                onClick={onClickThemeBack}/>
                                 }
                             </div>
                         </IonCol>

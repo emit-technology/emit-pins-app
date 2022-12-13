@@ -79,8 +79,17 @@ export const RoleEditModal: React.FC<Props> = ({isOpen, roleInfo, onOk, onClose}
                         <IonButton disabled={showLoading || (roleInfo && roleInfo.avatar == imgUrl &&
                             roleInfo.name == roleName &&
                             roleInfo.desc == desc )} expand="block" onClick={() => {
+
                             if (!imgUrl || !(imgUrl as MsgTextImage).url){
                                 present({message: "Please upload avatar image !", color:"danger", duration: 2000})
+                                return
+                            }
+                            if(roleName.indexOf("http://") > -1 || roleName.indexOf("https:") > -1 ){
+                                present({message: "Can't set url in the role name !", color:"danger", duration: 2000})
+                                return
+                            }
+                            if(desc.indexOf("http://") > -1 || desc.indexOf("https:") > -1 ){
+                                present({message: "Can't set url in the role note !", color:"danger", duration: 2000})
                                 return
                             }
                             const ri:TribeRole = {

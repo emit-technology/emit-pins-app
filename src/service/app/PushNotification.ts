@@ -34,6 +34,9 @@ export const addListeners = async () => {
     });
 
     await PushNotifications.addListener('pushNotificationReceived', notification => {
+
+        selfStorage.setItem("pushNotification", notification)
+
         console.log('Push notification received: ', notification);
     });
 
@@ -59,10 +62,11 @@ export const registerNotifications = async () => {
     await PushNotifications.register();
 }
 
-export const getDeliveredNotifications = async () => {
+export const getDeliveredNotifications = async ():Promise<any> => {
     if(! await isApp()){
         return;
     }
     const notificationList = await PushNotifications.getDeliveredNotifications();
     console.log('delivered notifications', JSON.stringify(notificationList));
+    return notificationList;
 }

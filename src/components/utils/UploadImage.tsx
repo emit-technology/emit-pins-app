@@ -33,13 +33,13 @@ const UploadImage = ({imgUrl, setImgUrl,width = 120,height,setColor,defaultIcon,
     };
 
     return <>
-        {/*<IonLoading*/}
-        {/*    cssClass='my-custom-class'*/}
-        {/*    isOpen={showLoading}*/}
-        {/*    onDidDismiss={() => setShowLoading(false)}*/}
-        {/*    message={'Please wait...'}*/}
-        {/*    duration={10000}*/}
-        {/*/>*/}
+        <IonLoading
+            cssClass='my-custom-class'
+            isOpen={showLoading}
+            onDidDismiss={() => setShowLoading(false)}
+            message={'Please wait...'}
+            duration={10000}
+        />
         <img onClick={()=>{
             setShowLoading(true)
             uploadImage().then(()=>{

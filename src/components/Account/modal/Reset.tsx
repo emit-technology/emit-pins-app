@@ -57,6 +57,7 @@ export const ResetModal:React.FC<Props> = ({isOpen,onOk,onUnlock,onClose})=>{
         const accountId:any = await walletWorker.resetAccount(textRef.current.value, passwordRef.current.value);
 
         if(accountId){
+            await walletWorker.setBackedUp(accountId);
             const account: AccountModel = await walletWorker.accountInfo(accountId)
             onOk(account)
         }

@@ -3,9 +3,9 @@ import {render, hydrate} from 'react-dom';
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
-import { defineCustomElements } from '@ionic/pwa-elements/loader';
+import {defineCustomElements} from '@ionic/pwa-elements/loader';
 import {App as AppPlugin} from "@capacitor/app";
-import { Toast } from '@capacitor/toast';
+import {Toast} from '@capacitor/toast';
 import {
     addListeners,
     getDeliveredNotifications,
@@ -20,6 +20,7 @@ import ResizeObserver from 'resize-observer-polyfill'
 
 import 'overlayscrollbars/overlayscrollbars.css';
 import {ParallaxProvider} from "react-scroll-parallax";
+import config from "./common/config";
 // import { SplashScreen } from '@capacitor/splash-screen';
 
 // globalThis.VIRTUOSO_LOG_LEVEL = LogLevel.DEBUG;
@@ -32,14 +33,14 @@ if (!window.ResizeObserver)
 // Virtuoso's resize observer can this error,
 // which is caught by DnD and aborts dragging.
 window.addEventListener("error", (e) => {
-    console.log("stopImmediatePropagation",e)
+    console.log("stopImmediatePropagation", e)
     // if (
     //     e.message ===
     //     "ResizeObserver loop completed with undelivered notifications." ||
     //     e.message === "ResizeObserver loop limit exceeded"
     // ) {
     //     console.log("=====> stopImmediatePropagation")
-        e.stopImmediatePropagation();
+    e.stopImmediatePropagation();
     // }
 });
 
@@ -47,19 +48,23 @@ if (rootElement.hasChildNodes()) {
     console.log("hydrate mode");
     hydrate(<React.StrictMode>
         <ParallaxProvider>
-        <App />
+            <App/>
         </ParallaxProvider>
     </React.StrictMode>, rootElement);
 } else {
     console.log("render mode");
     render(<React.StrictMode>
-            <App />
+        <App/>
     </React.StrictMode>, rootElement);
 }
 console.log("added app url open listener.")
 
-AppPlugin.addListener("appUrlOpen",(appUrlOpen)=>{
-    // console.log("app open pins: ", JSON.stringify(appUrlOpen));
+AppPlugin.addListener("appUrlOpen", (appUrlOpen) => {
+    console.log("app open pins: ", JSON.stringify(appUrlOpen));
+    const tribeId = utils.getTribeIdFromUrl(appUrlOpen.url);
+    if (tribeId.length >= 11) {
+        window.location.href = `./${tribeId}`;
+    }
     // Toast.show({
     //     text: 'app url open emit pins!',
     // });
@@ -68,29 +73,29 @@ AppPlugin.addListener("appUrlOpen",(appUrlOpen)=>{
     // });
 })
 
-if(utils.isIos() || utils.isAndroid()){
-    if(utils.isIos()){
+if (utils.isIos() || utils.isAndroid()) {
+    if (utils.isIos()) {
         setStatusBarStyleLight();
-    }else{
+    } else {
         setStatusBarStyleDark()
     }
 
-    addListeners().catch(e=>{
-        console.error("notification listen error",e)
+    addListeners().catch(e => {
+        console.error("notification listen error", e)
     })
 
-    registerNotifications().catch(e=>{
-        console.error("notification register error",e)
+    registerNotifications().catch(e => {
+        console.error("notification register error", e)
     })
 
-    getDeliveredNotifications().catch(e=>{
-        console.error("notification getDeliveredNotifications error",e);
+    getDeliveredNotifications().catch(e => {
+        console.error("notification getDeliveredNotifications error", e);
     })
 
     let timer;
 
-    isApp().then(f=>{
-        if(!f){
+    isApp().then(f => {
+        if (!f) {
             timer = setTimeout(() => {
                 // if(utils.isIos()){
                 //     //@ts-ignore
@@ -100,20 +105,19 @@ if(utils.isIos() || utils.isAndroid()){
                 //     window.location = "https://testflight.apple.com/join/8smFQVxG";
                 // }
             }, 3000)
-            window.location.href = 'emitcorepins://'
+            window.location.href = `emitcorepins://${config.tribeId ? config.tribeId : ""}`
         }
     })
 
-    // if (document.hidden !== undefined) {
-    //     document.addEventListener('visibilitychange', () => {
-    //         if (!document.hidden) {
-    //         }else{
-    //             clearTimeout(timer)
-    //         }
-    //     })
-    // }
+    if (document.hidden !== undefined) {
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+            } else {
+                clearTimeout(timer)
+            }
+        })
+    }
 }
-
 
 
 // ReactDOM.render(
@@ -122,7 +126,7 @@ if(utils.isIos() || utils.isAndroid()){
 //   </React.StrictMode>,
 //   document.getElementById('root')
 // );
-defineCustomElements(window).catch(e=>console.error("defineCustomElements error: ",e));
+defineCustomElements(window).catch(e => console.error("defineCustomElements error: ", e));
 
 // console.log=(function (oriLogFunc) {
 //     return function () {

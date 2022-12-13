@@ -121,7 +121,7 @@ const BottomBarChild: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTok
                     //@ts-ignore
                     textRef.current.value = "";
                     //@ts-ignore
-                    textRef.current.focus()
+                    // textRef.current.focus()
                 }
                 if (replayMsg) {
                     setReplayMsg(null);

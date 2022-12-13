@@ -278,16 +278,18 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 return total
             });
             setFirstItemIndex(reqIndex)
-            console.log("------> firstItemIndex: [%d]", reqIndex, comp.length > 0 && comp[0])
+            console.log("------> firstItemIndex: [%d], scroll to=[%d]", reqIndex,firstIndex - reqIndex, comp.length > 0 && comp[0])
 
-            if (toBottom) {
-                scrollToItem({index: rest.total - 1, align: "end"});
-                // setTimeout(()=>{
-               // }, 100)
-            } else {
-                scrollToItem({index: firstIndex - reqIndex, align: "start"});
-            }
+            setImmediate(()=>{
+                if (toBottom) {
+                    scrollToItem({index: rest.total - 1, align: "end"});
+                    // setTimeout(()=>{
+                    // }, 100)
+                } else {
+                    scrollToItem({index: firstIndex - reqIndex, align: "start"});
+                }
 
+            })
         }
     }
 
@@ -300,7 +302,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         } else {
             let latestId = getCurrentVisible();
             if (latestId == -1) {
-                latestId = pageSize < streamMsg1.total ? streamMsg1.total - pageSize + 1 : 0;
+                latestId = pageSize < streamMsg1.total ? streamMsg1.total - 1 : 0;
             }
             if (latestId >= streamMsg1.total) {
                 latestId = streamMsg1.total - 1;
@@ -361,9 +363,9 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     const loadMore = useCallback((lastIndex: number) => {
         if (comments.length > 0 && comments.length < total && lastIndex > -1) {
             const lastMsg: PinnedSticky = comments[comments.length - 1];
-            console.log("=========loadMore >> start=[%d], end=[%d] ", lastMsg.records[0].msgIndex + 1, pageSize, comments);
+            console.log("=========loadMore >> start=[%d], total=[%d] ", lastMsg.records[0].msgIndex + 1, total );
             if (
-                (!!lastMsg && !!lastMsg.records && !!lastMsg.records[0].msgIndex && lastMsg.records[0].msgIndex < total - 1)
+                (!!lastMsg && !!lastMsg.records && lastMsg.records[0].msgIndex > -1 && lastMsg.records[0].msgIndex < total - 1)
             ) {
                 tribeWorker.getPinnedMessageArray(config.tribeId, lastMsg.records[0].msgIndex + 1, pageSize).then(rest => {
                     setCommentsInner({total: rest.total, messages: rest.data}, true)
@@ -505,7 +507,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         }
     }, [loaded])
 
-    const setCommentsInner = (data: {total:number, messages: Array<PinnedSticky>}, append?:boolean) =>{
+    const setCommentsInner = useCallback((data: {total:number, messages: Array<PinnedSticky>}, append?:boolean) =>{
 
         const messages = data.messages;
         new Promise(resolve => {
@@ -571,9 +573,9 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                     }
 
                 }
-                // console.log("=========> commentsCopy>>>", commentsCopy, nextComments);
+                console.log("=========> commentsCopy>>>", commentsCopy, nextComments, append, visibleRange.endIndex , total);
                 const _cIndex = commentsCopy.findIndex(v => v.records[0].groupId == "");
-                if (commentsCopy.length == 0 || _cIndex >= 0 || append) {
+                if (commentsCopy.length == 0 || _cIndex >= 0 || append || visibleRange.endIndex == total - 1) {
                     const comp = [...commentsCopy, ...nextComments];
                     combile(comp)
                     resolve(true)
@@ -587,20 +589,20 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
             setTotal(data.total)
         })
 
-    }
+    },[setComments,total, comments, setTotal])
 
     useEffect(() => {
         if (loaded && count++ == 0) {
             tribeWorker.addMessageListener(config.tribeId, async (data: { total: number, messages: Array<PinnedSticky> }) => {
                 try {
                     console.log("======> startcallbutton ", data)
-                    setCommentsInner(data)
+                    setCommentsInner(data )
                 } catch (e) {
                     console.error(e)
                 }
             });
         }
-    }, [loaded, setComments, setTotal])
+    }, [loaded, setComments,total, comments, setTotal])
 
     useEffect(() => {
         if (!pinnedStickies && dispatchData) {
@@ -708,15 +710,14 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
 
     // setting 'auto' for behavior does help in this sample, but not in my actual code
     const followOutput = useCallback((isAtBottom) => {
-        // console.log('MessagesList: followOutput isAtBottom', isAtBottom, atBottom);
+        console.log('MessagesLislowOutput isAtBottom', isAtBottom, atBottom);
+
         const check = comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex >= total - 5;
         return isAtBottom && atBottom && check ? 'auto' : false;
     }, [comments, atBottom, total]);
 
     const bottomChange = useCallback((bottom) => {
-        if (bottom) {
-            console.log("bottom")
-        }
+        console.log("at bottom", bottom)
         setAtBottom(bottom)
     }, [setAtBottom])
 
@@ -728,11 +729,12 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 <div className="inner-box">
                     {loadingData && <Loading/>}
                     <div className="position-top">[{visibleRange.startIndex}] - [{visibleRange.endIndex}]
-                        : [{firstItemIndex}]..[{total}], [ren: {renderCount}]
+                        : [{firstItemIndex}]..[{total}]
                     </div>
                     <Virtuoso
                         ref={virtuoso}
                         style={{height: '100%'}}
+                        // overscan={{main: 0, reverse: 100}}
                         overscan={0}
                         isScrolling={(f) => setIsScrolling(f)}
                         firstItemIndex={firstItemIndex}
@@ -824,7 +826,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
             />
 
             {
-                comments.length - 1 > currentVisibleStopIndex &&
+                comments.length - 1 > currentVisibleStopIndex && !showPin &&
                 <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{
                     bottom: !pinnedStickies ? '145px' : "100px",
                     right: !pinnedStickies ? "" : "35px",
@@ -873,7 +875,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                         }
 
                         {
-                            (showButton || visibleRange.startIndex < 5) && (
+                            (showButton || visibleRange.endIndex < total - 5) && (
                                 <div className="fab-cus" onClick={() => {
                                     setAtBottom(true);
                                     if (comments && comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex == total - 1) {
