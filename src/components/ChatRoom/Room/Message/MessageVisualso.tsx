@@ -87,6 +87,8 @@ interface Props {
 
     subscribed?: boolean;
     onSubscribe?: (f:boolean)=>void;
+
+    timestamp?: number
 }
 
 const pageSize = 50;
@@ -130,7 +132,8 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                                                  selectRole, pinnedStickies,
                                                                  loaded, onReload, showPinnedMsgDetail,
                                                                  showPin, owner,
-                                                                 tribeInfo, onSupport, subscribed, onSubscribe
+                                                                 tribeInfo, onSupport, subscribed, onSubscribe,
+                                                                 timestamp
                                                              }) => {
 
     const dispatchData = useAppSelector(state => state.jsonData);
@@ -609,7 +612,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
             if (dispatchData.tag == 'scrollToItem' && dispatchData.data) {
                 // virtuoso.current.scrollToIndex({ index: comments.length - 1, behavior: 'smooth' });
                 if (comments && comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex == total - 1) {
-                    scrollToItem({index: total - 1, align: "end"})
+                    setTimeout(()=>scrollToItem({index: total - 1, align: "end"}), 100)
                 } else {
                     fetchMsgByIndex(total - 1, true);
                 }
@@ -643,7 +646,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     }, [dispatchData.data]);
 
     const setMaxVisible = (n: number) => {
-        // console.log("set max visible=[%d]", n)
+        console.log("set max visible=[%d]", n)
         setMaxVisibleIndex(n)
         selfStorage.setItem(`maxVisibleIndex_${config.tribeId}`, n)
         // const data: PinnedSticky = comments[n];
@@ -712,13 +715,15 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     const followOutput = useCallback((isAtBottom) => {
         console.log('MessagesLislowOutput isAtBottom', isAtBottom, atBottom);
 
-        const check = comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex >= total - 5;
+        const check = comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex >= total - 3;
         return isAtBottom && atBottom && check ? 'auto' : false;
     }, [comments, atBottom, total]);
 
     const bottomChange = useCallback((bottom) => {
-        console.log("at bottom", bottom)
-        setAtBottom(bottom)
+        console.log("at bottom", bottom, isScrolling)
+        if(bottom !== atBottom){
+            setTimeout(()=>setAtBottom(bottom), 100)
+        }
     }, [setAtBottom])
 
     return <>
@@ -743,7 +748,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                         endReached={loadMore}
                         startReached={prependItems}
                         followOutput={atBottom && (total > 0 && visibleRange.startIndex > total - pageSize) && followOutput}
-                        atBottomStateChange={(total > 0 && visibleRange.startIndex > total - pageSize) && bottomChange}
+                        atBottomStateChange={(total > 0 && visibleRange.endIndex >= total - 2) && bottomChange}
                         // initialTopMostItemIndex={getCurrentVisible()}
                         itemsRendered={(items)=>{
                             if (!isScrolling && !pinnedStickies) {
@@ -775,7 +780,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                 }else if(maxVisibleIndex> total - 1){
                                     // setMaxVisible(total-1)
                                 }
-                                if (visibleRange.endIndex >= total - 1) {
+                                if (visibleRange.endIndex >= total - 1 && atBottom) {
                                     if (!!tribeInfo) {
                                         const groupArr = tribeService.getGroupMap();
                                         const defaultGroup = groupArr[groupArr.length - 1];
@@ -864,18 +869,18 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                             </div>
                         }
                         {
-                            !pinnedStickies && (showButton || visibleRange.startIndex < 5) &&
+                            !pinnedStickies  &&
                             <div className="fab-cus-dig"
                                  style={(total - 1 - maxVisibleIndex <= 0) ? {
                                      background: "transparent",
                                      height: 0
-                                 } : {}}>
+                                 } : {marginTop: 6}}>
                                 <small>{total - 1 - maxVisibleIndex <= 0 ? "" : total - 1 - maxVisibleIndex}</small>
                             </div>
                         }
 
                         {
-                            (showButton || visibleRange.endIndex < total - 5) && (
+                            ( !atBottom || visibleRange.endIndex < total - 3) && (
                                 <div className="fab-cus" onClick={() => {
                                     setAtBottom(true);
                                     if (comments && comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex == total - 1) {

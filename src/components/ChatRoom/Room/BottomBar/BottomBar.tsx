@@ -65,6 +65,7 @@ const BottomBarChild: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTok
     const [themeColor, setThemeColor] = useState(null);
 
     const [loading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [showAirdropModal, setShowAirdropModal] = useState(false);
 
@@ -245,9 +246,9 @@ const BottomBarChild: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTok
                                                          return;
                                                      }
                                                      tribeService.picUpload().then(photo => {
-                                                         setLoading(true);
+                                                         setIsLoading(true);
                                                          tribeService.uploadToServer(photo).then(({url, themeColors})=>{
-                                                             setLoading(false)
+                                                             setIsLoading(false)
                                                              const displayImage = utils.convertImgDisplay(themeColors.width, themeColors.height, url);
                                                              setDisplayImage({
                                                                  url: url,
@@ -257,7 +258,7 @@ const BottomBarChild: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTok
 
                                                              setThemeColor(themeColors)
                                                          }).catch(e=>{
-                                                             setLoading(false)
+                                                             setIsLoading(false)
                                                          })
                                                      }).catch(e=>{
                                                          const err = typeof e == 'string'?e:e.message;
@@ -298,7 +299,12 @@ const BottomBarChild: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTok
 
                                     <IonIcon className="footer-icon" src={diceOutline} color="dark" size="large" onClick={(e) => {
                                         e.stopPropagation();
-                                        sendMsg(true)
+                                        sendMsg(true).then(()=>{
+                                            dispatch(saveDataState({
+                                                data: JSON.stringify({refresh: 0}),
+                                                tag: 'scrollToItem'
+                                            }))
+                                        })
                                     }}/>
                                 </div>
                             </IonCol>
@@ -451,8 +457,8 @@ const BottomBarChild: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTok
         <AirdropModal actor={selectRole} onOk={()=>sendAirdrop()} onClose={()=>setShowAirdropModal(false)} owner={owner} isOpen={showAirdropModal} />
         <IonLoading
             cssClass='my-custom-class'
-            isOpen={loading}
-            onDidDismiss={() => setLoading(false)}
+            isOpen={isLoading}
+            onDidDismiss={() => setIsLoading(false)}
             message={'Please wait...'}
             duration={60000}
         />

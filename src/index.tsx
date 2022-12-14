@@ -40,7 +40,7 @@ window.addEventListener("error", (e) => {
     //     e.message === "ResizeObserver loop limit exceeded"
     // ) {
     //     console.log("=====> stopImmediatePropagation")
-    e.stopImmediatePropagation();
+    // e.stopImmediatePropagation();
     // }
 });
 

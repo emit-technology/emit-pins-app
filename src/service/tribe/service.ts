@@ -353,13 +353,18 @@ class TribeService implements ITribe {
 
     userLogout = async (): Promise<boolean> => {
         // const rest: TribeResult<boolean> = await
-        const rest: TribeResult<boolean> = await this._rpc.post('/user/logout', null);
-        if (rest && rest.code == 0) {
-            tribeService.setAuthToken("logout token");
-            await tribeWorker.logout()
-            return Promise.resolve(true)
+        const isAlive = await this.isSessionAvailable();
+        if(isAlive){
+            const rest: TribeResult<boolean> = await this._rpc.post('/user/logout', null);
+            if (rest && rest.code == 0) {
+                tribeService.setAuthToken("logout token");
+                tribeWorker.logout()
+                return Promise.resolve(true)
+            }
+            return Promise.reject(rest.message);
         }
-        return Promise.reject(rest.message);
+        return true;
+
     }
 
     picUpload = async (): Promise<Photo> => {

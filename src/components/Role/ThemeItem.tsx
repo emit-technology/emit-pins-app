@@ -28,33 +28,32 @@ const ThemeItemChild:React.FC<Props> = ({theme,roles,seq}) =>{
 
 
     return <>
-        <div style={{padding: '8px 20px', height: 180 ,position: "relative"}}>
-            <div style={{position:"relative",width:'100%',height:'100%',backgroundImage: `url(${theme && utils.getDisPlayUrl(theme.image)})`}} className="theme-img">
-                {/*<img src={theme.image} className="theme-img"/>*/}
-                <div className="pinned-img-shade"></div>
-            </div>
 
-             <div className="pinned-msg-title">
-                 <div>{seq> 0 && `#${seq}`}</div>
-                 <div>{theme && theme.themeTag}</div>
-                 <div><small>{theme && theme.themeDesc}</small></div>
-             </div>
-
-            {
-                roleImgs && roleImgs.length > 0 && roleImgs.map((img,i)=>{
-                    if(i >=4){
-                        return <div key={i} className="pinned-msg-roles pinned-msg-rolesi">
-                            +{roleImgs[i]}
-                        </div>
-                    }
-                    return <div key={i} className="pinned-msg-roles" style={{right: 20 + (i+1)*22,zIndex: 10000 - i*2 }}>
-                        <IonAvatar className="ion-avatar2">
-                            <img src={img} />
-                        </IonAvatar>
-                    </div>
-                })
-            }
+        <div style={{position:"relative",width:'100%',height:'100%',backgroundImage: `url(${theme && utils.getDisPlayUrl(theme.image)})`}} className="theme-img">
+            {/*<img src={theme.image} className="theme-img"/>*/}
+            <div className="pinned-img-shade"></div>
         </div>
+
+        <div className="pinned-msg-title">
+            <div>{seq> 0 && `#${seq}`}</div>
+            <div>{theme && theme.themeTag}</div>
+            <div><small>{theme && theme.themeDesc}</small></div>
+        </div>
+
+        {
+            roleImgs && roleImgs.length > 0 && roleImgs.map((img,i)=>{
+                if(i >=4){
+                    return <div key={i} className="pinned-msg-roles pinned-msg-rolesi">
+                        +{roleImgs[i]}
+                    </div>
+                }
+                return <div key={i} className="pinned-msg-roles" style={{right: 20 + (i+1)*22,zIndex: 10000 - i*2 }}>
+                    <IonAvatar className="ion-avatar2">
+                        <img src={img} />
+                    </IonAvatar>
+                </div>
+            })
+        }
     </>
 }
 

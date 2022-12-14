@@ -89,7 +89,9 @@ export const TribeInfoModal:React.FC<Props> = ({isOpen,stickies,onReladData,onCl
             <IonContent className="ion-padding">
 
                 {
-                    stickyMsg && <ThemeItem theme={stickyMsg.groupId? stickyMsg.theme: tribeInfo && tribeInfo.theme} roles={stickyMsg.groupId ?stickyMsg.roles:roles} seq={stickyMsg&&stickyMsg.groupId?stickyMsg.seq:0}/>
+                    stickyMsg && <div style={{padding: '8px 12px', height: 180 ,position: "relative"}}>
+                        <ThemeItem theme={stickyMsg.groupId? stickyMsg.theme: tribeInfo && tribeInfo.theme} roles={stickyMsg.groupId ?stickyMsg.roles:roles} seq={stickyMsg&&stickyMsg.groupId?stickyMsg.seq:0}/>
+                    </div>
                 }
 
                 <div style={{padding: "0 12px"}}>

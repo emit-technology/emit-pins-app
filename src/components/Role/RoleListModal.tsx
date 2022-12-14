@@ -60,136 +60,138 @@ const RoleListModalChild: React.FC<Props> = ({
     },[])
 
     return <>
-            {
-                !isModal && tribeInfo && tribeInfo.forked  && tribeInfo.forked.length>0 && <IonHeader mode="ios" collapse="condense">
-                    <IonToolbar className="msg-toolbar">
-                        {/*<div style={{fontWeight:700,fontSize:'16px',textAlign:"center"}}>Manage</div>*/}
-                        <div style={{textAlign:'center'}}>
-                            {
-                                tribeInfo && tribeInfo.forked  && tribeInfo.forked.length>0 && <div>
-                                    <IonText color="medium"><small style={{fontWeight:700}}>Forked from {tribeInfo.forked[0].tribeId}</small></IonText>
-                                    <IonIcon style={{transform:'translateY(3px)',cursor:'pointer'}} size="small" src={openOutline} color="medium" onClick={()=>{
-                                        utils.goTo(tribeInfo.forked[0].tribeId)
-                                    }}/>
-                                </div>
-                            }
-                        </div>
-                    </IonToolbar>
-                </IonHeader>
-            }
-            <IonContent >
+            <IonPage>
                 {
-                    tribeInfo && (!tribeInfo.forked  || tribeInfo.forked.length  == 0)  && <div style={{height: (utils.isIos() || utils.isAndroid()) ?"48px": "12px"}}></div>
+                    !isModal && tribeInfo && tribeInfo.forked  && tribeInfo.forked.length>0 && <IonHeader mode="ios" collapse="condense">
+                        <IonToolbar className="msg-toolbar">
+                            {/*<div style={{fontWeight:700,fontSize:'16px',textAlign:"center"}}>Manage</div>*/}
+                            <div style={{textAlign:'center'}}>
+                                {
+                                    tribeInfo && tribeInfo.forked  && tribeInfo.forked.length>0 && <div>
+                                        <IonText color="medium"><small style={{fontWeight:700}}>Forked from {tribeInfo.forked[0].tribeId}</small></IonText>
+                                        <IonIcon style={{transform:'translateY(3px)',cursor:'pointer'}} size="small" src={openOutline} color="medium" onClick={()=>{
+                                            utils.goTo(tribeInfo.forked[0].tribeId)
+                                        }}/>
+                                    </div>
+                                }
+                            </div>
+                        </IonToolbar>
+                    </IonHeader>
                 }
-                <div style={{height: !showThemes?"0":"100%" }}>
-                    <ThemesItems onClickTheme={onClickTheme} groupMsg={groupMsg}  onClose={()=>{
-                        setShowThemes(false)
-                    }}/>
-                </div>
-
-                <div className="role-list-box"  style={{height: !showThemes?"100%":"0px"}}>
-                    <div style={{display: "flex", flexDirection: 'column'}}>
-                        <IonItem lines="none">
-                            <IonLabel slot="start">
-                                <div className="head-themes">
-                                    <div>Pins</div>
-                                    <div>.</div>
-                                    <div>{(groupMsg ?groupMsg.length : 0)}</div>
-                                </div>
-                            </IonLabel>
-                            <IonIcon src={layersOutline} className="theme-icon" color="medium" slot="end" onClick={() => {
-                                setShowThemes(true)
-                            }} size="small"/>
-                            {/*<IonIcon src={addCircleOutline} className="theme-icon" color="medium" slot="end" onClick={() => {*/}
-                            {/*    setShowTribeModal(true)*/}
-                            {/*}} size="small"/>*/}
-                        </IonItem>
-
-                        <div style={{height: 180}}>
-                            <ThemeItem
-                                theme={isModal && tribeInfo ?tribeInfo.theme: pinnedSticky && pinnedSticky.groupId?pinnedSticky.theme:tribeInfo&&tribeInfo.theme}
-                                roles={pinnedSticky && pinnedSticky.groupId?pinnedSticky.roles:roles}
-                                seq={pinnedSticky&&pinnedSticky.groupId ?pinnedSticky.seq:0}
-                            />
-                        </div>
-                        <div style={{padding: "0 12px"}}>
-                            {
-                                isModal|| pinnedSticky && !pinnedSticky.groupId ? <div className="theme-pinned-box">
-                                        <div>{tribeInfo && tribeInfo.theme.themeTag}</div>
-                                        <div  className="text-pre">
-                                            {tribeInfo && tribeInfo.theme.themeDesc}
-                                        </div>
-                                    </div>
-                                    :
-                                    <div className="theme-pinned-box">
-                                        <div>{pinnedSticky && pinnedSticky.theme.themeTag}</div>
-                                        <div className="text-pre">
-                                            {pinnedSticky && pinnedSticky.theme.themeDesc}
-                                        </div>
-                                    </div>
-                            }
-                        </div>
-                        <IonItem lines="none">
-                            <IonLabel>
-                                <div className="head-themes">
-                                    <div>Roles</div>
-                                    <div>.</div>
-                                    <div>{roles&&roles.length}</div>
-                                </div>
-                            </IonLabel>
-                            <IonIcon src={addCircleOutline} className="theme-icon" color="medium" slot="end" onClick={() => {
-                                setRoleInfo(null)
-                                setShowRoleModal(true)
-                            }} size="small"/>
-                        </IonItem>
+                <IonContent >
+                    {
+                        tribeInfo && (!tribeInfo.forked  || tribeInfo.forked.length  == 0)  && <div style={{height: (utils.isIos()) ?"48px": "12px"}}></div>
+                    }
+                    <div style={{height: !showThemes?"0":"100%" }}>
+                        <ThemesItems onClickTheme={onClickTheme} groupMsg={groupMsg}  onClose={()=>{
+                            setShowThemes(false)
+                        }}/>
                     </div>
-                    <div className="role-list-content">
-                        <div className="theme-roles-box">
-                            {
-                                roles && roles.map((v, i) => {
-                                    return <IonItem
-                                        lines={i == 0 ? "full" : "none"}
-                                        style={{borderRadius: (i == 0) ? "12px 12px 0 0" : i == roles.length - 1 ? "0 0 12px 12px" : ""}}
-                                        color="tertiary" key={i} onClick={(e) => {
-                                        e.persist();
-                                        onRoleCheck(v)
-                                    }}>
-                                        <IonAvatar slot="start" className="ion-avatar2">
-                                            <img src={utils.getDisPlayUrl(v.avatar)}/>
-                                        </IonAvatar>
-                                        <IonLabel>
-                                            <b style={{fontSize: '12px',color: defaultRole && v.id == defaultRole.id?'':'#868990'}}>{v.name}</b>
-                                            {/*<p><IonText color="medium">{v.desc}</IonText></p>*/}
-                                        </IonLabel>
-                                        {
-                                            defaultRole && v.id == defaultRole.id && <IonIcon slot="end" src={personOutline} size="small"/>
-                                        }
-                                        {
-                                            (i > 0 ) &&
-                                            <IonIcon size="small" slot="end" src={createOutline} color="medium"
-                                                     onClick={(e) => {
-                                                         e.stopPropagation();
-                                                         setRoleInfo(v);
-                                                         setShowRoleModal(true)
-                                                     }}/>
-                                        }
-                                    </IonItem>
-                                })
-                            }
+
+                    <div className="role-list-box"  style={{height: !showThemes?"100%":"0px"}}>
+                        <div style={{display: "flex", flexDirection: 'column'}}>
+                            <IonItem lines="none">
+                                <IonLabel slot="start">
+                                    <div className="head-themes">
+                                        <div>Pins</div>
+                                        <div>.</div>
+                                        <div>{(groupMsg ?groupMsg.length : 0)}</div>
+                                    </div>
+                                </IonLabel>
+                                <IonIcon src={layersOutline} className="theme-icon" color="medium" slot="end" onClick={() => {
+                                    setShowThemes(true)
+                                }} size="small"/>
+                                {/*<IonIcon src={addCircleOutline} className="theme-icon" color="medium" slot="end" onClick={() => {*/}
+                                {/*    setShowTribeModal(true)*/}
+                                {/*}} size="small"/>*/}
+                            </IonItem>
+
+                            <div style={{height: 160, padding: "0 20px", position: "relative"}}>
+                                <ThemeItem
+                                    theme={isModal && tribeInfo ?tribeInfo.theme: pinnedSticky && pinnedSticky.groupId?pinnedSticky.theme:tribeInfo&&tribeInfo.theme}
+                                    roles={pinnedSticky && pinnedSticky.groupId?pinnedSticky.roles:roles}
+                                    seq={pinnedSticky&&pinnedSticky.groupId ?pinnedSticky.seq:0}
+                                />
+                            </div>
+                            <div style={{padding: "0 12px"}}>
+                                {
+                                    isModal|| pinnedSticky && !pinnedSticky.groupId ? <div className="theme-pinned-box">
+                                            <div>{tribeInfo && tribeInfo.theme.themeTag}</div>
+                                            <div  className="text-pre">
+                                                {tribeInfo && tribeInfo.theme.themeDesc}
+                                            </div>
+                                        </div>
+                                        :
+                                        <div className="theme-pinned-box">
+                                            <div>{pinnedSticky && pinnedSticky.theme.themeTag}</div>
+                                            <div className="text-pre">
+                                                {pinnedSticky && pinnedSticky.theme.themeDesc}
+                                            </div>
+                                        </div>
+                                }
+                            </div>
+                            <IonItem lines="none">
+                                <IonLabel>
+                                    <div className="head-themes">
+                                        <div>Roles</div>
+                                        <div>.</div>
+                                        <div>{roles&&roles.length}</div>
+                                    </div>
+                                </IonLabel>
+                                <IonIcon src={addCircleOutline} className="theme-icon" color="medium" slot="end" onClick={() => {
+                                    setRoleInfo(null)
+                                    setShowRoleModal(true)
+                                }} size="small"/>
+                            </IonItem>
                         </div>
-                        <RoleEditModal isOpen={showRoleModal} onClose={() => setShowRoleModal(false)} onOk={(tribeRole) => {
-                            setShowRoleModal(false)
-                        }} roleInfo={roleInfo}/>
+                        <div className="role-list-content">
+                            <div className="theme-roles-box">
+                                {
+                                    roles && roles.map((v, i) => {
+                                        return <IonItem
+                                            lines={i == 0 ? "full" : "none"}
+                                            style={{borderRadius: (i == 0) ? "12px 12px 0 0" : i == roles.length - 1 ? "0 0 12px 12px" : ""}}
+                                            color="tertiary" key={i} onClick={(e) => {
+                                            e.persist();
+                                            onRoleCheck(v)
+                                        }}>
+                                            <IonAvatar slot="start" className="ion-avatar2">
+                                                <img src={utils.getDisPlayUrl(v.avatar)}/>
+                                            </IonAvatar>
+                                            <IonLabel>
+                                                <b style={{fontSize: '12px',color: defaultRole && v.id == defaultRole.id?'':'#868990'}}>{v.name}</b>
+                                                {/*<p><IonText color="medium">{v.desc}</IonText></p>*/}
+                                            </IonLabel>
+                                            {
+                                                defaultRole && v.id == defaultRole.id && <IonIcon slot="end" src={personOutline} size="small"/>
+                                            }
+                                            {
+                                                (i > 0 ) &&
+                                                <IonIcon size="small" slot="end" src={createOutline} color="medium"
+                                                         onClick={(e) => {
+                                                             e.stopPropagation();
+                                                             setRoleInfo(v);
+                                                             setShowRoleModal(true)
+                                                         }}/>
+                                            }
+                                        </IonItem>
+                                    })
+                                }
+                            </div>
+                            <RoleEditModal isOpen={showRoleModal} onClose={() => setShowRoleModal(false)} onOk={(tribeRole) => {
+                                setShowRoleModal(false)
+                            }} roleInfo={roleInfo}/>
+                        </div>
+                        <IonLoading
+                            cssClass='my-custom-class'
+                            isOpen={showLoading}
+                            onDidDismiss={() => setShowLoading(false)}
+                            message={'Please wait...'}
+                            duration={50000}
+                        />
                     </div>
-                    <IonLoading
-                        cssClass='my-custom-class'
-                        isOpen={showLoading}
-                        onDidDismiss={() => setShowLoading(false)}
-                        message={'Please wait...'}
-                        duration={50000}
-                    />
-                </div>
-            </IonContent>
+                </IonContent>
+            </IonPage>
     </>
 }
 

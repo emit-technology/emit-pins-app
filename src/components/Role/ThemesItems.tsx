@@ -40,7 +40,7 @@ const ThemesItemsChild:React.FC<Props> = ({groupMsg,onClickTheme,onClose}) =>{
                     {
                         groupMsg && groupMsg.map((v, i) => {
                             const seq = i == groupMsg.length -1 ?0:(i+1);
-                            return <div key={i} onClick={()=>{
+                            return <div style={{padding: '8px 12px', height: 160 ,position: "relative"}}  key={i} onClick={()=>{
                                 onClickTheme(v.groupId)
                             }}>
                                 <ThemeItem theme={v.theme} roles={v.roles} seq={seq} />
