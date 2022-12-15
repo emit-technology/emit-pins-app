@@ -12,7 +12,7 @@ export const AccountInfo:React.FC<Props> = ({isOpen, onClose,onOk})=>{
     return <>
         <IonModal isOpen={isOpen} className="role-select-list" onDidDismiss={() => {
             onClose()
-        }}>
+        }} swipeToClose>
             <IonHeader collapse="fade">
                 <IonToolbar>
                     <IonTitle>Create Account</IonTitle>

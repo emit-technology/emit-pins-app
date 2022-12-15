@@ -202,6 +202,8 @@ export const utils = {
 
     },
 
+    isApp: ():boolean => utils.isIos()||utils.isAndroid(),
+
     isSafari: (): boolean => {
         return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     },

@@ -281,7 +281,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 return total
             });
             setFirstItemIndex(reqIndex)
-            console.log("------> firstItemIndex: [%d], scroll to=[%d]", reqIndex,firstIndex - reqIndex, comp.length > 0 && comp[0])
+            console.log("------> firstItemIndex: [%d], scroll to=[%d]", reqIndex,firstIndex, comp.length > 0 && comp[0])
 
             setImmediate(()=>{
                 if (toBottom) {
@@ -289,7 +289,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                     // setTimeout(()=>{
                     // }, 100)
                 } else {
-                    scrollToItem({index: firstIndex - reqIndex, align: "start"});
+                    scrollToItem({index: firstIndex + reqIndex, align: "start"});
                 }
 
             })
@@ -576,7 +576,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                     }
 
                 }
-                console.log("=========> commentsCopy>>>", commentsCopy, nextComments, append, visibleRange.endIndex , total);
+                // console.log("=========> commentsCopy>>>", commentsCopy, nextComments, append, visibleRange.endIndex , total);
                 const _cIndex = commentsCopy.findIndex(v => v.records[0].groupId == "");
                 if (commentsCopy.length == 0 || _cIndex >= 0 || append || visibleRange.endIndex == total - 1) {
                     const comp = [...commentsCopy, ...nextComments];
@@ -831,7 +831,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
             />
 
             {
-                comments.length - 1 > currentVisibleStopIndex && !showPin &&
+                comments.length - 1 > currentVisibleStopIndex && !showPin && !isScrolling &&
                 <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{
                     bottom: !pinnedStickies ? '145px' : "100px",
                     right: !pinnedStickies ? "" : "35px",
@@ -903,7 +903,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                      onClose={() => setShowShareModal(false)}
                      tribeInfo={tribeInfo} latestMsg={shareMsgs} roles={shareRoles as Array<TribeRole>} owner={owner}/>
 
-            <IonModal isOpen={!!showModifyMsg} className="role-select-list" onDidDismiss={() => setShowModifyMsg(null)}>
+            <IonModal isOpen={!!showModifyMsg} className="role-select-list" onDidDismiss={() => setShowModifyMsg(null)} swipeToClose>
                 <IonHeader collapse="fade">
                     <IonToolbar>
                         <IonTitle>Update messages</IonTitle>

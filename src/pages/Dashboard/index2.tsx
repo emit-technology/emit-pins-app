@@ -795,14 +795,19 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
         }
 
        <div style={{height: 0}}>
+           {/*{*/}
+           {/*    roles && roles.length > 0 && roles.map(role=>{*/}
+           {/*        return <img src={utils.getDisPlayUrl((role as TribeRole).avatar)}/>*/}
+           {/*    })*/}
+           {/*}*/}
            {
-               roles && roles.length > 0 && roles.map(role=>{
-                   return <img src={utils.getDisPlayUrl((role as TribeRole).avatar)}/>
-               })
-           }
-           {
-              groupMsgs && groupMsgs.length > 0 && groupMsgs.map(gMsg =>{
-                  return <img src={utils.getDisPlayUrl((gMsg as GroupMsg).theme.image)}/>
+              groupMsgs && groupMsgs.length > 0 && groupMsgs.map((gMsg: GroupMsg) =>{
+                  return <>
+                    <img src={utils.getDisPlayUrl(gMsg.theme.image)}/>
+                    {/*{gMsg.roles && gMsg.roles.length>0 && gMsg.roles.map(role=>{*/}
+                    {/*    return <img src={utils.getDisPlayUrl((role as TribeRole).avatar)}/>;*/}
+                    {/*})}*/}
+                  </>
               })
            }
        </div>

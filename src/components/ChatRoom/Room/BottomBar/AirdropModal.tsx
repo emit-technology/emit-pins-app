@@ -99,7 +99,7 @@ export const AirdropModal: React.FC<Props> = ({onOk, actor, onClose, isOpen,owne
         setShowBalance(false);
     }
     return <>
-        <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal">
+        <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal" swipeToClose>
             <IonHeader>
                 <IonToolbar color="primary">
                     <IonTitle>Airdrop</IonTitle>

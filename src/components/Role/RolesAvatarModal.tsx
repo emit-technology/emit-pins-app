@@ -28,7 +28,7 @@ export const RolesAvatarModal: React.FC<Props> = ({roles,isOpen,onClose, default
     }, [roles])
 
     return <>
-        <IonModal isOpen={isOpen} className="role-avatar-modal" onDidDismiss={() => onClose()}>
+        <IonModal isOpen={isOpen} className="role-avatar-modal" onDidDismiss={() => onClose()}  swipeToClose>
             <IonToolbar>
                 <IonTitle>Select a role to actor</IonTitle>
                 <IonButtons slot="end">

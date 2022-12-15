@@ -35,7 +35,7 @@ export const RolesPopover: React.FC<Props> = ({roles,isOpen,onClose, defaultRole
     }, [roles])
 
     return <>
-        <IonModal isOpen={isOpen} className="role-select-list" onDidDismiss={() => onClose()}>
+        <IonModal isOpen={isOpen} className="role-select-list" onDidDismiss={() => onClose()} swipeToClose>
             <IonHeader collapse="fade">
                 <IonToolbar>
                     <IonTitle>Select Role</IonTitle>

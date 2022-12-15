@@ -232,7 +232,7 @@ export class HomePage extends React.Component<Props, State> {
                         {/*<IonPopover trigger="hover-trigger" triggerAction="click">*/}
                         {/*        <IonSearchbar placeholder="Input keyword"/>*/}
                         {/*</IonPopover>*/}
-                        {/*<IonModal trigger="open-custom-dialog" className="searchbar-modal">*/}
+                        {/*<IonModal trigger="open-custom-dialog" className="searchbar-modal" swipeToClose>*/}
                         {/*    <IonSearchbar showClearButton="focus" id="search-input" placeholder="Input keyword"*/}
                         {/*                  onIonChange={(e) => {*/}
                         {/*                      this.searchText(e.detail.value)*/}

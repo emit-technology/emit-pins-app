@@ -255,7 +255,7 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
 
     return <>
         {/*//initialBreakpoint={0.4} breakpoints={[0, 0.4, 0.6]}*/}
-        <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-share-modal">
+        <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-share-modal" swipeToClose>
             <IonToolbar>
                 <IonButtons slot="end">
                     <IonButton disabled={genning} onClick={() => sharePng().catch(e=>console.error(e))}><IonIcon src={shareOutline}/> Share</IonButton>
@@ -357,7 +357,7 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
 
 
         <IonModal isOpen={showButtons} initialBreakpoint={0.4} breakpoints={[0, 0.4, 0.6]}
-                  onDidDismiss={() => setShowButtons(false)}>
+                  onDidDismiss={() => setShowButtons(false)} swipeToClose>
             <IonContent className="ion-padding">
                 <div className="share-tbs">
                     <div>

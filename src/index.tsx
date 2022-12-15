@@ -74,6 +74,8 @@ AppPlugin.addListener("appUrlOpen", (appUrlOpen) => {
 })
 
 if (utils.isIos() || utils.isAndroid()) {
+
+
     if (utils.isIos()) {
         setStatusBarStyleLight();
     } else {

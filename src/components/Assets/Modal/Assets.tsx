@@ -77,7 +77,7 @@ export const AssetsModal:React.FC<Props> = ({isOpen,router ,address, onClose}) =
     return <>
         <IonModal isOpen={isOpen}
                   presentingElement={router || undefined}
-              onDidDismiss={() => onClose()} className="assets-modal">
+              onDidDismiss={() => onClose()} className="assets-modal" swipeToClose>
             <IonHeader collapse="fade">
                 <IonToolbar>
                     <IonTitle>EMIT Assets</IonTitle>

@@ -8,6 +8,7 @@ import {
 } from "@ionic/react";
 import {ThemeItem} from "./ThemeItem";
 import {arrowBackOutline, chevronBackOutline} from "ionicons/icons";
+import {utils} from "../../common";
 
 interface Props{
     groupMsg: Array<GroupMsg>;
@@ -28,11 +29,13 @@ const ThemesItemsChild:React.FC<Props> = ({groupMsg,onClickTheme,onClose}) =>{
                             <div>{groupMsg && groupMsg.length}</div>
                         </div>
                     </IonLabel>
-                    <div slot="end">
-                        <IonButton expand="block" onClick={()=>{
-                            onClose();
-                        }}><IonIcon src={arrowBackOutline}/></IonButton>
-                    </div>
+                    {
+                        !utils.isApp() &&  <div slot="end">
+                            <IonButton expand="block" onClick={()=>{
+                                onClose();
+                            }}><IonIcon src={arrowBackOutline}/></IonButton>
+                        </div>
+                    }
                 </IonItem>
             </div>
             <div className="role-list-content2">

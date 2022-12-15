@@ -179,7 +179,7 @@ export const CreateModal: React.FC<Props> = ({isOpen, onOk, onClose}) => {
         <IonModal isOpen={isOpenCreate} className="role-select-list" onDidDismiss={() => {
             setIsOpenCreate(false)
             onClose();
-        }}>
+        }} swipeToClose>
             <IonHeader collapse="fade">
                 <IonToolbar>
                     <IonButtons slot="start">
@@ -278,7 +278,7 @@ export const CreateModal: React.FC<Props> = ({isOpen, onOk, onClose}) => {
 
         <IonModal isOpen={isOpenImport} className="role-select-list" onDidDismiss={() => {
             setIsOpenImport(false);
-        }}>
+        }} swipeToClose>
             <IonHeader collapse="fade">
                 <IonToolbar>
                     <IonButtons slot="start">

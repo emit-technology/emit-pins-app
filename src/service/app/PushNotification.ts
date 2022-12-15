@@ -1,4 +1,4 @@
-import { PushNotifications } from '@capacitor/push-notifications';
+import {ActionPerformed, PushNotificationActionPerformed, PushNotifications} from '@capacitor/push-notifications';
 import selfStorage from "../../common/storage";
 import {tribeService} from "../tribe";
 import {Device} from "@capacitor/device";
@@ -35,6 +35,14 @@ export const addListeners = async () => {
         selfStorage.setItem("pushTokenErr", err.error)
     });
 
+    await PushNotifications.addListener('pushNotificationActionPerformed', (actionPerformed: ActionPerformed) => {
+            console.log('Push action performed: ' + JSON.stringify(actionPerformed));
+            if(actionPerformed && actionPerformed.notification.data){
+                const tribeId = actionPerformed.notification.data["tribeId"];
+                utils.goTo(tribeId);
+            }
+        })
+
     await PushNotifications.addListener('pushNotificationReceived', notification => {
         if(utils.isAndroid()){
             Toast.show({
@@ -42,6 +50,12 @@ export const addListeners = async () => {
                 position: "top",
                 duration: "long"
             });
+        }
+        if(utils.isIos()){
+            if(notification && notification.data && notification.data["tribeId"]){
+                const tribeId = notification.data["tribeId"];
+                utils.goTo(tribeId);
+            }
         }
         console.log('Push notification received: ', notification);
     });
