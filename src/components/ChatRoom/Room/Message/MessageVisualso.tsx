@@ -81,7 +81,7 @@ function setCurrentVisible(visibleStartId: number) {
 
 const getCurrentVisible = (): number => {
     const id = selfStorage.getItem(currentMsgIndexKey());
-    return !id && id !== 0  ? -1 : id;
+    return !id && id !== 0 ? -1 : id;
 }
 
 function combile(comp: Array<PinnedSticky>, keeper: string): Array<PinnedSticky> {
@@ -133,7 +133,7 @@ function combile(comp: Array<PinnedSticky>, keeper: string): Array<PinnedSticky>
 // let lastVisible:{startIndex:number,endIndex} = {startIndex: 0, endIndex: 0}; //0; //init -1 up, 1 down;
 
 export const MessageContentVisualsoChild: React.FC<Props> = ({
-                                                                  onFork,
+                                                                 onFork,
                                                                  shareMsgId, userLimit,
                                                                  selectRole, pinnedStickies,
                                                                  loaded, onReload, showPinnedMsgDetail,
@@ -533,11 +533,11 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 if (!dataObj["msg"]) {
                     setReplayMsg(null)
                 }
-            } else if (dispatchData.tag == 'setFirstIndex' && dispatchData.data){
+            } else if (dispatchData.tag == 'setFirstIndex' && dispatchData.data) {
                 let dataObj = dispatchData.data;
                 if (dataObj["firstIndex"] > -1) {
                     const firstIndex = dataObj["firstIndex"];
-                    fetchMsgByIndex(firstIndex,false).catch(e=>console.error(e));
+                    fetchMsgByIndex(firstIndex, false).catch(e => console.error(e));
                 }
             }
         }
@@ -617,21 +617,21 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     //     }))
     // },[isScrollUp])
 
-    useEffect(()=>{
+    useEffect(() => {
         dispatch(saveMessageState({
             data: {isScrollDown: isScrollDown},
             tag: 'isScrollDown'
         }))
-    },[isScrollDown])
+    }, [isScrollDown])
 
-    useEffect(()=>{
+    useEffect(() => {
         document.addEventListener('ionBackButton', (ev) => {
             console.log("===> ionBackButton", ev)
             ev.detail.register(10, () => {
                 console.log('Handler was called!');
             });
         });
-    },[])
+    }, [])
 
     // const Loading = () => <div style={{width: '100%', textAlign: 'center', padding: 12}}>⏳ Loading...</div>;
 
@@ -646,7 +646,9 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     const bottomChange = useCallback((bottom) => {
         console.log("at bottom", bottom, isScrolling)
         if (bottom !== atBottom) {
-            // setAtBottom(bottom);
+            setTimeout(() => {
+                setAtBottom(bottom);
+            }, 50)
         }
     }, [setAtBottom])
 
@@ -685,7 +687,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                             index: -1
                         });
                     }
-                }else{
+                } else {
                     if (!!itemStart) {
                         dispatchThemeFn(itemStart)
                     }
@@ -706,8 +708,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     }, [visibleRange])
 
 
-
-    useEffect(()=>{
+    useEffect(() => {
         const gesture: Gesture = createGesture({
             el: document.querySelector('.rectangle-content'),
             threshold: 100,
@@ -715,13 +716,13 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
             disableScroll: true,
             gestureName: 'my-gesture',
             onMove: ev => {
-                if(ev.startX < ev.currentX){
+                if (ev.startX < ev.currentX) {
                     window.location.href = "./"
                 }
             }
         });
         gesture.enable();
-    },[])
+    }, [])
 
     return <>
 
@@ -738,7 +739,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                         ref={virtuoso}
                         style={{height: '100%'}}
                         overscan={0}
-                        atTopThreshold={200}
+                        // atTopThreshold={200}
                         // increaseViewportBy={{top: -20, bottom: 0}}
                         isScrolling={setIsScrolling}
                         firstItemIndex={firstItemIndex}
@@ -762,8 +763,8 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                         //     },
                         //     change: (_velocity, { startIndex, endIndex }) => {}
                         // }}
-                        // followOutput={atBottom && (total > 0 && visibleRange.startIndex > total - pageSize) && followOutput}
-                        // atBottomStateChange={(total > 0 && visibleRange.endIndex >= total - 2) && bottomChange}
+                        followOutput={atBottom && (total > 0 && visibleRange.startIndex > total - pageSize) && followOutput}
+                        atBottomStateChange={(total > 0 && visibleRange.endIndex >= total - 1) && bottomChange}
                         // initialTopMostItemIndex={getCurrentVisible()}
                         // itemSize={(el, field) => {
                         //     return el.getBoundingClientRect().height;
@@ -773,18 +774,18 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                                 atBottom={atBottom} firstItemIndex={firstItemIndex}
                                                 checkedMsgArr={checkedMsgArr} showPin={showPin} owner={owner}
                                                 checkedMsgId={checkedMsgId} pinnedStickies={pinnedStickies}
-                                                onSupport={(msgId, f)=>{
-                                                    if((!(
-                                                            data as PinnedSticky).records[0].Supporters || (data as PinnedSticky).records[0].Supporters.length == 0
+                                                onSupport={(msgId, f) => {
+                                                    if ((!(
+                                                                data as PinnedSticky).records[0].Supporters || (data as PinnedSticky).records[0].Supporters.length == 0
                                                         )
                                                         ||
                                                         (
                                                             !!(data as PinnedSticky).records[0].Supporters
-                                                            && (data as PinnedSticky).records[0].Supporters.length>0
+                                                            && (data as PinnedSticky).records[0].Supporters.length > 0
                                                             && (data as PinnedSticky).records[0].Supporters.indexOf(owner) == -1
                                                         )
-                                                    ){
-                                                        onSupport(msgId,f)
+                                                    ) {
+                                                        onSupport(msgId, f)
                                                     }
                                                 }} onFork={onFork} tribeInfo={tribeInfo}
                                                 onShare={onShare} stickyMsg={stickyMsg} userLimit={userLimit}
@@ -793,7 +794,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                                     setCheckedMsgId(data.records[0].id)
                                                     dispatchThemeFn(data);
                                                 }}
-                                                setCheckedMsgId={(msgId)=>{
+                                                setCheckedMsgId={(msgId) => {
                                                     dispatchThemeFn(data);
                                                     setCheckedMsgId(msgId)
                                                 }}

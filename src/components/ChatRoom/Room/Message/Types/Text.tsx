@@ -49,11 +49,8 @@ export const Text: React.FC<Props> = ({
         }
     }}>
         <div className="support-display">
-            <img src={isSupported ? './assets/img/support2.png' : './assets/img/support.png'} width={16}
-                 height={16}/><small style={{
-            fontWeight: 700
-        }}>
-            &nbsp;<IonText color={isSupported ? "primary" : ""}>{msg.support}</IonText></small>
+            <img src={isSupported ? './assets/img/support2.png' : './assets/img/support.png'} width={16} height={16} style={{verticalAlign: "middle"}}/>
+                 <small style={{ fontWeight: 700, color: "#000" }}>&nbsp;{msg.support}</small>
         </div>
     </div>
 
@@ -111,11 +108,9 @@ export const Text: React.FC<Props> = ({
                         paddingBottom: '3px',
                         minHeight: replayCtn && replayCtn.image && replayCtn.image.url ? '46px' : '20px'
                     }}>
-                        <b>
-                            <IonText color="dark">
-                                {msg.replayMsg.actor ? msg.replayMsg.actor.name : "Narrator"}
-                            </IonText>
-                        </b>
+                        <div style={{color: "#000"}}>
+                            {msg.replayMsg.actor ? msg.replayMsg.actor.name : "Narrator"}
+                        </div>
                         {
                             replayCtn.image && replayCtn.image.url &&
                             <div><IonIcon color="dark" src={imageOutline}/></div>
@@ -204,28 +199,23 @@ export const Text: React.FC<Props> = ({
             ) ?(
                 msg && msg.role ?
                     <>
-                        <div className={!hideTime ? "avatar" : ""} style={!!hideTime ?{width: 63}:{}}>
-                            {
-                                !hideTime && msg && msg.actor && !!msg.actor.avatar ?
-                                    <IonAvatar className="ion-avatar">
-                                        <img src={utils.getDisPlayUrl(msg.actor && msg.actor.avatar)} width={30}/>
-                                    </IonAvatar> : <div style={{width: '48px'}}></div>
-                            }
+                        <div className="avatar" >
+                            <div className="ion-avatar-pins">
+                                {
+                                    !hideTime && msg && msg.actor && !!msg.actor.avatar &&
+                                    <img src={utils.getDisPlayUrl(msg.actor && msg.actor.avatar)} width="100%" height="100%"/>
+                                }
+                            </div>
                         </div>
                         <div className="box-max-width">
                             {
-                                <div style={{
-                                    textAlign: isOwner ? "right" : "left",
-                                    padding: "0px",
-                                    width: "auto",
-                                    height: !hideTime ? "auto" : 0,
-                                    overflow: "hidden"
-                                }}>
-                                    <b style={{fontSize: '16px'}}>
-                                        {keeper && <><IonText>{msg.actor && msg.actor.name}</IonText>&nbsp;{
-                                            // msg.owner == keeper && !msg.groupId && <Keeper/>
-                                        }</>}</b> <span style={{fontSize: '11px'}}><IonText
-                                    color="medium">{utils.dateFormat(new Date(msg.timestamp * 1000))} </IonText></span>
+                                !hideTime && <div className={`message-avatar-name ${isOwner && "owner-an"}`}>
+                                    <div style={{fontSize: '16px', fontWeight: 700}}>
+                                        { keeper && msg.actor && msg.actor.name }
+                                    </div>
+                                    <div style={{fontSize: '11px', color: "#92949c",margin: "0 4px 0 4px"}}>
+                                        {utils.dateFormat(new Date(msg.timestamp * 1000))}
+                                    </div>
                                 </div>
                             }
 
@@ -295,14 +285,17 @@ export const Text: React.FC<Props> = ({
                     :
                     <div style={{width: '100%'}}>
                         {
-                            !hideTime ? <div>
-                                <span style={{fontSize: '11px'}}>
-                                    {keeper && msg.owner == keeper && !msg.groupId &&
-                                    <img src="/assets/img/keeper.png" height={14}
-                                         style={{transform: 'translateY(1px)'}}/>} <IonText
-                                    color="medium">{utils.dateFormat(new Date(msg.timestamp * 1000))}</IonText>
-                                </span>
-                            </div> : <div style={{height: "1px"}}></div>
+                            !hideTime && <div>
+                                <div style={{fontSize: '11px', display: "flex", alignItems:"center"}}>
+                                    {
+                                        keeper && msg.owner == keeper && !msg.groupId &&
+                                    <div>
+                                        <img src="/assets/img/keeper.png" height={14} style={{verticalAlign: "middle" }}/>
+                                    </div>
+                                    }
+                                    <div style={{color: "#92949c",marginLeft: 4}}>{utils.dateFormat(new Date(msg.timestamp * 1000))}</div>
+                                </div>
+                            </div>
                         }
                         <div className={`support-outer  ${hovered && 'support-outer-column'}`}>
                             <div className={isOwner ? 'no-role-div-owner' : "no-role-div"} style={{

@@ -165,17 +165,20 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
                                         <IonCol size="8">
                                             <div className="head-box">
                                                 <div>
-                                                    <div style={{height: 42, width: 42, borderRadius: 6}} onClick={() => {
+                                                    <div  className="head-reg" style={{ backgroundImage: (stickyMsg && stickyMsg.theme && stickyMsg.theme.image || tribeInfo && tribeInfo.theme) ?
+                                                            `url(${utils.getDisPlayUrl(stickyMsg && stickyMsg.groupId ? stickyMsg.theme.image : tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image))})`:""
+
+                                                    }} onClick={() => {
                                                         fetch().then(() => {
                                                             setShowTribeInfoModal(true)
                                                         }).catch(e => console.error(e))
                                                     }}>
-                                                        {
-                                                            (stickyMsg && stickyMsg.theme && stickyMsg.theme.image || tribeInfo && tribeInfo.theme)
-                                                            && <img width="100%" height="100%"
-                                                                    src={utils.getDisPlayUrl(stickyMsg && stickyMsg.groupId ? stickyMsg.theme.image : tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image))}
-                                                                    style={{borderRadius: 6, objectFit: 'cover'}}/>
-                                                        }
+                                                        {/*{*/}
+                                                        {/*    (stickyMsg && stickyMsg.theme && stickyMsg.theme.image || tribeInfo && tribeInfo.theme)*/}
+                                                        {/*    && <img className="head-reg" width="100%" height="100%"*/}
+                                                        {/*            src={utils.getDisPlayUrl(stickyMsg && stickyMsg.groupId ? stickyMsg.theme.image : tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image))}*/}
+                                                        {/*            style={{borderRadius: 6, objectFit: 'cover'}}/>*/}
+                                                        {/*}*/}
                                                     </div>
                                                     <div className="headxs" onClick={() => {
                                                         fetch().then(() => {

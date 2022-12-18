@@ -229,3 +229,41 @@
 .right-menu{
   --width: 340px;
 }
+
+.ion-avatar-pins{
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+
+}
+
+.ion-avatar-pins > img {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.head-reg {
+  height: 42px;
+  width: 42px;
+  border-radius: 6px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  -webkit-background-size: cover;
+  transition: background-image 1s ease-in-out;
+}
+
+.message-avatar-name {
+  text-align: left;
+  padding: 0px;
+  height: auto;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.owner-an {
+  justify-content: revert;
+  flex-direction: row-reverse;
+}

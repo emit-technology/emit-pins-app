@@ -58,8 +58,11 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
             if(!imgUrl || !(imgUrl as MsgTextImage).url){
                 return Promise.reject("Please upload the image! ")
             }
-            if(themeTag.indexOf("http://") > -1 || themeTag.indexOf("https:") > -1 ){
-                return Promise.reject("Can't set url in the tag !")
+            if(title && (title.indexOf("http://") > -1 || title.indexOf("https:") > -1) ) {
+                return Promise.reject("Can't set url in the name !")
+            }
+            if(themeTag && (themeTag.indexOf("http://") > -1 || themeTag.indexOf("https:") > -1) ){
+                return Promise.reject("Can't set url in the Note !")
             }
         }
         if (tribeInfo) {
@@ -77,7 +80,7 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                 })
                 tribeId = tribeInfo.tribeId;
             }else{
-                if(title.indexOf("http://") > -1 || title.indexOf("https:") > -1 ) {
+                if(title && (title.indexOf("http://") > -1 || title.indexOf("https:") > -1) ) {
                     return Promise.reject("Can't set url in the name !")
                 }
                 const tribeInfoCopy:TribeInfo = JSON.parse(JSON.stringify(tribeInfo));
@@ -124,7 +127,6 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
         }
     }
 
-    console.log(":::: render tribe edit modal::: ", isOpen);
     return <>
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal" swipeToClose>
             <IonHeader collapse="fade">

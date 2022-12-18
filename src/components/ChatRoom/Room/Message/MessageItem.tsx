@@ -80,7 +80,10 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                                                 stickyMsg,dispatchTheme, setCheckedMsgId,
                                                 onReplay,onEdit,setCheckedMsgArr,
                                                 onShare,userLimit,visibleRange}) => {
-    const preIndex = useMemo(()=>  index - firstItemIndex - 1, [index, firstItemIndex]);
+    // const preIndex = useMemo(()=>  {
+    //     // console.log("pre index memo :: ", index ,firstItemIndex , index - firstItemIndex - 1)
+    //     return index - firstItemIndex - 1
+    // }, [index, firstItemIndex]);
     //
     if (!!pinnedSticky) {
         return (
@@ -91,7 +94,7 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                 {/*<small>{pinnedSticky.records[0].msgIndex}</small>*/}
 
                 {
-                    firstItemIndex == 0 && preIndex == -1 && !pinnedStickies && <div style={{paddingTop: 20}}>
+                    firstItemIndex == 0 && index - firstItemIndex - 1 == -1 && !pinnedStickies && <div style={{paddingTop: 20}}>
                         <div className="strike">
                             <span>{!pinnedSticky.groupId ? "New Tape" : `#1`}</span>
                         </div>

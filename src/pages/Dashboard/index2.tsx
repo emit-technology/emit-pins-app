@@ -26,7 +26,7 @@ import {
     arrowBackOutline,
     close,
     colorPaletteOutline,
-    ellipsisVertical, heartCircleOutline,
+    ellipsisVertical, heartCircleOutline, linkOutline,
     listOutline,
     pinOutline,
     share
@@ -53,6 +53,7 @@ import {utils} from "../../common";
 import {CreateModal} from "../../components/Account/modal";
 import {RolesAvatarModal} from "../../components/Role/RolesAvatarModal";
 import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
+import copy from "copy-to-clipboard";
 
 interface Props {
     tribeId: string
@@ -346,6 +347,13 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                 }
             },
             {
+                text: 'Link', icon: linkOutline, handler: () => {
+                    console.log('Link clicked');
+                    copy(`${config.baseUrl}/${config.tribeId}`);
+                    presentToast({color:"primary", message: "Copied to clipboard!", duration: 2000}).catch(e=>console.error(e))
+                }
+            },
+            {
                 text: 'Cancel', icon: close, role: 'cancel', handler: () => {
                     console.log('Cancel clicked');
                 }
@@ -492,7 +500,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
     }, [latestRole, setLatestRole, setAlreadySelectRole, setShowRoleAvatar])
 
 
-    console.log("render parent...");
+    // console.log("render parent...");
 
     return <>
         {/*<IonRow style={{height: '100%'}}>*/}

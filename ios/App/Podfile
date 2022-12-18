@@ -16,7 +16,6 @@ def capacitor_pods
   pod 'CapacitorToast', :path => '../../node_modules/@capacitor/toast'
   pod 'CapacitorApp', :path => '../../node_modules/@capacitor/app'
   pod 'CapacitorHaptics', :path => '../../node_modules/@capacitor/haptics'
-  pod 'CapacitorKeyboard', :path => '../../node_modules/@capacitor/keyboard'
   pod 'CapacitorStatusBar', :path => '../../node_modules/@capacitor/status-bar'
 end
 
