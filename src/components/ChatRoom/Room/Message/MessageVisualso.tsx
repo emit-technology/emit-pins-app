@@ -81,7 +81,7 @@ function setCurrentVisible(visibleStartId: number) {
 
 const getCurrentVisible = (): number => {
     const id = selfStorage.getItem(currentMsgIndexKey());
-    return !id ? -1 : id;
+    return !id && id !== 0  ? -1 : id;
 }
 
 function combile(comp: Array<PinnedSticky>, keeper: string): Array<PinnedSticky> {
@@ -130,7 +130,7 @@ function combile(comp: Array<PinnedSticky>, keeper: string): Array<PinnedSticky>
     return ret;
 }
 
-let lastVisible:{startIndex:number,endIndex} = {startIndex: 0, endIndex: 0}; //0; //init -1 up, 1 down;
+// let lastVisible:{startIndex:number,endIndex} = {startIndex: 0, endIndex: 0}; //0; //init -1 up, 1 down;
 
 export const MessageContentVisualsoChild: React.FC<Props> = ({
                                                                   onFork,
@@ -646,7 +646,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     const bottomChange = useCallback((bottom) => {
         console.log("at bottom", bottom, isScrolling)
         if (bottom !== atBottom) {
-            // setTimeout(()=>setAtBottom(bottom), 100)
+            // setAtBottom(bottom);
         }
     }, [setAtBottom])
 
@@ -685,11 +685,13 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                             index: -1
                         });
                     }
+                }else{
+                    if (!!itemStart) {
+                        dispatchThemeFn(itemStart)
+                    }
                 }
                 setCurrentVisible(visibleRange.startIndex);
-                if (!!itemStart) {
-                    dispatchThemeFn(itemStart)
-                }
+
             }
 
             // dispatch hide bar
@@ -760,8 +762,8 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                         //     },
                         //     change: (_velocity, { startIndex, endIndex }) => {}
                         // }}
-                        followOutput={atBottom && (total > 0 && visibleRange.startIndex > total - pageSize) && followOutput}
-                        atBottomStateChange={(total > 0 && visibleRange.endIndex >= total - 2) && bottomChange}
+                        // followOutput={atBottom && (total > 0 && visibleRange.startIndex > total - pageSize) && followOutput}
+                        // atBottomStateChange={(total > 0 && visibleRange.endIndex >= total - 2) && bottomChange}
                         // initialTopMostItemIndex={getCurrentVisible()}
                         // itemSize={(el, field) => {
                         //     return el.getBoundingClientRect().height;
@@ -771,17 +773,30 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                                 atBottom={atBottom} firstItemIndex={firstItemIndex}
                                                 checkedMsgArr={checkedMsgArr} showPin={showPin} owner={owner}
                                                 checkedMsgId={checkedMsgId} pinnedStickies={pinnedStickies}
-                                                onSupport={onSupport} onFork={onFork} tribeInfo={tribeInfo}
+                                                onSupport={(msgId, f)=>{
+                                                    if((!(
+                                                            data as PinnedSticky).records[0].Supporters || (data as PinnedSticky).records[0].Supporters.length == 0
+                                                        )
+                                                        ||
+                                                        (
+                                                            !!(data as PinnedSticky).records[0].Supporters
+                                                            && (data as PinnedSticky).records[0].Supporters.length>0
+                                                            && (data as PinnedSticky).records[0].Supporters.indexOf(owner) == -1
+                                                        )
+                                                    ){
+                                                        onSupport(msgId,f)
+                                                    }
+                                                }} onFork={onFork} tribeInfo={tribeInfo}
                                                 onShare={onShare} stickyMsg={stickyMsg} userLimit={userLimit}
                                                 onEdit={(msg) => setShowModifyMsg(msg)} onReplay={onReplay}
                                                 dispatchTheme={(data) => {
                                                     setCheckedMsgId(data.records[0].id)
                                                     dispatchThemeFn(data);
                                                 }}
-                                                    setCheckedMsgId={(msgId)=>{
-                                                        dispatchThemeFn(data);
-                                    setCheckedMsgId(msgId)
-                                }}
+                                                setCheckedMsgId={(msgId)=>{
+                                                    dispatchThemeFn(data);
+                                                    setCheckedMsgId(msgId)
+                                                }}
                                                 visibleRange={visibleRange}
                                                 setCheckedMsgArr={(msgs) => setCheckedMsgArr(msgs)}
 

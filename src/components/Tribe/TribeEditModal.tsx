@@ -53,10 +53,10 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
         setShowLoading(false)
     },[tribeInfo])
 
-    const createTribe = useCallback(async (): Promise<string> => {
+    const createTribe = async (): Promise<string> => {
         if(!forkGroupId){
             if(!imgUrl || !(imgUrl as MsgTextImage).url){
-                return Promise.reject("Please upload the image!")
+                return Promise.reject("Please upload the image! ")
             }
             if(themeTag.indexOf("http://") > -1 || themeTag.indexOf("https:") > -1 ){
                 return Promise.reject("Can't set url in the tag !")
@@ -122,8 +122,9 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
             setShowLoading(false)
             return rest
         }
-    },[])
+    }
 
+    console.log(":::: render tribe edit modal::: ", isOpen);
     return <>
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal" swipeToClose>
             <IonHeader collapse="fade">

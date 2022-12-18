@@ -199,7 +199,7 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                         <IonButtons>
                             <IonButton onClick={() => {
                                 // setShowLoading(true)
-                                // console.log(pinnedSticky.showPin)
+                                console.log(pinnedSticky)
                                 onFork(pinnedSticky.groupId, {
                                     tribeId: config.tribeId,
                                     keeper: "",

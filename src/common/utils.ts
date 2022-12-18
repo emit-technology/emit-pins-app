@@ -7,6 +7,9 @@ import selfStorage from "./storage";
 const format = require('date-format');
 const BN = require("bn.js");
 
+
+const imageUrlObj:any = {};
+
 export const utils = {
     ellipsisStr: function (v: string, num?: number) {
         if (!v) return ""
@@ -228,14 +231,19 @@ export const utils = {
 
     toLocalImageUrl: async (url: string): Promise<any> => {
         if (!!url) {
+            if(!!imageUrlObj && imageUrlObj[url]){
+                return imageUrlObj[url];
+            }
             const rest = await fetch(url)
             const blob = await rest.blob();
             return new Promise(resolve => {
                 const reader = new FileReader();
-                reader.addEventListener("load", function () {
+                reader.addEventListener("load", ()=> {
+                    if(!!imageUrlObj){
+                        imageUrlObj[url] = reader.result as string;
+                    }
                     resolve(reader.result as string);
                 }, false);
-
                 reader.readAsDataURL(blob)
             })
             //@ts-ignore
