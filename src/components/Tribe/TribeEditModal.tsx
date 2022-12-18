@@ -14,7 +14,7 @@ import {
     IonLoading, useIonToast, IonInput, IonIcon
 } from '@ionic/react';
 import UploadImage from "../utils/UploadImage";
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {tribeService} from "../../service/tribe";
 import add from "../../img/add.png";
 import TextareaAutosize from "react-textarea-autosize";
@@ -53,12 +53,14 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
         setShowLoading(false)
     },[tribeInfo])
 
-    const createTribe = async (): Promise<string> => {
-        if(!imgUrl || !(imgUrl as MsgTextImage).url){
-            return Promise.reject("Please upload the image!")
-        }
-        if(themeTag.indexOf("http://") > -1 || themeTag.indexOf("https:") > -1 ){
-            return Promise.reject("Can't set url in the theme tag !")
+    const createTribe = useCallback(async (): Promise<string> => {
+        if(!forkGroupId){
+            if(!imgUrl || !(imgUrl as MsgTextImage).url){
+                return Promise.reject("Please upload the image!")
+            }
+            if(themeTag.indexOf("http://") > -1 || themeTag.indexOf("https:") > -1 ){
+                return Promise.reject("Can't set url in the tag !")
+            }
         }
         if (tribeInfo) {
             let tribeId:string ;
@@ -76,7 +78,7 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                 tribeId = tribeInfo.tribeId;
             }else{
                 if(title.indexOf("http://") > -1 || title.indexOf("https:") > -1 ) {
-                    return Promise.reject("Can't set url in the title !")
+                    return Promise.reject("Can't set url in the name !")
                 }
                 const tribeInfoCopy:TribeInfo = JSON.parse(JSON.stringify(tribeInfo));
                 tribeInfoCopy.theme = {
@@ -120,7 +122,8 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
             setShowLoading(false)
             return rest
         }
-    }
+    },[])
+
     return <>
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal" swipeToClose>
             <IonHeader collapse="fade">

@@ -2,15 +2,27 @@ import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useAppDispatch, useAppSelector} from "../../common/state/app/hooks";
 import {saveDataState} from '../../common/state/slice/dataSlice';
-import {IonIcon, IonItem, IonLabel, IonText, IonRow, IonCol} from "@ionic/react";
+import {
+    IonIcon,
+    IonItem,
+    IonLabel,
+    IonText,
+    IonRow,
+    IonCol,
+    IonToolbar,
+    IonButtons,
+    IonButton,
+    IonTitle, IonMenuToggle, IonHeader
+} from "@ionic/react";
 import {MessageStatus, PinnedSticky, TribeInfo, TribeRole, WsStatus} from "../../types";
 import tribeWorker from "../../worker/imWorker";
 import config from "../../common/config";
-import {chevronBackOutline, chevronForwardOutline} from "ionicons/icons";
+import {chevronBackOutline, chevronForwardOutline, ellipsisVertical, listOutline} from "ionicons/icons";
 import BigNumber from "bignumber.js";
 import {tribeService} from "../../service/tribe";
 import {TribeInfoModal} from "./TribeInfoModal";
 import {utils} from "../../common";
+import {saveMessageState} from "../../common/state/slice/messageSlice";
 
 interface Props {
     tribeInfo: TribeInfo;
@@ -20,20 +32,36 @@ interface Props {
 
     stickyMsg?: PinnedSticky
 
-    onChangeMsgIndex?: (msgIndex: number) => void;
+    showPin: boolean;
+    onCancelShowPin: () => void;
+
+    setShowActionSheet: (f: boolean) => void;
 }
 
-const TribeHeaderChild: React.FC<Props> = ({tribeInfo, onReladData, onChangeMsgIndex, stickyMsg, roles, wsStatus}) => {
+const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin, setShowActionSheet, onReladData,  roles, wsStatus}) => {
 
     const [showTribeInfoModal, setShowTribeInfoModal] = useState(false);
     const [stickies, setStickies] = useState({data: [], total: 0});
+    const [stickyMsg, setStickyMsg] = useState(null);
+
+    const [isUp, setIsUp] = useState(false);
+
+
+    const dispatchData = useAppSelector(state => state.jsonData);
+    const dispatch = useAppDispatch();
+
+    const dispatchMessage = useAppSelector(state => state.messageData);
 
     const onClickThemeBack = useCallback(() => {
-        if (stickyMsg && !!onChangeMsgIndex) {
+        if (stickyMsg) {
             const index = tribeService.groupIdCache().findIndex(v => v == stickyMsg.groupId)
             if (index > 0) {
                 tribeService.getMsgPositionWithGroupId(tribeService.groupIdCache()[index - 1]).then(postion => {
-                    onChangeMsgIndex(postion)
+                    // onChangeMsgIndex(postion)
+                    dispatch(saveDataState({
+                        data: {firstIndex: postion},
+                        tag: 'setFirstIndex'
+                    }))
                 })
             }
         }
@@ -41,11 +69,14 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, onReladData, onChangeMsgI
 
 
     const onClickThemeForward = useCallback(() => {
-        if (stickyMsg && !!onChangeMsgIndex) {
+        if (stickyMsg ) {
             const index = tribeService.groupIdCache().findIndex(v => v == stickyMsg.groupId)
             if (index < tribeService.groupIdCache().length - 1) {
                 tribeService.getMsgPositionWithGroupId(tribeService.groupIdCache()[index + 1]).then(postion => {
-                    onChangeMsgIndex(postion)
+                    dispatch(saveDataState({
+                        data: {firstIndex: postion},
+                        tag: 'setFirstIndex'
+                    }))
                 })
             }
         }
@@ -73,66 +104,127 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, onReladData, onChangeMsgI
             }
         }
     }
+
+    useEffect(() => {
+        if (dispatchData) {
+            if (dispatchData.tag == 'updateTheme2' && dispatchData.data) {
+                let dataObj: any = dispatchData.data;
+                if (dataObj.stickyMsgTop) {
+                    setStickyMsg(dataObj.stickyMsgTop)
+                    dispatch(saveDataState({
+                        data: {stickyMsg: dataObj.stickyMsg, stickyMsgTop: null},
+                        tag: 'updateTheme2'
+                    }))
+                }
+
+            }
+        }
+    }, [dispatchData.data]);
+
+
+    useEffect(() => {
+        if (dispatchMessage) {
+            if (dispatchMessage.tag == 'isScrollDown' && dispatchMessage.data) {
+                let dataObj: any = dispatchMessage.data;
+                setIsUp(dataObj.isScrollDown);
+                // if (dataObj.isScrolling) {
+                // dispatch(saveMessageState({data: {isScrolling:false  }, tag: 'isScrolling'}))
+                // }
+
+            }
+        }
+    }, [dispatchMessage.data]);
+
+
     return <>
+        {/* className={"display-animation"} style={{height: !isUp && utils.isApp()?"1px":"auto"}}*/}
         {
-            stickyMsg && <div className="head-item">
-                <div style={{cursor: "pointer", width: "100%"}}>
-                    <IonRow>
-                        <IonCol size="2">
-                            <div className="head-icons">
-                                {
-                                    stickyMsg && tribeService.groupIdCache().indexOf(stickyMsg.groupId) > 0
-                                    && <IonIcon src={chevronBackOutline} size="large" color="medium"
-                                                onClick={onClickThemeBack}/>
-                                }
-                            </div>
-                        </IonCol>
-                        <IonCol size="8">
-                            <div className="head-box">
-                                <div>
-                                    <div style={{height: 42, width: 42, borderRadius: 6}} onClick={() => {
-                                        fetch().then(() => {
-                                            setShowTribeInfoModal(true)
-                                        }).catch(e => console.error(e))
-                                    }}>
-                                        {
-                                            (stickyMsg && stickyMsg.theme.image || tribeInfo && tribeInfo.theme)
-                                            && <img width="100%" height="100%"
-                                                    src={utils.getDisPlayUrl(stickyMsg && stickyMsg.groupId ? stickyMsg.theme.image : tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image))}
-                                                    style={{borderRadius: 6, objectFit: 'cover'}}/>
-                                        }
-                                    </div>
-                                    <div className="headxs" onClick={() => {
-                                        fetch().then(() => {
-                                            setShowTribeInfoModal(true)
-                                        }).catch(e => console.error(e))
-                                    }}>
-                                        <div className="head-pin-title">{tribeInfo && tribeInfo.title}</div>
-                                        <div style={{overflow: "hidden"}} className="head-sub">
-                                    <span style={{fontSize: '11px',color:"#92949c"}}>
+          <IonHeader mode="ios" color="primary">
+                <IonToolbar className="msg-toolbar">
+                    <div className="msg-head-avatar">
+                        <div slot="start" id="main-content-left">
+                            <IonMenuToggle menu="start" autoHide={false}>
+                                <IonIcon src={listOutline} size="large"/>
+                            </IonMenuToggle>
+                        </div>
+                    </div>
+                    <IonTitle className="font-style-bold">
+                        {
+                            stickyMsg && <div className="head-item">
+                                <div style={{cursor: "pointer", width: "100%"}}>
+                                    <IonRow>
+                                        <IonCol size="2">
+                                            <div className="head-icons">
+                                                {
+                                                    stickyMsg && tribeService.groupIdCache().indexOf(stickyMsg.groupId) > 0
+                                                    && <IonIcon src={chevronBackOutline} size="large" color="medium"
+                                                                onClick={onClickThemeBack}/>
+                                                }
+                                            </div>
+                                        </IonCol>
+                                        <IonCol size="8">
+                                            <div className="head-box">
+                                                <div>
+                                                    <div style={{height: 42, width: 42, borderRadius: 6}} onClick={() => {
+                                                        fetch().then(() => {
+                                                            setShowTribeInfoModal(true)
+                                                        }).catch(e => console.error(e))
+                                                    }}>
+                                                        {
+                                                            (stickyMsg && stickyMsg.theme && stickyMsg.theme.image || tribeInfo && tribeInfo.theme)
+                                                            && <img width="100%" height="100%"
+                                                                    src={utils.getDisPlayUrl(stickyMsg && stickyMsg.groupId ? stickyMsg.theme.image : tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image))}
+                                                                    style={{borderRadius: 6, objectFit: 'cover'}}/>
+                                                        }
+                                                    </div>
+                                                    <div className="headxs" onClick={() => {
+                                                        fetch().then(() => {
+                                                            setShowTribeInfoModal(true)
+                                                        }).catch(e => console.error(e))
+                                                    }}>
+                                                        <div className="head-pin-title">{tribeInfo && tribeInfo.title}</div>
+                                                        <div style={{overflow: "hidden"}} className="head-sub">
+                                    <span style={{fontSize: '11px', color: "#92949c"}}>
                                     {
                                         (stickyMsg && stickyMsg.groupId ? `#${stickyMsg.seq} ${(stickyMsg as PinnedSticky).theme.themeTag}` : tribeInfo && tribeInfo.theme.themeTag)
                                     }
                                         </span>
-                                        </div>
-                                    </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </IonCol>
+                                        <IonCol size="2">
+                                            <div className="head-icons2">
+                                                {
+                                                    stickyMsg && tribeService.groupIdCache().indexOf(stickyMsg.groupId) < tribeService.groupIdCache().length - 1
+                                                    && <IonIcon src={chevronForwardOutline} size="large" color="medium"
+                                                                onClick={onClickThemeForward}/>
+                                                }
+                                            </div>
+                                        </IonCol>
+                                    </IonRow>
+
+
                                 </div>
                             </div>
-                        </IonCol>
-                        <IonCol size="2">
-                            <div className="head-icons2">
-                                {
-                                    stickyMsg && tribeService.groupIdCache().indexOf(stickyMsg.groupId) < tribeService.groupIdCache().length - 1
-                                    && <IonIcon src={chevronForwardOutline} size="large" color="medium"
-                                                onClick={onClickThemeForward}/>
-                                }
-                            </div>
-                        </IonCol>
-                    </IonRow>
-
-
-                </div>
-            </div>
+                        }
+                    </IonTitle>
+                    {
+                        showPin ? <IonButtons slot="end">
+                            <IonButton onClick={() => {
+                                onCancelShowPin()
+                            }}>
+                                Cancel
+                            </IonButton>
+                        </IonButtons> : <IonIcon src={ellipsisVertical} color="medium" size="large" slot="end"
+                                                 onClick={(e) => {
+                                                     e.persist();
+                                                     setShowActionSheet(true)
+                                                 }}/>
+                    }
+                </IonToolbar>
+            </IonHeader>
         }
 
         <TribeInfoModal onReladData={onReladData} isOpen={showTribeInfoModal} stickies={stickies}

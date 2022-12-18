@@ -33,15 +33,15 @@ if (!window.ResizeObserver)
 // Virtuoso's resize observer can this error,
 // which is caught by DnD and aborts dragging.
 window.addEventListener("error", (e) => {
-    console.log("stopImmediatePropagation", e)
-    // if (
-    //     e.message ===
-    //     "ResizeObserver loop completed with undelivered notifications." ||
-    //     e.message === "ResizeObserver loop limit exceeded"
-    // ) {
-    //     console.log("=====> stopImmediatePropagation")
-    // e.stopImmediatePropagation();
-    // }
+    // console.log("stopImmediatePropagation", e)
+    if (
+        e.message ===
+        "ResizeObserver loop completed with undelivered notifications." ||
+        e.message === "ResizeObserver loop limit exceeded"
+    ) {
+        // console.log("=====> stopImmediatePropagation")
+    e.stopImmediatePropagation();
+    }
 });
 
 if (rootElement.hasChildNodes()) {

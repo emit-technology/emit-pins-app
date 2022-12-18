@@ -14,6 +14,7 @@ import {
 import './message.scss';
 import {useAppDispatch, useAppSelector} from "../../../../common/state/app/hooks";
 import {saveDataState} from "../../../../common/state/slice/dataSlice";
+import {saveMessageState} from "../../../../common/state/slice/messageSlice";
 import {
     IonAvatar,
     IonButton,
@@ -30,12 +31,11 @@ import {
     IonRow,
     IonTextarea,
     IonTitle,
-    IonToolbar
+    IonToolbar, Gesture, createGesture
 } from '@ionic/react';
 import {
-    arrowForwardOutline, at,
+    arrowForwardOutline,
     createOutline,
-    gitBranchOutline,
 } from "ionicons/icons";
 import {tribeService} from "../../../../service/tribe";
 import UploadImage from "../../../utils/UploadImage";
@@ -47,20 +47,8 @@ import selfStorage from "../../../../common/storage";
 import {utils} from "../../../../common";
 import {ShareEx} from "../../../utils/ShareEx";
 import {ReplayText} from "./Types/ReplayText";
-import {StatusBar} from "@capacitor/status-bar";
-import {isApp} from "../../../../service/app";
 import {Virtuoso} from 'react-virtuoso'
-import {LoremIpsum} from "lorem-ipsum";
 import {MessageItem} from "./MessageItem";
-
-
-const lorem = new LoremIpsum({
-    wordsPerSentence: {
-        max: 32,
-        min: 4
-    }
-});
-
 
 interface Props {
     pinnedStickies?: { data: Array<PinnedSticky>, total: number }
@@ -71,32 +59,18 @@ interface Props {
     showPinnedMsgDetail?: (groupId: string) => void;
     onReload?: (loadOwnerOnly: boolean) => void;
     loaded?: boolean
-    groupMsg?: Array<GroupMsg>
     userLimit?: UserLimit
     selectRole?: TribeRole
     shareMsgId?: string
     onFork?: (groupId: string, forkTribeInfo: TribeInfo) => void;
 
-    setHideMenu?: (f: boolean) => void;
-
-    onChangeVisible?: (v: PinnedSticky) => void;
-
-    firstIndex: number
-
-    isConnecting?: WsStatus
-
     subscribed?: boolean;
-    onSubscribe?: (f:boolean)=>void;
+    onSubscribe?: (f: boolean) => void;
 
-    timestamp?: number
 }
 
 const pageSize = 50;
-let pageNo = 1;
 let count = 0;
-let shouldScroll = 0;
-let shouldScrollToBottom = false;
-let delaySaveCurrentVisibleIndex = 0;
 let loadCount = 0;
 
 const currentMsgIndexKey = () => `current_msg_v2_index_${config.tribeId}`;
@@ -105,35 +79,66 @@ function setCurrentVisible(visibleStartId: number) {
     selfStorage.setItem(currentMsgIndexKey(), visibleStartId)
 }
 
-let visibleStartId = 0;
-
-const setVisibleStartIndex = (id: number) => {
-    visibleStartId = id
-}
-
-const mutexify = require('mutexify/promise')
-const _lock = mutexify()
-
-const isAPP = false// utils.isSafari();
-
-let renderCount = 0;
-
 const getCurrentVisible = (): number => {
     const id = selfStorage.getItem(currentMsgIndexKey());
     return !id ? -1 : id;
 }
 
+function combile(comp: Array<PinnedSticky>, keeper: string): Array<PinnedSticky> {
+    if (!comp || comp.length == 0) {
+        return [];
+    }
+    const ret: Array<PinnedSticky> = [];
+    let msgIndex = comp[0].records[0].msgIndex;
+    let groupByTime: { role: string, timestamp: number, groupId: string, owner: string } = null;
+    let lastPin: PinnedSticky = null;
+    for (let i = 0; i < comp.length; i++) {
+        let pMsg = JSON.parse(JSON.stringify(comp[i]));
+        const nextMsg = i < comp.length ? comp[i + 1] : null
+        if ((pMsg as PinnedSticky).records && (pMsg as PinnedSticky).records[0]) {
+            const msg: Message = (pMsg as PinnedSticky).records[0];
+            if (msg.msgType !== MessageType.Role) {
+                msg.hideTime = !!groupByTime && groupByTime.role == msg.role && groupByTime.groupId == msg.groupId && (Math.floor(groupByTime.timestamp / 300) == Math.floor(msg.timestamp / 300));
+
+                if (groupByTime && keeper && (
+                    groupByTime.owner == keeper && msg.owner !== keeper ||
+                    groupByTime.owner !== keeper && msg.owner == keeper
+                )) {
+                    if (!msg.groupId) {
+                        msg.hideTime = false;
+                    }
+                }
+                groupByTime = {role: msg.role, timestamp: msg.timestamp, groupId: msg.groupId, owner: msg.owner};
+            } else {
+                msg.hideTime = false;
+                groupByTime = null;
+            }
+
+            msg.msgIndex = msgIndex++;
+        }
+
+        pMsg.showPin = {
+            // lastPin: JSON.parse(JSON.stringify(comp[i])),
+            showPin: lastPin && lastPin.groupId !== pMsg.groupId,
+            showFork: !nextMsg && !!pMsg.groupId || nextMsg && nextMsg.groupId !== pMsg.groupId
+        };
+        ret.push(pMsg)
+
+        lastPin = pMsg;
+    }
+
+    return ret;
+}
+
+let lastVisible:{startIndex:number,endIndex} = {startIndex: 0, endIndex: 0}; //0; //init -1 up, 1 down;
+
 export const MessageContentVisualsoChild: React.FC<Props> = ({
-                                                                 groupMsg
-                                                                 , isConnecting, firstIndex,
-                                                                 onChangeVisible,
-                                                                 setHideMenu, onFork,
+                                                                  onFork,
                                                                  shareMsgId, userLimit,
                                                                  selectRole, pinnedStickies,
                                                                  loaded, onReload, showPinnedMsgDetail,
                                                                  showPin, owner,
                                                                  tribeInfo, onSupport, subscribed, onSubscribe,
-                                                                 timestamp
                                                              }) => {
 
     const dispatchData = useAppSelector(state => state.jsonData);
@@ -155,10 +160,11 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     const [checkedMsgId, setCheckedMsgId] = useState("");
     // const [scrollEvent, setScrollEvent] = useState(null);
     const virtuoso = useRef(null);
-    const [loadingData, setLoadingData] = useState(false)
+    const [loadedData, setLoadedData] = useState(false)
 
     const [firstItemIndex, setFirstItemIndex] = useState(0)
     const [total, setTotal] = useState(0)
+    const [overscan, setOverscan] = useState(200)
 
     // useLayoutEffect(() => {
     //     const doc = document.querySelectorAll('[data-virtuoso-scroller=true]');
@@ -167,9 +173,9 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     //     }
     // }, [])
 
-    useEffect(() => {
-        fetchMsgByIndex(firstIndex).catch(e => console.error(e))
-    }, [firstIndex])
+    // useEffect(() => {
+    //     fetchMsgByIndex(firstIndex).catch(e => console.error(e))
+    // }, [firstIndex])
 
     useEffect(() => {
         if (!!shareMsgId) {
@@ -206,61 +212,22 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     //     }
     // }
 
-    const setCurrentTimeout = useCallback((f: boolean) => {
-        // console.log("visibleStartId == ", visibleStartId)
-        if (visibleStartId && delaySaveCurrentVisibleIndex++ == 0) {
-            setTimeout(() => {
-                setCurrentVisible(visibleStartId);
-                delaySaveCurrentVisibleIndex = 0;
-            }, 10)
-        }
-    },[setCurrentVisible])
-
-
-    const combile = useCallback((comp: Array<PinnedSticky>) => {
-        if (!comp || comp.length == 0) {
-            return;
-        }
-        let msgIndex = comp[0].records[0].msgIndex;
-        let groupByTime: { role: string, timestamp: number, groupId: string, owner: string } = null;
-        let lastPin: PinnedSticky = null;
-        for (let i = 0; i < comp.length; i++) {
-            let pMsg = comp[i];
-            const nextMsg = i < comp.length ? comp[i + 1] : null
-            if ((pMsg as PinnedSticky).records && (pMsg as PinnedSticky).records[0]) {
-                const msg: Message = (pMsg as PinnedSticky).records[0];
-                if (msg.msgType !== MessageType.Role) {
-                    msg.hideTime = !!groupByTime && groupByTime.role == msg.role && groupByTime.groupId == msg.groupId && (Math.floor(groupByTime.timestamp / 300) == Math.floor(msg.timestamp / 300));
-
-                    if (groupByTime && tribeInfo && (
-                        groupByTime.owner == tribeInfo.keeper && msg.owner !== tribeInfo.keeper ||
-                        groupByTime.owner !== tribeInfo.keeper && msg.owner == tribeInfo.keeper
-                    )) {
-                        if (!msg.groupId) {
-                            msg.hideTime = false;
-                        }
-                    }
-                    groupByTime = {role: msg.role, timestamp: msg.timestamp, groupId: msg.groupId, owner: msg.owner};
-                } else {
-                    msg.hideTime = false;
-                    groupByTime = null;
-                }
-
-                msg.msgIndex = msgIndex++;
-            }
-
-            pMsg.showPin = {
-                lastPin: pMsg,
-                showPin: lastPin && lastPin.groupId !== pMsg.groupId,
-                showFork: !nextMsg && !!pMsg.groupId || nextMsg && nextMsg.groupId !== pMsg.groupId
-            };
-
-            lastPin = pMsg;
-        }
-    },[])
-
+    // const setCurrentTimeout = useCallback((f: boolean) => {
+    //     // console.log("visibleStartId == ", visibleStartId)
+    //     if (visibleStartId && delaySaveCurrentVisibleIndex++ == 0) {
+    //         setTimeout(() => {
+    //             setCurrentVisible(visibleStartId);
+    //             const itemStart = comments[visibleStartId - firstItemIndex]
+    //             if(!!itemStart){
+    //                 setStickyMsg(itemStart)
+    //             }
+    //             delaySaveCurrentVisibleIndex = 0;
+    //         }, 1000)
+    //     }
+    // },[comments,firstItemIndex, setCurrentVisible, setStickyMsg])
 
     const fetchMsgByIndex = async (firstIndex: number, toBottom: boolean = false) => {
+        setOverscan(0);
         if (firstIndex > -1) {
             let reqIndex = firstIndex;
             let reqPageSize = pageSize;
@@ -272,24 +239,25 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 reqIndex = 0;
             }
             const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, reqIndex, reqPageSize);
-            const {total} = await tribeService.streamMsg(config.tribeId, 0 , 1);
+            const {total} = await tribeService.streamMsg(config.tribeId, 0, 1);
             const comp = rest.data;
             // console.log("======== comments: ", comments);
-            combile(comp);
-            setComments(comp)
+            // combile(comp);
+            setComments(combile(comp, tribeInfo && tribeInfo.keeper))
             setTotal(pre => {
                 return total
             });
             setFirstItemIndex(reqIndex)
-            console.log("------> firstItemIndex: [%d], scroll to=[%d]", reqIndex,firstIndex, comp.length > 0 && comp[0])
+            console.log("------> firstItemIndex: [%d], scroll to=[%d]", reqIndex, firstIndex, comp.length > 0 && comp[0])
 
-            setImmediate(()=>{
+            setImmediate(() => {
                 if (toBottom) {
                     scrollToItem({index: rest.total - 1, align: "end"});
                     // setTimeout(()=>{
                     // }, 100)
                 } else {
-                    scrollToItem({index: firstIndex + reqIndex, align: "start"});
+                    // scrollToItem({index: firstIndex + reqIndex, align: "start"});
+                    startItem(firstIndex - reqIndex)
                 }
 
             })
@@ -301,7 +269,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         const streamMsg1 = await tribeWorker.getPinnedMessageArray(config.tribeId, 0, 2);
         if (streamMsg1 && streamMsg1.total == 0) {
             const defaultThem = await tribeService.defaultTheme();
-            dispatchTheme(defaultThem)
+            setStickyMsg(defaultThem)
         } else {
             let latestId = getCurrentVisible();
             if (latestId == -1) {
@@ -310,18 +278,19 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
             if (latestId >= streamMsg1.total) {
                 latestId = streamMsg1.total - 1;
             }
-            console.log("=========initLatestPin >> start=[%d], end=[%d] ", latestId, pageSize);
-            const data = await tribeWorker.getPinnedMessageArray(config.tribeId, latestId, pageSize);
-            const comp = data.data;
-            combile(comp)
-            console.log("=========initLatestPin >> start=[%d], end=[%d], data=[%d] ", latestId, pageSize, data.data.length);
-            setComments(comp)
-            setTotal(pre => {
-                console.log("------> tribeWorker set total 5 ==  ", pre, data.total)
-                return data.total
-            });
-            console.log("------> firstItemIndex: [%d], initLatestPin", latestId)
-            setFirstItemIndex(latestId);
+            await fetchMsgByIndex(latestId, false)
+            // console.log("=========initLatestPin >> start=[%d], end=[%d] ", latestId, pageSize);
+            // const data = await tribeWorker.getPinnedMessageArray(config.tribeId, latestId, pageSize);
+            // const comp = data.data;
+            // combile(comp)
+            // console.log("=========initLatestPin >> start=[%d], end=[%d], data=[%d] ", latestId, pageSize, data.data.length);
+            // setComments(comp)
+            // setTotal(pre => {
+            //     console.log("------> tribeWorker set total 5 ==  ", pre, data.total)
+            //     return data.total
+            // });
+            // console.log("------> firstItemIndex: [%d], initLatestPin", latestId)
+            // setFirstItemIndex(latestId);
         }
     }
 
@@ -352,8 +321,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 setFirstItemIndex(nextFirstItemIndex >= 0 ? nextFirstItemIndex : 0)
                 setComments(pre => {
                     const comp = [...rest.data, ...pre];
-                    combile(comp);
-                    return comp
+                    return combile(comp, tribeInfo && tribeInfo.keeper)
                 })
             }).catch(() => {
                 // setLoadingData(false)
@@ -366,29 +334,12 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     const loadMore = useCallback((lastIndex: number) => {
         if (comments.length > 0 && comments.length < total && lastIndex > -1) {
             const lastMsg: PinnedSticky = comments[comments.length - 1];
-            console.log("=========loadMore >> start=[%d], total=[%d] ", lastMsg.records[0].msgIndex + 1, total );
+            console.log("=========loadMore >> start=[%d], total=[%d] ", lastMsg.records[0].msgIndex + 1, total);
             if (
                 (!!lastMsg && !!lastMsg.records && lastMsg.records[0].msgIndex > -1 && lastMsg.records[0].msgIndex < total - 1)
             ) {
                 tribeWorker.getPinnedMessageArray(config.tribeId, lastMsg.records[0].msgIndex + 1, pageSize).then(rest => {
                     setCommentsInner({total: rest.total, messages: rest.data}, true)
-                    // if (rest.data.length > 0) {
-                    //     console.log("=========loadMore >> start=[%d], end=[%d] , data=[%d] ", lastMsg.records[0].msgIndex + 1, pageSize, rest.data.length);
-                    //     new Promise(resolve => {
-                    //         setComments(pre => {
-                    //
-                    //             const comp = [...pre, ...rest.data]
-                    //             combile(comp);
-                    //             resolve(true)
-                    //             return comp
-                    //         })
-                    //     }).then(()=>{
-                    //         setTotal(pre => {
-                    //             console.log("=========loadMore >> set total 6 ==  ", pre, rest.total)
-                    //             return pre < rest.total ? rest.total : pre;
-                    //         });
-                    //     })
-                    // }
                 }).catch(e => console.error(e))
             }
         }
@@ -405,43 +356,20 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
             }
         } else {
             const comp = pinnedStickies.data;
-            combile(comp);
-            console.log(comp)
-            setComments(comp)
+            // combile(comp);
+            // console.log(comp)
+            setComments(combile(comp, tribeInfo && tribeInfo.keeper))
             setTotal(pinnedStickies.data.length)
         }
     }, [loaded])
 
-    const dispatchTheme = useCallback((data: PinnedSticky) => {
-
-        if (data && !!onChangeVisible && (!stickyMsg || data.groupId != stickyMsg.groupId)) {
-            // console.log(groupMsg,"group msg")
-            // const current = data.seq - 1;
-            // let preIndex = -1 ;
-            // let nextIndex = -1 ;
-            // if(current > 0){
-            //     preIndex = current - 1
-            // }else{
-            //     if(current < 0 && groupMsg.length > 1){
-            //         preIndex = groupMsg.length - 2;
-            //     }
-            // }
-            // if(current < groupMsg.length - 1){
-            //     nextIndex = current + 1;
-            // }
-            // if(preIndex > -1){
-            //     console.log("fetch pre index: ", preIndex)
-            //     fetch(utils.getDisPlayUrl(groupMsg[preIndex].theme.image)).catch(e=>console.error(e))
-            // }
-            // if(nextIndex > -1){
-            //     console.log("fetch next index: ", nextIndex)
-            //     fetch(utils.getDisPlayUrl(groupMsg[nextIndex].theme.image)).catch(e=>console.error(e))
-            // }
-
-            onChangeVisible(data)
-            setStickyMsg(data);
-        }
-    }, [stickyMsg, groupMsg])
+    // useEffect(() => {
+    //     console.log("......... dispatch theme")
+    //     dispatch(saveDataState({
+    //         data: {stickyMsg: stickyMsg},
+    //         tag: 'updateTheme2'
+    //     }))
+    // }, [stickyMsg])
 
     const startItem = (index: number) => {
         virtuoso.current.scrollToIndex({
@@ -459,42 +387,6 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         })
     }
 
-    useEffect(() => {
-        if (!pinnedStickies && comments.length > 0) {
-            if (shouldScroll++ == 0) {
-                // const lastId = comments.findIndex(value => (value as PinnedSticky).records && (value as PinnedSticky).records && (value as PinnedSticky).records.length > 0 && (value as PinnedSticky).records[0].id == shareMsgId);
-                const last = getCurrentVisible();
-                if (last >= 0) {
-                    setTimeout(() => {
-                        if (last == 999999999) {
-                            const itm = comments.length - 1;
-                            const data = comments[itm];
-                            dispatchTheme(data);
-                            startItem(itm);
-                        } else {
-                            const data = comments[last];
-                            dispatchTheme(data);
-                        }
-
-                    }, 100)
-                } else {
-                    setTimeout(() => {
-                        // scrollToBottom();
-                    }, 100)
-                }
-            } else {
-                if (currentVisibleStopIndex >= comments.length - 5 || shouldScrollToBottom) {
-                    setTimeout(() => {
-                        // scrollToBottom();
-                    }, 100)
-                }
-            }
-
-        } else {
-
-        }
-    }, []);
-
     const onReplay = (msg: Message) => {
         if (owner) {
             setReplayMsg(msg)
@@ -505,12 +397,12 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     useEffect(() => {
         if (loaded && loadCount++ == 0) {
             initLatestPin().then(() => {
-
+                setLoadedData(true);
             }).catch(e => console.error(e))
         }
     }, [loaded])
 
-    const setCommentsInner = useCallback((data: {total:number, messages: Array<PinnedSticky>}, append?:boolean) =>{
+    const setCommentsInner = useCallback((data: { total: number, messages: Array<PinnedSticky> }, append?: boolean) => {
 
         const messages = data.messages;
         new Promise(resolve => {
@@ -528,7 +420,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                         onReload(false);
                         //TODO
                     } else if (_comment.records && _comment.records.length > 0 && _comment.records[0].msgType == MessageType.UpdateTribe) {
-                        onReload(false);
+                        // onReload(false);
                     } else {
                         const _index = commentsCopy.findIndex(v => (v.records && v.records.length > 0 && _comment && _comment.records && _comment.records.length > 0 && v.records[0].id == _comment.records[0].id))
                         //new message
@@ -568,7 +460,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                     }
 
                     if (_comment.records && _comment.records.length > 0 && _comment.records[0].msgType == MessageType.Role) {
-                        onReload(false);
+                        // onReload(false);
                     }
 
                     if (_comment.records && _comment.records.length > 0 && _comment.records[0].owner == owner) {
@@ -580,39 +472,39 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 const _cIndex = commentsCopy.findIndex(v => v.records[0].groupId == "");
                 if (commentsCopy.length == 0 || _cIndex >= 0 || append || visibleRange.endIndex == total - 1) {
                     const comp = [...commentsCopy, ...nextComments];
-                    combile(comp)
+                    const ret = combile(comp, tribeInfo && tribeInfo.keeper)
                     resolve(true)
-                    return comp
+                    return ret
                 }
-                combile(commentsCopy)
+                const ret = combile(commentsCopy, tribeInfo && tribeInfo.keeper)
                 resolve(true)
-                return commentsCopy
+                return ret
             })
-        }).then(()=>{
+        }).then(() => {
             setTotal(data.total)
         })
 
-    },[setComments,total, comments, setTotal])
+    }, [setComments, total, comments, setTotal])
 
     useEffect(() => {
         if (loaded && count++ == 0) {
             tribeWorker.addMessageListener(config.tribeId, async (data: { total: number, messages: Array<PinnedSticky> }) => {
                 try {
                     console.log("======> startcallbutton ", data)
-                    setCommentsInner(data )
+                    setCommentsInner(data)
                 } catch (e) {
                     console.error(e)
                 }
             });
         }
-    }, [loaded, setComments,total, comments, setTotal])
+    }, [loaded, setComments, total, comments, setTotal])
 
     useEffect(() => {
         if (!pinnedStickies && dispatchData) {
             if (dispatchData.tag == 'scrollToItem' && dispatchData.data) {
                 // virtuoso.current.scrollToIndex({ index: comments.length - 1, behavior: 'smooth' });
                 if (comments && comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex == total - 1) {
-                    setTimeout(()=>scrollToItem({index: total - 1, align: "end"}), 100)
+                    setTimeout(() => scrollToItem({index: total - 1, align: "end"}), 100)
                 } else {
                     fetchMsgByIndex(total - 1, true);
                 }
@@ -641,6 +533,12 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 if (!dataObj["msg"]) {
                     setReplayMsg(null)
                 }
+            } else if (dispatchData.tag == 'setFirstIndex' && dispatchData.data){
+                let dataObj = dispatchData.data;
+                if (dataObj["firstIndex"] > -1) {
+                    const firstIndex = dataObj["firstIndex"];
+                    fetchMsgByIndex(firstIndex,false).catch(e=>console.error(e));
+                }
             }
         }
     }, [dispatchData.data]);
@@ -658,7 +556,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
 
     const onShare = useCallback((msg: Message) => {
         // console.log("====> share msg: ", msg, new Date(msg.timestamp * 1000))
-        tribeWorker.getPinnedMessageArray(config.tribeId, msg.msgIndex, 20).then(rest=>{
+        tribeWorker.getPinnedMessageArray(config.tribeId, msg.msgIndex, 20).then(rest => {
             let shareMsgs: Array<Message> = [];
             let shareRoles: Array<TribeRole> = [];
             const data = rest.data;
@@ -675,12 +573,12 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
             setShareRoles(shareRoles)
         })
 
-    },[setShowShareModal,setShareMsgs,setShareRoles])
+    }, [setShowShareModal, setShareMsgs, setShareRoles])
 
-    const _url = useMemo(()=>{
+    const _url = useMemo(() => {
         return stickyMsg && (stickyMsg as PinnedSticky).groupId ? stickyMsg.theme.image :
             pinnedStickies && pinnedStickies.data.length > 0 ? pinnedStickies.data[0].theme.image : tribeInfo && tribeInfo.theme.image
-    },[stickyMsg, pinnedStickies, tribeInfo])
+    }, [stickyMsg, pinnedStickies, tribeInfo])
 
     const [atBottom, setAtBottom] = useState(false)
     const showButtonTimeoutRef = useRef(null)
@@ -709,7 +607,33 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
 
     const [isScrolling, setIsScrolling] = useState(false);
 
-    const Loading = () => <div style={{width: '100%', textAlign: 'center', padding: 12}}>⏳ Loading...</div>;
+    // const [isScrollUp, setIsScrollUp] = useState(false);
+    const [isScrollDown, setIsScrollDown] = useState(false);
+
+    // useEffect(()=>{
+    //     dispatch(saveMessageState({
+    //         data: {isScrollUp: isScrollUp},
+    //         tag: 'isScrollUp'
+    //     }))
+    // },[isScrollUp])
+
+    useEffect(()=>{
+        dispatch(saveMessageState({
+            data: {isScrollDown: isScrollDown},
+            tag: 'isScrollDown'
+        }))
+    },[isScrollDown])
+
+    useEffect(()=>{
+        document.addEventListener('ionBackButton', (ev) => {
+            console.log("===> ionBackButton", ev)
+            ev.detail.register(10, () => {
+                console.log('Handler was called!');
+            });
+        });
+    },[])
+
+    // const Loading = () => <div style={{width: '100%', textAlign: 'center', padding: 12}}>⏳ Loading...</div>;
 
     // setting 'auto' for behavior does help in this sample, but not in my actual code
     const followOutput = useCallback((isAtBottom) => {
@@ -721,100 +645,145 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
 
     const bottomChange = useCallback((bottom) => {
         console.log("at bottom", bottom, isScrolling)
-        if(bottom !== atBottom){
-            setTimeout(()=>setAtBottom(bottom), 100)
+        if (bottom !== atBottom) {
+            // setTimeout(()=>setAtBottom(bottom), 100)
         }
     }, [setAtBottom])
 
+    const dispatchThemeFn = useCallback((data: PinnedSticky) => {
+        setStickyMsg(data)
+        dispatch(saveDataState({
+            data: {stickyMsg: data, stickyMsgTop: data},
+            tag: 'updateTheme2'
+        }))
+    }, [setStickyMsg])
+
+    useEffect(() => {
+        if (!!loaded && !!loadedData && !pinnedStickies) {
+            setOverscan(200);
+            // console.log("visibleRange.startIndex >= firstItemIndex: ", visibleRange.startIndex, firstItemIndex)
+            if (visibleRange.startIndex >= firstItemIndex) {
+                const _startIndex = visibleRange.startIndex - firstItemIndex;
+                const _endIndex = visibleRange.endIndex - firstItemIndex;
+                const itemStart: PinnedSticky = comments[_startIndex];
+                const itemEnd: PinnedSticky = comments[_endIndex];
+                if (itemEnd && itemEnd.records && itemEnd.records[0].msgIndex > maxVisibleIndex) {
+                    setMaxVisible(itemEnd.records[0].msgIndex)
+                } else if (maxVisibleIndex > total - 1) {
+                    setMaxVisible(total - 1)
+                }
+                if (visibleRange.endIndex >= total - 1 && atBottom) {
+                    if (!!tribeInfo) {
+                        const groupArr = tribeService.getGroupMap();
+                        const defaultGroup = groupArr[groupArr.length - 1];
+                        dispatchThemeFn({
+                            theme: tribeInfo && tribeInfo.theme,
+                            seq: -1,
+                            roles: defaultGroup ? defaultGroup.roles : [],
+                            records: [],
+                            groupId: "",
+                            index: -1
+                        });
+                    }
+                }
+                setCurrentVisible(visibleRange.startIndex);
+                if (!!itemStart) {
+                    dispatchThemeFn(itemStart)
+                }
+            }
+
+            // dispatch hide bar
+            // if(visibleRange.startIndex > lastVisible.startIndex){
+            //     setIsScrollDown(true);
+            // }else if(visibleRange.startIndex  < lastVisible.startIndex){
+            //     setIsScrollDown(false);
+            // }
+            // lastVisible = visibleRange
+        }
+
+    }, [visibleRange])
+
+
+
+    useEffect(()=>{
+        const gesture: Gesture = createGesture({
+            el: document.querySelector('.rectangle-content'),
+            threshold: 100,
+            direction: "x",
+            disableScroll: true,
+            gestureName: 'my-gesture',
+            onMove: ev => {
+                if(ev.startX < ev.currentX){
+                    window.location.href = "./"
+                }
+            }
+        });
+        gesture.enable();
+    },[])
+
     return <>
-        <div className={!pinnedStickies ? "msg-content" : "msg-content2"} style={{
+
+        <div className={!pinnedStickies ? "msg-content rectangle-content" : "msg-content2 rectangle-content"} style={{
             backgroundImage: `url(${utils.getDisPlayUrl(_url)})`,
         }}>
             <div className={`outer-box `}>
                 <div className="inner-box">
-                    {loadingData && <Loading/>}
+                    {/*{loadingData && <Loading/>}*/}
                     <div className="position-top">[{visibleRange.startIndex}] - [{visibleRange.endIndex}]
                         : [{firstItemIndex}]..[{total}]
                     </div>
                     <Virtuoso
                         ref={virtuoso}
                         style={{height: '100%'}}
-                        // overscan={{main: 0, reverse: 100}}
                         overscan={0}
-                        isScrolling={(f) => setIsScrolling(f)}
+                        atTopThreshold={200}
+                        // increaseViewportBy={{top: -20, bottom: 0}}
+                        isScrolling={setIsScrolling}
                         firstItemIndex={firstItemIndex}
                         rangeChanged={setVisibleRange}
                         data={comments}
                         endReached={loadMore}
                         startReached={prependItems}
+                        // scrollSeekConfiguration={{
+                        //     enter: (velocity) => {
+                        //         if(Math.abs(velocity) > 10){
+                        //             setIsScrollDown(velocity > 0)
+                        //         }
+                        //         return false;
+                        //     },
+                        //     exit: (velocity) => {
+                        //         const shouldExit = Math.abs(velocity) < 5;
+                        //         // if (shouldExit) {
+                        //         //     setVisibleRange({startIndex: 0, endIndex: 0});
+                        //         // }
+                        //         return shouldExit;
+                        //     },
+                        //     change: (_velocity, { startIndex, endIndex }) => {}
+                        // }}
                         followOutput={atBottom && (total > 0 && visibleRange.startIndex > total - pageSize) && followOutput}
                         atBottomStateChange={(total > 0 && visibleRange.endIndex >= total - 2) && bottomChange}
                         // initialTopMostItemIndex={getCurrentVisible()}
-                        itemsRendered={(items)=>{
-                            if (!isScrolling && !pinnedStickies) {
-                                if (!stickyMsg) {
-                                    if (!!tribeInfo) {
-                                        const groupArr = tribeService.getGroupMap();
-                                        const defaultGroup = groupArr[groupArr.length - 1];
-                                        dispatchTheme({
-                                            theme: tribeInfo && tribeInfo.theme,
-                                            seq: -1,
-                                            roles: defaultGroup?defaultGroup.roles:[],
-                                            records: [],
-                                            groupId: "",
-                                            index: -1
-                                        })
-                                    }
-                                    if (items[items.length - 1] && items.length > 0 && maxVisibleIndex < items[items.length - 1].data.records[0].msgIndex) {
-                                        setMaxVisible(items[items.length - 1].data.records[0].msgIndex)
-                                    }else if(maxVisibleIndex> total - 1){
-                                        // setMaxVisible(total-1)
-                                    }
-                                }
-                            }
-                            if (!pinnedStickies && items && items[0] && items[0].data) {
-                                visibleStartId = items[0].index;
-                                setCurrentTimeout(false)
-                                if (!!(items[items.length - 1].data) && maxVisibleIndex < items[items.length - 1].index) {
-                                    setMaxVisible(items[items.length - 1].index)
-                                }else if(maxVisibleIndex> total - 1){
-                                    // setMaxVisible(total-1)
-                                }
-                                if (visibleRange.endIndex >= total - 1 && atBottom) {
-                                    if (!!tribeInfo) {
-                                        const groupArr = tribeService.getGroupMap();
-                                        const defaultGroup = groupArr[groupArr.length - 1];
-                                        dispatchTheme({
-                                            theme: tribeInfo && tribeInfo.theme,
-                                            seq: -1,
-                                            roles: defaultGroup?defaultGroup.roles:[],
-                                            records: [],
-                                            groupId: "",
-                                            index: -1
-                                        })
-                                    }
-                                } else {
-                                    // console.log("items[0].data = ", items[0].data)
-                                    dispatchTheme(items[0].data)
-                                }
-                            }
-                        }}
                         // itemSize={(el, field) => {
                         //     return el.getBoundingClientRect().height;
                         // }}
                         itemContent={(index, data) => {
-                            return <MessageItem index={index} pinnedSticky={data as PinnedSticky}  total={total}
+                            return <MessageItem index={index} pinnedSticky={data as PinnedSticky} total={total}
                                                 atBottom={atBottom} firstItemIndex={firstItemIndex}
                                                 checkedMsgArr={checkedMsgArr} showPin={showPin} owner={owner}
                                                 checkedMsgId={checkedMsgId} pinnedStickies={pinnedStickies}
                                                 onSupport={onSupport} onFork={onFork} tribeInfo={tribeInfo}
                                                 onShare={onShare} stickyMsg={stickyMsg} userLimit={userLimit}
                                                 onEdit={(msg) => setShowModifyMsg(msg)} onReplay={onReplay}
-                                                dispatchTheme={dispatchTheme} setCheckedMsgId={(msgId)=>{
-                                setCheckedMsgId(msgId)
-                            }}
+                                                dispatchTheme={(data) => {
+                                                    setCheckedMsgId(data.records[0].id)
+                                                    dispatchThemeFn(data);
+                                                }}
+                                                    setCheckedMsgId={(msgId)=>{
+                                                        dispatchThemeFn(data);
+                                    setCheckedMsgId(msgId)
+                                }}
                                                 visibleRange={visibleRange}
-                                                setCheckedMsgArr={(msgs)=>setCheckedMsgArr(msgs)}
+                                                setCheckedMsgArr={(msgs) => setCheckedMsgArr(msgs)}
 
                             />
                         }}
@@ -831,29 +800,32 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
             />
 
             {
+                !showPin && <IonFab vertical="top" horizontal="end" slot="fixed">
+                    {
+                        !!onSubscribe &&
+                        <div className="fab-cus" onClick={() => {
+                            onSubscribe(!subscribed)
+                        }}>
+                            {
+                                subscribed === false ? <img src="assets/img/fab-icon00004.png" width={32} height={32}
+                                                            style={{verticalAlign: "middle"}}/>
+                                    :
+                                    <img src="assets/img/fab-icon00001.png" width={32} height={32}
+                                         style={{verticalAlign: "middle"}}/>
+                            }
+                        </div>
+                    }
+                </IonFab>
+            }
+
+            {
                 comments.length - 1 > currentVisibleStopIndex && !showPin && !isScrolling &&
-                <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{
-                    bottom: !pinnedStickies ? '145px' : "100px",
+                <IonFab vertical="center" horizontal="end" slot="fixed" style={{
+                    // bottom: !pinnedStickies ? '145px' : "100px",
                     right: !pinnedStickies ? "" : "35px",
                     cursor: 'pointer'
                 }}>
                     <div>
-
-                        {
-                            !!onSubscribe &&
-                            <div className="fab-cus" onClick={() => {
-                                onSubscribe(!subscribed)
-                            }}>
-                                {
-                                    subscribed === false ?<img src="assets/img/fab-icon00004.png" width={32} height={32}
-                                                               style={{verticalAlign: "middle"}}/>
-                                                               :
-                                        <img src="assets/img/fab-icon00001.png" width={32} height={32}
-                                             style={{verticalAlign: "middle"}}/>
-                                }
-                            </div>
-                        }
-
                         {
                             visibleRange.startIndex > 5 &&
                             <div className="fab-cus" onClick={() => {
@@ -869,7 +841,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                             </div>
                         }
                         {
-                            !pinnedStickies  &&
+                            !pinnedStickies &&
                             <div className="fab-cus-dig"
                                  style={(total - 1 - maxVisibleIndex <= 0) ? {
                                      background: "transparent",
@@ -880,7 +852,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                         }
 
                         {
-                            ( !atBottom || visibleRange.endIndex < total - 3) && (
+                            (!atBottom || visibleRange.endIndex < total - 3) && (
                                 <div className="fab-cus" onClick={() => {
                                     setAtBottom(true);
                                     if (comments && comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex == total - 1) {
@@ -903,7 +875,8 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                      onClose={() => setShowShareModal(false)}
                      tribeInfo={tribeInfo} latestMsg={shareMsgs} roles={shareRoles as Array<TribeRole>} owner={owner}/>
 
-            <IonModal isOpen={!!showModifyMsg} className="role-select-list" onDidDismiss={() => setShowModifyMsg(null)} swipeToClose>
+            <IonModal isOpen={!!showModifyMsg} className="role-select-list" onDidDismiss={() => setShowModifyMsg(null)}
+                      swipeToClose>
                 <IonHeader collapse="fade">
                     <IonToolbar>
                         <IonTitle>Update messages</IonTitle>

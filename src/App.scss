@@ -194,6 +194,63 @@ pre {
   .font-style-bold {
     padding-inline: 50px !important;
   }
+
+  .role-list-content2{
+    height: auto !important;
+  }
+
+  div::-webkit-scrollbar {
+    -webkit-appearance: none !important;;
+    width: 0 !important;;
+    background: transparent !important;;
+    display: none !important;;
+  }
+
+  div {
+    -ms-overflow-style: none !important;;  /* IE and Edge */
+    scrollbar-width: none !important;  /* Firefox */
+  }
+
+  .ion-content-chat {--overflow: hidden}
+
+  .support-outer:hover {
+    flex-direction: column;
+  }
+
+  .display-animation {
+    overflow: hidden;
+    transition: height 1s ease-in-out;
+  }
+  @-webkit-keyframes anim-disp {
+    0% {
+      opacity: 1;
+      display: block;
+    }
+    100% {
+      opacity: 0;
+      display: none;
+    }
+  }
+
+  @keyframes anim-disp {
+    0% {
+      opacity: 1;
+      display: block;
+    }
+    100% {
+      opacity: 0;
+      display: none;
+    }
+  }
+
+  .support-outer {
+    flex-direction: column !important;
+  }
+
+  .support-outer-owner {
+    flex-direction: column !important;
+  }
+
 }
 
 

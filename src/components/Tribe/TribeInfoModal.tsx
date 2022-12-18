@@ -113,7 +113,7 @@ export const TribeInfoModal:React.FC<Props> = ({isOpen,stickies,onReladData,onCl
                 </div>
 
                 <div className="tribe-info-modal-box">
-                    <MessageContentVisualso tribeInfo={tribeInfo} firstIndex={-1} owner={""} pinnedStickies={stickies}/>
+                    <MessageContentVisualso tribeInfo={tribeInfo}  owner={""} pinnedStickies={stickies}/>
                 </div>
 
                 <TribeEditModal isOpen={updateTribeModal}

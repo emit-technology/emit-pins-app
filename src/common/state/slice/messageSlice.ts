@@ -13,7 +13,7 @@ export const messageSlice = createSlice({
     name: 'jsonData',
     initialState,
     reducers: {
-        saveMessageState: (state, action: PayloadAction<any>) => {
+        saveMessageState: (state, action?: PayloadAction<any>) => {
             state.data = action.payload.data
             state.tag = action.payload.tag
         }

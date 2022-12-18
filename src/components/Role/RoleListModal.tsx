@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useCallback, useState} from 'react'
+import {useCallback, useEffect, useState} from 'react'
 import {
     IonAvatar,
     IonHeader,
@@ -22,6 +22,9 @@ import {ThemeItem} from "./ThemeItem";
 import {ThemesItems} from "./ThemesItems";
 import {utils} from "../../common";
 import {tribeService} from "../../service/tribe";
+import {useAppDispatch, useAppSelector} from "../../common/state/app/hooks";
+import {saveDataState} from '../../common/state/slice/dataSlice';
+import {saveMessageState} from '../../common/state/slice/messageSlice';
 
 interface Props {
     roles: Array<TribeRole>
@@ -35,13 +38,10 @@ interface Props {
 
     groupMsg: Array<GroupMsg>;
 
-    pinnedSticky?: PinnedSticky
-
-    onChangeMsgIndex?: (msgIndex:number)=>void;
 }
 
 const RoleListModalChild: React.FC<Props> = ({
-                               roles,groupMsg,onChangeMsgIndex, pinnedSticky,isModal,
+                               roles,groupMsg, isModal,
                                tribeInfo, onRoleCheck, defaultRole, onReloadList
                            }) => {
 
@@ -50,17 +50,35 @@ const RoleListModalChild: React.FC<Props> = ({
     const [roleInfo, setRoleInfo] = React.useState(null);
     const [showThemes, setShowThemes] = React.useState(false);
     const [showLoading, setShowLoading] = useState(false);
+    const [pinnedSticky, setPinnedSticky] = useState(null);
+
+    const dispatchData = useAppSelector(state => state.jsonData);
+
+    const dispatch = useAppDispatch();
 
     const onClickTheme = useCallback((groupId: string)=>{
-        if(!!onChangeMsgIndex){
-            tribeService.getMsgPositionWithGroupId(groupId).then(position=>{
-                onChangeMsgIndex(position)
-            })
-        }
+        tribeService.getMsgPositionWithGroupId(groupId).then(position=>{
+            dispatch(saveDataState({
+                data: {firstIndex: position},
+                tag: 'setFirstIndex'
+            }))
+        })
     },[])
 
+    useEffect(() => {
+        if (dispatchData) {
+            if (dispatchData.tag == 'updateTheme2' && dispatchData.data) {
+                let dataObj:any = dispatchData.data;
+                if (dataObj.stickyMsg) {
+                    setPinnedSticky(dataObj.stickyMsg)
+                    dispatch(saveDataState({data: {stickyMsg: null,stickyMsgTop: dataObj.stickyMsgTop  }, tag: 'updateTheme2'}))
+                }
+            }
+        }
+    }, [dispatchData.data]);
+
+
     return <>
-            <IonPage>
                 {
                     !isModal && tribeInfo && tribeInfo.forked  && tribeInfo.forked.length>0 && <IonHeader mode="ios" collapse="condense">
                         <IonToolbar className="msg-toolbar">
@@ -78,9 +96,9 @@ const RoleListModalChild: React.FC<Props> = ({
                         </IonToolbar>
                     </IonHeader>
                 }
-                <IonContent>
+                <IonContent  className="ion-content-chat">
                     {
-                        tribeInfo && (!tribeInfo.forked  || tribeInfo.forked.length  == 0)  && <div style={{height: (utils.isIos()) ?"48px": "12px"}}></div>
+                        tribeInfo && (!tribeInfo.forked  || tribeInfo.forked.length  == 0)  && <div style={{height: (utils.isIos()) ?"30px": "12px"}}></div>
                     }
                     <div style={{height: (!showThemes && !utils.isApp()) ?"0":"100%" }}>
                         <ThemesItems onClickTheme={onClickTheme} groupMsg={groupMsg}  onClose={()=>{
@@ -193,7 +211,6 @@ const RoleListModalChild: React.FC<Props> = ({
                         </div>
                     }
                 </IonContent>
-            </IonPage>
     </>
 }
 

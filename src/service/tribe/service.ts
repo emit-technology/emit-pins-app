@@ -147,11 +147,25 @@ class TribeService implements ITribe {
     }
 
     tribeInfo = async (tribeId: string): Promise<TribeInfo> => {
+        const _key = `tribeInfo_${tribeId}`;
+        const dataStr = sessionStorage.getItem(_key);
+        if(dataStr){
+            const data:TribeInfo = JSON.parse(dataStr)
+            this._tribeInfoFn(tribeId).catch(e=>console.error(e))
+            return Promise.resolve(data);
+        }else{
+            return this._tribeInfoFn(tribeId);
+        }
+    }
+
+    private _tribeInfoFn = async (tribeId:string):Promise<TribeInfo> =>{
+        const _key = `tribeInfo_${tribeId}`;
         const rest: TribeResult<TribeInfo> = await this._rpc.post('/tribe/tribeInfo', {tribeId});
         if (rest && rest.code == 0) {
             if(config.tribeId && config.tribeId == tribeId){
                 this._tribeInfo = rest.data;
             }
+            sessionStorage.setItem(_key, JSON.stringify(rest.data))
             return Promise.resolve(rest.data)
         }
         return Promise.reject(rest.message);
@@ -165,7 +179,20 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
+
     tribeRoles = async (tribeId: string): Promise<Array<TribeRole>> => {
+        const _key = `tribeRole_${tribeId}`;
+        const dataStr = sessionStorage.getItem(_key);
+        if(dataStr){
+            const data:Array<TribeRole> = JSON.parse(dataStr)
+            this._tribeRolesFn(tribeId).catch(e=>console.error(e))
+            return Promise.resolve(data);
+        }
+        return this._tribeRolesFn(tribeId);
+    }
+
+    private _tribeRolesFn = async (tribeId: string): Promise<Array<TribeRole>> => {
+        const _key = `tribeRole_${tribeId}`;
         const rest: TribeResult<Array<TribeRole>> = await this._rpc.post('/tribe/tribeRoles', {tribeId});
         const defaultRole = {
             avatar: {url: `https://pic.emit.technology/img/3ce83e299e485e006cd9e820ea9c790f.png`, height: 300, width: 300},
@@ -178,9 +205,11 @@ class TribeService implements ITribe {
                 const ret = rest.data.reverse();
                 ret.unshift(defaultRole)
                 this._tribeRole = ret;
+                sessionStorage.setItem(_key, JSON.stringify(ret))
                 return Promise.resolve(ret)
             }
             this._tribeRole = [defaultRole];
+            sessionStorage.setItem(_key, JSON.stringify([defaultRole]))
             return [defaultRole]
         }
         return Promise.reject(rest.message);
@@ -802,6 +831,7 @@ class TribeService implements ITribe {
         const address = account ?account.addresses[ChainType.EMIT]:""
         const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/myTribes', {userId: address});
         if (rest && rest.code == 0) {
+            selfStorage.setItem("myTribes", rest.data)
             return Promise.resolve(rest.data)
         }
         return Promise.reject(rest.message);
@@ -812,6 +842,7 @@ class TribeService implements ITribe {
         const address = account && account.addresses && account.addresses[ChainType.EMIT]
         const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/involvedTribes', {userId: address});
         if (rest && rest.code == 0) {
+            selfStorage.setItem("involvedTribes", rest.data)
             return Promise.resolve(rest.data)
         }
         return Promise.reject(rest.message);

@@ -245,7 +245,7 @@ const MessageContentViewportChild: React.FC<Props> = ({groupMsg
                 msg.msgIndex = msgIndex++;
             }
 
-            pMsg.showPin = {lastPin: pMsg, showPin: lastPin && lastPin.groupId !== pMsg.groupId, showFork: nextMsg && nextMsg.groupId !== pMsg.groupId};
+            pMsg.showPin = { showPin: lastPin && lastPin.groupId !== pMsg.groupId, showFork: nextMsg && nextMsg.groupId !== pMsg.groupId};
 
             lastPin = pMsg;
         }

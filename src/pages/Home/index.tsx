@@ -87,14 +87,26 @@ export class HomePage extends React.Component<Props, State> {
             }
             let data: Array<TribeInfo> = [];
             if (seqmt == 'forYou') {
-                const rest = await tribeService.involvedTribes();
+                const rest = selfStorage.getItem("involvedTribes"); //await tribeService.involvedTribes();
                 if (rest) {
                     data = [...rest]
+                    tribeService.involvedTribes().then(data=>{
+                        this.setState({data: data})
+                    })
+                }else{
+                    const res = await tribeService.involvedTribes();
+                    data = [...res]
                 }
             } else if (seqmt == 'myVerse') {
-                const rest = await tribeService.myTribes();
+                const rest = selfStorage.getItem("myTribes"); //await tribeService.myTribes();
                 if (rest) {
                     data = [...rest]
+                    tribeService.myTribes().then(data=>{
+                        this.setState({data: data})
+                    })
+                }else{
+                    const res = await tribeService.myTribes();
+                    data = [...res]
                 }
             }
 
@@ -182,7 +194,7 @@ export class HomePage extends React.Component<Props, State> {
                         </IonTitle>
                     </IonToolbar>
                 </IonHeader>
-                <IonContent className="ion-padding">
+                <IonContent className="ion-padding ion-content-chat">
                     {/*<IonMenuToggle>*/}
                     {/*    <IonButton>Click to close the menu</IonButton>*/}
                     {/*</IonMenuToggle>*/}
@@ -241,7 +253,7 @@ export class HomePage extends React.Component<Props, State> {
 
                     </IonToolbar>
                 </IonHeader>
-                <IonContent fullscreen className="ion-padding home-ctn">
+                <IonContent fullscreen className="ion-padding home-ctn ion-content-chat">
                     <IonSegment className="segment" color="secondary" mode="md" value={segment} onIonChange={(e) => {
                         this.setState({showLoading: true, segment: e.detail.value})
                         this.init(e.detail.value).then(() => {
@@ -277,7 +289,7 @@ export class HomePage extends React.Component<Props, State> {
                             />
                         </IonCol>
                     </IonRow>
-                    <div>
+                    <div style={{height: "100%",padding: "0 0 200px 0",overflow: "scroll"}}>
                         {/*{*/}
                         {/*    layout && layout.length>0&&<TribeRecommend data={data} layout={layout}/>*/}
                         {/*}*/}
@@ -286,13 +298,13 @@ export class HomePage extends React.Component<Props, State> {
                         }} address={address} tribeUserInfo={tribeUserInfo} data={data} tribeTimeMap={tribeTimeMap}/>
                     </div>
 
-                    <IonLoading
-                        cssClass='my-custom-class'
-                        isOpen={showLoading}
-                        onDidDismiss={() => this.setShowLoading(false)}
-                        message={'Loading...'}
-                        duration={60000}
-                    />
+                    {/*<IonLoading*/}
+                    {/*    cssClass='my-custom-class'*/}
+                    {/*    isOpen={showLoading}*/}
+                    {/*    onDidDismiss={() => this.setShowLoading(false)}*/}
+                    {/*    message={'Loading...'}*/}
+                    {/*    duration={60000}*/}
+                    {/*/>*/}
 
                     <IonToast
                         isOpen={showToast}

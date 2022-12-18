@@ -2,6 +2,7 @@ import {Message, MessageType, MsgText} from "../../../../../types";
 import {IonIcon} from "@ionic/react";
 import {arrowUndoOutline, createOutline, shareOutline, thumbsUpOutline, trashOutline} from "ionicons/icons";
 import * as React from "react";
+import {utils} from "../../../../../common";
 
 
 interface Props {
@@ -25,7 +26,7 @@ export const Tools:React.FC<Props> = ({msg,isChecked,showPin, onReplay,
     const isOwnerAndNotPinned =  msg && owner == msg.owner && !msg.groupId
     const isSupported = msg && msg.Supporters && msg.Supporters.indexOf(owner)>-1;
 
-    return isChecked && !showPin && <div className={isSystem || msg.msgType == MessageType.Role ? "flex-center tool-no-role" : "tools"}>
+    return !showPin && (utils.isApp() ? isChecked: true) && <div className={isSystem || msg.msgType == MessageType.Role ? "tools-display flex-center tool-no-role" : "tools-display tools"}>
         {
             (onSupport && msg && (!msg.support || msg.support == 0)) && !msg.groupId && !isSupported && <div className={`support-bx ${msg.Supporters && isSupported?"support-bx-owner":""}`}  onClick={() => {
                 if (!msg.groupId) {

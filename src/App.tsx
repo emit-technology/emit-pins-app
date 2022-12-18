@@ -24,18 +24,12 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 import './App.scss';
-import {DashboardV1} from "./pages/Dashboard";
 import React, {useEffect, useRef, useState} from "react";
 import config from "./common/config";
 import {Provider} from "react-redux";
 import store from "./common/state/app/store";
 import {HomePage} from "./pages/Home";
 import {DashboardV2} from "./pages/Dashboard/index2";
-import {DashboardV2Test} from "./pages/Dashboard/indexTest";
-import {DashboardV3} from "./pages/Dashboard/indexV3";
-import {DashboardV4} from "./pages/Dashboard/indexV4";
-import {DashboardV2Test2} from "./pages/Dashboard/indexTestV2";
-import {DashboardTestScroller} from "./pages/Dashboard/indexVirtualScroller";
 import { App as AppPin } from '@capacitor/app';
 import {utils} from "./common";
 import {Toast} from "@capacitor/toast";
@@ -95,41 +89,6 @@ const App: React.FC = () => {
                                         const tribeId = props.match.params.tribeId;
                                         config.tribeId = tribeId;
                                         return <DashboardV2 tribeId={tribeId} router={routerRef.current}/>
-                                    }}/>
-
-                                    <Route exact path="/v1/:tribeId" component={(props: any) => {
-                                        const tribeId = props.match.params.tribeId;
-                                        config.tribeId = tribeId;
-                                        return <DashboardV1 tribeId={tribeId} router={routerRef.current}/>
-                                    }}/>
-
-                                    <Route exact path="/test/:tribeId" component={(props: any) => {
-                                        const tribeId = props.match.params.tribeId;
-                                        config.tribeId = tribeId;
-                                        return <DashboardV2Test tribeId={tribeId} router={routerRef.current}/>
-                                    }}/>
-                                    <Route exact path="/test2/:tribeId" component={(props: any) => {
-                                        const tribeId = props.match.params.tribeId;
-                                        config.tribeId = tribeId;
-                                        return <DashboardV2Test2 tribeId={tribeId} router={routerRef.current}/>
-                                    }}/>
-
-                                    <Route exact path="/scroller/:tribeId" component={(props: any) => {
-                                        const tribeId = props.match.params.tribeId;
-                                        config.tribeId = tribeId;
-                                        return <DashboardTestScroller tribeId={tribeId} router={routerRef.current}/>
-                                    }}/>
-
-                                    <Route exact path="/v3/:tribeId" component={(props: any) => {
-                                        const tribeId = props.match.params.tribeId;
-                                        config.tribeId = tribeId;
-                                        return <DashboardV3 tribeId={tribeId} router={routerRef.current}/>
-                                    }}/>
-
-                                    <Route exact path="/v4/:tribeId" component={(props: any) => {
-                                        const tribeId = props.match.params.tribeId;
-                                        config.tribeId = tribeId;
-                                        return <DashboardV4 tribeId={tribeId} router={routerRef.current}/>
                                     }}/>
 
                                     <Route exact path="/:tribeId/:msgId" component={(props: any) => {

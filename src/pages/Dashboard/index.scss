@@ -6,6 +6,7 @@
 .msg-content{
   background-color: var(--ion-color-tertiary);
   height: calc(100% - 114px);
+  //padding-bottom: 114px;
   background-position: center;
   background-size: cover;
   //-webkit-animation: anim 1.5s 1 alternate;
@@ -177,9 +178,10 @@ input::placeholder {
   //padding: 12px 0 0;
   position: relative;
   background-color: rgb(255, 255, 255);
-  border-radius: 0 12px 12px 0;
+  //border-radius: 0 12px 12px 0;
   height: 100%;
   cursor: pointer;
+  overflow: scroll;
 }
 
 .role-list-head{
@@ -715,4 +717,23 @@ position: absolute;
 
 .main-splane {
   --side-width: 342px;
+}
+
+.tools-display{
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  display: none;
+}
+
+.support-outer:hover .tools-display {
+  width: auto;
+  height: auto;
+  display: flex;
+}
+
+.support-outer-owner:hover .tools-display {
+  width: auto;
+  height: auto;
+  display: flex;
 }

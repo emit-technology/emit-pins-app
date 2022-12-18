@@ -251,7 +251,6 @@ const MessageContentVisualsoChild: React.FC<Props> = ({
             }
 
             pMsg.showPin = {
-                lastPin: pMsg,
                 showPin: lastPin && lastPin.groupId !== pMsg.groupId,
                 showFork: nextMsg && nextMsg.groupId !== pMsg.groupId
             };

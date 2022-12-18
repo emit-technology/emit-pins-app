@@ -80,32 +80,12 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                                                 stickyMsg,dispatchTheme, setCheckedMsgId,
                                                 onReplay,onEdit,setCheckedMsgArr,
                                                 onShare,userLimit,visibleRange}) => {
-    const arrIndex = index - firstItemIndex;
-    const preIndex = arrIndex - 1;
+    const preIndex = useMemo(()=>  index - firstItemIndex - 1, [index, firstItemIndex]);
     //
-    const target = React.useRef(null)
-
-    // const size:any = useSize(target);
-
-    // if(!!size){
-    //     console.log(" size 222:  index=[%d], height=[%d], msgIndex=[%d]  ", index, size["height"], pinnedSticky.records[0].msgIndex )
-    // }
-    //
-    // useLayoutEffect(() => {
-    //
-    //     if(!!setSize && size){
-    //         // console.log(target.current)
-    //         const height = size["height"]; //target.current.getBoundingClientRect().height;
-    //         console.log(" size111:  index=[%d], height=[%d], msgIndex=[%d] " , index , height,  pinnedSticky.records[0].msgIndex );
-    //
-    //         setSize(index, height);
-    //     }
-    // }, [setSize, size, windowWidth]);
-
     if (!!pinnedSticky) {
         return (
-            <div ref={target} className="visual-msg-box"
-                 style={{padding: atBottom && index >= total - 1 && index == visibleRange.endIndex ? "0 0 44px" : "0" }}
+            <div className="visual-msg-box"
+                 style={{padding: index >= total - 1 && index == visibleRange.endIndex ? "0 0 44px" : "0" }}
                  key={index}>
 
                 {/*<small>{pinnedSticky.records[0].msgIndex}</small>*/}
@@ -123,7 +103,7 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                     !!pinnedSticky.showPin && pinnedSticky.showPin.showPin && <>
                         {
                             !pinnedStickies && <div className="strike">
-                                <span>{!pinnedSticky.groupId ? "New Tape" : `#${pinnedSticky.showPin.lastPin.seq}`}</span>
+                                <span>{!pinnedSticky.groupId ? "New Tape" : `#${pinnedSticky.seq}`}</span>
                             </div>
                         }
                     </>
@@ -166,8 +146,8 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                                 }}>
 
                                     <div className="inner" style={{maxWidth: '100%'}}
-                                         onMouseOver={() => {
-                                             if(!pinnedStickies){
+                                         onClick={() => {
+                                             if(!pinnedStickies && setCheckedMsgId){
                                                  setCheckedMsgId(v.id)
                                              }
                                          }}
@@ -220,16 +200,16 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                             <IonButton onClick={() => {
                                 // setShowLoading(true)
                                 // console.log(pinnedSticky.showPin)
-                                onFork(pinnedSticky.showPin.lastPin.groupId, {
+                                onFork(pinnedSticky.groupId, {
                                     tribeId: config.tribeId,
                                     keeper: "",
-                                    lastPinedSeq: pinnedSticky.showPin.lastPin.seq,
+                                    lastPinedSeq: pinnedSticky.seq,
                                     onlineUser: 0,
-                                    theme: pinnedSticky.showPin.lastPin.theme,
+                                    theme: pinnedSticky.theme,
                                     title: tribeInfo.title,
                                     desc: "",
-                                    themeTag: pinnedSticky.showPin.lastPin.theme.themeTag,
-                                    themeDesc: pinnedSticky.showPin.lastPin.theme.themeDesc,
+                                    themeTag: pinnedSticky.theme.themeTag,
+                                    themeDesc: pinnedSticky.theme.themeDesc,
                                 })
                             }}><IonIcon src={gitBranchOutline} style={{
                                 color: "#4C89F8",
@@ -242,32 +222,6 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                 {
                     pinnedSticky.records[0].msgIndex == total - 1 && !!pinnedSticky.records[0].groupId &&
                     <>
-                        {/*<div style={{*/}
-                        {/*    padding: '6px 12px',*/}
-                        {/*    display: "flex",*/}
-                        {/*    justifyContent: "flex-end"*/}
-                        {/*}}>*/}
-                        {/*    <div className="fork-icon">*/}
-                        {/*        <IonButtons>*/}
-                        {/*            <IonButton onClick={() => {*/}
-                        {/*                onFork(pinnedSticky.records[0].groupId, {*/}
-                        {/*                    tribeId: config.tribeId,*/}
-                        {/*                    keeper: "",*/}
-                        {/*                    lastPinedSeq: 0,*/}
-                        {/*                    onlineUser: 0,*/}
-                        {/*                    theme: pinnedSticky.theme,*/}
-                        {/*                    title: tribeInfo.title,*/}
-                        {/*                    desc: "",*/}
-                        {/*                    themeTag: pinnedSticky.theme.themeTag,*/}
-                        {/*                    themeDesc: pinnedSticky.theme.themeDesc,*/}
-                        {/*                })*/}
-                        {/*            }}><IonIcon src={gitBranchOutline} style={{*/}
-                        {/*                color: "#4C89F8",*/}
-                        {/*                fontSize: "24px"*/}
-                        {/*            }}/></IonButton>*/}
-                        {/*        </IonButtons>*/}
-                        {/*    </div>*/}
-                        {/*</div>*/}
                         <div className="strike">
                             <span>New Tape</span>
                         </div>
@@ -275,17 +229,6 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                 }
             </div>
         )
-        // if (pinnedSticky.records && pinnedSticky.records.length > 0
-        //     && ((pinnedSticky.records[0].msgStatus !== MessageStatus.removed && pinnedSticky.records[0].msgStatus !== MessageStatus.draft)
-        //         || (!!pinnedStickies && pinnedSticky.records[0].msgStatus == MessageStatus.draft))) {
-        //     const arrIndex = index - firstItemIndex;
-        //     const preIndex = arrIndex - 1;
-        //     // renInboxMsg(messages)
-        //     // return <div style={{backgroundColor: "green", padding: 12}}>{index} - It feels like there are more bot comments than real people on twitter now.</div>
-        //     return
-        // } else {
-        //     return <div></div>
-        // }
     } else {
         return <div>Invalid data</div>
     }

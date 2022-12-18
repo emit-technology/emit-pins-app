@@ -8,7 +8,7 @@ import {
     IonItem,
     IonLabel,
     IonRow,
-    useIonToast, IonLoading,
+    useIonToast, IonLoading, IonFooter,
 } from '@ionic/react'
 import {
     chatboxEllipsesOutline, diceOutline,
@@ -24,7 +24,7 @@ import 'react-popper-tooltip/dist/styles.css';
 import config from "../../../../common/config";
 import {saveDataState} from "../../../../common/state/slice/dataSlice";
 import {useAppDispatch, useAppSelector} from "../../../../common/state/app/hooks";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {ReplayText} from "../Message/Types/ReplayText";
 import selfStorage from "../../../../common/storage";
 import {RolesPopover} from "../../../Role/RolesPopover";
@@ -44,7 +44,7 @@ interface Props {
     tribeInfo: TribeInfo
     owner: string;
     isTokenValid: boolean;
-    alreadySelectRole:boolean;
+    alreadySelectRole: boolean;
 }
 
 
@@ -55,8 +55,8 @@ const lorem = new LoremIpsum({
     }
 });
 
-const BottomBarChild: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTokenValid, tribeInfo, owner, userLimit, onRoleCheck, onPin, selectRole}) => {
-    const textRef = React.useRef("")
+const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isTokenValid, tribeInfo, owner, userLimit, onRoleCheck, onPin, selectRole}) => {
+    const textRef = useRef(null);
     const [present, dismiss] = useIonToast();
     const [replayMsg, setReplayMsg] = useState(null);
     const [showSelectRole, setShowSelectRole] = useState(false);
@@ -68,6 +68,7 @@ const BottomBarChild: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTok
     const [isLoading, setIsLoading] = useState(false);
 
     const [showAirdropModal, setShowAirdropModal] = useState(false);
+    const [isDown, setIsDown] = useState(false);
 
     const [cursorPosition, setCursorPosition] = useState(-1);
 
@@ -83,11 +84,14 @@ const BottomBarChild: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTok
         closeOnTriggerHidden: true,
         closeOnOutsideClick: true,
         followCursor: true,
-        trigger:['click','hover']
+        trigger: ['click', 'hover']
     });
 
     const dispatch = useAppDispatch();
     const dispatchData = useAppSelector(state => state.jsonData);
+
+    const dispatchMessage = useAppSelector(state => state.messageData);
+
     useEffect(() => {
         if (dispatchData) {
             if (dispatchData.tag == 'replayMsg' && dispatchData.data) {
@@ -98,8 +102,19 @@ const BottomBarChild: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTok
             }
         }
     }, [dispatchData.data]);
+
+
+    useEffect(() => {
+        if (dispatchMessage) {
+            if (dispatchMessage.tag == 'isScrollDown' && dispatchMessage.data) {
+                let dataObj: any = dispatchMessage.data;
+                setIsDown(dataObj.isScrollDown);
+            }
+        }
+    }, [dispatchMessage.data]);
+
     const sendMsg = async (f?: boolean) => {
-        if(userLimit && userLimit.msgLeft <=0){
+        if (userLimit && userLimit.msgLeft <= 0) {
             return Promise.reject(`reaching the max number(${userLimit.maxMsgCount}) of likes`)
         }
         if (textRef && textRef.current) {
@@ -164,248 +179,264 @@ const BottomBarChild: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTok
 
     return <>
         {
-            !showPin ?
-                <IonRow>
-                    <IonCol size="12">
-                        <IonRow>
-                            <IonCol size="7">
-                                {
-                                    selectRole && <div className="bottom-role">
-                                        <div className={`avatar ${(!alreadySelectRole && roles.length > 1 && selectRole && !selectRole.id) && "avatarn"}`} onClick={() => {
-                                            setShowSelectRole(true)
-                                        }}>
-                                            <IonAvatar slot="start">
-                                                <img src={utils.getDisPlayUrl(selectRole.avatar)}/>
-                                            </IonAvatar>
-                                        </div>
-                                        <div className="bottom-role-name">
-                                            <div style={{
-                                                // transform: 'translate(-10px,4px)'
-                                                width: "1px"
-                                            }}>
-                                                {/*{*/}
-                                                {/*    tribeInfo && tribeInfo.keeper !== owner && <IonBadge>*/}
-                                                {/*        <small>Role</small>*/}
-                                                {/*        {userLimit && <>&nbsp;*/}
-                                                {/*            <IonIcon src={chatbubbleEllipsesOutline}*/}
-                                                {/*                     style={{transform: 'translateY(2px)'}}/><small>{userLimit.msgLeft}</small> &nbsp;*/}
-                                                {/*            <IonIcon src={thumbsUpOutline}*/}
-                                                {/*                     style={{transform: 'translateY(2px)'}}/><small>{userLimit.supportLeft}</small>*/}
-                                                {/*        </>}*/}
-                                                {/*    </IonBadge>*/}
-                                                {/*}*/}
-                                            </div>
-                                            <div className="btn-name">
-                                                {selectRole.name} &nbsp;
-                                                <IonIcon color="medium" src={chatboxEllipsesOutline}
-                                                         style={{transform: 'translateY(3px)'}}/>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                            </IonCol>
-                            <IonCol size="5">
-                                <div className="msg-bottom-icon">
-                                    {/*<div>*/}
-                                    <IonIcon className="footer-icon" src={happyOutline} ref={setTriggerRef} color="dark"
-                                             size="large"
-                                             onClick={(e) => {
-                                                 e.stopPropagation();
-                                             }}/>
-                                    {visible && (
-                                        <div
-                                            style={{zIndex: 100001}}
-                                            ref={setTooltipRef}
-                                            {...getTooltipProps({className: 'tooltip-container'})}
-                                        >
-                                            <EmojiBlock onSelectEmoji={(v) => {
-                                                typeInTextarea(v.emoji, textRef.current);
-                                                // if (textRef && textRef.current) {
-                                                //     //@ts-ignore
-                                                //     textRef.current.value = textRef.current.value + v.emoji
-                                                // }
-                                            }}/>
-                                            {/*<div {...getArrowProps({ className: 'tooltip-arrow' })} />*/}
-                                        </div>
-                                    )}
-
-                                    {/*</div>*/}
-
-
-                                    <IonIcon className="footer-icon" src={imageOutline} color="dark" size="large"
-                                             onClick={(e) => {
-                                                 e.stopPropagation();
-                                                 tribeService.userCheckAuth().then(()=>{
-                                                     if(userLimit && userLimit.msgLeft <=0){
-                                                         present({
-                                                             message: `Sending messages has reached the maximum limit ${userLimit.maxMsgCount}`,
-                                                             duration: 2000,
-                                                             position: "top",
-                                                             color: "danger"
-                                                         })
-                                                         return;
-                                                     }
-                                                     tribeService.picUpload().then(photo => {
-                                                         setIsLoading(true);
-                                                         tribeService.uploadToServer(photo).then(({url, themeColors})=>{
-                                                             setIsLoading(false)
-                                                             const displayImage = utils.convertImgDisplay(themeColors.width, themeColors.height, url);
-                                                             setDisplayImage({
-                                                                 url: url,
-                                                                 width: displayImage.width,
-                                                                 height: displayImage.height
-                                                             });
-
-                                                             setThemeColor(themeColors)
-                                                         }).catch(e=>{
-                                                             setIsLoading(false)
-                                                         })
-                                                     }).catch(e=>{
-                                                         const err = typeof e == 'string'?e:e.message;
-                                                         present({
-                                                             message: err,
-                                                             duration: 2000,
-                                                             position: "top",
-                                                             color: "danger"
-                                                         })
-                                                     })
-                                                 }).catch(e=>{
-                                                     console.error(e)
-                                                     const err = typeof e == 'string'?e:e.message;
-                                                     present({
-                                                         message: err,
-                                                         duration: 2000,
-                                                         position: "top",
-                                                         color: "danger"
-                                                     })
-                                                 })
-                                             }}/>
-                                    <IonIcon className="footer-icon" src={rocketOutline} color="dark" size="large" onClick={(e) => {
-                                        e.stopPropagation();
-                                        tribeService.userCheckAuth().then(()=>{
-                                            setShowAirdropModal(true)
-                                        }).catch(e=>{
-                                            console.error(e)
-                                            const err = typeof e == 'string'?e:e.message;
-                                            present({
-                                                message: err,
-                                                duration: 2000,
-                                                position: "top",
-                                                color: "danger"
-                                            })
-                                        })
-
-                                    }}/>
-
-                                    <IonIcon className="footer-icon" src={diceOutline} color="dark" size="large" onClick={(e) => {
-                                        e.stopPropagation();
-                                        sendMsg(true).then(()=>{
-                                            dispatch(saveDataState({
-                                                data: JSON.stringify({refresh: 0}),
-                                                tag: 'scrollToItem'
-                                            }))
-                                        })
-                                    }}/>
-                                </div>
-                            </IonCol>
-                        </IonRow>
-                        <IonRow>
-                            <IonCol size="10">
-                                <div>
-                                    {
-
-                                        <TextareaAutosize onChange={(e)=>{
-                                            if(e.target.value && e.target.value.indexOf("/mind") == 0){
-                                                //@ts-ignore
-                                                if(textRef.current){
-                                                    //@ts-ignore
-                                                    textRef.current.value = textRef.current.value.replace("/mind","💭");
-                                                }
+            !isDown && <IonFooter>
+                <div className={`msg-bottom`}>
+                    {
+                        !showPin ?
+                            <IonRow>
+                                <IonCol size="12">
+                                    <IonRow>
+                                        <IonCol size="7">
+                                            {
+                                                selectRole && <div className="bottom-role">
+                                                    <div
+                                                        className={`avatar ${(!alreadySelectRole && roles.length > 1 && selectRole && !selectRole.id) && "avatarn"}`}
+                                                        onClick={() => {
+                                                            setShowSelectRole(true)
+                                                        }}>
+                                                        <IonAvatar slot="start">
+                                                            <img src={utils.getDisPlayUrl(selectRole.avatar)}/>
+                                                        </IonAvatar>
+                                                    </div>
+                                                    <div className="bottom-role-name">
+                                                        <div style={{
+                                                            // transform: 'translate(-10px,4px)'
+                                                            width: "1px"
+                                                        }}>
+                                                            {/*{*/}
+                                                            {/*    tribeInfo && tribeInfo.keeper !== owner && <IonBadge>*/}
+                                                            {/*        <small>Role</small>*/}
+                                                            {/*        {userLimit && <>&nbsp;*/}
+                                                            {/*            <IonIcon src={chatbubbleEllipsesOutline}*/}
+                                                            {/*                     style={{transform: 'translateY(2px)'}}/><small>{userLimit.msgLeft}</small> &nbsp;*/}
+                                                            {/*            <IonIcon src={thumbsUpOutline}*/}
+                                                            {/*                     style={{transform: 'translateY(2px)'}}/><small>{userLimit.supportLeft}</small>*/}
+                                                            {/*        </>}*/}
+                                                            {/*    </IonBadge>*/}
+                                                            {/*}*/}
+                                                        </div>
+                                                        <div className="btn-name">
+                                                            {selectRole.name} &nbsp;
+                                                            <IonIcon color="medium" src={chatboxEllipsesOutline}
+                                                                     style={{transform: 'translateY(3px)'}}/>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             }
-                                            //@ts-ignore
-                                        }} onBlur={emitChanges.bind(this)} id="msgText" rows={1} maxLength={1024} ref={textRef} wrap='hard'
-                                                          placeholder={tribeInfo && owner !== tribeInfo.keeper && userLimit?`msg (${userLimit && userLimit.msgLeft}/${userLimit && userLimit.maxMsgCount}) , likes (${userLimit && userLimit.supportLeft}/${userLimit && userLimit.maxSupportCount}) `:`Your messages`}
-                                                      className="msg-input"/>
+                                        </IonCol>
+                                        <IonCol size="5">
+                                            <div className="msg-bottom-icon">
+                                                {/*<div>*/}
+                                                <IonIcon className="footer-icon" src={happyOutline} ref={setTriggerRef}
+                                                         color="dark"
+                                                         size="large"
+                                                         onClick={(e) => {
+                                                             e.stopPropagation();
+                                                         }}/>
+                                                {visible && (
+                                                    <div
+                                                        style={{zIndex: 100001}}
+                                                        ref={setTooltipRef}
+                                                        {...getTooltipProps({className: 'tooltip-container'})}
+                                                    >
+                                                        <EmojiBlock onSelectEmoji={(v) => {
+                                                            typeInTextarea(v.emoji, textRef.current);
+                                                            // if (textRef && textRef.current) {
+                                                            //     //@ts-ignore
+                                                            //     textRef.current.value = textRef.current.value + v.emoji
+                                                            // }
+                                                        }}/>
+                                                        {/*<div {...getArrowProps({ className: 'tooltip-arrow' })} />*/}
+                                                    </div>
+                                                )}
 
-                                    }
-                                    {
-                                        replayMsg && <ReplayText msg={replayMsg} onClose={() => {
-                                            setReplayMsg(null)
-                                            dispatch(saveDataState({data: JSON.stringify({msg: null}), tag: 'replayMsg'}))
-                                        }
-                                        }/>
-                                    }
-                                </div>
-                            </IonCol>
-                            <IonCol size="2">
-                                <div className="msg-bottom-icon2">
-                                    {
-                                        //@ts-ignore
-                                        <IonButton className="footer-btn" disabled={loading } onClick={() => {
-                                            setLoading(true)
-                                            sendMsg().then(() => {
-                                                setLoading(false)
-                                                dispatch(saveDataState({
-                                                    data: JSON.stringify({refresh: 0}),
-                                                    tag: 'scrollToItem'
-                                                }))
+                                                {/*</div>*/}
+
+
+                                                <IonIcon className="footer-icon" src={imageOutline} color="dark"
+                                                         size="large"
+                                                         onClick={(e) => {
+                                                             e.stopPropagation();
+                                                             tribeService.userCheckAuth().then(() => {
+                                                                 if (userLimit && userLimit.msgLeft <= 0) {
+                                                                     present({
+                                                                         message: `Sending messages has reached the maximum limit ${userLimit.maxMsgCount}`,
+                                                                         duration: 2000,
+                                                                         position: "top",
+                                                                         color: "danger"
+                                                                     })
+                                                                     return;
+                                                                 }
+                                                                 tribeService.picUpload().then(photo => {
+                                                                     setIsLoading(true);
+                                                                     tribeService.uploadToServer(photo).then(({url, themeColors}) => {
+                                                                         setIsLoading(false)
+                                                                         const displayImage = utils.convertImgDisplay(themeColors.width, themeColors.height, url);
+                                                                         setDisplayImage({
+                                                                             url: url,
+                                                                             width: displayImage.width,
+                                                                             height: displayImage.height
+                                                                         });
+
+                                                                         setThemeColor(themeColors)
+                                                                     }).catch(e => {
+                                                                         setIsLoading(false)
+                                                                     })
+                                                                 }).catch(e => {
+                                                                     const err = typeof e == 'string' ? e : e.message;
+                                                                     present({
+                                                                         message: err,
+                                                                         duration: 2000,
+                                                                         position: "top",
+                                                                         color: "danger"
+                                                                     })
+                                                                 })
+                                                             }).catch(e => {
+                                                                 console.error(e)
+                                                                 const err = typeof e == 'string' ? e : e.message;
+                                                                 present({
+                                                                     message: err,
+                                                                     duration: 2000,
+                                                                     position: "top",
+                                                                     color: "danger"
+                                                                 })
+                                                             })
+                                                         }}/>
+                                                <IonIcon className="footer-icon" src={rocketOutline} color="dark"
+                                                         size="large" onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    tribeService.userCheckAuth().then(() => {
+                                                        setShowAirdropModal(true)
+                                                    }).catch(e => {
+                                                        console.error(e)
+                                                        const err = typeof e == 'string' ? e : e.message;
+                                                        present({
+                                                            message: err,
+                                                            duration: 2000,
+                                                            position: "top",
+                                                            color: "danger"
+                                                        })
+                                                    })
+
+                                                }}/>
+
+                                                <IonIcon className="footer-icon" src={diceOutline} color="dark" size="large"
+                                                         onClick={(e) => {
+                                                             e.stopPropagation();
+                                                             sendMsg(true).then(() => {
+                                                                 dispatch(saveDataState({
+                                                                     data: JSON.stringify({refresh: 0}),
+                                                                     tag: 'scrollToItem'
+                                                                 }))
+                                                             })
+                                                         }}/>
+                                            </div>
+                                        </IonCol>
+                                    </IonRow>
+                                    <IonRow>
+                                        <IonCol size="10">
+                                            <div>
+                                                {
+
+                                                    <TextareaAutosize onChange={(e) => {
+                                                        if (e.target.value && e.target.value.indexOf("/mind") == 0) {
+                                                            //@ts-ignore
+                                                            if (textRef.current) {
+                                                                //@ts-ignore
+                                                                textRef.current.value = textRef.current.value.replace("/mind", "💭");
+                                                            }
+                                                        }
+                                                        //@ts-ignore
+                                                    }} onBlur={emitChanges.bind(this)} id="msgText" rows={1}
+                                                                      maxLength={1024} ref={textRef} wrap='hard'
+                                                                      placeholder={tribeInfo && owner !== tribeInfo.keeper && userLimit ? `msg (${userLimit && userLimit.msgLeft}/${userLimit && userLimit.maxMsgCount}) , likes (${userLimit && userLimit.supportLeft}/${userLimit && userLimit.maxSupportCount}) ` : `Your messages`}
+                                                                      className="msg-input"/>
+
+                                                }
+                                                {
+                                                    replayMsg && <ReplayText msg={replayMsg} onClose={() => {
+                                                        setReplayMsg(null)
+                                                        dispatch(saveDataState({
+                                                            data: JSON.stringify({msg: null}),
+                                                            tag: 'replayMsg'
+                                                        }))
+                                                    }
+                                                    }/>
+                                                }
+                                            </div>
+                                        </IonCol>
+                                        <IonCol size="2">
+                                            <div className="msg-bottom-icon2">
+                                                {
+                                                    //@ts-ignore
+                                                    <IonButton className="footer-btn" disabled={loading} onClick={() => {
+                                                        setLoading(true)
+                                                        sendMsg().then(() => {
+                                                            setLoading(false)
+                                                            dispatch(saveDataState({
+                                                                data: JSON.stringify({refresh: 0}),
+                                                                tag: 'scrollToItem'
+                                                            }))
+                                                        }).catch(e => {
+                                                            setLoading(false)
+                                                            const err = typeof e == 'string' ? e : e.message;
+                                                            present({
+                                                                message: err,
+                                                                duration: 2000,
+                                                                position: "top",
+                                                                color: "danger"
+                                                            })
+                                                            console.error(e)
+                                                        })
+                                                    }}>SEND</IonButton>
+                                                }
+                                            </div>
+                                        </IonCol>
+                                    </IonRow>
+
+                                </IonCol>
+                            </IonRow> :
+                            <IonRow>
+                                <IonCol size="4">
+                                    <IonItem lines="none">
+                                        <IonCheckbox onIonChange={(e) => {
+                                            const checked = e.detail.checked;
+                                            // const arr = document.getElementsByName("pinMsgId");
+                                            // for (let i = 0; i < arr.length; i++) {
+                                            //     //@ts-ignore
+                                            //     document.getElementsByName("pinMsgId")[i].checked = checked
+                                            // }
+                                            dispatch(saveDataState({
+                                                data: JSON.stringify({refresh: true, checked: checked}),
+                                                tag: 'checkedAllMsg'
+                                            }))
+                                        }}></IonCheckbox>
+                                        <IonLabel>All</IonLabel>
+                                    </IonItem>
+                                </IonCol>
+                                <IonCol size="8">
+                                    <IonButton expand="block" onClick={() => {
+                                        const msgIds = selfStorage.getItem('tribe_pin_arr');
+                                        if (msgIds) {
+                                            tribeService.summarizeTribe(config.tribeId, msgIds).then(() => {
+                                                selfStorage.setItem("tribe_pin_arr", [])
+                                                onPin()
                                             }).catch(e => {
-                                                setLoading(false)
-                                                const err = typeof e == 'string' ? e : e.message;
-                                                present({
-                                                    message: err,
-                                                    duration: 2000,
-                                                    position: "top",
-                                                    color: "danger"
-                                                })
-                                                console.error(e)
+                                                console.log(e)
                                             })
-                                        }}>SEND</IonButton>
-                                    }
-                                </div>
-                            </IonCol>
-                        </IonRow>
+                                        }
+                                    }}>Pin</IonButton>
+                                </IonCol>
+                            </IonRow>
+                    }
+                </div>
+            </IonFooter>
 
-                    </IonCol>
-                </IonRow> :
-                <IonRow>
-                    <IonCol size="4">
-                        <IonItem lines="none">
-                            <IonCheckbox onIonChange={(e) => {
-                                const checked = e.detail.checked;
-                                // const arr = document.getElementsByName("pinMsgId");
-                                // for (let i = 0; i < arr.length; i++) {
-                                //     //@ts-ignore
-                                //     document.getElementsByName("pinMsgId")[i].checked = checked
-                                // }
-                                dispatch(saveDataState({
-                                    data: JSON.stringify({refresh: true, checked: checked}),
-                                    tag: 'checkedAllMsg'
-                                }))
-                            }}></IonCheckbox>
-                            <IonLabel>All</IonLabel>
-                        </IonItem>
-                    </IonCol>
-                    <IonCol size="8">
-                        <IonButton expand="block" onClick={() => {
-                            const msgIds = selfStorage.getItem('tribe_pin_arr');
-                            if (msgIds) {
-                                tribeService.summarizeTribe(config.tribeId, msgIds).then(() => {
-                                    selfStorage.setItem("tribe_pin_arr", [])
-                                    onPin()
-                                }).catch(e => {
-                                    console.log(e)
-                                })
-                            }
-                        }}>Pin</IonButton>
-                    </IonCol>
-                </IonRow>
+
         }
-
-
         <SendImageModal url={displayImage["url"]} width={displayImage["width"]} height={displayImage["height"]}
                         onOk={(text: string) => {
-                            if(userLimit && userLimit.msgLeft <=0){
+                            if (userLimit && userLimit.msgLeft <= 0) {
                                 present({
                                     message: `Sending messages has reached the maximum limit ${userLimit.maxMsgCount}`,
                                     duration: 2000,
@@ -442,7 +473,7 @@ const BottomBarChild: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTok
                                 present({
                                     message: err,
                                     duration: 2000,
-                                    position: "top" ,
+                                    position: "top",
                                     color: "danger"
                                 })
                             })
@@ -454,7 +485,8 @@ const BottomBarChild: React.FC<Props> = ({showPin,alreadySelectRole, roles,isTok
             onRoleCheck(role)
         }}/>
 
-        <AirdropModal actor={selectRole} onOk={()=>sendAirdrop()} onClose={()=>setShowAirdropModal(false)} owner={owner} isOpen={showAirdropModal} />
+        <AirdropModal actor={selectRole} onOk={() => sendAirdrop()} onClose={() => setShowAirdropModal(false)}
+                      owner={owner} isOpen={showAirdropModal}/>
         <IonLoading
             cssClass='my-custom-class'
             isOpen={isLoading}
