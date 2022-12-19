@@ -22,7 +22,7 @@ interface Props{
 }
 export const PinnedMsgModal: React.FC<Props> = ({isOpen,onClose,tribeInfo,data}) =>{
     return <>
-        <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} swipeToClose>
+        <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} canDismiss>
             <IonHeader collapse="fade">
                 <IonToolbar>
                     <IonButtons slot="start">

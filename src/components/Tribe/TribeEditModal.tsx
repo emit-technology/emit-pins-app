@@ -128,7 +128,7 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
     }
 
     return <>
-        <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal" swipeToClose>
+        <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal" canDismiss>
             <IonHeader collapse="fade">
                 <IonToolbar>
                     <IonTitle>{forkGroupId? `Create a new Fork  ${tribeInfo.title} `: (tribeInfo ? `Update ${tribeInfo.title}` : `Create Verse`)}</IonTitle>

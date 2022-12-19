@@ -66,7 +66,7 @@ export const ResetModal:React.FC<Props> = ({isOpen,onOk,onUnlock,onClose})=>{
     return <>
         <IonModal isOpen={isOpen} className="role-select-list" onDidDismiss={() => {
             onClose()
-        }} swipeToClose>
+        }} canDismiss>
             <IonHeader collapse="fade">
                 <IonToolbar>
                     <IonButtons slot="start">

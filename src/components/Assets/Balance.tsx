@@ -30,7 +30,7 @@ interface Props {
 export const Balance: React.FC<Props> = ({isOpen, onSelect, factors,onClose}) => {
 
     return <>
-        <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} initialBreakpoint={0.5} breakpoints={[0, 0.5, 0.75]} swipeToClose>
+        <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} initialBreakpoint={0.5} breakpoints={[0, 0.5, 0.75]} canDismiss>
             <IonHeader collapse="fade">
                 <IonToolbar>
                     {

@@ -72,7 +72,7 @@ export const BackupModal:React.FC<Props> = ({isOpen,mnemonic,onClose,onOK,accoun
     return <IonModal
         mode="ios"
         isOpen={isOpen}
-        swipeToClose
+        canDismiss
         onDidDismiss={() => {
             onClose()
         }} initialBreakpoint={0.6}

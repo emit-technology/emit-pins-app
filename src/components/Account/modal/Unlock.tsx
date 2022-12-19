@@ -41,7 +41,7 @@ export const AccountUnlock: React.FC<Props> = ({isOpen,onForgot, onClose, onOk})
     return <>
         <IonModal isOpen={isOpen} className="unlock-modal" onDidDismiss={() => {
             onClose()
-        }} swipeToClose>
+        }} canDismiss>
             <IonToolbar >
                 <IonTitle>Unlock Account</IonTitle>
                 <IonButtons slot="end">

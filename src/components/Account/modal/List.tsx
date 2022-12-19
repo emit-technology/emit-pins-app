@@ -76,7 +76,7 @@ export const AccountList: React.FC<Props> = ({isOpen, isLogin, onClose, onOk}) =
     return <>
         <IonModal isOpen={isOpen} className="account-info-modal" onDidDismiss={() => {
             onClose()
-        }} swipeToClose>
+        }} canDismiss>
 
             {/*<IonHeader collapse="fade">*/}
             {/*    <IonToolbar>*/}
@@ -395,7 +395,7 @@ export const AccountList: React.FC<Props> = ({isOpen, isLogin, onClose, onOk}) =
                 {/*}} onClose={()=>setShowCreate(false)}/>*/}
 
                 <IonModal isOpen={showAlert} onDidDismiss={() => setShowAlert(false)} initialBreakpoint={0.6}
-                          breakpoints={[0, 0.6, 0.75]} swipeToClose>
+                          breakpoints={[0, 0.6, 0.75]} canDismiss>
                     <IonHeader collapse="fade">
                         <IonToolbar color="white">
                             <IonTitle>

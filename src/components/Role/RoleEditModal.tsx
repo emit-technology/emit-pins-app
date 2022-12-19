@@ -42,7 +42,7 @@ export const RoleEditModal: React.FC<Props> = ({isOpen, roleInfo, onOk, onClose}
     },[roleInfo])
 
     return <>
-        <IonModal isOpen={isOpen} className="role-select-list" onDidDismiss={() => onClose()} swipeToClose>
+        <IonModal isOpen={isOpen} className="role-select-list" onDidDismiss={() => onClose()} canDismiss>
             <IonHeader collapse="fade">
                 <IonToolbar>
                     <IonTitle>{roleInfo?"Update":"New"} Role</IonTitle>

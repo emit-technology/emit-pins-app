@@ -47,7 +47,7 @@ export const AirdropInfoModal: React.FC<Props> = ({onClose, isOpen,keeper, owner
         airdropRecord.unshift(_copy)
     }
     return <>
-        <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="airdrop-info-modal" swipeToClose>
+        <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="airdrop-info-modal" canDismiss>
             {/*<IonHeader>*/}
             {/*    <IonToolbar color="primary">*/}
             {/*        <IonTitle>Airdrop</IonTitle>*/}

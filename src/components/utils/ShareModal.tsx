@@ -10,7 +10,7 @@ interface Props{
 }
 const ShareModal:React.FC<Props> = ({isOpen,onClose,tribeInfo,latestMessage})=>{
 
-    return  <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal" swipeToClose>
+    return  <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal" canDismiss>
         <IonContent className="ion-padding">
             <div className="about-info">
 

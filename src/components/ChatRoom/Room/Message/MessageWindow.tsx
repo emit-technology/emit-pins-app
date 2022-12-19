@@ -1014,7 +1014,7 @@ export const MessageContentWindowChild: React.FC<Props> = ({
                      onClose={() => setShowShareModal(false)}
                      tribeInfo={tribeInfo} latestMsg={shareMsgs} roles={shareRoles as Array<TribeRole>} owner={owner}/>
 
-            <IonModal isOpen={!!showModifyMsg} className="role-select-list" onDidDismiss={() => setShowModifyMsg(null)} swipeToClose>
+            <IonModal isOpen={!!showModifyMsg} className="role-select-list" onDidDismiss={() => setShowModifyMsg(null)} canDismiss>
                 <IonHeader collapse="fade">
                     <IonToolbar>
                         <IonTitle>Update messages</IonTitle>
