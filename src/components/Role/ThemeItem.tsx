@@ -8,8 +8,9 @@ interface Props{
     theme: TribeTheme;
     roles: Array<TribeRole>;
     seq: number;
+    checked?:boolean
 }
-const ThemeItemChild:React.FC<Props> = ({theme,roles,seq}) =>{
+const ThemeItemChild:React.FC<Props> = ({theme,roles,seq,checked}) =>{
 
     const roleImgs = useMemo(()=>{
         const roleImgs = [];
@@ -29,7 +30,9 @@ const ThemeItemChild:React.FC<Props> = ({theme,roles,seq}) =>{
 
     return <>
 
-        <div style={{position:"relative",width:'100%',height:'100%',backgroundImage: `url(${theme && utils.getDisPlayUrl(theme.image)})`}} className="theme-img">
+        <div style={{position:"relative",width:'100%',height:'100%',backgroundImage: `url(${theme && utils.getDisPlayUrl(theme.image)})`,
+            boxShadow: checked ?"0 0 2px 4px #D8F20C":"none"
+        }} className="theme-img">
             {/*<img src={theme.image} className="theme-img"/>*/}
             <div className="pinned-img-shade"></div>
         </div>

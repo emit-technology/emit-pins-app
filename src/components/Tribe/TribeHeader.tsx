@@ -14,7 +14,7 @@ import {
     IonButton,
     IonTitle, IonMenuToggle, IonHeader
 } from "@ionic/react";
-import {MessageStatus, PinnedSticky, TribeInfo, TribeRole, WsStatus} from "../../types";
+import {Message, MessageStatus, PinnedSticky, TribeInfo, TribeRole, TribeTheme, WsStatus} from "../../types";
 import tribeWorker from "../../worker/imWorker";
 import config from "../../common/config";
 import {chevronBackOutline, chevronForwardOutline, ellipsisVertical, listOutline} from "ionicons/icons";
@@ -56,6 +56,31 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
         if (stickyMsg) {
             const index = tribeService.groupIdCache().findIndex(v => v == stickyMsg.groupId)
             if (index > 0) {
+                const preGroupId = tribeService.groupIdCache()[index - 1];
+                if(!preGroupId){
+                    setStickyMsg({
+                        theme: tribeInfo && tribeInfo.theme,
+                        seq: index,
+                        roles: [],
+                        records: [],
+                        groupId: preGroupId,
+                        index: -1
+                    })
+                }else{
+                    tribeService.groupedMsg([preGroupId]).then(rest=>{
+                        const groupMsg = rest[0];
+                        setStickyMsg({
+                            theme: groupMsg.theme,
+                            seq: index,
+                            roles: [],
+                            records: [],
+                            groupId: preGroupId,
+                            index: index
+                        })
+                    })
+                }
+
+
                 tribeService.getMsgPositionWithGroupId(tribeService.groupIdCache()[index - 1]).then(postion => {
                     // onChangeMsgIndex(postion)
                     dispatch(saveDataState({
@@ -72,6 +97,33 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
         if (stickyMsg ) {
             const index = tribeService.groupIdCache().findIndex(v => v == stickyMsg.groupId)
             if (index < tribeService.groupIdCache().length - 1) {
+
+                const preGroupId = tribeService.groupIdCache()[index + 1];
+                if(!preGroupId){
+                    setStickyMsg({
+                        theme: tribeInfo && tribeInfo.theme,
+                        seq: -1,
+                        roles: [],
+                        records: [],
+                        groupId: preGroupId,
+                        index: -1
+                    })
+                }else{
+                    tribeService.groupedMsg([preGroupId]).then(rest=>{
+                        console.log(rest,"rest")
+                        const groupMsg = rest[0];
+                        setStickyMsg({
+                            theme: groupMsg.theme,
+                            seq: index + 2,
+                            roles: [],
+                            records: [],
+                            groupId: preGroupId,
+                            index: index + 2
+                        })
+                    })
+                }
+
+
                 tribeService.getMsgPositionWithGroupId(tribeService.groupIdCache()[index + 1]).then(postion => {
                     dispatch(saveDataState({
                         data: {firstIndex: postion},
@@ -106,15 +158,11 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
     }
 
     useEffect(() => {
-        if (dispatchData) {
-            if (dispatchData.tag == 'updateTheme2' && dispatchData.data) {
-                let dataObj: any = dispatchData.data;
-                if (dataObj.stickyMsgTop) {
-                    setStickyMsg(dataObj.stickyMsgTop)
-                    dispatch(saveDataState({
-                        data: {stickyMsg: dataObj.stickyMsg, stickyMsgTop: null},
-                        tag: 'updateTheme2'
-                    }))
+        if (dispatchMessage) {
+            if (dispatchMessage.tag == 'updateThemeHead' && dispatchData.data) {
+                let dataObj: any = dispatchMessage.data;
+                if (dataObj.stickyMsg) {
+                    setStickyMsg(dataObj.stickyMsg)
                 }
 
             }
@@ -122,18 +170,18 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
     }, [dispatchData.data]);
 
 
-    useEffect(() => {
-        if (dispatchMessage) {
-            if (dispatchMessage.tag == 'isScrollDown' && dispatchMessage.data) {
-                let dataObj: any = dispatchMessage.data;
-                setIsUp(dataObj.isScrollDown);
-                // if (dataObj.isScrolling) {
-                // dispatch(saveMessageState({data: {isScrolling:false  }, tag: 'isScrolling'}))
-                // }
-
-            }
-        }
-    }, [dispatchMessage.data]);
+    // useEffect(() => {
+    //     if (dispatchMessage) {
+    //         if (dispatchMessage.tag == 'isScrollDown' && dispatchMessage.data) {
+    //             let dataObj: any = dispatchMessage.data;
+    //             setIsUp(dataObj.isScrollDown);
+    //             // if (dataObj.isScrolling) {
+    //             // dispatch(saveMessageState({data: {isScrolling:false  }, tag: 'isScrolling'}))
+    //             // }
+    //
+    //         }
+    //     }
+    // }, [dispatchMessage.data]);
 
 
     return <>

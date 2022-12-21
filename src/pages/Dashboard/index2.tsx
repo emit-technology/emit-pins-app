@@ -551,10 +551,10 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                                         cursor: "pointer"
                                     }}>login</span></IonText></div>
                                 }
-                                {
-                                    isConnecting == WsStatus.inactive &&
-                                    <div className="not-connect">Connecting...</div>
-                                }
+                                {/*{*/}
+                                {/*    isConnecting == WsStatus.inactive &&*/}
+                                {/*    <div className="not-connect">Connecting...</div>*/}
+                                {/*}*/}
                                 <div className="msg-toolbar">
                                     <ToolBar/>
                                     <ShareEx owner={owner} roles={roles} latestMsg={latestMgs} isOpen={showShare}

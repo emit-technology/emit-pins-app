@@ -283,13 +283,14 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
                                                                          setIsLoading(false)
                                                                      })
                                                                  }).catch(e => {
-                                                                     const err = typeof e == 'string' ? e : e.message;
-                                                                     present({
-                                                                         message: err,
-                                                                         duration: 2000,
-                                                                         position: "top",
-                                                                         color: "danger"
-                                                                     })
+                                                                     // const err = typeof e == 'string' ? e : e.message;
+                                                                     // present({
+                                                                     //     message: err,
+                                                                     //     duration: 2000,
+                                                                     //     position: "top",
+                                                                     //     color: "danger"
+                                                                     // })
+                                                                     console.log(e)
                                                                  })
                                                              }).catch(e => {
                                                                  console.error(e)

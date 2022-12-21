@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {GroupMsg, PinnedSticky} from "../../types";
+import {GroupMsg, PinnedSticky, TribeTheme} from "../../types";
 import {
     IonButton,
     IonIcon,
@@ -14,9 +14,11 @@ interface Props{
     groupMsg: Array<GroupMsg>;
     onClose:()=>void;
     onClickTheme:(groupId: string)=>void;
+
+    checkedGroupId?: string
 }
 
-const ThemesItemsChild:React.FC<Props> = ({groupMsg,onClickTheme,onClose}) =>{
+const ThemesItemsChild:React.FC<Props> = ({groupMsg,onClickTheme,onClose, checkedGroupId}) =>{
 
     return <>
         <div className="role-list-box">
@@ -43,10 +45,10 @@ const ThemesItemsChild:React.FC<Props> = ({groupMsg,onClickTheme,onClose}) =>{
                     {
                         groupMsg && groupMsg.map((v, i) => {
                             const seq = i == groupMsg.length -1 ?0:(i+1);
-                            return <div style={{padding: '8px 12px', height: 160 ,position: "relative"}}  key={i} onClick={()=>{
+                            return <div style={{padding: '8px 12px', height: 160 ,position: "relative", }}  key={i} onClick={()=>{
                                 onClickTheme(v.groupId)
                             }}>
-                                <ThemeItem theme={v.theme} roles={v.roles} seq={seq} />
+                                <ThemeItem theme={v.theme} roles={v.roles} seq={seq} checked={checkedGroupId && checkedGroupId == v.groupId}/>
                             </div>
                         })
                     }

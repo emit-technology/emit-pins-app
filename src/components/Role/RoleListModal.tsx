@@ -57,6 +57,33 @@ const RoleListModalChild: React.FC<Props> = ({
     const dispatch = useAppDispatch();
 
     const onClickTheme = useCallback((groupId: string)=>{
+
+
+        const preGroupIndex = tribeService.groupIdCache().findIndex(v=>v == groupId);
+        if(!groupId){
+            setPinnedSticky({
+                theme: tribeInfo && tribeInfo.theme,
+                seq: -1,
+                roles: [],
+                records: [],
+                groupId: groupId,
+                index: -1
+            })
+        }else{
+            tribeService.groupedMsg([groupId]).then(rest=>{
+                console.log(rest,"rest")
+                const groupMsg = rest[0];
+                setPinnedSticky({
+                    theme: groupMsg.theme,
+                    seq: preGroupIndex+1,
+                    roles: [],
+                    records: [],
+                    groupId: groupId,
+                    index: preGroupIndex +1
+                })
+            })
+        }
+
         tribeService.getMsgPositionWithGroupId(groupId).then(position=>{
             dispatch(saveDataState({
                 data: {firstIndex: position},
@@ -67,11 +94,10 @@ const RoleListModalChild: React.FC<Props> = ({
 
     useEffect(() => {
         if (dispatchData) {
-            if (dispatchData.tag == 'updateTheme2' && dispatchData.data) {
+            if (dispatchData.tag == 'updateThemeRight' && dispatchData.data) {
                 let dataObj:any = dispatchData.data;
                 if (dataObj.stickyMsg) {
                     setPinnedSticky(dataObj.stickyMsg)
-                    dispatch(saveDataState({data: {stickyMsg: null,stickyMsgTop: dataObj.stickyMsgTop  }, tag: 'updateTheme2'}))
                 }
             }
         }
@@ -101,7 +127,7 @@ const RoleListModalChild: React.FC<Props> = ({
                         tribeInfo && (!tribeInfo.forked  || tribeInfo.forked.length  == 0)  && <div style={{height: (utils.isIos()) ?"30px": "12px"}}></div>
                     }
                     <div style={{height: (!showThemes && !utils.isApp()) ?"0":"100%" }}>
-                        <ThemesItems onClickTheme={onClickTheme} groupMsg={groupMsg}  onClose={()=>{
+                        <ThemesItems onClickTheme={onClickTheme} groupMsg={groupMsg} checkedGroupId={pinnedSticky && (pinnedSticky as PinnedSticky).groupId}  onClose={()=>{
                             setShowThemes(false)
                         }}/>
                     </div>

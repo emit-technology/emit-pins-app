@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
+import {useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState} from 'react';
 import {
     GroupMsg,
     Message,
@@ -142,7 +142,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                                              }) => {
 
     const dispatchData = useAppSelector(state => state.jsonData);
-    const dispatch = useAppDispatch();
+    const appDispatch = useAppDispatch();
 
     const [comments, setComments] = useState([]);
     const [showModifyMsg, setShowModifyMsg] = useState(null);
@@ -164,7 +164,6 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
 
     const [firstItemIndex, setFirstItemIndex] = useState(0)
     const [total, setTotal] = useState(0)
-    const [overscan, setOverscan] = useState(200)
 
     // useLayoutEffect(() => {
     //     const doc = document.querySelectorAll('[data-virtuoso-scroller=true]');
@@ -176,6 +175,20 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     // useEffect(() => {
     //     fetchMsgByIndex(firstIndex).catch(e => console.error(e))
     // }, [firstIndex])
+
+
+    useLayoutEffect(()=>{
+        if(!stickyMsg && tribeInfo){
+            setStickyMsg({
+                theme: tribeInfo && tribeInfo.theme,
+                seq: -1,
+                roles: [],
+                records: [],
+                groupId: "",
+                index: -1
+            })
+        }
+    },[tribeInfo, stickyMsg])
 
     useEffect(() => {
         if (!!shareMsgId) {
@@ -227,27 +240,29 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     // },[comments,firstItemIndex, setCurrentVisible, setStickyMsg])
 
     const fetchMsgByIndex = async (firstIndex: number, toBottom: boolean = false) => {
-        setOverscan(0);
         if (firstIndex > -1) {
             let reqIndex = firstIndex;
+            const pageSize = 30;
             let reqPageSize = pageSize;
             if (reqIndex > pageSize) {
-                reqPageSize = pageSize * 2
-                reqIndex = reqIndex - pageSize;
+                reqPageSize = pageSize + 20
+                reqIndex = reqIndex - 20;
             } else {
                 reqPageSize = pageSize + reqIndex;
                 reqIndex = 0;
             }
             const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, reqIndex, reqPageSize);
-            const {total} = await tribeService.streamMsg(config.tribeId, 0, 1);
+            // const {total} = await tribeService.streamMsg(config.tribeId, 0, 1);
             const comp = rest.data;
             // console.log("======== comments: ", comments);
             // combile(comp);
-            setComments(combile(comp, tribeInfo && tribeInfo.keeper))
-            setTotal(pre => {
-                return total
-            });
+            const ret = combile(comp, tribeInfo && tribeInfo.keeper);
             setFirstItemIndex(reqIndex)
+            setComments(ret)
+            // setTotal(pre => {
+            //     return total
+            // });
+
             console.log("------> firstItemIndex: [%d], scroll to=[%d]", reqIndex, firstIndex, comp.length > 0 && comp[0])
 
             setImmediate(() => {
@@ -258,6 +273,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 } else {
                     // scrollToItem({index: firstIndex + reqIndex, align: "start"});
                     startItem(firstIndex - reqIndex)
+                    setTimeout(()=> startItem(firstIndex - reqIndex), 500)
                 }
 
             })
@@ -279,6 +295,9 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 latestId = streamMsg1.total - 1;
             }
             await fetchMsgByIndex(latestId, false)
+            const {total} = await tribeService.streamMsg(config.tribeId, 0, 1);
+            setTotal(total);
+
             // console.log("=========initLatestPin >> start=[%d], end=[%d] ", latestId, pageSize);
             // const data = await tribeWorker.getPinnedMessageArray(config.tribeId, latestId, pageSize);
             // const comp = data.data;
@@ -390,7 +409,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     const onReplay = (msg: Message) => {
         if (owner) {
             setReplayMsg(msg)
-            dispatch(saveDataState({data: JSON.stringify({msg: msg}), tag: 'replayMsg'}))
+            appDispatch(saveDataState({data: JSON.stringify({msg: msg}), tag: 'replayMsg'}))
         }
     }
 
@@ -508,7 +527,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 } else {
                     fetchMsgByIndex(total - 1, true);
                 }
-                dispatch(saveDataState({data: JSON.stringify({refresh: -1}), tag: 'scrollToItem'}))
+                appDispatch(saveDataState({data: JSON.stringify({refresh: -1}), tag: 'scrollToItem'}))
             } else if (dispatchData.tag == 'checkedAllMsg' && dispatchData.data) {
                 let dataObj = JSON.parse(dispatchData.data);
                 if (dataObj.refresh) {
@@ -527,7 +546,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                         selfStorage.setItem(`tribe_pin_arr`, [])
                     }
                 }
-                dispatch(saveDataState({data: JSON.stringify({refresh: false, checked: false}), tag: 'checkedAllMsg'}))
+                appDispatch(saveDataState({data: JSON.stringify({refresh: false, checked: false}), tag: 'checkedAllMsg'}))
             } else if (dispatchData.tag == 'replayMsg' && dispatchData.data) {
                 let dataObj = JSON.parse(dispatchData.data);
                 if (!dataObj["msg"]) {
@@ -618,7 +637,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     // },[isScrollUp])
 
     useEffect(() => {
-        dispatch(saveMessageState({
+        appDispatch(saveMessageState({
             data: {isScrollDown: isScrollDown},
             tag: 'isScrollDown'
         }))
@@ -652,57 +671,49 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         }
     }, [setAtBottom])
 
-    const dispatchThemeFn = useCallback((data: PinnedSticky) => {
-        setStickyMsg(data)
-        dispatch(saveDataState({
-            data: {stickyMsg: data, stickyMsgTop: data},
-            tag: 'updateTheme2'
+    useEffect(()=>{
+        appDispatch(saveDataState({
+            data: {stickyMsg: stickyMsg},
+            tag: 'updateThemeRight'
         }))
-    }, [setStickyMsg])
+        appDispatch(saveMessageState({
+            data: {stickyMsg: stickyMsg},
+            tag: 'updateThemeHead'
+        }))
+    }, [stickyMsg])
 
     useEffect(() => {
         if (!!loaded && !!loadedData && !pinnedStickies) {
-            setOverscan(200);
             // console.log("visibleRange.startIndex >= firstItemIndex: ", visibleRange.startIndex, firstItemIndex)
-            if (visibleRange.startIndex >= firstItemIndex) {
-                const _startIndex = visibleRange.startIndex - firstItemIndex;
-                const _endIndex = visibleRange.endIndex - firstItemIndex;
-                const itemStart: PinnedSticky = comments[_startIndex];
-                const itemEnd: PinnedSticky = comments[_endIndex];
-                if (itemEnd && itemEnd.records && itemEnd.records[0].msgIndex > maxVisibleIndex) {
-                    setMaxVisible(itemEnd.records[0].msgIndex)
-                } else if (maxVisibleIndex > total - 1) {
-                    setMaxVisible(total - 1)
-                }
-                if (visibleRange.endIndex >= total - 1 && atBottom) {
-                    if (!!tribeInfo) {
-                        const groupArr = tribeService.getGroupMap();
-                        const defaultGroup = groupArr[groupArr.length - 1];
-                        dispatchThemeFn({
-                            theme: tribeInfo && tribeInfo.theme,
-                            seq: -1,
-                            roles: defaultGroup ? defaultGroup.roles : [],
-                            records: [],
-                            groupId: "",
-                            index: -1
-                        });
-                    }
-                } else {
-                    if (!!itemStart) {
-                        dispatchThemeFn(itemStart)
-                    }
-                }
-                setCurrentVisible(visibleRange.startIndex);
-
+            const _startIndex = visibleRange.startIndex - firstItemIndex;
+            const _endIndex = visibleRange.endIndex - firstItemIndex;
+            const itemStart: PinnedSticky = comments[_startIndex];
+            const itemEnd: PinnedSticky = comments[_endIndex];
+            if (itemEnd && itemEnd.records && itemEnd.records[0].msgIndex > maxVisibleIndex) {
+                setMaxVisible(itemEnd.records[0].msgIndex)
+            } else if (maxVisibleIndex > total - 1) {
+                setMaxVisible(total - 1)
             }
+            if (visibleRange.endIndex >= total - 1 && atBottom) {
+                if (!!tribeInfo) {
+                    const groupArr = tribeService.getGroupMap();
+                    const defaultGroup = groupArr[groupArr.length - 1];
+                    setStickyMsg({
+                        theme: tribeInfo && tribeInfo.theme,
+                        seq: -1,
+                        roles: defaultGroup ? defaultGroup.roles : [],
+                        records: [],
+                        groupId: "",
+                        index: -1
+                    });
+                }
+            } else {
+                if (!!itemStart) {
+                    setStickyMsg(itemStart)
+                }
+            }
+            setCurrentVisible(visibleRange.startIndex);
 
-            // dispatch hide bar
-            // if(visibleRange.startIndex > lastVisible.startIndex){
-            //     setIsScrollDown(true);
-            // }else if(visibleRange.startIndex  < lastVisible.startIndex){
-            //     setIsScrollDown(false);
-            // }
-            // lastVisible = visibleRange
         }
 
     }, [visibleRange])
@@ -792,10 +803,10 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                                 onEdit={(msg) => setShowModifyMsg(msg)} onReplay={onReplay}
                                                 dispatchTheme={(data) => {
                                                     setCheckedMsgId(data.records[0].id)
-                                                    dispatchThemeFn(data);
+                                                    setStickyMsg(data);
                                                 }}
                                                 setCheckedMsgId={(msgId) => {
-                                                    dispatchThemeFn(data);
+                                                    setStickyMsg(data);
                                                     setCheckedMsgId(msgId)
                                                 }}
                                                 visibleRange={visibleRange}
