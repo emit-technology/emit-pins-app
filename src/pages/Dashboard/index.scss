@@ -3,6 +3,10 @@
   --background: #ffffff;
 }
 
+.msg-toolbar2{
+  --min-height: 60px;
+}
+
 .msg-content{
   background-color: var(--ion-color-tertiary);
   height: calc(100% - 114px);
@@ -555,7 +559,7 @@ ion-icon:before {
 
 .recmt-head{
   display: flex;
-  //padding: 0px 0 12px;
+  padding: 0 0 6px;
 }
 
 .recmt-head-icon {
@@ -600,6 +604,7 @@ ion-icon:before {
   justify-content: center;
   padding-bottom: 12px;
   max-height: 450px;
+  position: relative;
 }
 
 .recmt-img img{
@@ -625,6 +630,8 @@ ion-icon:before {
   color: #B9BABE;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  flex-direction: column;
 }
 
 .recmt-footer div:last-child {
@@ -660,7 +667,7 @@ ion-icon:before {
 position: absolute;
 /* size: 32px; */
   left: 18px;
-  bottom: 80px;
+  bottom: 62px;
 }
 
 @keyframes comeIn {
@@ -736,4 +743,12 @@ position: absolute;
   width: auto;
   height: auto;
   display: flex;
+}
+
+.footer-icons{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 6px;
+  flex: 2;
 }

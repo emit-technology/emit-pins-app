@@ -3,7 +3,14 @@ import {
     IonHeader, IonModal,IonButton, IonPage, IonSearchbar, IonContent, IonToolbar, IonSegment, IonLabel, IonSegmentButton, IonItem,
     IonButtons, IonIcon,IonRow,IonCol,IonText, IonToast, IonTitle, IonLoading, IonMenu, IonMenuToggle
 } from "@ionic/react";
-import {addOutline, arrowBackOutline, listOutline, personCircleOutline, searchOutline} from "ionicons/icons";
+import {
+    addOutline,
+    arrowBackOutline,
+    closeOutline,
+    listOutline,
+    personCircleOutline,
+    searchOutline
+} from "ionicons/icons";
 import {tribeService} from "../../service/tribe";
 import {TribeInfo} from "../../types";
 import './index.scss';
@@ -31,6 +38,8 @@ interface State {
     showCreateModal: boolean
     tribeUserInfo: any;
     address:string
+    showSearch: boolean
+    searchText: string;
 }
 
 interface Props {
@@ -51,7 +60,10 @@ export class HomePage extends React.Component<Props, State> {
         tribeTimeMap: new Map<string,number>() ,
         showCreateModal: false,
         tribeUserInfo:null,
-        address: ""
+        address: "",
+        showSearch: false,
+        searchText: ""
+
     }
 
     componentDidMount() {
@@ -151,10 +163,10 @@ export class HomePage extends React.Component<Props, State> {
     searchText = (value: string) => {
         const {dataOrigin, segment} = this.state;
         if (!value) {
-            this.setState({data: dataOrigin})
+            this.setState({data: dataOrigin,searchText:value})
         } else {
             const data = dataOrigin.filter(v => (v.title.toLowerCase().indexOf(value.toLowerCase()) > -1 || v.tribeId.toLowerCase().indexOf(value.toLowerCase()) > -1))
-            this.setState({data: data})
+            this.setState({data: data,searchText:value})
             if(!data || data.length == 0){
                 try{
                     const tribeId = utils.getTribeIdFromUrl(value)
@@ -164,7 +176,7 @@ export class HomePage extends React.Component<Props, State> {
                             tribeInfo.roles = [];
                             tribeInfo.subscribed = false;
 
-                            this.setState({data:[tribeInfo]})
+                            this.setState({data:[tribeInfo],searchText:value})
                         }).catch(e=>console.log(e))
                     }
                 }catch (e){
@@ -181,11 +193,11 @@ export class HomePage extends React.Component<Props, State> {
 
 
     render() {
-        const {segment, account,tribeUserInfo,address, isSessionAvailable, showCreateModal ,tribeTimeMap, data, layout, showLoading, showToast, toastMsg} = this.state;
+        const {segment, account,tribeUserInfo,showSearch,searchText, address, isSessionAvailable, showCreateModal ,tribeTimeMap, data, layout, showLoading, showToast, toastMsg} = this.state;
         return <>
             <IonMenu contentId="main-home">
                 <IonHeader>
-                    <IonToolbar className="msg-toolbar">
+                    <IonToolbar >
                         <IonMenuToggle>
                             <div style={{paddingLeft: 12}}><IonIcon src={arrowBackOutline}/></div>
                         </IonMenuToggle>
@@ -216,13 +228,14 @@ export class HomePage extends React.Component<Props, State> {
                 </IonContent>
             </IonMenu>
             <IonPage id="main-home">
-                <IonHeader mode="ios" color="primary" style={{padding: '0 12px', background: "#ffffff"}}>
-                    <IonToolbar className="msg-toolbar">
+                <IonHeader mode="ios" color="primary">
+                    <IonToolbar style={{padding: "6px 12px 0"}} className={!utils.isApp()?"msg-toolbar":"msg-toolbar2"}>
                         <div slot="start" id="main-home">
                             <IonMenuToggle>
                                 <IonIcon src={listOutline} size="large"/>
                             </IonMenuToggle>
                         </div>
+
                         <IonTitle>
                             <div className="home-head-title">
                                 <div className="home-head-ctn">
@@ -235,8 +248,11 @@ export class HomePage extends React.Component<Props, State> {
                                 </div>
                             </div>
                         </IonTitle>
-
                         <IonButtons slot="end">
+                            <IonButton onClick={()=>{
+                                this.setState({showSearch: true})
+                            }}><IonIcon src={searchOutline} id="open-custom-dialog" size="large" color="dark"/></IonButton>
+
                             <IonButton onClick={()=>{
                                 this.setState({showCreateModal: true})
                             }}><IonIcon src={addOutline} id="open-custom-dialog" size="large" color="dark"/></IonButton>
@@ -253,7 +269,7 @@ export class HomePage extends React.Component<Props, State> {
 
                     </IonToolbar>
                 </IonHeader>
-                <IonContent fullscreen className="ion-padding home-ctn ion-content-chat">
+                <IonContent fullscreen className="ion-padding home-ctn ion-content-chat padding-top-0">
                     <IonSegment className="segment" color="secondary" mode="md" value={segment} onIonChange={(e) => {
                         this.setState({showLoading: true, segment: e.detail.value})
                         this.init(e.detail.value).then(() => {
@@ -271,24 +287,39 @@ export class HomePage extends React.Component<Props, State> {
                         </IonSegmentButton>
                         {/*<IonSegmentButton color="dark" className="segment-button" value="recentView">Recent View</IonSegmentButton>*/}
                     </IonSegment>
-                    <IonRow>
-                        <IonCol offsetLg="3" sizeLg="6" offsetSm="1" sizeSm="10">
-                            <IonSearchbar  showClearButton="focus" id="search-input" placeholder="Search"
-                                          onIonChange={(e) => {
-                                              this.searchText(e.detail.value)
-                                          }}
-                                          // onIonCancel={(e) => {
-                                          //     const value = e.target.value;
-                                          //     if(value && value.indexOf("https://pins.emit.technology/") > -1){
-                                          //         const tribeId = value.slice("https://pins.emit.technology/".length)
-                                          //         window.location.href = `./${tribeId}`
-                                          //     }else{
-                                          //         this.searchText(e.target.value)
-                                          //     }
-                                          // }}
-                            />
-                        </IonCol>
-                    </IonRow>
+
+
+                    <IonModal isOpen={showSearch} className="searchbar-modal" onDidDismiss={(e)=>{
+                        this.setState({showSearch: false})
+                    }}>
+                        <IonSearchbar value={searchText}  onIonBlur={()=>{
+                            this.setState({showSearch: false})
+                        }}  showClearButton="focus" id="search-input" placeholder="Search"
+                                      onIonChange={(e) => {
+                                          this.searchText(e.detail.value)
+                                      }}
+                        />
+                    </IonModal>
+
+
+                    {/*<IonRow>*/}
+                    {/*    <IonCol offsetLg="3" sizeLg="6" offsetSm="1" sizeSm="10">*/}
+                    {/*        <IonSearchbar  showClearButton="focus" id="search-input" placeholder="Search"*/}
+                    {/*                      onIonChange={(e) => {*/}
+                    {/*                          this.searchText(e.detail.value)*/}
+                    {/*                      }}*/}
+                    {/*                      // onIonCancel={(e) => {*/}
+                    {/*                      //     const value = e.target.value;*/}
+                    {/*                      //     if(value && value.indexOf("https://pins.emit.technology/") > -1){*/}
+                    {/*                      //         const tribeId = value.slice("https://pins.emit.technology/".length)*/}
+                    {/*                      //         window.location.href = `./${tribeId}`*/}
+                    {/*                      //     }else{*/}
+                    {/*                      //         this.searchText(e.target.value)*/}
+                    {/*                      //     }*/}
+                    {/*                      // }}*/}
+                    {/*        />*/}
+                    {/*    </IonCol>*/}
+                    {/*</IonRow>*/}
                     <div style={{height: "100%",padding: "0 0 200px 0",overflow: "scroll"}}>
                         {/*{*/}
                         {/*    layout && layout.length>0&&<TribeRecommend data={data} layout={layout}/>*/}

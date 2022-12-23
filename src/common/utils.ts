@@ -49,7 +49,7 @@ export const utils = {
     },
     nFormatter: function (n: number | BigNumber | string | undefined, digits: number) {
         if (!n || new BigNumber(n).toNumber() == 0) {
-            return "0.000"
+            return "0"
         }
         const num = new BigNumber(n).toNumber();
         const si = [

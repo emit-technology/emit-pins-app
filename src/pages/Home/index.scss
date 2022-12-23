@@ -17,22 +17,34 @@
 .segment {
   border-bottom: 2px solid #f7f7f7;
   --backgroud:  #F5F7F9 !important;
+  margin-top: 60px;
 }
 .segment-button{
-  --indicator-height: 3px;
+  --indicator-height: 0px;
 }
 
 .searchbar-modal{
   --height: 60px;
   --max-width: 90vw;
   align-items: flex-start !important;
-  padding-top: 60px;
+  padding-top: 40px;
+  --border-radius: 100px;
 }
 
+.padding-top-0 {
+}
+
+.searchbar-modal::-webkit-scrollbar { width: 0 !important }
+
 .airdrop-time{
-  font-size: 14px;
-  padding: 6px 0;
-  color: var(--ion-color-medium);
+  position: absolute;
+  color: #fff;
+  font-size: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0 6px;
+  border-radius: 20px;
+  left: 6px;
+  top: 6px;
 }
 
 .tag-point {
@@ -96,14 +108,17 @@
 }
 
 .seq-title{
-  font-family: SFBold;
-  font-size: 16px;
+  font-family: SFProText-Bold !important;
+  font-size: 14px;
   letter-spacing: -0.1px;
+  background: var(--ion-color-secondary);
+  padding: 3px 8px;
+  border-radius: 35px;
 }
 
 .seq-title-2{
-  font-family: SFProText-Medium;
-  font-size: 16px;
+  font-family: SFProText-Medium !important;
+  font-size: 14px;
   letter-spacing: -0.1px;
 }
 
@@ -123,16 +138,17 @@
 }
 
 .static-icons{
-  width: 20px;
-  //vertical-align: middle;
+  height: 16px;
+  vertical-align: middle;
   display: flex;
+  color: #868990;
 }
 
 .asv-name{
   padding: 0px 6px;
-  color: rgb(0, 0, 0);
+  color: #868990;
   font-size: 16px;
-  width: 250px;
+  width: 100px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -395,7 +411,7 @@
   -webkit-box-orient: vertical;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   line-height: 1.2;
   //font-family: SFProText-Medium !important;
 }
@@ -465,7 +481,7 @@
 
 .share-content-role > div {
   min-width: 100px;
-  max-width: 300px;
+  width: 300px;
   background: #fff;
   display: flex;
   align-content: center;
@@ -550,4 +566,17 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 5;
   overflow: hidden;
+}
+
+
+.iconss > div {
+  height: 20px;
+  font-size: 10px;
+  color: #868990;
+  display: flex;
+  align-items: flex-start;
+}
+
+.sc-ion-searchbar-ios-h{
+  --border-radius: 100px;
 }

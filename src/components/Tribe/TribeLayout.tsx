@@ -9,6 +9,7 @@ import {
 } from "ionicons/icons";
 import selfStorage from "../../common/storage";
 import copy from "copy-to-clipboard";
+import {NoneData} from "../Data/None";
 
 interface Props {
     data: Array<TribeInfo>
@@ -26,7 +27,12 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
 
         <XMasonry>
             {
-                data && data.map((v, i) => {
+                data && data.length == 0 && <XBlock key={-1}>
+                    <NoneData/>
+                </XBlock>
+            }
+            {
+                data && data.length>0&& data.map((v, i) => {
                     const content = v.latestMsg && v.latestMsg.content as MsgText;
                     let roles = v.roles;
                     if (!roles) {
@@ -59,18 +65,18 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                     <div>{v.tribeId}</div>
                                 </div>
                             </div>
-                            <div
-                                className="airdrop-time">{v.latestMsg && v.latestMsg.timestamp && utils.dateFormat(new Date(v.latestMsg.timestamp * 1000))}</div>
                             {
                                 content && content["image"] && content["image"]["url"] &&
                                 <div className="recmt-img">
                                     <img src={content["image"]["url"]}/>
+                                    <div className="airdrop-time">{v.latestMsg && v.latestMsg.timestamp && utils.dateFormat(new Date(v.latestMsg.timestamp * 1000))}</div>
                                 </div>
                             }
                             {
-                                !v.latestMsg &&
+                                (!v.latestMsg || !!v.latestMsg && v.latestMsg.content["image"] && !((v.latestMsg.content as MsgText).image.url)) &&
                                 <div className="recmt-img">
                                     <img src={v.theme.image["url"]}/>
+                                    <div className="airdrop-time">{v.latestMsg && v.latestMsg.timestamp && utils.dateFormat(new Date(v.latestMsg.timestamp * 1000))}</div>
                                 </div>
 
                             }
@@ -127,7 +133,7 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                             <div className="recmt-footer">
                                 <div style={{display: "flex", alignItems: "center"}}>
                                     {actor ? <>
-                                        <div style={{height: 36}}>
+                                        <div style={{height: 36, width: 36}}>
                                             <img className="ava-img" src={utils.getDisPlayUrl(actor.avatar)}/>
                                         </div>
                                         <div className="asv-name">
@@ -135,7 +141,7 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                         </div>
 
                                     </> : <>
-                                        <div style={{height: 36}}>
+                                        <div style={{height: 36, width: 36}}>
                                             <img className="ava-img" src={"./assets/img/default-avatar.png"}/>
                                         </div>
                                         <div className="asv-name">
@@ -145,30 +151,27 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                     </>
                                     }
                                 </div>
-
-                            </div>
-
-                            <div style={{display: "flex", alignItems: "center", justifyContent: "space-between",paddingTop:6}}>
-                                <div className="iconss">
-                                    <img src="./assets/img/view.png" className="static-icons"/>&nbsp;<span style={{verticalAlign: "middle"}}>{v.reads}</span>
-                                </div>
-                                {/*<div className="iconss">*/}
-                                {/*    <img src="./assets/img/users.png" className="static-icons"/>&nbsp;<span style={{verticalAlign: "middle"}}>{roles && roles.length + 1}</span>*/}
-                                {/*</div>*/}
-                                <div className="iconss">
-                                    <img src="./assets/img/like.png" className="static-icons"/>&nbsp;<span style={{verticalAlign: "middle"}}>{v.collections}</span>
-                                </div>
-                                <div className="iconss">
-                                    <img src="./assets/img/likes.png" className="static-icons"/>&nbsp;<span style={{verticalAlign: "middle"}}>{v.likes}</span>
-                                </div>
-                                <div className="iconss" onClick={(e)=>{
-                                    e.stopPropagation();
-                                    copy(`${config.baseUrl}/${v.tribeId}`)
-                                    presentToast({color:"primary", message: "Copied to clipboard", duration: 2000})
-                                }}>
-                                    <img src="./assets/img/copylink.png" className="static-icons"/>
+                                <div className="footer-icons">
+                                    <div className="iconss">
+                                        <div><img src="./assets/img/icon/viewOutline.png" className="static-icons"/></div>
+                                        <div>{utils.nFormatter(v.reads,2)}</div>
+                                    </div>
+                                    <div className="iconss">
+                                        <div><img src="./assets/img/icon/rolesOutline.png"  className="static-icons"/></div>
+                                        <div>{utils.nFormatter(roles && roles.length + 1,2)}</div>
+                                    </div>
+                                    <div className="iconss">
+                                        <div><img src="./assets/img/icon/collectionOutline.png" className="static-icons"/></div>
+                                        <div>{utils.nFormatter(v.collections,2)}</div>
+                                    </div>
+                                    <div className="iconss">
+                                        <div><img src="./assets/img/icon/likeOutline.png" className="static-icons"/></div>
+                                        <div>{utils.nFormatter(v.likes,2)}</div>
+                                    </div>
                                 </div>
                             </div>
+
+
 
                             {/*<div className="subop">*/}
                             {/*    /!*<div><IonIcon className="subop-icon" src={chatbubbleOutline}/></div>*!/*/}
@@ -225,15 +228,15 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                     <div className="tag-point-r"></div>
                                 </>
                             }
-                            {/*<div className="tag-point">*/}
-                            {/*    <div className="iconss" onClick={(e)=>{*/}
-                            {/*        e.stopPropagation();*/}
-                            {/*        copy(`${window.location.href}/${v.tribeId}`)*/}
-                            {/*        presentToast({color:"primary", message: "Copied to clipboard", duration: 2000})*/}
-                            {/*    }}>*/}
-                            {/*        <img src="./assets/img/copylink.png" width={18}/>*/}
-                            {/*    </div>*/}
-                            {/*</div>*/}
+                            <div className="tag-point">
+                                <div className="iconss" onClick={(e)=>{
+                                    e.stopPropagation();
+                                    copy(`${window.location.href}/${v.tribeId}`)
+                                    presentToast({color:"primary", message: "Copied to clipboard", duration: 2000})
+                                }}>
+                                    <img src="./assets/img/icon/linkOutline.png" width={18}/>
+                                </div>
+                            </div>
 
                         </div>
                     </XBlock>

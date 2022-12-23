@@ -161,7 +161,6 @@ export const Text: React.FC<Props> = ({
                     }
                     {
                         (meta as Metadata).og.title && <div>
-                            <div className="og-card-title">{(meta as Metadata).meta.title}</div>
                             <div className="og-card-title">{(meta as Metadata).og.title}</div>
                             <div className="og-card-desc og-card-text">{(meta as Metadata).og.description}</div>
                         </div>

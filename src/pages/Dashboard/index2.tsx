@@ -538,7 +538,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                                  onCancelShowPin={()=>setShowPin(false)}
                     />
 
-                    <IonContent fullscreen className="ion-content-chat">
+                    <IonContent fullscreen className="ion-content-chat padding-top-0">
                         <div className="msg-box">
                             <>
                                 {
