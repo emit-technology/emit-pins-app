@@ -35,8 +35,6 @@ export const Role:React.FC<Props> = ({msg,isOwner}) =>{
                             </span>
                             </div>
                             <div className="update-role">
-
-
                                 {
                                     showOrigin && content.origin && <div style={{position: "relative"}}>
                                         <div className="origin">old</div>

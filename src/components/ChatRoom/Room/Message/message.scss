@@ -550,7 +550,6 @@
   background-image: linear-gradient(#F2F5F8, #F2F5F8);
 }
 
-
 .strike {
   display: block;
   text-align: center;
@@ -1184,4 +1183,11 @@ ion-radio.radio-checked::part(mark) {
   display: flex;
   align-content: center;
   align-items: center;
+}
+
+
+.message-role-outer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }

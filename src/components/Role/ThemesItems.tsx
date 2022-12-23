@@ -48,7 +48,7 @@ const ThemesItemsChild:React.FC<Props> = ({groupMsg,onClickTheme,onClose, checke
                             return <div style={{padding: '8px 12px', height: 160 ,position: "relative", }}  key={i} onClick={()=>{
                                 onClickTheme(v.groupId)
                             }}>
-                                <ThemeItem theme={v.theme} roles={v.roles} seq={seq} checked={checkedGroupId && checkedGroupId == v.groupId}/>
+                                <ThemeItem theme={v.theme} roles={v.roles} seq={seq} checked={ checkedGroupId == v.groupId}/>
                             </div>
                         })
                     }

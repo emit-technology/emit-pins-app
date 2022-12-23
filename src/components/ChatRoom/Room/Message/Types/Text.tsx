@@ -343,8 +343,8 @@ export const Text: React.FC<Props> = ({
                 )
                 :
 
-                <div>
-                    <div className={`support-outer  ${hovered && 'support-outer-column'}`}>
+                <div style={{width: "100%"}}>
+                    <div className={`support-outer message-role-outer  ${hovered && 'support-outer-column'}`}>
                         <div style={{position: "relative"}}>
                             {
                                 msg.msgType == MessageType.Role &&

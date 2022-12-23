@@ -456,9 +456,9 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
 
     const onSupportFn = useCallback((msgId, f) => {
         onSupport(msgId, f).catch(e => {
-            const err = typeof e == 'string' ? e : e.message;
-            setShowToast(true)
-            setToastMsg(err)
+            // const err = typeof e == 'string' ? e : e.message;
+            // setShowToast(true)
+            // setToastMsg(err)
         })
     }, [])
 

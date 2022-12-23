@@ -38,7 +38,7 @@ interface Props {
     setShowActionSheet: (f: boolean) => void;
 }
 
-const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin, setShowActionSheet, onReladData,  roles, wsStatus}) => {
+const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin, setShowActionSheet, onReladData, roles, wsStatus}) => {
 
     const [showTribeInfoModal, setShowTribeInfoModal] = useState(false);
     const [stickies, setStickies] = useState({data: [], total: 0});
@@ -57,7 +57,7 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
             const index = tribeService.groupIdCache().findIndex(v => v == stickyMsg.groupId)
             if (index > 0) {
                 const preGroupId = tribeService.groupIdCache()[index - 1];
-                if(!preGroupId){
+                if (!preGroupId) {
                     setStickyMsg({
                         theme: tribeInfo && tribeInfo.theme,
                         seq: index,
@@ -66,8 +66,8 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
                         groupId: preGroupId,
                         index: -1
                     })
-                }else{
-                    tribeService.groupedMsg([preGroupId]).then(rest=>{
+                } else {
+                    tribeService.groupedMsg([preGroupId]).then(rest => {
                         const groupMsg = rest[0];
                         setStickyMsg({
                             theme: groupMsg.theme,
@@ -94,36 +94,43 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
 
 
     const onClickThemeForward = useCallback(() => {
-        if (stickyMsg ) {
+        if (stickyMsg) {
             const index = tribeService.groupIdCache().findIndex(v => v == stickyMsg.groupId)
             if (index < tribeService.groupIdCache().length - 1) {
 
                 const preGroupId = tribeService.groupIdCache()[index + 1];
-                if(!preGroupId){
-                    setStickyMsg({
+                if (!preGroupId) {
+                    const stickyMsg1 = {
                         theme: tribeInfo && tribeInfo.theme,
                         seq: -1,
                         roles: [],
                         records: [],
                         groupId: preGroupId,
                         index: -1
-                    })
-                }else{
-                    tribeService.groupedMsg([preGroupId]).then(rest=>{
-                        console.log(rest,"rest")
+                    }
+                    setStickyMsg(stickyMsg1)
+                    dispatch(saveDataState({
+                        data: {stickyMsg: stickyMsg1},
+                        tag: 'updateThemeRight'
+                    }))
+                } else {
+                    tribeService.groupedMsg([preGroupId]).then(rest => {
                         const groupMsg = rest[0];
-                        setStickyMsg({
+                        const stickyMsg1 = {
                             theme: groupMsg.theme,
                             seq: index + 2,
                             roles: [],
                             records: [],
                             groupId: preGroupId,
                             index: index + 2
-                        })
+                        };
+                        setStickyMsg(stickyMsg1)
+                        dispatch(saveDataState({
+                            data: {stickyMsg: stickyMsg1},
+                            tag: 'updateThemeRight'
+                        }))
                     })
                 }
-
-
                 tribeService.getMsgPositionWithGroupId(tribeService.groupIdCache()[index + 1]).then(postion => {
                     dispatch(saveDataState({
                         data: {firstIndex: postion},
@@ -187,7 +194,7 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
     return <>
         {/* className={"display-animation"} style={{height: !isUp && utils.isApp()?"1px":"auto"}}*/}
         {
-          <IonHeader mode="ios" color="primary">
+            <IonHeader mode="ios" color="primary">
                 <IonToolbar className="msg-toolbar">
                     <div className="msg-head-avatar">
                         <div slot="start" id="main-content-left">
@@ -213,8 +220,9 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
                                         <IonCol size="8">
                                             <div className="head-box">
                                                 <div>
-                                                    <div  className="head-reg" style={{ backgroundImage: (stickyMsg && stickyMsg.theme && stickyMsg.theme.image || tribeInfo && tribeInfo.theme) ?
-                                                            `url(${utils.getDisPlayUrl(stickyMsg && stickyMsg.groupId ? stickyMsg.theme.image : tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image))})`:""
+                                                    <div className="head-reg" style={{
+                                                        backgroundImage: (stickyMsg && stickyMsg.theme && stickyMsg.theme.image || tribeInfo && tribeInfo.theme) ?
+                                                            `url(${utils.getDisPlayUrl(stickyMsg && stickyMsg.groupId ? stickyMsg.theme.image : tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image))})` : ""
 
                                                     }} onClick={() => {
                                                         fetch().then(() => {
@@ -233,7 +241,8 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
                                                             setShowTribeInfoModal(true)
                                                         }).catch(e => console.error(e))
                                                     }}>
-                                                        <div className="head-pin-title">{tribeInfo && tribeInfo.title}</div>
+                                                        <div
+                                                            className="head-pin-title">{tribeInfo && tribeInfo.title}</div>
                                                         <div style={{overflow: "hidden"}} className="head-sub">
                                     <span style={{fontSize: '11px', color: "#92949c"}}>
                                     {

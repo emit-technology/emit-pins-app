@@ -61,34 +61,46 @@ const RoleListModalChild: React.FC<Props> = ({
 
         const preGroupIndex = tribeService.groupIdCache().findIndex(v=>v == groupId);
         if(!groupId){
-            setPinnedSticky({
+            const stickyMsg = {
                 theme: tribeInfo && tribeInfo.theme,
-                seq: -1,
-                roles: [],
-                records: [],
-                groupId: groupId,
-                index: -1
-            })
+                    seq: -1,
+                    roles: [],
+                    records: [],
+                    groupId: groupId,
+                    index: -1
+            }
+            setPinnedSticky(stickyMsg);
+            dispatch(saveMessageState({
+                data: {stickyMsg: stickyMsg},
+                tag: 'updateThemeHead'
+            }))
         }else{
             tribeService.groupedMsg([groupId]).then(rest=>{
                 console.log(rest,"rest")
                 const groupMsg = rest[0];
-                setPinnedSticky({
+                const stickyMsg = {
                     theme: groupMsg.theme,
                     seq: preGroupIndex+1,
                     roles: [],
                     records: [],
                     groupId: groupId,
                     index: preGroupIndex +1
-                })
+                };
+                setPinnedSticky(stickyMsg)
+                dispatch(saveMessageState({
+                    data: {stickyMsg: stickyMsg},
+                    tag: 'updateThemeHead'
+                }))
             })
         }
 
-        tribeService.getMsgPositionWithGroupId(groupId).then(position=>{
-            dispatch(saveDataState({
-                data: {firstIndex: position},
-                tag: 'setFirstIndex'
-            }))
+        setImmediate(()=>{
+            tribeService.getMsgPositionWithGroupId(groupId).then(position=>{
+                dispatch(saveDataState({
+                    data: {firstIndex: position},
+                    tag: 'setFirstIndex'
+                }))
+            })
         })
     },[])
 
