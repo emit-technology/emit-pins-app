@@ -760,13 +760,13 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 </IonFab>
             }
 
-            {/*<ShareEx stickyMsg={stickyMsg} isOpen={showShareModal} showHistory={true}*/}
-            {/*         onClose={() => setShowShareModal(false)}*/}
-            {/*         tribeInfo={tribeInfo} latestMsg={shareMsgs} roles={shareRoles as Array<TribeRole>} owner={owner}/>*/}
-
-            <ShareExV2 stickyMsg={stickyMsg} isOpen={showShareModal} showHistory={true}
+            <ShareEx stickyMsg={stickyMsg} isOpen={showShareModal} showHistory={true}
                      onClose={() => setShowShareModal(false)}
                      tribeInfo={tribeInfo} latestMsg={shareMsgs} roles={shareRoles as Array<TribeRole>} owner={owner}/>
+
+            {/*<ShareExV2 stickyMsg={stickyMsg} isOpen={showShareModal} showHistory={true}*/}
+            {/*         onClose={() => setShowShareModal(false)}*/}
+            {/*         tribeInfo={tribeInfo} latestMsg={shareMsgs} roles={shareRoles as Array<TribeRole>} owner={owner}/>*/}
 
             <IonModal isOpen={!!showModifyMsg} className="role-select-list" onDidDismiss={() => setShowModifyMsg(null)}
                       canDismiss>

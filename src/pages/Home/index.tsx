@@ -21,8 +21,6 @@ import {TribeLayout} from "../../components/Tribe/TribeLayout";
 import selfStorage from "../../common/storage";
 import {TribeEditModal} from "../../components/Tribe";
 import {utils} from "../../common";
-import {useEffect} from "react";
-import {isApp} from "../../service/app";
 
 interface State {
     segment: string
@@ -197,12 +195,12 @@ export class HomePage extends React.Component<Props, State> {
         return <>
             <IonMenu contentId="main-home">
                 <IonHeader>
-                    <IonToolbar >
+                    <IonToolbar className="msg-toolbar">
                         <IonMenuToggle>
                             <div style={{paddingLeft: 12}}><IonIcon src={arrowBackOutline}/></div>
                         </IonMenuToggle>
                         <IonTitle>
-                            <img height={28} src="./assets/img/pins-logo.png"/>
+                            <img height={24} src="./assets/img/pins-logo.png"/>
                         </IonTitle>
                     </IonToolbar>
                 </IonHeader>
@@ -229,18 +227,19 @@ export class HomePage extends React.Component<Props, State> {
             </IonMenu>
             <IonPage id="main-home">
                 <IonHeader mode="ios" color="primary">
-                    <IonToolbar style={{padding: "6px 12px 0"}} className={!utils.isApp()?"msg-toolbar":"msg-toolbar2"}>
+                    <IonToolbar className="msg-toolbar">
                         <div slot="start" id="main-home">
                             <IonMenuToggle>
-                                <IonIcon src={listOutline} size="large"/>
+                                {/*<IonIcon src={listOutline} size="large"/>*/}
+                                <img src="./assets/img/icon/menuOutline.png" height={24}/>
                             </IonMenuToggle>
                         </div>
 
                         <IonTitle>
                             <div className="home-head-title">
                                 <div className="home-head-ctn">
-                                    <div style={{height: 32,borderRadius: 6}} slot={"start"}>
-                                        <img src="./assets/img/pins-logo.png" height='100%'/>
+                                    <div style={{height: 24,borderRadius: 6}} slot={"start"}>
+                                        <img src="./assets/img/pins-logo.png" height='24px'/>
                                     </div>
                                     {/*<div style={{fontSize: '20px',fontFamily:"SFBold",paddingLeft: 2}}>*/}
                                     {/*   Verse*/}
@@ -251,11 +250,15 @@ export class HomePage extends React.Component<Props, State> {
                         <IonButtons slot="end">
                             <IonButton onClick={()=>{
                                 this.setState({showSearch: true})
-                            }}><IonIcon src={searchOutline} id="open-custom-dialog" size="large" color="dark"/></IonButton>
+                            }}>
+                                <img src="./assets/img/icon/searchOutline.png" style={{height: 24}}/>
+                            </IonButton>
 
                             <IonButton onClick={()=>{
                                 this.setState({showCreateModal: true})
-                            }}><IonIcon src={addOutline} id="open-custom-dialog" size="large" color="dark"/></IonButton>
+                            }}>
+                                <img src="./assets/img/icon/addOutline.png" style={{height: 24}}/>
+                            </IonButton>
                         </IonButtons>
                         {/*<IonPopover trigger="hover-trigger" triggerAction="click">*/}
                         {/*        <IonSearchbar placeholder="Input keyword"/>*/}
@@ -269,7 +272,7 @@ export class HomePage extends React.Component<Props, State> {
 
                     </IonToolbar>
                 </IonHeader>
-                <IonContent fullscreen className="ion-padding home-ctn ion-content-chat padding-top-0">
+                <IonContent fullscreen className="home-ctn ion-content-chat padding-top-0">
                     <IonSegment className="segment" color="secondary" mode="md" value={segment} onIonChange={(e) => {
                         this.setState({showLoading: true, segment: e.detail.value})
                         this.init(e.detail.value).then(() => {
@@ -320,7 +323,7 @@ export class HomePage extends React.Component<Props, State> {
                     {/*        />*/}
                     {/*    </IonCol>*/}
                     {/*</IonRow>*/}
-                    <div style={{height: "100%",padding: "0 0 200px 0",overflow: "scroll"}}>
+                    <div style={{height: "100%",padding: "0 6px 200px 6px",overflow: "scroll"}}>
                         {/*{*/}
                         {/*    layout && layout.length>0&&<TribeRecommend data={data} layout={layout}/>*/}
                         {/*}*/}

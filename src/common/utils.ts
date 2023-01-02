@@ -87,7 +87,7 @@ export const utils = {
 
     dateFormatStr(date: Date) {
         // return format("MM/dd hh:mm", date);
-        return date.toString();
+        return date.toLocaleTimeString(["en"], {hour12: true,hour: '2-digit', minute:'2-digit'}) + " · " + date.toLocaleDateString(["en-US"],{year:"2-digit",month:"short", day:"2-digit"});
     },
 
     toHash(v: string): string {

@@ -15,10 +15,11 @@
 }
 
 .segment {
-  border-bottom: 2px solid #f7f7f7;
-  --backgroud:  #F5F7F9 !important;
-  margin-top: 60px;
+  //border-bottom: 2px solid #f7f7f7;
+  background: linear-gradient(#fff, #F5F7F9) !important;
+  height: 48px;
 }
+
 .segment-button{
   --indicator-height: 0px;
 }
@@ -39,12 +40,13 @@
 .airdrop-time{
   position: absolute;
   color: #fff;
-  font-size: 10px;
-  background: rgba(0, 0, 0, 0.6);
-  padding: 0 6px;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 7px 6px;
   border-radius: 20px;
   left: 6px;
   top: 6px;
+  font-family: SFProText-Medium !important;
 }
 
 .tag-point {
@@ -138,7 +140,7 @@
 }
 
 .static-icons{
-  height: 16px;
+  height: 14px;
   vertical-align: middle;
   display: flex;
   color: #868990;
@@ -147,8 +149,8 @@
 .asv-name{
   padding: 0px 6px;
   color: #868990;
-  font-size: 16px;
-  width: 100px;
+  font-size: 13px;
+  width: 125px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -575,6 +577,7 @@
   color: #868990;
   display: flex;
   align-items: flex-start;
+  font-family: SFProText-Medium !important;
 }
 
 .sc-ion-searchbar-ios-h{

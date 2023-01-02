@@ -69,14 +69,14 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                 content && content["image"] && content["image"]["url"] &&
                                 <div className="recmt-img">
                                     <img src={content["image"]["url"]}/>
-                                    <div className="airdrop-time">{v.latestMsg && v.latestMsg.timestamp && utils.dateFormat(new Date(v.latestMsg.timestamp * 1000))}</div>
+                                    <div className="airdrop-time">{v.latestMsg && v.latestMsg.timestamp && utils.dateFormatStr(new Date(v.latestMsg.timestamp * 1000))}</div>
                                 </div>
                             }
                             {
                                 (!v.latestMsg || !!v.latestMsg && v.latestMsg.content["image"] && !((v.latestMsg.content as MsgText).image.url)) &&
                                 <div className="recmt-img">
                                     <img src={v.theme.image["url"]}/>
-                                    <div className="airdrop-time">{v.latestMsg && v.latestMsg.timestamp && utils.dateFormat(new Date(v.latestMsg.timestamp * 1000))}</div>
+                                    <div className="airdrop-time">{v.latestMsg && v.latestMsg.timestamp && utils.dateFormatStr(new Date(v.latestMsg.timestamp * 1000))}</div>
                                 </div>
 
                             }
@@ -133,7 +133,7 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                             <div className="recmt-footer">
                                 <div style={{display: "flex", alignItems: "center"}}>
                                     {actor ? <>
-                                        <div style={{height: 36, width: 36}}>
+                                        <div style={{height: 28, width: 28}}>
                                             <img className="ava-img" src={utils.getDisPlayUrl(actor.avatar)}/>
                                         </div>
                                         <div className="asv-name">
@@ -141,7 +141,7 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                         </div>
 
                                     </> : <>
-                                        <div style={{height: 36, width: 36}}>
+                                        <div style={{height: 28, width: 28}}>
                                             <img className="ava-img" src={"./assets/img/default-avatar.png"}/>
                                         </div>
                                         <div className="asv-name">
@@ -234,7 +234,7 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                     copy(`${window.location.href}/${v.tribeId}`)
                                     presentToast({color:"primary", message: "Copied to clipboard", duration: 2000})
                                 }}>
-                                    <img src="./assets/img/icon/linkOutline.png" width={18}/>
+                                    <img src="./assets/img/icon/linkOutline.png" height={22}/>
                                 </div>
                             </div>
 
