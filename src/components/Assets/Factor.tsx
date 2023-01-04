@@ -35,16 +35,22 @@ export const FactorItem: React.FC<Props> = ({factor, showLine, hideDetail, noTra
             factor &&
             <IonItem detail={!hideDetail} detailIcon={arrowForwardOutline} lines={showLine ? "inset" : "none"}>
                 <IonAvatar slot="start">
-                    <img src={`${utils.assetUrl()}/assets/img/tokens/${symbol}.png`}/>
+                    <img src={`${utils.assetUrl()}/assets/img/tokens/${symbol}.png`}
+                         onError={(e)=>{
+                             //@ts-ignore
+                             (e.target.onerror = null)(
+                                 //@ts-ignore
+                                 (e.target.src =
+                                     `./assets/img/Default_Image_Thumbnail.png`)
+                         )}}/>
                 </IonAvatar>
                 <IonLabel className="ion-text-wrap">
                     <IonBadge color="primary">{symbol}</IonBadge>
                     <div style={{color: "#92949c"}}>[{utils.ellipsisStr(factor.category.supplier, 5)}]</div>
                 </IonLabel>
-
                 <IonLabel style={{textAlign: 'right'}}>
                     <span style={{fontSize: 20,fontFamily: "SFBold"}}  slot="end">
-                        <IonText color="primary">{noTransform ? utils.fromValue(factor.value, 18).toString(10) : utils.fromHexValue(factor.value, 18).toString(10)}</IonText>
+                        <IonText color="primary">{utils.nFormatter(noTransform ? utils.fromValue(factor.value, 18).toString(10) : utils.fromHexValue(factor.value, 18).toString(10),3)}</IonText>
                     </span>&nbsp;
                 </IonLabel>
             </IonItem>

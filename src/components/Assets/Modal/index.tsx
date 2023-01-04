@@ -1,2 +1,2 @@
 export * from './Assets';
-export * from './List';
+export * from './InboxList';

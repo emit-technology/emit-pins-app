@@ -37,10 +37,23 @@ export const addListeners = async () => {
 
     await PushNotifications.addListener('pushNotificationActionPerformed', (actionPerformed: ActionPerformed) => {
             console.log('Push action performed: ' + JSON.stringify(actionPerformed));
-            if(actionPerformed && actionPerformed.notification.data){
-                const tribeId = actionPerformed.notification.data["tribeId"];
-                utils.goTo(tribeId);
+
+            const notification = actionPerformed.notification;
+
+            if(utils.isIos()){
+                if(notification && notification.data && notification.data["aps"] && notification.data["aps"]["data"]&& notification.data["aps"]["data"]["tribeId"]){
+                    const tribeId = notification.data["aps"]["data"]["tribeId"];
+                    utils.goTo(tribeId);
+                }
             }
+
+            if(utils.isAndroid()){
+                if(actionPerformed && actionPerformed.notification.data){
+                    const tribeId = actionPerformed.notification.data["tribeId"];
+                    utils.goTo(tribeId);
+                }
+            }
+
         })
 
     await PushNotifications.addListener('pushNotificationReceived', notification => {
@@ -52,8 +65,20 @@ export const addListeners = async () => {
             });
         }
         if(utils.isIos()){
-            if(notification && notification.data && notification.data["tribeId"]){
-                const tribeId = notification.data["tribeId"];
+            /**
+             * "data": {
+			"aps": {
+				"alert": {
+					"body": "New update"
+				},
+				"data":{
+					"tribeId": "sss"
+				}
+			}
+		},
+             */
+            if(notification && notification.data && notification.data["aps"] && notification.data["aps"]["data"]&& notification.data["aps"]["data"]["tribeId"]){
+                const tribeId = notification.data["aps"]["data"]["tribeId"];
                 utils.goTo(tribeId);
             }
         }

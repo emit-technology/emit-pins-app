@@ -34,6 +34,9 @@ export const InboxList: React.FC<Props> = ({item, onReceive}) => {
                             letterSpacing: "0"
                         }}>[{utils.ellipsisStr(v.factor.factor.category.supplier, 4)}]</small>
                     </IonBadge>
+                    {
+                        v.factor.factor.category.id && <IonBadge color="secondary">NFT</IonBadge>
+                    }
                 </div>
 
                 {

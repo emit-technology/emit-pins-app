@@ -18,7 +18,7 @@ import {NoneData} from "../../Data/None";
 import {ChainType, Factor, FactorSet, Settle, SettleResp} from "@emit-technology/emit-lib";
 import {useEffect, useState} from "react";
 import {emitBoxSdk} from "../../../service/emitBox";
-import {InboxList} from "./List";
+import {InboxList} from "./InboxList";
 import walletWorker from "../../../worker/walletWorker";
 
 interface Props {
@@ -51,6 +51,10 @@ export const AssetsModal:React.FC<Props> = ({isOpen,router ,address, onClose}) =
     }
 
     const receive = async (settles: Array<SettleResp>)=>{
+        const isLocked = await walletWorker.isLocked()
+        if(isLocked){
+            return Promise.reject("Account is locked!")
+        }
         const account = await emitBoxSdk.getAccount();
         const sets: Array<Settle> = [];
         for (let settle of settles) {
