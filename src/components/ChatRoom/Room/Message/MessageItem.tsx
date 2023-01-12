@@ -113,7 +113,7 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                 }
 
                 {/*<div>*/}
-                <div className={"visual-msg-content"} onClick={(e) => {
+                <div className={"visual-msg-content"} style={{marginTop: pinnedSticky.records && pinnedSticky.records[0].hideTime?3:12}} onClick={(e) => {
                     e.stopPropagation();
                     e.persist();
                     if (!pinnedStickies && !!dispatchTheme && pinnedSticky && stickyMsg && pinnedSticky.groupId != stickyMsg.groupId) {
@@ -191,36 +191,38 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                 </div>
 
 
-                <div style={{
-                    padding: '0px 12px',
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    height:  !!pinnedSticky.showPin && pinnedSticky.showPin.showFork && onFork?"100%":"0px",
-                    overflow: "hidden"
-                }}>
-                    <div className="fork-icon">
-                        <IonButtons>
-                            <IonButton onClick={() => {
-                                // setShowLoading(true)
-                                console.log(pinnedSticky)
-                                onFork(pinnedSticky.groupId, {
-                                    tribeId: config.tribeId,
-                                    keeper: "",
-                                    lastPinedSeq: pinnedSticky.seq,
-                                    onlineUser: 0,
-                                    theme: pinnedSticky.theme,
-                                    title: tribeInfo.title,
-                                    desc: "",
-                                    themeTag: pinnedSticky.theme.themeTag,
-                                    themeDesc: pinnedSticky.theme.themeDesc,
-                                })
-                            }}><IonIcon src={gitBranchOutline} style={{
-                                color: "#4C89F8",
-                                fontSize: "24px"
-                            }}/></IonButton>
-                        </IonButtons>
+                {
+                    !!pinnedSticky.showPin && pinnedSticky.showPin.showFork && <div style={{
+                        padding: '12px 8px 0 12px',
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        height:  !!pinnedSticky.showPin && pinnedSticky.showPin.showFork && onFork?"100%":"0px",
+                        overflow: "hidden"
+                    }}>
+                        <div className="fork-icon">
+                            <IonButtons>
+                                <IonButton onClick={() => {
+                                    // setShowLoading(true)
+                                    console.log(pinnedSticky)
+                                    onFork(pinnedSticky.groupId, {
+                                        tribeId: config.tribeId,
+                                        keeper: "",
+                                        lastPinedSeq: pinnedSticky.seq,
+                                        onlineUser: 0,
+                                        theme: pinnedSticky.theme,
+                                        title: tribeInfo.title,
+                                        desc: "",
+                                        themeTag: pinnedSticky.theme.themeTag,
+                                        themeDesc: pinnedSticky.theme.themeDesc,
+                                    })
+                                }}><IonIcon src={gitBranchOutline} style={{
+                                    color: "#4986F3",
+                                    fontSize: "20px"
+                                }}/><span style={{fontSize: 14,color: "#4986F3",letterSpacing: '-0.21px',fontWeight: 500}}>Fork</span></IonButton>
+                            </IonButtons>
+                        </div>
                     </div>
-                </div>
+                }
 
                 {
                     pinnedSticky.records[0].msgIndex == total - 1 && !!pinnedSticky.records[0].groupId &&

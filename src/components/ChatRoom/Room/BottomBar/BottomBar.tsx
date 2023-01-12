@@ -321,16 +321,16 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
 
                                                 }}/>
 
-                                                {/*<IonIcon className="footer-icon" src={diceOutline} color="dark" size="large"*/}
-                                                {/*         onClick={(e) => {*/}
-                                                {/*             e.stopPropagation();*/}
-                                                {/*             sendMsg(true).then(() => {*/}
-                                                {/*                 dispatch(saveDataState({*/}
-                                                {/*                     data: JSON.stringify({refresh: 0}),*/}
-                                                {/*                     tag: 'scrollToItem'*/}
-                                                {/*                 }))*/}
-                                                {/*             })*/}
-                                                {/*         }}/>*/}
+                                                <IonIcon className="footer-icon" src={diceOutline} color="dark" size="large"
+                                                         onClick={(e) => {
+                                                             e.stopPropagation();
+                                                             sendMsg(true).then(() => {
+                                                                 dispatch(saveDataState({
+                                                                     data: JSON.stringify({refresh: 0}),
+                                                                     tag: 'scrollToItem'
+                                                                 }))
+                                                             })
+                                                         }}/>
                                             </div>
                                         </IonCol>
                                     </IonRow>

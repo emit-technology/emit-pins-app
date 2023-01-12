@@ -27,6 +27,7 @@ import {App} from "@capacitor/app";
 import walletWorker from "../../worker/walletWorker";
 import {Device} from "@capacitor/device";
 import {Photo} from "@capacitor/camera";
+import {CatInfo} from "../../types/cat";
 // import WebSocket from 'ws';
 
 const W3CWebSocket = require('websocket').w3cwebsocket;
@@ -1141,6 +1142,31 @@ class TribeService implements ITribe {
        if(_cache){
         return _cache
        }
+    }
+
+    catItems = async ():Promise<Array<CatInfo>> =>{
+        return [
+            { img: "./assets/img/cat/000660.png", id: "000660", visibility: 100, createdAt: Date.now(), name: "000660",life: 100 },
+            { img: "./assets/img/cat/000660.png", id: "000650", visibility: 99, createdAt: Date.now(), name: "000660",life: 100 },
+            { img: "./assets/img/cat/000660.png", id: "000651", visibility: 90, createdAt: Date.now(), name: "000660",life: 100 },
+            { img: "./assets/img/cat/000660.png", id: "000652", visibility: 85, createdAt: Date.now(), name: "000660",life: 100 },
+            { img: "./assets/img/cat/000660.png", id: "000653", visibility: 50, createdAt: Date.now(), name: "000660",life: 100 },
+            { img: "./assets/img/cat/000660.png", id: "000654", visibility: 35, createdAt: Date.now(), name: "000660",life: 100 },
+            { img: "./assets/img/cat/000660.png", id: "000655", visibility: 25, createdAt: Date.now(), name: "000660",life: 100 },
+            { img: "./assets/img/cat/000660.png", id: "000656", visibility: 15, createdAt: Date.now(), name: "000660",life: 100 },
+            { img: "./assets/img/cat/000660.png", id: "000657", visibility: 5, createdAt: Date.now(), name: "000660",life: 100 },
+            { img: "./assets/img/cat/000660.png", id: "000658", visibility: 1, createdAt: Date.now(), name: "000660",life: 100 },
+            { img: "./assets/img/cat/000660.png", id: "000659", visibility: 0, createdAt: Date.now(), name: "000660",life: 100 },
+
+            { img: "./assets/img/cat/000661.png", id: "000661", visibility: 60, createdAt: Date.now(), name: "000661",life: 100 },
+            { img: "./assets/img/cat/000662.png", id: "000662", visibility: 50, createdAt: Date.now(), name: "000662",life: 100 },
+            { img: "./assets/img/cat/000663.png", id: "000663", visibility: 10, createdAt: Date.now(), name: "000663",life: 100 },
+        ]
+        // const rest: TribeResult<Array<CatInfo>> = await this._rpc.post('/tribe/cat', {owner: "" });
+        // if (rest && rest.code == 0) {
+        //     return rest.data
+        // }
+        // return Promise.reject(rest.message);
     }
 }
 

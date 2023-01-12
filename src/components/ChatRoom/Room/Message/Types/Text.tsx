@@ -209,7 +209,7 @@ export const Text: React.FC<Props> = ({
                         <div className="box-max-width">
                             {
                                 !hideTime && <div className={`message-avatar-name ${isOwner && "owner-an"}`}>
-                                    <div style={{fontSize: '16px', fontWeight: 700}}>
+                                    <div className="avatar-name">
                                         { keeper && msg.actor && msg.actor.name }
                                     </div>
                                     <div style={{fontSize: '11px', color: "#92949c",margin: "0 4px 0 4px"}}>
@@ -235,7 +235,7 @@ export const Text: React.FC<Props> = ({
                                                             }} className={isOwner ? "msg-text-sender" : "msg-text-receive"}>
                                                                 {replayItem}
                                                                 { genMetadataEl() }
-                                                                <div style={{padding: '6px 6px 4px 6px'}}>
+                                                                <div>
                                                                     <div className="text-pre">
                                                                         {genContent()}
                                                                     </div>

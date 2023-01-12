@@ -1,21 +1,17 @@
 import * as React from 'react';
 import {
-    IonList,
-    IonItemDivider,
     useIonToast,
     IonItem,
     IonLabel,
     IonButton,
-    IonText,
     IonIcon,
-    IonMenuToggle, IonContent, IonLoading, IonAvatar
+    IonLoading, IonAvatar
 } from '@ionic/react';
 import {
     chevronForwardOutline,
-    homeOutline, listOutline,
+    homeOutline,
     openOutline,
     personOutline,
-    swapHorizontalOutline,
     walletOutline
 } from "ionicons/icons";
 import {AccountModel, ChainType} from "@emit-technology/emit-lib";
@@ -29,9 +25,8 @@ import {AccountUnlock} from "../../Account/modal/Unlock";
 import {ResetModal} from "../../Account/modal/Reset";
 import {AssetsModal} from "../../Assets/Modal";
 import Avatar from "react-avatar";
-import copy from "copy-to-clipboard";
-import selfStorage from "../../../common/storage";
-import {getDeliveredNotifications} from "../../../service/app";
+import catSvg from '../../../img/cat.svg';
+import {CatList} from "../../Cat";
 
 interface Props {
     onRequestAccount: () => void;
@@ -43,7 +38,7 @@ interface Props {
 
 let cb: any;
 
-export const SideBar: React.FC<Props> = ({onRequestAccount, account,router, onLogout, isSessionAvailable}) => {
+export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onLogout, isSessionAvailable}) => {
 
     const [present, dismiss] = useIonToast();
 
@@ -53,6 +48,8 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account,router, onLo
     const [showList, setShowList] = useState(false);
     const [showAssetsModal, setShowAssetsModal] = useState(false);
     const [showLoading, setShowLoading] = useState(false);
+    const [showCatList, setShowCatList] = useState(false);
+    const [catItems, setCatItems] = useState([]);
 
     const requestAccount = () => {
         if (utils.useInjectAccount()) {
@@ -83,9 +80,9 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account,router, onLo
     }
 
     const onAccount = async (account: AccountModel) => {
-        if(isSessionAvailable){
+        if (isSessionAvailable) {
             await tribeService.userLogout()
-        }else{
+        } else {
             await tribeService.accountLogin(account)
         }
         onRequestAccount()
@@ -108,6 +105,12 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account,router, onLo
         } else {
             window.open(utils.assetUrl())
         }
+    }
+
+    const showCats = async ()=>{
+        const items = await tribeService.catItems();
+        setCatItems(items);
+        setShowCatList(true)
     }
     return <>
         {
@@ -135,12 +138,13 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account,router, onLo
                 !account && <IonIcon slot="start" src={personOutline} size="large"/>
             }
             {
-                !!account &&  <IonAvatar slot="start">
-                    {account.name?<Avatar name={account.name} round size={"36"}/>:<IonIcon src={personOutline} size="large"/>}
+                !!account && <IonAvatar slot="start">
+                    {account.name ? <Avatar name={account.name} round size={"36"}/> :
+                        <IonIcon src={personOutline} size="large"/>}
                 </IonAvatar>
             }
             <IonLabel className="ion-text-wrap">
-                <b>{!!account&&account.name ? account.name : 'Person'}</b>
+                <b>{!!account && account.name ? account.name : 'Person'}</b>
                 <p>
                     <small>{!!account && utils.ellipsisStr(account && account.addresses && account.addresses[ChainType.EMIT], 3)}</small>
                 </p>
@@ -153,7 +157,8 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account,router, onLo
         }}>
             <IonIcon slot="start" src={walletOutline} size="large"/>
             <IonLabel>Assets</IonLabel>
-            <IonIcon src={utils.useInjectAccount()?chevronForwardOutline:openOutline} color="medium" slot="end" size="small"/>
+            <IonIcon src={utils.useInjectAccount() ? chevronForwardOutline : openOutline} color="medium" slot="end"
+                     size="small"/>
         </IonItem>
 
         {/*<IonItem onClick={() => {*/}
@@ -188,6 +193,13 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account,router, onLo
         {/*    <IonIcon slot="start" src={homeOutline} size="large"/>*/}
         {/*    <IonLabel>Notify Latest</IonLabel>*/}
         {/*</IonItem>*/}
+
+        <IonItem onClick={() => {
+            showCats().catch(e=>console.error(e))
+        }}>
+            <IonIcon slot="start" src={catSvg} size="large"/>
+            <IonLabel>Cat</IonLabel>
+        </IonItem>
 
         <div style={{height: 30}}>
         </div>
@@ -244,7 +256,7 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account,router, onLo
             setShowUnlock(false);
             setShowLoading(true)
             if (cb) {
-                cb().then(()=> setShowLoading(false)).catch(e=>{
+                cb().then(() => setShowLoading(false)).catch(e => {
                     setShowLoading(false)
                 })
             }
@@ -275,6 +287,8 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account,router, onLo
 
         <AssetsModal address={account && account.addresses[ChainType.EMIT]} isOpen={showAssetsModal}
                      onClose={() => setShowAssetsModal(false)}/>
+
+        <CatList isOpen={showCatList} onClose={()=>setShowCatList(false)} items={catItems}/>
 
         <IonLoading
             cssClass='my-custom-class'

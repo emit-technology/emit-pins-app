@@ -5,14 +5,13 @@ import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 import {defineCustomElements} from '@ionic/pwa-elements/loader';
 import {App as AppPlugin} from "@capacitor/app";
-import {Toast} from '@capacitor/toast';
 import {
     addListeners,
     getDeliveredNotifications,
     setStatusBarStyleLight,
     registerNotifications,
     isApp,
-    setStatusBarStyleDefault, setStatusBarStyleDark
+    setStatusBarStyleDark
 } from './service/app'
 import {utils} from "./common";
 import {LogLevel} from "react-virtuoso";

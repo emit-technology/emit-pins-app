@@ -37,7 +37,7 @@ export const TribeInfoModal:React.FC<Props> = ({isOpen,stickies,onReladData,onCl
     const [updateTribeModal,setUpdateTribeModal] = useState(false);
 
     return <>
-        <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal" canDismiss>
+        <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-list-modal" canDismiss>
             <IonHeader collapse="fade">
                 <IonToolbar>
                     {

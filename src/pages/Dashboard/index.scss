@@ -66,7 +66,7 @@
 }
 .msg-input{
   background-color: var(--ion-color-tertiary);
-  border-radius: 12px;
+  border-radius: 120px;
   padding: 12px 12px !important;
   max-height: 200px;
   border: unset;
@@ -317,7 +317,9 @@ input::placeholder {
   text-align: left;
   //max-width: 60px;
   overflow: hidden;
+  font-family: SFBold !important;
   text-overflow: ellipsis;
+  letter-spacing: -0.21px;
 }
 
 .header-ios ion-toolbar:last-of-type{
@@ -585,14 +587,19 @@ ion-icon:before {
   position: relative;
 }
 
-.recmt-head-title div:first-child {
+.recmt-head-title > div:first-child {
   //font-weight: 700;
   font-size: 16px;
   font-family: SFProText-Bold !important;
   letter-spacing: -0.48px;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* overflow-wrap: normal; */
+  white-space: nowrap;
 }
 
-.recmt-head-title div:last-child {
+.recmt-head-title > div:last-child {
   font-size: 12px;
   color: #868990;
   //line-height: 16px;
@@ -753,4 +760,10 @@ position: absolute;
   justify-content: space-between;
   padding-top: 6px;
   flex: 2;
+}
+
+.fab-box{
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 }

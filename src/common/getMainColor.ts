@@ -1,6 +1,15 @@
 import {getColor, getPalette} from 'color-thief-react'
 import BigNumber from "bignumber.js";
 import reactImageSize from 'react-image-size';
+
+import 'dear-image.detect-background-color';
+
+const DearImage = require('dear-image');
+
+export const getBackgroundColor = async (image:string): Promise<string> =>{
+    return DearImage.detectBackgroundColor(image);
+}
+
 export interface ThemeColors {
     primary: string;
     palette: Array<string>;
@@ -41,6 +50,8 @@ interface SimilarColors {
 const getMainColor = async (src: string): Promise<ThemeColors> => {
     const color = await getColor(src, "rgbArray")
     const palette = await getPalette(src, 10, "rgbArray")
+    console.log(src , "---> ", palette)
+
     palette.sort(sortRgb);
 
     let isDarkColor = false;
@@ -70,7 +81,6 @@ const getMainColor = async (src: string): Promise<ThemeColors> => {
 };
 
 export const getBgColor = async (src: string) => {
-    console.info("src==",src);
     const color = await getColor(src, "rgbArray")
     return `rgb(${color[0]},${color[1]},${color[2]})`
 };
@@ -102,7 +112,7 @@ export const getSimilarColor = (color: string): SimilarColors => {
 
 };
 
-function set16ToRgb(str: string) {
+export function set16ToRgb(str: string, a:number = 1) {
     // var reg = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/
     // if(!reg.test(str)){return;}
     let newStr = (str.toLowerCase()).replace(/\#/g, '')
@@ -119,7 +129,7 @@ function set16ToRgb(str: string) {
         let s = newStr.slice(i, i + 2)
         arr.push(parseInt("0x" + s))
     }
-    return 'rgb(' + arr.join(",") + ')';
+    return 'rgba(' + arr.join(",") + a + ')';
 }
 
 function sortRgb(a: Array<number>, b: Array<number>) {

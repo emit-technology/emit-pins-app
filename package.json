@@ -82,6 +82,7 @@
   },
   "devDependencies": {
     "@capacitor/app": "^1.1.1",
+    "@capacitor/browser": "^4.1.0",
     "@capacitor/cli": "3.6.0",
     "@capacitor/haptics": "^1.1.4",
     "@capacitor/status-bar": "^1.0.8",
@@ -104,6 +105,8 @@
     "crypto-browserify": "^3.12.0",
     "customize-cra": "^1.0.0",
     "date-format": "^4.0.13",
+    "dear-image": "^1.4.0",
+    "dear-image.detect-background-color": "^1.0.1",
     "dom-to-image-improved": "^2.8.0",
     "dom-to-image-more": "^2.12.0",
     "html-metadata-parser": "^2.0.4",

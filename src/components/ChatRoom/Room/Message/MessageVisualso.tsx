@@ -88,7 +88,11 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                                                  tribeInfo, onSupport, subscribed, onSubscribe,
                                                              }) => {
 
-    const [state, dispatch] = useReducer(messageReducer, { total: 0, firstItemIndex: 0, comments:[] }, messageInitializer);
+    const [state, dispatch] = useReducer(messageReducer, {
+        total: 0,
+        firstItemIndex: 0,
+        comments: []
+    }, messageInitializer);
 
     const {total, comments, firstItemIndex} = state;
 
@@ -128,8 +132,8 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     // }, [firstIndex])
 
 
-    useLayoutEffect(()=>{
-        if(!stickyMsg && tribeInfo){
+    useLayoutEffect(() => {
+        if (!stickyMsg && tribeInfo) {
             setStickyMsg({
                 theme: tribeInfo && tribeInfo.theme,
                 seq: -1,
@@ -139,7 +143,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 index: -1
             })
         }
-    },[tribeInfo, stickyMsg])
+    }, [tribeInfo, stickyMsg])
 
     useEffect(() => {
         if (!!shareMsgId) {
@@ -190,10 +194,10 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     //     }
     // },[comments,firstItemIndex, setCurrentVisible, setStickyMsg])
 
-    const fetchMsgByIndex = async (firstIndex: number, toBottom: boolean = false, init:boolean = false) => {
+    const fetchMsgByIndex = async (firstIndex: number, toBottom: boolean = false, init: boolean = false) => {
         if (firstIndex > -1) {
             setStartItemIndex(firstIndex);
-            setTimeout(()=>setStartItemIndex(-1),1500)
+            setTimeout(() => setStartItemIndex(-1), 1500)
             let reqIndex = firstIndex;
             const pageSize = 30;
             let reqPageSize = pageSize;
@@ -209,11 +213,19 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
             // const ret = combile(comp, tribeInfo && tribeInfo.keeper);
 
             let _total = total;
-            if(init){
+            if (init) {
                 const {total} = await tribeService.streamMsg(config.tribeId, 0, 1);
                 _total = total;
             }
-            dispatch({type: MessageActionKind.RESET, payload: {total: _total, firstItemIndex: reqIndex, comments: rest.data, keeper: tribeInfo && tribeInfo.keeper}})
+            dispatch({
+                type: MessageActionKind.RESET,
+                payload: {
+                    total: _total,
+                    firstItemIndex: reqIndex,
+                    comments: rest.data,
+                    keeper: tribeInfo && tribeInfo.keeper
+                }
+            })
             // setFirstItemIndex(reqIndex)
             // setComments(ret)
             // console.log("------> firstItemIndex: [%d], scroll to=[%d]", reqIndex, firstIndex, comp.length > 0 && comp[0])
@@ -226,7 +238,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 } else {
                     // scrollToItem({index: firstIndex + reqIndex, align: "start"});
                     startItem(firstIndex - reqIndex)
-                    setTimeout(()=> startItem(firstIndex - reqIndex), 500)
+                    setTimeout(() => startItem(firstIndex - reqIndex), 500)
                 }
 
             })
@@ -263,7 +275,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     // }
 
     const prependItems = useCallback(() => {
-        if(startItemIndex > -1){
+        if (startItemIndex > -1) {
             return;
         }
         // setLoadingData(true)
@@ -280,12 +292,14 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 const nextFirstItemIndex = firstItemIndex - pageSize;
                 console.log("------> firstItemIndex: [%d], prependItems", nextFirstItemIndex >= 0 ? nextFirstItemIndex : 0)
 
-                dispatch({type: MessageActionKind.PREPEND, payload: {
+                dispatch({
+                    type: MessageActionKind.PREPEND, payload: {
                         total: total,
                         keeper: tribeInfo && tribeInfo.keeper,
                         firstItemIndex: nextFirstItemIndex >= 0 ? nextFirstItemIndex : 0,
                         comments: rest.data
-                }})
+                    }
+                })
 
                 // setFirstItemIndex(nextFirstItemIndex >= 0 ? nextFirstItemIndex : 0)
                 // setComments(pre => {
@@ -325,13 +339,15 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 setMaxVisibleIndex(max ? max : 0)
             }
         } else {
-            dispatch({type: MessageActionKind.RESET,
+            dispatch({
+                type: MessageActionKind.RESET,
                 payload: {
                     total: pinnedStickies.data.length,
                     firstItemIndex: 0,
                     comments: pinnedStickies.data,
                     keeper: tribeInfo && tribeInfo.keeper
-            }})
+                }
+            })
         }
     }, [loaded])
 
@@ -375,14 +391,16 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     }, [loaded])
 
     const setCommentsInner = useCallback((data: { total: number, messages: Array<PinnedSticky> }, append?: boolean) => {
-        dispatch({type: MessageActionKind.COMBINE, payload: {
+        dispatch({
+            type: MessageActionKind.COMBINE, payload: {
                 total: data.total,
                 firstItemIndex: firstItemIndex,
                 comments: data.messages,
                 append: append,
                 keeper: tribeInfo && tribeInfo.keeper,
                 visibleRange: visibleRange
-            }})
+            }
+        })
     }, [])
 
     useEffect(() => {
@@ -426,7 +444,10 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                         selfStorage.setItem(`tribe_pin_arr`, [])
                     }
                 }
-                appDispatch(saveDataState({data: JSON.stringify({refresh: false, checked: false}), tag: 'checkedAllMsg'}))
+                appDispatch(saveDataState({
+                    data: JSON.stringify({refresh: false, checked: false}),
+                    tag: 'checkedAllMsg'
+                }))
             } else if (dispatchData.tag == 'replayMsg' && dispatchData.data) {
                 let dataObj = JSON.parse(dispatchData.data);
                 if (!dataObj["msg"]) {
@@ -551,8 +572,8 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         }
     }, [setAtBottom])
 
-    useEffect(()=>{
-        if(startItemIndex == -1){
+    useEffect(() => {
+        if (!pinnedStickies && startItemIndex == -1) {
             appDispatch(saveDataState({
                 data: {stickyMsg: stickyMsg},
                 tag: 'updateThemeRight'
@@ -562,7 +583,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 tag: 'updateThemeHead'
             }))
         }
-    }, [stickyMsg, startItemIndex])
+    }, [stickyMsg, startItemIndex, pinnedStickies])
 
     useEffect(() => {
         if (!!loaded && !!loadedData && !pinnedStickies) {
@@ -601,27 +622,11 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     }, [visibleRange])
 
 
-    useEffect(() => {
-        if(utils.isApp()){
-            const gesture: Gesture = createGesture({
-                el: document.querySelector('.rectangle-content'),
-                threshold: 100,
-                direction: "x",
-                disableScroll: true,
-                gestureName: 'my-gesture',
-                onMove: ev => {
-                    if (ev.startX < ev.currentX) {
-                        window.location.href = "./"
-                    }
-                }
-            });
-            gesture.enable();
-        }
-    }, [])
+
 
     return <>
 
-        <div className={!pinnedStickies ? "msg-content rectangle-content" : "msg-content2 rectangle-content"} style={{
+        <div className={!pinnedStickies ? "msg-content" : "msg-content2"} style={{
             backgroundImage: `url(${utils.getDisPlayUrl(_url)})`,
         }}>
             <div className={`outer-box `}>
@@ -709,26 +714,27 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
 
             {
                 comments.length - 1 > currentVisibleStopIndex && !showPin && !isScrolling &&
-                <IonFab vertical="center" horizontal="end" slot="fixed" style={{
+                <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{
                     // bottom: !pinnedStickies ? '145px' : "100px",
                     right: !pinnedStickies ? "" : "35px",
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    bottom: 140
                 }}>
-                    <div>
-                        {
-                            visibleRange.startIndex > 5 &&
-                            <div className="fab-cus" onClick={() => {
-                                setAtBottom(false);
-                                if (firstItemIndex < 1) {
-                                    scrollToItem({index: 0, align: "start"})
-                                } else {
-                                    fetchMsgByIndex(0).catch(e => console.error(e))
-                                }
-                            }}>
-                                <img src="assets/img/fab-icon00003.png" width={32} height={32}
-                                     style={{verticalAlign: "middle"}}/>
-                            </div>
-                        }
+                    <div className="fab-box">
+                        {/*{*/}
+                        {/*    visibleRange.startIndex > 5 &&*/}
+                        {/*    <div className="fab-cus" onClick={() => {*/}
+                        {/*        setAtBottom(false);*/}
+                        {/*        if (firstItemIndex < 1) {*/}
+                        {/*            scrollToItem({index: 0, align: "start"})*/}
+                        {/*        } else {*/}
+                        {/*            fetchMsgByIndex(0).catch(e => console.error(e))*/}
+                        {/*        }*/}
+                        {/*    }}>*/}
+                        {/*        <img src="assets/img/fab-icon00003.png" width={32} height={32}*/}
+                        {/*             style={{verticalAlign: "middle"}}/>*/}
+                        {/*    </div>*/}
+                        {/*}*/}
                         {
                             !pinnedStickies &&
                             <div className="fab-cus-dig"
@@ -742,7 +748,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
 
                         {
                             (!atBottom || visibleRange.endIndex < total - 3) && (
-                                <div className="fab-cus" onClick={() => {
+                                <div className="fab-cus" style={{padding: 6}} onClick={() => {
                                     setAtBottom(true);
                                     if (comments && comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex == total - 1) {
                                         scrollToItem({index: total - 1, align: "end"})
@@ -751,7 +757,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                     }
 
                                 }}>
-                                    <img src="assets/img/fab-icon00002.png" width={32} height={32}
+                                    <img src="assets/img/icon/toBottom.svg" height={20}
                                          style={{verticalAlign: "middle"}}/>
                                 </div>
                             )}

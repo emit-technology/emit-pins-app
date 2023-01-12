@@ -50,19 +50,26 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                     <img src={utils.getDisPlayUrl(v.theme.image)}/>
                                 </div>
                                 <div className="recmt-head-title">
-                                    <div style={{padding: "0px 0 0 0", position: "relative"}}>{v.title} {
-                                        v.tribeId == config.defaultTribes &&
-                                        <div className="cert-icon"><img src="./assets/img/cert.png"
-                                                                        className="cert-icon" width="100%"
-                                                                        height="100%"/></div>
-                                    }
+                                    <div style={{padding: "0px 0 0 0", position: "relative"}}>
+                                        {v.title}
                                         {
-                                            v.forked && v.forked.length > 0 &&
-                                            <IonIcon src={gitBranchSharp} color="primary"/>
+                                            v.tribeId == config.defaultTribes && <img src="./assets/img/cert.png"
+                                                                                      className="cert-icon" width="100%"
+                                                                                      height="100%"/>
+                                            // <div className="cert-icon"><img src="./assets/img/cert.png"
+                                            //                                 className="cert-icon" width="100%"
+                                            //                                 height="100%"/></div>
                                         }
+
                                     </div>
                                     {/*<div>{v.theme.themeTag}</div>*/}
-                                    <div>{v.tribeId}</div>
+                                    <div>{v.tribeId}
+
+                                        {
+                                            v.forked && v.forked.length > 0 &&
+                                            <IonIcon src={gitBranchSharp} color="primary" style={{transform: 'translate(3px,2px)'}}/>
+                                        }
+                                    </div>
                                 </div>
                             </div>
                             {

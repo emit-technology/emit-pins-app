@@ -98,11 +98,14 @@
 }
 
 .cert-icon {
-  position: absolute;
+  //position: absolute;
   width: 20px;
   height: 20px;
-  top: -1px;
-  right: -10px;
+  //top: -1px;
+  //right: -10px;
+  //vertical-align: middle;
+  transform: translateY(3px);
+  margin-left: 4px;
 }
 
 .cert-icon img {
@@ -234,6 +237,7 @@
   flex-direction: row;
   align-items: center;
   height: 100%;
+  justify-content: center;
 }
 
 .head-icons2{
@@ -249,8 +253,8 @@
 }
 
 .ion-avatar-pins{
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
 
 }
@@ -273,7 +277,7 @@
 
 .message-avatar-name {
   text-align: left;
-  padding: 0px;
+  padding: 0 0 2px 0;
   height: auto;
   overflow: hidden;
   display: flex;

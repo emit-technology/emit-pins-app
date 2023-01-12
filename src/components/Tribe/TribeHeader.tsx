@@ -12,7 +12,7 @@ import {
     IonToolbar,
     IonButtons,
     IonButton,
-    IonTitle, IonMenuToggle, IonHeader
+    IonTitle, IonMenuToggle, IonHeader, IonLoading
 } from "@ionic/react";
 import {Message, MessageStatus, PinnedSticky, TribeInfo, TribeRole, TribeTheme, WsStatus} from "../../types";
 import tribeWorker from "../../worker/imWorker";
@@ -44,7 +44,7 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
     const [stickies, setStickies] = useState({data: [], total: 0});
     const [stickyMsg, setStickyMsg] = useState(null);
 
-    const [isUp, setIsUp] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
 
     const dispatchData = useAppSelector(state => state.jsonData);
@@ -212,8 +212,7 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
                                             <div className="head-icons">
                                                 {
                                                     stickyMsg && tribeService.groupIdCache().indexOf(stickyMsg.groupId) > 0
-                                                    && <IonIcon src={chevronBackOutline} size="large" color="medium"
-                                                                onClick={onClickThemeBack}/>
+                                                    && <img src="./assets/img/icon/upOutline.svg" height={22} onClick={onClickThemeBack}/>
                                                 }
                                             </div>
                                         </IonCol>
@@ -225,9 +224,14 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
                                                             `url(${utils.getDisPlayUrl(stickyMsg && stickyMsg.groupId ? stickyMsg.theme.image : tribeInfo && utils.getDisPlayUrl(tribeInfo.theme.image))})` : ""
 
                                                     }} onClick={() => {
+                                                        setIsLoading(true)
                                                         fetch().then(() => {
+                                                            setIsLoading(false)
                                                             setShowTribeInfoModal(true)
-                                                        }).catch(e => console.error(e))
+                                                        }).catch(e => {
+                                                            setIsLoading(false)
+                                                            console.error(e)
+                                                        })
                                                     }}>
                                                         {/*{*/}
                                                         {/*    (stickyMsg && stickyMsg.theme && stickyMsg.theme.image || tribeInfo && tribeInfo.theme)*/}
@@ -243,12 +247,12 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
                                                     }}>
                                                         <div
                                                             className="head-pin-title">{tribeInfo && tribeInfo.title}</div>
-                                                        <div style={{overflow: "hidden"}} className="head-sub">
-                                    <span style={{fontSize: '11px', color: "#92949c"}}>
+                                                        <div className="head-sub">
+                                    {/*<span style={{fontSize: '11px', color: "#92949c"}}>*/}
                                     {
                                         (stickyMsg && stickyMsg.groupId ? `#${stickyMsg.seq} ${(stickyMsg as PinnedSticky).theme.themeTag}` : tribeInfo && tribeInfo.theme.themeTag)
                                     }
-                                        </span>
+                                        {/*</span>*/}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -258,8 +262,7 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
                                             <div className="head-icons2">
                                                 {
                                                     stickyMsg && tribeService.groupIdCache().indexOf(stickyMsg.groupId) < tribeService.groupIdCache().length - 1
-                                                    && <IonIcon src={chevronForwardOutline} size="large" color="medium"
-                                                                onClick={onClickThemeForward}/>
+                                                    && <img src="./assets/img/icon/downOutline.svg" height={22} onClick={onClickThemeForward}/>
                                                 }
                                             </div>
                                         </IonCol>
@@ -290,6 +293,13 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
         <TribeInfoModal onReladData={onReladData} isOpen={showTribeInfoModal} stickies={stickies}
                         onClose={() => setShowTribeInfoModal(false)} tribeInfo={tribeInfo} roles={roles}
                         stickyMsg={stickyMsg}/>
+        <IonLoading
+            cssClass='my-custom-class'
+            isOpen={isLoading}
+            onDidDismiss={() => setIsLoading(false)}
+            message={'Please wait...'}
+            duration={60000}
+        />
     </>
 }
 

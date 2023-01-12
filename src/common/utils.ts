@@ -3,6 +3,7 @@ import config from "./config";
 import {ImageType, Message, MessageType, MsgText, MsgTextImage, TribeRole} from "../types";
 import {Category} from "@emit-technology/emit-lib";
 import selfStorage from "./storage";
+import { Browser } from '@capacitor/browser';
 
 const format = require('date-format');
 const BN = require("bn.js");
