@@ -7,7 +7,10 @@ import 'dear-image.detect-background-color';
 const DearImage = require('dear-image');
 
 export const getBackgroundColor = async (image:string): Promise<string> =>{
-    return DearImage.detectBackgroundColor(image);
+    const resp = await fetch(image);
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    return DearImage.detectBackgroundColor(url);
 }
 
 export interface ThemeColors {

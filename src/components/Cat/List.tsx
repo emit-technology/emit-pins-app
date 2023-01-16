@@ -14,6 +14,8 @@ import {
 } from "@ionic/react";
 import './index.scss';
 import {closeOutline} from "ionicons/icons";
+import {url} from "inspector";
+import {XBlock, XMasonry} from "react-xmasonry";
 
 interface Props {
     isOpen: boolean;
@@ -24,40 +26,98 @@ interface Props {
 export const CatList: React.FC<Props> = ({items, isOpen, onClose,}) => {
     return <>
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-cat-modal" >
-            <IonHeader collapse="fade">
-                <IonToolbar>
-                    <IonTitle>YOUR CAT</IonTitle>
-                    <IonButtons slot="end">
-                        <IonButton onClick={() => onClose()}><IonIcon src={closeOutline}/></IonButton>
-                    </IonButtons>
-                </IonToolbar>
-            </IonHeader>
-            <IonContent className="ion-padding">
-                {
-                    items && items.length == 0 &&
-                    <div className="cat-empty-content">
-                        <div className="cat-empty-box" style={{backgroundImage: `url('./assets/img/icon/catDashRec.svg')`}}>
-                            <div style={{marginBottom: 20}}>
-                                Seems like you don’t have a cat yet.<br/>
-                                Adopt one right now!
-                            </div>
-                            <IonButton size="small">Adopt</IonButton>
-                        </div>
-                    </div>
-                }
+            {/*<IonHeader>*/}
+            {/*    <IonToolbar>*/}
+            {/*        <IonTitle>Noki</IonTitle>*/}
+            {/*        <IonButtons slot="end">*/}
+            {/*            <IonButton onClick={() => onClose()} style={{transform: "translateX(10px)"}}><IonIcon src={closeOutline} size="large"/></IonButton>*/}
+            {/*        </IonButtons>*/}
+            {/*    </IonToolbar>*/}
+            {/*</IonHeader>*/}
+            <IonContent className="ion-padding" color="tertiary">
+               <div className="noki-box">
+                   <div className="noki-title">
+                       <div><img src="./assets/img/icon/catOutline.png"/></div>
+                       <div>YOUR NOKI</div>
+                   </div>
+                   {
+                       items && items.length == 0 &&
+                       <div className="cat-empty-content">
+                           <div className="cat-empty-box" style={{backgroundImage: `url('./assets/img/icon/catDashRec.svg')`}}>
+                               <div style={{marginBottom: 20}}>
+                                   Seems like you don’t have a cat yet.<br/>
+                                   Adopt one right now!
+                               </div>
+                               {/*<IonButton size="small">Adopt</IonButton>*/}
+                           </div>
+                       </div>
+                   }
 
-                {
-                    items && items.length > 0 &&
-                    <IonRow>
-                        {
-                            items && items.map(v => {
-                                return <IonCol sizeMd="6" size="12"><CatItem catInfo={v}/></IonCol>
-                            })
-                        }
-                    </IonRow>
-                }
+                   {
+                       items && items.length > 0 &&
+                       <XMasonry>
+                           {
+                               items && items.map((v,i) => {
+                                   return <XBlock key={i}>
+                                       <CatItem catInfo={v}/>
+                                   </XBlock>
+                               })
+                           }
+                           {
+                               items && items.map((v,i) => {
+                                   return <XBlock key={i+1}>
+                                       <CatItem catInfo={v}/>
+                                   </XBlock>
+                               })
+                           }
+                           {
+                               items && items.map((v,i) => {
+                                   return <XBlock key={i+2}>
+                                       <CatItem catInfo={v}/>
+                                   </XBlock>
+                               })
+                           }
 
+                           {
+                               items && items.map((v,i) => {
+                                   return <XBlock key={i+3}>
+                                       <CatItem catInfo={v}/>
+                                   </XBlock>
+                               })
+                           }
+                           {
+                               items && items.map((v,i) => {
+                                   return <XBlock key={i+4}>
+                                       <CatItem catInfo={v}/>
+                                   </XBlock>
+                               })
+                           }
 
+                           {
+                               items && items.map((v,i) => {
+                                   return <XBlock key={i+5}>
+                                       <CatItem catInfo={v}/>
+                                   </XBlock>
+                               })
+                           }
+
+                           {
+                               items && items.map((v,i) => {
+                                   return <XBlock key={i+6}>
+                                       <CatItem catInfo={v}/>
+                                   </XBlock>
+                               })
+                           }
+
+                       </XMasonry>
+                   }
+
+                   <div style={{position: "absolute",top: 0, right:0}}>
+                       <IonButtons slot="end">
+                           <IonButton color="primary" onClick={() => onClose()} style={{transform: "translateX(10px)"}}><IonIcon src={closeOutline} size="large"/></IonButton>
+                       </IonButtons>
+                   </div>
+               </div>
             </IonContent>
         </IonModal>
     </>

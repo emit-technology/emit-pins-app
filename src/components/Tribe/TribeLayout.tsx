@@ -172,7 +172,7 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                         <div>{utils.nFormatter(v.collections,2)}</div>
                                     </div>
                                     <div className="iconss">
-                                        <div><img src="./assets/img/icon/likeOutline.png" className="static-icons"/></div>
+                                        <div><img src="./assets/img/icon/likeGrayOutline.png" className="static-icons"/></div>
                                         <div>{utils.nFormatter(v.likes,2)}</div>
                                     </div>
                                 </div>

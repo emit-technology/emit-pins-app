@@ -57,6 +57,11 @@ export const RolesPopover: React.FC<Props> = ({roles,isOpen,onClose, defaultRole
                                 }}>
                                     <IonAvatar slot="start" className="ion-avatar2">
                                         <img src={utils.getDisPlayUrl(v.avatar)}/>
+                                        {
+                                            v && v.roleType && <div style={{position: "absolute",top: "14px", right: "-4px"}}>
+                                                <img src="./assets/img/icon/nokiTag.png" height={12}/>
+                                            </div>
+                                        }
                                     </IonAvatar>
                                     <IonLabel className="ion-text-wrap">
                                         <b style={{

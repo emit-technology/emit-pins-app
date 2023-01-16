@@ -1,8 +1,12 @@
 export interface CatInfo {
-    img: string;
-    visibility: number;
-    name: string;
-    createdAt: number;
+    source?: string;
+    chain?: string;
+    nftType?: string;
     id: string;
-    life: number;
+    name: string;
+    image: string;
+    meta?: any;
+    createAt: number;
+    visibility: number;
+    life: number
 }

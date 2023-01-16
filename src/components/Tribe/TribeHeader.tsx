@@ -22,7 +22,6 @@ import BigNumber from "bignumber.js";
 import {tribeService} from "../../service/tribe";
 import {TribeInfoModal} from "./TribeInfoModal";
 import {utils} from "../../common";
-import {saveMessageState} from "../../common/state/slice/messageSlice";
 
 interface Props {
     tribeInfo: TribeInfo;
@@ -199,7 +198,8 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
                     <div className="msg-head-avatar">
                         <div slot="start" id="main-content-left">
                             <IonMenuToggle menu="start" autoHide={false}>
-                                <IonIcon src={listOutline} size="large"/>
+                                {/*<IonIcon src={listOutline} size="large"/>*/}
+                                <img src="./assets/img/icon/menuOutline.png" height={24} style={{verticalAlign: "middle"}}/>
                             </IonMenuToggle>
                         </div>
                     </div>
@@ -212,7 +212,7 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
                                             <div className="head-icons">
                                                 {
                                                     stickyMsg && tribeService.groupIdCache().indexOf(stickyMsg.groupId) > 0
-                                                    && <img src="./assets/img/icon/upOutline.svg" height={22} onClick={onClickThemeBack}/>
+                                                    && <img src="./assets/img/icon/upOutline.png" height={22} onClick={onClickThemeBack}/>
                                                 }
                                             </div>
                                         </IonCol>
@@ -262,7 +262,7 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
                                             <div className="head-icons2">
                                                 {
                                                     stickyMsg && tribeService.groupIdCache().indexOf(stickyMsg.groupId) < tribeService.groupIdCache().length - 1
-                                                    && <img src="./assets/img/icon/downOutline.svg" height={22} onClick={onClickThemeForward}/>
+                                                    && <img src="./assets/img/icon/downOutline.png" height={22} onClick={onClickThemeForward}/>
                                                 }
                                             </div>
                                         </IonCol>
@@ -280,11 +280,16 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
                             }}>
                                 Cancel
                             </IonButton>
-                        </IonButtons> : <IonIcon src={ellipsisVertical} color="medium" size="large" slot="end"
-                                                 onClick={(e) => {
-                                                     e.persist();
-                                                     setShowActionSheet(true)
-                                                 }}/>
+                        </IonButtons> :
+                            <img src="./assets/img/icon/moreOutline.png" slot='end' height={24} onClick={(e) => {
+                                e.persist();
+                                setShowActionSheet(true)
+                            }}/>
+                            // <IonIcon src={ellipsisVertical} color="medium" size="large" slot="end"
+                            //                      onClick={(e) => {
+                            //                          e.persist();
+                            //                          setShowActionSheet(true)
+                            //                      }}/>
                     }
                 </IonToolbar>
             </IonHeader>

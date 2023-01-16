@@ -5,9 +5,11 @@ import {
     ImageType,
     Message,
     MessageStatus,
-    MessageType, MsgStaticInfo,
+    MessageType,
+    MsgStaticInfo,
     MsgText,
-    PinnedSticky, StreamMsg,
+    PinnedSticky,
+    StreamMsg,
     TribeInfo,
     TribeResult,
     TribeRole,
@@ -18,7 +20,7 @@ import {BaseRpc} from "../../rpc";
 import config from "../../common/config";
 import {Websocket, WebsocketBuilder} from 'websocket-ts';
 import selfStorage from "../../common/storage";
-import getMainColor, {ThemeColors} from "../../common/getMainColor";
+import getMainColor from "../../common/getMainColor";
 import {emitBoxSdk} from "../emitBox";
 import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import tribeWorker from "../../worker/imWorker";
@@ -150,20 +152,20 @@ class TribeService implements ITribe {
     tribeInfo = async (tribeId: string): Promise<TribeInfo> => {
         const _key = `tribeInfo_${tribeId}`;
         const dataStr = sessionStorage.getItem(_key);
-        if(dataStr){
-            const data:TribeInfo = JSON.parse(dataStr)
-            this._tribeInfoFn(tribeId).catch(e=>console.error(e))
+        if (dataStr) {
+            const data: TribeInfo = JSON.parse(dataStr)
+            this._tribeInfoFn(tribeId).catch(e => console.error(e))
             return Promise.resolve(data);
-        }else{
+        } else {
             return this._tribeInfoFn(tribeId);
         }
     }
 
-    private _tribeInfoFn = async (tribeId:string):Promise<TribeInfo> =>{
+    private _tribeInfoFn = async (tribeId: string): Promise<TribeInfo> => {
         const _key = `tribeInfo_${tribeId}`;
         const rest: TribeResult<TribeInfo> = await this._rpc.post('/tribe/tribeInfo', {tribeId});
         if (rest && rest.code == 0) {
-            if(config.tribeId && config.tribeId == tribeId){
+            if (config.tribeId && config.tribeId == tribeId) {
                 this._tribeInfo = rest.data;
             }
             sessionStorage.setItem(_key, JSON.stringify(rest.data))
@@ -180,37 +182,100 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
+    userNFTs = async (): Promise<Array<CatInfo>> => {
+        const account = await emitBoxSdk.getAccount();
+        const rest: TribeResult<Array<CatInfo>> = await this._rpc.post('/tribe/userNFTs', {user: account && account.addresses[ChainType.EMIT]});
+        if (rest && rest.code == 0) {
+            return Promise.resolve(rest.data)
+        }
+        return Promise.reject(rest.message);
+    }
 
-    tribeRoles = async (tribeId: string): Promise<Array<TribeRole>> => {
-        const _key = `tribeRole_${tribeId}`;
-        const dataStr = sessionStorage.getItem(_key);
-        if(dataStr){
-            const data:Array<TribeRole> = JSON.parse(dataStr)
-            this._tribeRolesFn(tribeId).catch(e=>console.error(e))
-            return Promise.resolve(data);
+    setUserNFTName = async (nftId: string, name: string): Promise<Array<CatInfo>> => {
+        const rest: TribeResult<Array<CatInfo>> = await this._rpc.post('/tribe/setUserNFTName', {
+            id: nftId,
+            name: name
+        });
+        if (rest && rest.code == 0) {
+            return Promise.resolve(rest.data)
+        }
+        return Promise.reject(rest.message);
+    }
+
+    // dispatchNoki = async (): Promise<Array<CatInfo>> => {
+    //     const account =await emitBoxSdk.getAccount();
+    //     const rest: TribeResult<Array<CatInfo>> = await this._rpc.post('/tribe/userNFTs', {
+    //         "sign":"38a97a9fb44489bce15ebe5",
+    //         user: account && account.addresses[ChainType.EMIT]});
+    //     if (rest && rest.code == 0) {
+    //         return Promise.resolve(rest.data)
+    //     }
+    //     return Promise.reject(rest.message);
+    // }
+
+    tribeRoles = async (tribeId: string, cache: boolean = true): Promise<Array<TribeRole>> => {
+        if(cache){
+            const _key = `tribeRole_${tribeId}`;
+            const dataStr = selfStorage.getItem(_key);
+            if (dataStr) {
+                const data: Array<TribeRole> = dataStr
+                this._tribeRolesFn(tribeId).catch(e => console.error(e))
+                const ret = data.filter(v => !v.hide)
+                // ret.sort(this._sortRole)
+                return Promise.resolve(ret);
+            }
         }
         return this._tribeRolesFn(tribeId);
     }
 
+
+    private _sortRole = (a:TribeRole, b: TribeRole) =>{
+        if(!a.roleType && !b.roleType || !!a.roleType && !! b.roleType ){
+            return a.createdAt - b.createdAt
+        }else if (!a.roleType && !!b.roleType){
+            return 1
+        }else if(!!a.roleType && !b.roleType){
+            return -1
+        }
+    }
+
     private _tribeRolesFn = async (tribeId: string): Promise<Array<TribeRole>> => {
         const _key = `tribeRole_${tribeId}`;
-        const rest: TribeResult<Array<TribeRole>> = await this._rpc.post('/tribe/tribeRoles', {tribeId});
+        const account = await emitBoxSdk.getAccount();
+        const rest: TribeResult<Array<TribeRole>> = await this._rpc.post('/tribe/tribeUserRoles', {
+            tribeId,
+            user: account && account.addresses[ChainType.EMIT]
+        });
         const defaultRole = {
-            avatar: {url: `https://pic.emit.technology/img/3ce83e299e485e006cd9e820ea9c790f.png`, height: 300, width: 300},
+            avatar: {
+                url: `https://pic.emit.technology/img/3ce83e299e485e006cd9e820ea9c790f.png`,
+                height: 300,
+                width: 300
+            },
             name: "Narrator",
             id: "",
             tribeId: config.tribeId
         }
         if (rest && rest.code == 0) {
             if (rest.data) {
-                const ret = rest.data.reverse();
+                let ret = rest.data.reverse();
+                ret = ret.filter(v => !v.hide)
+                ret = ret.map(v => {
+                    if (v.id == v.name) {
+                        v.name = "Noki"
+                    }
+                    return v
+                })
+
+                ret.sort(this._sortRole)
+
                 ret.unshift(defaultRole)
                 this._tribeRole = ret;
-                sessionStorage.setItem(_key, JSON.stringify(ret))
+                selfStorage.setItem(_key, ret)
                 return Promise.resolve(ret)
             }
             this._tribeRole = [defaultRole];
-            sessionStorage.setItem(_key, JSON.stringify([defaultRole]))
+            selfStorage.setItem(_key, [defaultRole])
             return [defaultRole]
         }
         return Promise.reject(rest.message);
@@ -249,11 +314,11 @@ class TribeService implements ITribe {
             authToken = tribeService.getAuthToken();
         }
         if (rest.code == 40000) {
-            try{
+            try {
                 authToken = await this.getAccountAndLogin();
-            }catch (e){
-                const err:string = typeof e == 'string'?e: e.message;
-                if(err && err.indexOf("Account locked")>-1){
+            } catch (e) {
+                const err: string = typeof e == 'string' ? e : e.message;
+                if (err && err.indexOf("Account locked") > -1) {
                     return Promise.reject("Account not login!")
                 }
                 return Promise.reject(e)
@@ -384,7 +449,7 @@ class TribeService implements ITribe {
     userLogout = async (): Promise<boolean> => {
         // const rest: TribeResult<boolean> = await
         const isAlive = await this.isSessionAvailable();
-        if(isAlive){
+        if (isAlive) {
             const rest: TribeResult<boolean> = await this._rpc.post('/user/logout', null);
             if (rest && rest.code == 0) {
                 tribeService.setAuthToken("logout token");
@@ -402,8 +467,8 @@ class TribeService implements ITribe {
         return await this._picRpc.upload()
     }
 
-    uploadToServer = async (image: any) =>{
-        try{
+    uploadToServer = async (image: any) => {
+        try {
             const themeColors = await getMainColor(image.webPath);
             const file = await fetch(image.webPath).then(r => r.blob()).then(blobFile => new File([blobFile], `file.${image.format}`, {type: blobFile.type}));
             const data = await this._picRpc.uploadFile(file);
@@ -814,11 +879,14 @@ class TribeService implements ITribe {
     }
 
 
-    tribeUserInfo = async (tribeId?: string): Promise<{limit: UserLimit, subscribed:boolean}> => {
+    tribeUserInfo = async (tribeId?: string): Promise<{ limit: UserLimit, subscribed: boolean }> => {
         const account = await emitBoxSdk.getAccount();
-        if(!!account){
+        if (!!account) {
             const address = account.addresses[ChainType.EMIT]
-            const rest: TribeResult<{limit: UserLimit, subscribed:boolean}> = await this._rpc.post('/tribe/tribeUserInfo', {tribeId:tribeId?tribeId:config.tribeId,user: address});
+            const rest: TribeResult<{ limit: UserLimit, subscribed: boolean }> = await this._rpc.post('/tribe/tribeUserInfo', {
+                tribeId: tribeId ? tribeId : config.tribeId,
+                user: address
+            });
             if (rest && rest.code == 0) {
                 return Promise.resolve(rest.data)
             }
@@ -829,7 +897,7 @@ class TribeService implements ITribe {
 
     myTribes = async (): Promise<Array<TribeInfo>> => {
         const account = await emitBoxSdk.getAccount();
-        const address = account ?account.addresses[ChainType.EMIT]:""
+        const address = account ? account.addresses[ChainType.EMIT] : ""
         const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/myTribes', {userId: address});
         if (rest && rest.code == 0) {
             selfStorage.setItem("myTribes", rest.data)
@@ -866,7 +934,7 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
-    unSubscribeTribe = async (tribeId:string): Promise<boolean> => {
+    unSubscribeTribe = async (tribeId: string): Promise<boolean> => {
         await this.userCheckAuth()
         const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/unSubscribeTribe', {tribeId: tribeId});
         if (rest && rest.code == 0) {
@@ -1017,10 +1085,10 @@ class TribeService implements ITribe {
                         groupMsg = groups[0];
                         groupMsg.groupId = msg.groupId;
                     } else {
-                        if(!this._tribeInfo){
+                        if (!this._tribeInfo) {
                             await tribeService.tribeInfo(config.tribeId);
                         }
-                        if(!this._tribeRole){
+                        if (!this._tribeRole) {
                             await tribeService.tribeRoles(config.tribeId);
                         }
                         groupMsg = {
@@ -1137,37 +1205,22 @@ class TribeService implements ITribe {
 
     }
 
-    urlMetadata = (url:string) =>{
-       const _cache = selfStorage.getItem(`metadata_${url}`);
-       if(_cache){
-        return _cache
-       }
+    urlMetadata = (url: string) => {
+        const _cache = selfStorage.getItem(`metadata_${url}`);
+        if (_cache) {
+            return _cache
+        }
     }
 
-    catItems = async ():Promise<Array<CatInfo>> =>{
-        return [
-            { img: "./assets/img/cat/000660.png", id: "000660", visibility: 100, createdAt: Date.now(), name: "000660",life: 100 },
-            { img: "./assets/img/cat/000660.png", id: "000650", visibility: 99, createdAt: Date.now(), name: "000660",life: 100 },
-            { img: "./assets/img/cat/000660.png", id: "000651", visibility: 90, createdAt: Date.now(), name: "000660",life: 100 },
-            { img: "./assets/img/cat/000660.png", id: "000652", visibility: 85, createdAt: Date.now(), name: "000660",life: 100 },
-            { img: "./assets/img/cat/000660.png", id: "000653", visibility: 50, createdAt: Date.now(), name: "000660",life: 100 },
-            { img: "./assets/img/cat/000660.png", id: "000654", visibility: 35, createdAt: Date.now(), name: "000660",life: 100 },
-            { img: "./assets/img/cat/000660.png", id: "000655", visibility: 25, createdAt: Date.now(), name: "000660",life: 100 },
-            { img: "./assets/img/cat/000660.png", id: "000656", visibility: 15, createdAt: Date.now(), name: "000660",life: 100 },
-            { img: "./assets/img/cat/000660.png", id: "000657", visibility: 5, createdAt: Date.now(), name: "000660",life: 100 },
-            { img: "./assets/img/cat/000660.png", id: "000658", visibility: 1, createdAt: Date.now(), name: "000660",life: 100 },
-            { img: "./assets/img/cat/000660.png", id: "000659", visibility: 0, createdAt: Date.now(), name: "000660",life: 100 },
-
-            { img: "./assets/img/cat/000661.png", id: "000661", visibility: 60, createdAt: Date.now(), name: "000661",life: 100 },
-            { img: "./assets/img/cat/000662.png", id: "000662", visibility: 50, createdAt: Date.now(), name: "000662",life: 100 },
-            { img: "./assets/img/cat/000663.png", id: "000663", visibility: 10, createdAt: Date.now(), name: "000663",life: 100 },
-        ]
-        // const rest: TribeResult<Array<CatInfo>> = await this._rpc.post('/tribe/cat', {owner: "" });
-        // if (rest && rest.code == 0) {
-        //     return rest.data
-        // }
-        // return Promise.reject(rest.message);
+    catItems = async (): Promise<Array<CatInfo>> => {
+        const arr = await tribeService.userNFTs()
+        return arr.map(v => {
+            // v.image = `${config.tribePic}/display?url=${v.image}&w=${300}&h=${300}&op=resize&upscale=1`
+            return v
+        });
     }
+
+
 }
 
 export const tribeService = new TribeService();

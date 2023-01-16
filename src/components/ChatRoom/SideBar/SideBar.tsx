@@ -119,7 +119,8 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
                     window.location.href = "/"
                 }
             }}>
-                <IonIcon slot="start" src={homeOutline} size="large"/>
+                {/*<IonIcon slot="start" src={homeOutline} size="large"/>*/}
+                <img src="./assets/img/icon/homeOutline.png" height={32} slot="start"/>
                 <IonLabel>HOME</IonLabel>
             </IonItem>
         }
@@ -135,16 +136,15 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
             requestAccount();
         }}>
             {
-                !account && <IonIcon slot="start" src={personOutline} size="large"/>
+                (!account || !!account && !account.name) &&  <img src="./assets/img/icon/personOutline.png" height={32} slot="start"/>
             }
             {
-                !!account && <IonAvatar slot="start">
-                    {account.name ? <Avatar name={account.name} round size={"36"}/> :
-                        <IonIcon src={personOutline} size="large"/>}
+                !!account && account.name && <IonAvatar slot="start">
+                    <Avatar name={account.name} round size={"32"}/>
                 </IonAvatar>
             }
-            <IonLabel className="ion-text-wrap">
-                <b>{!!account && account.name ? account.name : 'Person'}</b>
+            <IonLabel>
+                {!!account && account.name ? account.name : 'Person'}
                 <p>
                     <small>{!!account && utils.ellipsisStr(account && account.addresses && account.addresses[ChainType.EMIT], 3)}</small>
                 </p>
@@ -197,8 +197,9 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
         <IonItem onClick={() => {
             showCats().catch(e=>console.error(e))
         }}>
-            <IonIcon slot="start" src={catSvg} size="large"/>
-            <IonLabel>Cat</IonLabel>
+            {/*<IonIcon slot="start" src={catSvg} size="large"/>*/}
+            <img src="./assets/img/icon/catOutline.png" height={32} slot="start"/>
+            <IonLabel>Noki</IonLabel>
         </IonItem>
 
         <div style={{height: 30}}>

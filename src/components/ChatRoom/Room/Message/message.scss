@@ -97,6 +97,7 @@
   padding: 8px 10px;
   //margin-bottom: 2px;
   width: 100%;
+  min-width: 36px;
   font-size: 14px;
   overflow: hidden;
 }
@@ -107,6 +108,7 @@
   border-radius: 16px 0 14px 16px;
   margin-bottom: 2px;
   font-size: 14px;
+  min-width: 36px;
   //color: #ffffff
 }
 
@@ -319,6 +321,7 @@
   background: rgba(120, 120, 120, 0.5);
   font-size: 14px;
   border-radius: 12px;
+  min-width: 36px;
   /* min-width: 200px; */
   //margin-top: 2px;
   color: #fff;
@@ -336,6 +339,7 @@
   //min-width: 200px;
   margin-top: 2px;
   color: #fff;
+  min-width: 36px;
   max-width: 70%;
   padding: 2px;
 }
@@ -471,9 +475,10 @@
   flex-direction: column;
   /* height: 50px; */
   align-items: center;
-  justify-content: flex-end;
-  margin-top: 6px;
-  //margin-bottom: 6px;
+  justify-content: center;
+  /* margin-top: 6px; */
+  width: 36px;
+  height: 36px;
 }
 
 .fab-cus-dig {
@@ -492,16 +497,16 @@
 
 .bottom-role {
   position: absolute;
-  top: -30px;
+  top: -26px;
   display: flex;
   width: 100%;
 }
 
 .bottom-role .avatar {
-  padding: 5px;
-  height: 58px;
-  width: 58px;
-  background: #ffffff;
+  padding: 3px;
+  height: 54px;
+  width: 54px;
+  background: #F5F7F9;
   border-radius: 50%;
 }
 
@@ -529,6 +534,7 @@
   position: relative;
   //min-height: 58px;
   font-size: 12px;
+  margin: -4px -6px 4px;
   //min-width: 150px;
   //margin-top: 6px;
 }
@@ -614,6 +620,7 @@
 .ion-avatar2 {
   width: 36px;
   height: 36px;
+  position: relative;
   //background: #fff;
   //padding: 2px;
 }
@@ -779,8 +786,10 @@
   white-space: nowrap;
   //max-width: 64px;
   text-overflow: ellipsis;
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: 400;
   color: rgb(146, 148, 156);
+  text-align: left;
   width: calc(100% - 18px);
 }
 
@@ -897,11 +906,14 @@
 }
 
 .btn-name {
-  transform: translate(10px, -6px);
+  transform: translate(6px, 0px);
   white-space: nowrap;
+  font-family: SFProText-Medium !important;
+  font-size: 14px;
   width: 200px;
   text-overflow: ellipsis;
   overflow: hidden;
+  letter-spacing: -0.21px;
 }
 
 .update-role {
@@ -1207,6 +1219,7 @@ ion-radio.radio-checked::part(mark) {
   display: flex;
   align-content: center;
   align-items: center;
+  margin-top: 2px;
 }
 
 

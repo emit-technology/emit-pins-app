@@ -16,6 +16,10 @@ div {
   font-family: "SFProText-Regular" !important;
 }
 
+img {
+  vertical-align: middle;
+}
+
 .font-bold {
   font-family: 'SFBold', sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen',
   'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue';
@@ -197,7 +201,7 @@ pre {
     position: absolute;
     /* size: 32px; */
     left: 18px;
-    bottom: 47px !important;
+    bottom: 50px !important;
   }
 
   .asv-name{

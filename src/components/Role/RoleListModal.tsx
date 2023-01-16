@@ -206,6 +206,7 @@ const RoleListModalChild: React.FC<Props> = ({
                                     {
                                         roles && roles.map((v, i) => {
                                             return <IonItem
+                                                className="role-item"
                                                 lines={i == 0 ? "full" : "none"}
                                                 style={{borderRadius: (i == 0) ? "12px 12px 0 0" : i == roles.length - 1 ? "0 0 12px 12px" : ""}}
                                                 color="tertiary" key={i} onClick={(e) => {
@@ -214,13 +215,19 @@ const RoleListModalChild: React.FC<Props> = ({
                                             }}>
                                                 <IonAvatar slot="start" className="ion-avatar2">
                                                     <img src={utils.getDisPlayUrl(v.avatar)}/>
+                                                    {
+                                                        v && v.roleType && <div style={{position: "absolute",top: "14px", right: "-4px"}}>
+                                                            <img src="./assets/img/icon/nokiTag.png" height={12}/>
+                                                        </div>
+                                                    }
                                                 </IonAvatar>
                                                 <IonLabel>
                                                     <b style={{fontSize: '12px',color: defaultRole && v.id == defaultRole.id?'':'#868990'}}>{v.name}</b>
                                                     {/*<p><IonText color="medium">{v.desc}</IonText></p>*/}
                                                 </IonLabel>
                                                 {
-                                                    defaultRole && v.id == defaultRole.id && <IonIcon slot="end" src={personOutline} size="small"/>
+                                                    defaultRole && v.id == defaultRole.id && <img src={"./assets/img/icon/personOutline.png"} height={18}/>
+                                                    // <IonIcon slot="end" src={personOutline} size="small"/>
                                                 }
                                                 {
                                                     (i > 0 ) &&

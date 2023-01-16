@@ -47,6 +47,13 @@ http://ionicframework.com/docs/theming/ */
   url('./fonts/SF/sf-pro-text-medium.svg#svgFontName') format('svg');
 }
 
+@font-face {
+  font-family: 'SF-Pro-Rounded-Bold';
+  src: url('./fonts/SF/SF-Pro-Rounded-Bold.eot?#iefix') format('embedded-opentype'),
+  url('./fonts/SF/SF-Pro-Rounded-Bold.woff') format('woff'),
+  url('./fonts/SF/SF-Pro-Rounded-Bold.ttf')  format('truetype')
+}
+
 /** Ionic CSS Variables **/
 :root {
 

@@ -99,9 +99,6 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     const dispatchData = useAppSelector(state => state.jsonData);
     const appDispatch = useAppDispatch();
 
-    // const [comments, setComments] = useState([]);
-    // const [firstItemIndex, setFirstItemIndex] = useState(0)
-    // const [total, setTotal] = useState(0)
     const [showModifyMsg, setShowModifyMsg] = useState(null);
 
     const [showShareModal, setShowShareModal] = useState(false);
@@ -557,20 +554,20 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
 
     // setting 'auto' for behavior does help in this sample, but not in my actual code
     const followOutput = useCallback((isAtBottom) => {
-        console.log('MessagesLislowOutput isAtBottom', isAtBottom, atBottom);
-
         const check = comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex >= total - 3;
+
+        console.log('MessagesLislowOutput isAtBottom',check, isAtBottom, atBottom);
         return isAtBottom && atBottom && check ? 'auto' : false;
     }, [comments, atBottom, total]);
 
     const bottomChange = useCallback((bottom) => {
-        console.log("at bottom", bottom, isScrolling)
+        console.log("at bottom", bottom,atBottom, isScrolling)
         if (bottom !== atBottom) {
             setTimeout(() => {
                 setAtBottom(bottom);
             }, 50)
         }
-    }, [setAtBottom])
+    }, [setAtBottom,atBottom])
 
     useEffect(() => {
         if (!pinnedStickies && startItemIndex == -1) {
@@ -621,9 +618,6 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
 
     }, [visibleRange])
 
-
-
-
     return <>
 
         <div className={!pinnedStickies ? "msg-content" : "msg-content2"} style={{
@@ -632,9 +626,9 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
             <div className={`outer-box `}>
                 <div className="inner-box">
                     {/*{loadingData && <Loading/>}*/}
-                    {/*<div className="position-top">[{visibleRange.startIndex}] - [{visibleRange.endIndex}]*/}
-                    {/*    :[{comments && comments.length > 0 && comments[0].records[0].msgIndex}]..[{comments && comments.length > 0 && comments[comments.length - 1].records[0].msgIndex}], [{firstItemIndex}]..[{total}]*/}
-                    {/*</div>*/}
+                    <div className="position-top">[{visibleRange.startIndex}] - [{visibleRange.endIndex}]
+                        :[{comments && comments.length > 0 && comments[0].records[0].msgIndex}]..[{comments && comments.length > 0 && comments[comments.length - 1].records[0].msgIndex}], [{firstItemIndex}]..[{total}]
+                    </div>
                     <Virtuoso
                         ref={virtuoso}
                         style={{height: '100%'}}
@@ -701,10 +695,10 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                             onSubscribe(!subscribed)
                         }}>
                             {
-                                subscribed === false ? <img src="assets/img/fab-icon00004.png" width={32} height={32}
+                                subscribed === false ? <img src="assets/img/fab-icon00004.png" width={36} height={36}
                                                             style={{verticalAlign: "middle"}}/>
                                     :
-                                    <img src="assets/img/fab-icon00001.png" width={32} height={32}
+                                    <img src="assets/img/fab-icon00001.png" width={36} height={36}
                                          style={{verticalAlign: "middle"}}/>
                             }
                         </div>
@@ -748,7 +742,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
 
                         {
                             (!atBottom || visibleRange.endIndex < total - 3) && (
-                                <div className="fab-cus" style={{padding: 6}} onClick={() => {
+                                <div className="fab-cus" onClick={() => {
                                     setAtBottom(true);
                                     if (comments && comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex == total - 1) {
                                         scrollToItem({index: total - 1, align: "end"})
@@ -757,7 +751,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                     }
 
                                 }}>
-                                    <img src="assets/img/icon/toBottom.svg" height={20}
+                                    <img src="assets/img/icon/toBottom.png" height={18}
                                          style={{verticalAlign: "middle"}}/>
                                 </div>
                             )}

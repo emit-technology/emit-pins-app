@@ -54,6 +54,7 @@ import {CreateModal} from "../../components/Account/modal";
 import {RolesAvatarModal} from "../../components/Role/RolesAvatarModal";
 import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
 import copy from "copy-to-clipboard";
+import {useAppDispatch, useAppSelector} from "../../common/state/app/hooks";
 
 interface Props {
     tribeId: string
@@ -108,6 +109,16 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
 
     const [presentAlert] = useIonAlert();
     const [presentToast] = useIonToast();
+
+    const dispatchData = useAppSelector(state => state.jsonData);
+
+    useEffect(() => {
+        if (dispatchData) {
+            if (dispatchData.tag == 'initData') {
+                initRole().catch(e=>console.error(e))
+            }
+        }
+    }, [dispatchData.data]);
 
     // const init = async () => {
     //     checkInterVal = selfStorage.getItem("checkInterVal")
@@ -232,20 +243,8 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
         setShowShare(true);
     }
 
-
-    const initData = async () => {
-        const account = await emitBoxSdk.getAccount();
-        const tribeInfo = await tribeService.tribeInfo(tribeId);
-        const owner = account && account.addresses && account.addresses[ChainType.EMIT.valueOf()]
-        const f = await tribeService.isSessionAvailable()
-        setIsSessionAvailable(f);
-
-        const roles = await tribeService.tribeRoles(tribeId);
-        // const groupIds = tribeService.groupIdCache(); //await tribeService.groupIds(tribeId);
-        const groupTribes = JSON.parse(JSON.stringify(tribeService.getGroupMap()))//await tribeService.groupedMsg(groupIds);
-        // console.log("======> init data groupTribes", groupTribes)
-
-        groupTribes.push({groupId: "", theme: tribeInfo.theme, records: [], roles: roles})
+    const initRole = async ()=>{
+        const roles = await tribeService.tribeRoles(tribeId, false);
         let latestRoleId = selfStorage.getItem("latestRoleId");
         let role;
         if (!latestRoleId && roles && roles.length > 0) {
@@ -258,12 +257,28 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                 role = roles[0];
             }
         }
+        setRoles(roles);
+        setRoleFunc(role);
+        return roles;
+    }
 
+    const initData = async () => {
+        const account = await emitBoxSdk.getAccount();
+        const tribeInfo = await tribeService.tribeInfo(tribeId);
+        const owner = account && account.addresses && account.addresses[ChainType.EMIT.valueOf()]
+        const f = await tribeService.isSessionAvailable()
+        setIsSessionAvailable(f);
+
+        const roles = await initRole();
+
+        // const groupIds = tribeService.groupIdCache(); //await tribeService.groupIds(tribeId);
+        const groupTribes = JSON.parse(JSON.stringify(tribeService.getGroupMap()))//await tribeService.groupedMsg(groupIds);
+        // console.log("======> init data groupTribes", groupTribes)
+
+        groupTribes.push({groupId: "", theme: tribeInfo.theme, records: [], roles: roles})
         setAccount(account);
         setOwner(owner);
         setTribeInfo(tribeInfo);
-        setRoles(roles);
-        setRoleFunc(role);
         setGroupMsgs(groupTribes)
 
     }

@@ -18,6 +18,9 @@ export interface TribeRole {
     tribeId?: string;
     op?: string
     origin?: TribeRole
+
+    hide?:boolean;
+    roleType?:string
 }
 
 export interface TribeInfo {

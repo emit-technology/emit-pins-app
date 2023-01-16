@@ -95,7 +95,7 @@ export const Text: React.FC<Props> = ({
 
     const replayItem = replayCtn && msg.replayMsg && <div style={{
         minWidth: replayCtn && replayCtn.image && replayCtn.image.url ? "150px" : "50px",
-        width: '100%',
+        width: 'calc(100% + 12px)',
         backgroundBlendMode: msg.role ? "multiply" : "screen"
     }} className={isOwner ?
         `${!msg.role ? 'replay-box replay-box-sender-norole-owner' : 'replay-box replay-box-sender'}`
@@ -108,7 +108,7 @@ export const Text: React.FC<Props> = ({
                         paddingBottom: '3px',
                         minHeight: replayCtn && replayCtn.image && replayCtn.image.url ? '46px' : '20px'
                     }}>
-                        <div style={{color: "#000"}}>
+                        <div style={{color: "#000",fontSize: 13}}>
                             {msg.replayMsg.actor ? msg.replayMsg.actor.name : "Narrator"}
                         </div>
                         {
@@ -118,10 +118,11 @@ export const Text: React.FC<Props> = ({
                     </div>
                     {
                         replayCtn.content && <div className="text-pre" style={{
-                            width: '85%',
+                            width: '100%',
                             overflow: "hidden",
                             textOverflow: "ellipsis",
-                            whiteSpace: "nowrap"
+                            whiteSpace: "nowrap",
+                            fontSize: 14
                         }}>
                             {replayCtn.content}
                         </div>

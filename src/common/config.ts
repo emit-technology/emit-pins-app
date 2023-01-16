@@ -30,8 +30,8 @@ const NODE_ENV: string = process.env.NODE_ENV || 'development';
 
 const development: IConfig = {
     baseUrl: "https://pins.emit.technology",
-    // nodeUrl: "https://core-node-beta.emit.technology",
-    nodeUrl: "http://127.0.0.1:8585",
+    nodeUrl: "https://core-node-beta.emit.technology",
+    // nodeUrl: "http://127.0.0.1:8585",
     emitNode: "https://node-account.emit.technology",
     tribeNode: "https://pins-api.emit.technology",
     tribeWs: "wss://pins-ws.emit.technology/ws",
