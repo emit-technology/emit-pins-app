@@ -567,7 +567,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 setAtBottom(bottom);
             }, 50)
         }
-    }, [setAtBottom,atBottom])
+    }, [setAtBottom])
 
     useEffect(() => {
         if (!pinnedStickies && startItemIndex == -1) {
@@ -626,9 +626,9 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
             <div className={`outer-box `}>
                 <div className="inner-box">
                     {/*{loadingData && <Loading/>}*/}
-                    <div className="position-top">[{visibleRange.startIndex}] - [{visibleRange.endIndex}]
-                        :[{comments && comments.length > 0 && comments[0].records[0].msgIndex}]..[{comments && comments.length > 0 && comments[comments.length - 1].records[0].msgIndex}], [{firstItemIndex}]..[{total}]
-                    </div>
+                    {/*<div className="position-top">[{visibleRange.startIndex}] - [{visibleRange.endIndex}]*/}
+                    {/*    :[{comments && comments.length > 0 && comments[0].records[0].msgIndex}]..[{comments && comments.length > 0 && comments[comments.length - 1].records[0].msgIndex}], [{firstItemIndex}]..[{total}]*/}
+                    {/*</div>*/}
                     <Virtuoso
                         ref={virtuoso}
                         style={{height: '100%'}}

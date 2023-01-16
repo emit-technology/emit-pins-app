@@ -27,6 +27,8 @@ import {AssetsModal} from "../../Assets/Modal";
 import Avatar from "react-avatar";
 import catSvg from '../../../img/cat.svg';
 import {CatList} from "../../Cat";
+import {useAppDispatch} from "../../../common/state/app/hooks";
+import {saveDataState} from "../../../common/state/slice/dataSlice";
 
 interface Props {
     onRequestAccount: () => void;
@@ -50,6 +52,7 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
     const [showLoading, setShowLoading] = useState(false);
     const [showCatList, setShowCatList] = useState(false);
     const [catItems, setCatItems] = useState([]);
+    const dispatch = useAppDispatch();
 
     const requestAccount = () => {
         if (utils.useInjectAccount()) {
@@ -110,6 +113,12 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
     const showCats = async ()=>{
         const items = await tribeService.catItems();
         setCatItems(items);
+        if(items && items.length>0){
+            dispatch(saveDataState({
+                tag: 'initData',
+                data: Date.now()
+            }))
+        }
         setShowCatList(true)
     }
     return <>
@@ -155,7 +164,8 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
         <IonItem onClick={() => {
             checkAssets()
         }}>
-            <IonIcon slot="start" src={walletOutline} size="large"/>
+            {/*<IonIcon slot="start" src={walletOutline} size="large"/>*/}
+            <img src="./assets/img/icon/walletOutline.png" height={32} slot="start"/>
             <IonLabel>Assets</IonLabel>
             <IonIcon src={utils.useInjectAccount() ? chevronForwardOutline : openOutline} color="medium" slot="end"
                      size="small"/>

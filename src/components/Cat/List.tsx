@@ -45,8 +45,8 @@ export const CatList: React.FC<Props> = ({items, isOpen, onClose,}) => {
                        <div className="cat-empty-content">
                            <div className="cat-empty-box" style={{backgroundImage: `url('./assets/img/icon/catDashRec.svg')`}}>
                                <div style={{marginBottom: 20}}>
-                                   Seems like you don’t have a cat yet.<br/>
-                                   Adopt one right now!
+                                   Seems like you don’t have a noki yet.<br/>
+                                   {/*Adopt one right now!*/}
                                </div>
                                {/*<IonButton size="small">Adopt</IonButton>*/}
                            </div>
@@ -59,51 +59,6 @@ export const CatList: React.FC<Props> = ({items, isOpen, onClose,}) => {
                            {
                                items && items.map((v,i) => {
                                    return <XBlock key={i}>
-                                       <CatItem catInfo={v}/>
-                                   </XBlock>
-                               })
-                           }
-                           {
-                               items && items.map((v,i) => {
-                                   return <XBlock key={i+1}>
-                                       <CatItem catInfo={v}/>
-                                   </XBlock>
-                               })
-                           }
-                           {
-                               items && items.map((v,i) => {
-                                   return <XBlock key={i+2}>
-                                       <CatItem catInfo={v}/>
-                                   </XBlock>
-                               })
-                           }
-
-                           {
-                               items && items.map((v,i) => {
-                                   return <XBlock key={i+3}>
-                                       <CatItem catInfo={v}/>
-                                   </XBlock>
-                               })
-                           }
-                           {
-                               items && items.map((v,i) => {
-                                   return <XBlock key={i+4}>
-                                       <CatItem catInfo={v}/>
-                                   </XBlock>
-                               })
-                           }
-
-                           {
-                               items && items.map((v,i) => {
-                                   return <XBlock key={i+5}>
-                                       <CatItem catInfo={v}/>
-                                   </XBlock>
-                               })
-                           }
-
-                           {
-                               items && items.map((v,i) => {
-                                   return <XBlock key={i+6}>
                                        <CatItem catInfo={v}/>
                                    </XBlock>
                                })

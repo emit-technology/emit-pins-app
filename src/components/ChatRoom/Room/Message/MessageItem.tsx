@@ -10,6 +10,7 @@ import {gitBranchOutline} from "ionicons/icons";
 import * as React from "react";
 import {Components} from "react-virtuoso";
 import useResizeObserver from '@react-hook/resize-observer'
+import {utils} from "../../../../common";
 
 const useSize = (target) => {
     const [size, setSize] = React.useState(null)
@@ -113,7 +114,7 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                 }
 
                 {/*<div>*/}
-                <div className={"visual-msg-content"} style={{marginTop: pinnedSticky.records && pinnedSticky.records[0].hideTime?3:12}} onClick={(e) => {
+                <div className={"visual-msg-content"} style={{paddingTop: pinnedSticky.records && pinnedSticky.records[0].hideTime?utils.isApp()?1:3:12}} onClick={(e) => {
                     e.stopPropagation();
                     e.persist();
                     if (!pinnedStickies && !!dispatchTheme && pinnedSticky && stickyMsg && pinnedSticky.groupId != stickyMsg.groupId) {
