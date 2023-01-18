@@ -119,6 +119,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
             }else if(dispatchData.tag == 'initTribeInfo'){
                 console.log("initTribeInfo...")
                 tribeService.tribeInfo(tribeId).then(tribeInfo=>{
+                    console.log("tribe... info", tribeInfo)
                     setTribeInfo(tribeInfo);
                 })
             }

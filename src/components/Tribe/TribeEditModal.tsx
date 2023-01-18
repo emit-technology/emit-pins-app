@@ -79,7 +79,7 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
             let tribeId:string ;
 
             if(!forkGroupId){
-                // const newTheme = JSON.parse(JSON.stringify(tribeInfo.theme))
+                const newTheme = JSON.parse(JSON.stringify(tribeInfo.theme))
                 await tribeService.updateTribe({
                     tribeId: tribeInfo.tribeId,
                     image: imageRemote as ImageType,
@@ -92,25 +92,31 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                 })
                 tribeId = tribeInfo.tribeId;
 
-                // newTheme.image = imageRemote as ImageType;
-                // const stickyMsg = {
-                //     theme: newTheme,
-                //     seq: -1,
-                //     roles: [],
-                //     records: [],
-                //     groupId: "",
-                //     index: -1
-                // }
-                //
-                // console.log("update sticky msg ", stickyMsg)
-                // dispatch(saveDataState({
-                //     data: {stickyMsg: stickyMsg, time: Date.now()},
-                //     tag: 'updateThemeRight'
-                // }))
-                // dispatch(saveMessageState({
-                //     data: {stickyMsg: stickyMsg, time: Date.now()},
-                //     tag: 'updateThemeHead'
-                // }))
+                newTheme.image = imageRemote as ImageType;
+                const stickyMsg = {
+                    theme: newTheme,
+                    seq: -1,
+                    roles: [],
+                    records: [],
+                    groupId: "",
+                    index: -1
+                }
+                dispatch(saveDataState({
+                    data: {time: Date.now()},
+                    tag: 'initTribeInfo'
+                }))
+
+                setTimeout(()=>{
+                    console.log("update sticky msg ", stickyMsg)
+                    dispatch(saveDataState({
+                        data: {stickyMsg: stickyMsg, time: Date.now()},
+                        tag: 'updateThemeRight'
+                    }))
+                    dispatch(saveMessageState({
+                        data: {stickyMsg: stickyMsg, time: Date.now()},
+                        tag: 'updateThemeHead'
+                    }))
+                }, 100)
             }else{
                 if(title && (title.indexOf("http://") > -1 || title.indexOf("https:") > -1) ) {
                     return Promise.reject("Can't set url in the name !")

@@ -231,7 +231,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  width: 100%;
+  width: calc(100% - 42px);
 }
 
 .head-icons{

@@ -135,6 +135,7 @@ class TribeService implements ITribe {
         await this.userCheckAuth()
         const rest: TribeResult<any> = await this._rpc.post('/tribe/updateTribe', theme);
         if (rest && rest.code == 0) {
+            await tribeService.tribeInfoNoCache(config.tribeId)
             return Promise.resolve(true)
         }
         return Promise.reject(rest.message);
@@ -154,14 +155,14 @@ class TribeService implements ITribe {
         const dataStr = sessionStorage.getItem(_key);
         if (dataStr) {
             const data: TribeInfo = JSON.parse(dataStr)
-            this._tribeInfoFn(tribeId).catch(e => console.error(e))
+            this.tribeInfoNoCache(tribeId).catch(e => console.error(e))
             return Promise.resolve(data);
         } else {
-            return this._tribeInfoFn(tribeId);
+            return this.tribeInfoNoCache(tribeId);
         }
     }
 
-    private _tribeInfoFn = async (tribeId: string): Promise<TribeInfo> => {
+    tribeInfoNoCache = async (tribeId: string): Promise<TribeInfo> => {
         const _key = `tribeInfo_${tribeId}`;
         const rest: TribeResult<TribeInfo> = await this._rpc.post('/tribe/tribeInfo', {tribeId});
         if (rest && rest.code == 0) {

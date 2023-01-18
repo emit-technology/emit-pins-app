@@ -15,7 +15,7 @@ import {
 import './index.scss';
 import {closeOutline} from "ionicons/icons";
 // import {XBlock, XMasonry} from "react-xmasonry";
-import Masonry, {ResponsiveMasonry} from "react-responsive-masonry"
+// import Masonry, {ResponsiveMasonry} from "react-responsive-masonry"
 interface Props {
     isOpen: boolean;
     onClose: () => void;

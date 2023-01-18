@@ -108,6 +108,7 @@ const RoleListModalChild: React.FC<Props> = ({
 
     useEffect(() => {
         if (dispatchData) {
+            console.log(dispatchData)
             if (dispatchData.tag == 'updateThemeRight' && dispatchData.data) {
                 let dataObj:any = dispatchData.data;
                 if (dataObj.stickyMsg) {

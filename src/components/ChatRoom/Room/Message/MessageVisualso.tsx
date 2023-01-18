@@ -1,15 +1,6 @@
 import * as React from 'react';
 import {useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState} from 'react';
-import {
-    Message,
-    MessageStatus,
-    MessageType,
-    MsgText,
-    PinnedSticky,
-    TribeInfo,
-    TribeRole,
-    UserLimit
-} from "../../../../types";
+import {Message, MessageType, MsgText, PinnedSticky, TribeInfo, TribeRole, UserLimit} from "../../../../types";
 
 import './message.scss';
 import {useAppDispatch, useAppSelector} from "../../../../common/state/app/hooks";
@@ -39,7 +30,6 @@ import UploadImage from "../../../utils/UploadImage";
 import add from "../../../../img/add.png";
 import config from "../../../../common/config";
 import tribeWorker from "../../../../worker/imWorker";
-import BigNumber from "bignumber.js";
 import selfStorage from "../../../../common/storage";
 import {utils} from "../../../../common";
 import {ShareEx} from "../../../utils/ShareEx";
@@ -47,7 +37,6 @@ import {ReplayText} from "./Types/ReplayText";
 import {Virtuoso} from 'react-virtuoso'
 import {MessageItem} from "./MessageItem";
 import {MessageActionKind, messageInitializer, messageReducer} from "./MessageReducer";
-import {ShareExV2} from "../../../utils/ShareExV2";
 
 interface Props {
     pinnedStickies?: { data: Array<PinnedSticky>, total: number }
@@ -259,7 +248,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         } else {
             let latestId = getCurrentVisible();
             if (latestId == -1) {
-                latestId = pageSize < streamMsg1.total ? streamMsg1.total - 1 : 0;
+                latestId = streamMsg1.total - 1;
             }
             if (latestId >= streamMsg1.total) {
                 latestId = streamMsg1.total - 1;
@@ -396,6 +385,15 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     }, [loaded])
 
     const setCommentsInner = useCallback((data: { total: number, messages: Array<PinnedSticky> }, append?: boolean) => {
+        if(data.messages.findIndex(v=>v.records && v.records[0].msgType == MessageType.UpdateTribe) > -1){
+            tribeService.tribeInfoNoCache(config.tribeId).then(()=>{
+                appDispatch(saveDataState({
+                    data: {time: Date.now()},
+                    tag: 'initTribeInfo'
+                }))
+            })
+        }
+
         dispatch({
             type: MessageActionKind.COMBINE, payload: {
                 total: data.total,
@@ -624,7 +622,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
 
         }
 
-    }, [visibleRange])
+    }, [visibleRange, atBottom])
 
     const commitUpdateMsg = async () =>{
 
@@ -753,11 +751,11 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                         {
                             !pinnedStickies &&
                             <div className="fab-cus-dig"
-                                 style={(total - 1 - maxVisibleIndex <= 0) ? {
+                                 style={(total - 1 - maxVisibleIndex <= 1) ? {
                                      background: "transparent",
                                      height: 0
-                                 } : {marginTop: 6}}>
-                                <small>{total - 1 - maxVisibleIndex <= 0 ? "" : total - 1 - maxVisibleIndex}</small>
+                                 } : {marginBottom: 6}}>
+                                <small>{total - 1 - maxVisibleIndex <= 1 ? "" : total - 1 - maxVisibleIndex}</small>
                             </div>
                         }
 
