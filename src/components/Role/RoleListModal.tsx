@@ -78,7 +78,6 @@ const RoleListModalChild: React.FC<Props> = ({
             }))
         }else{
             tribeService.groupedMsg([groupId]).then(rest=>{
-                console.log(rest,"rest")
                 const groupMsg = rest[0];
                 const stickyMsg = {
                     theme: groupMsg.theme,
@@ -108,7 +107,7 @@ const RoleListModalChild: React.FC<Props> = ({
 
     useEffect(() => {
         if (dispatchData) {
-            console.log(dispatchData)
+            // console.log(dispatchData)
             if (dispatchData.tag == 'updateThemeRight' && dispatchData.data) {
                 let dataObj:any = dispatchData.data;
                 if (dataObj.stickyMsg) {

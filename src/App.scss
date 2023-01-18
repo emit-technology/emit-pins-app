@@ -180,13 +180,13 @@ pre {
   }
 
   .support-outer{
-    align-items: start;
+    //align-items: start;
   }
   .no-role-div-owner{
     max-width: 100% !important;
   }
   .support-outer-column {
-    flex-direction: column !important;
+    //flex-direction: column !important;
   }
 
   .tools {
@@ -252,7 +252,8 @@ pre {
   .ion-content-chat {--overflow: hidden;}
 
   .support-outer:hover {
-    flex-direction: column;
+    //flex-direction: column;
+    flex-wrap: wrap;
   }
 
   .display-animation {
@@ -282,11 +283,11 @@ pre {
   }
 
   .support-outer {
-    flex-direction: column !important;
+    //flex-direction: column !important;
   }
 
   .support-outer-owner {
-    flex-direction: column !important;
+    //flex-direction: column !important;
   }
 
 }

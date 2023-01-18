@@ -6,6 +6,7 @@ import {
     IonButton,
     IonText,
     IonIcon,
+    IonBadge,
     IonLoading, IonAvatar
 } from '@ionic/react';
 import {
@@ -19,14 +20,14 @@ import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import {utils} from "../../../common";
 import {tribeService} from "../../../service/tribe";
 import {CreateModal} from "../../Account/modal";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import walletWorker from "../../../worker/walletWorker";
 import {AccountList} from "../../Account/modal/List";
 import {AccountUnlock} from "../../Account/modal/Unlock";
 import {ResetModal} from "../../Account/modal/Reset";
 import {AssetsModal} from "../../Assets/Modal";
 import Avatar from "react-avatar";
-import catSvg from '../../../img/cat.svg';
+// import catSvg from '../../../img/cat.svg';
 import {CatList} from "../../Cat";
 import {useAppDispatch} from "../../../common/state/app/hooks";
 import {saveDataState} from "../../../common/state/slice/dataSlice";
@@ -37,11 +38,12 @@ interface Props {
     onLogout: () => void;
     isSessionAvailable: boolean
     router?: any;
+    inboxNum: number
 }
 
 let cb: any;
 
-export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onLogout, isSessionAvailable}) => {
+export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onLogout,inboxNum, isSessionAvailable}) => {
 
     const [present, dismiss] = useIonToast();
 
@@ -54,6 +56,10 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
     const [showCatList, setShowCatList] = useState(false);
     const [catItems, setCatItems] = useState([]);
     const dispatch = useAppDispatch();
+
+    useEffect(()=>{
+        console.log("rendersss")
+    },[])
 
     const requestAccount = () => {
         if (utils.useInjectAccount()) {
@@ -166,7 +172,9 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
         }}>
             {/*<IonIcon slot="start" src={walletOutline} size="large"/>*/}
             <img src="./assets/img/icon/walletOutline.png" height={24} slot="start"/>
-            <IonLabel className="side-text">Assets</IonLabel>
+            <IonLabel className="side-text">Assets
+                {inboxNum > 0 && <IonBadge color={"danger"} style={{transform: "translateY(2px)",marginLeft: 2}}>{inboxNum}</IonBadge>}
+            </IonLabel>
             {/*<IonIcon src={utils.useInjectAccount() ? chevronForwardOutline : openOutline} color="medium" slot="end"*/}
             {/*         size="small"/>*/}
         </IonItem>

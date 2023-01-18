@@ -101,15 +101,13 @@ export function messageReducer(state: MessageState = {
             const preComments = comments;
             const messages = payload.comments;
 
-            messages.sort(_sort)
+            // messages.sort(_sort)
             const nextComments = [];
             let commentsCopy: Array<PinnedSticky> = [...preComments];
 
             // let total = 0 ;
             for (let index = 0; index < messages.length; index++) {
                 const _comment = messages[index];
-
-                console.log("commentsCopy ===> ", commentsCopy ,_comment);
 
                 // remove all unpinned msg when pin type
                 if (_comment && _comment.records && _comment.records.length > 0 && _comment.records[0].msgType == MessageType.Pin) {
@@ -164,7 +162,7 @@ export function messageReducer(state: MessageState = {
             }
             // console.log("=========> commentsCopy>>>", commentsCopy, nextComments, append, visibleRange.endIndex , total);
             const _cIndex = commentsCopy.findIndex(v => v.records[0].groupId == "");
-            console.log("=========> commentsCopy>>> c_index=[%d], copy=[%d], next=[%d]",_cIndex,commentsCopy.length, nextComments.length )
+            // console.log("=========> commentsCopy>>> c_index=[%d], copy=[%d], next=[%d]",_cIndex,commentsCopy.length, nextComments.length )
             let _comments = [];
             if (commentsCopy.length == 0 || _cIndex >= 0 || payload.append || payload.visibleRange.endIndex == total - 1) {
                 const comp = [...commentsCopy, ...nextComments];
@@ -172,7 +170,7 @@ export function messageReducer(state: MessageState = {
             }else{
                 _comments = combile(commentsCopy, payload.keeper)
             }
-            console.log("return _comments = [%d]", _comments.length)
+            // console.log("return _comments = ", _comments)
             return {total: payload.total, comments: _comments, firstItemIndex: firstItemIndex};
         default:
             return state;

@@ -246,11 +246,13 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
                                                         }).catch(e => console.error(e))
                                                     }}>
                                                         <div
-                                                            className="head-pin-title">{tribeInfo && tribeInfo.title}</div>
+                                                            className="head-pin-title">{
+                                                            (stickyMsg && stickyMsg.groupId ? `${(stickyMsg as PinnedSticky).theme.themeTag}` : tribeInfo && tribeInfo.theme.themeTag)
+                                                        }</div>
                                                         <div className="head-sub">
                                     {/*<span style={{fontSize: '11px', color: "#92949c"}}>*/}
                                     {
-                                        (stickyMsg && stickyMsg.groupId ? `#${stickyMsg.seq} ${(stickyMsg as PinnedSticky).theme.themeTag}` : tribeInfo && tribeInfo.theme.themeTag)
+                                        (stickyMsg && stickyMsg.groupId ? `#${stickyMsg.seq} ${(stickyMsg as PinnedSticky).theme.themeDesc}` : tribeInfo && tribeInfo.theme.themeDesc)
                                     }
                                         {/*</span>*/}
                                                         </div>

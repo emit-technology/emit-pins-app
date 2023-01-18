@@ -74,7 +74,7 @@ interface Props {
     visibleRange?: {startIndex: number, endIndex: number}
 }
 
-const defaultPadding = utils.isApp()?1:3;
+const defaultPadding = 3;
 
 const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                                                 total, atBottom, firstItemIndex,

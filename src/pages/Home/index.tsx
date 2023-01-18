@@ -15,7 +15,7 @@ import {tribeService} from "../../service/tribe";
 import {TribeInfo} from "../../types";
 import './index.scss';
 import {SideBar} from "../../components/ChatRoom/SideBar";
-import {AccountModel, ChainType} from "@emit-technology/emit-lib";
+import {AccountModel, ChainType, SettleResp} from "@emit-technology/emit-lib";
 import {emitBoxSdk} from "../../service/emitBox";
 import {TribeLayout} from "../../components/Tribe/TribeLayout";
 import selfStorage from "../../common/storage";
@@ -38,6 +38,7 @@ interface State {
     address:string
     showSearch: boolean
     searchText: string;
+    inboxNum:number
 }
 
 interface Props {
@@ -60,7 +61,8 @@ export class HomePage extends React.Component<Props, State> {
         tribeUserInfo:null,
         address: "",
         showSearch: false,
-        searchText: ""
+        searchText: "",
+        inboxNum:0
 
     }
 
@@ -127,6 +129,7 @@ export class HomePage extends React.Component<Props, State> {
             const f = await tribeService.isSessionAvailable()
             // const tribeUserInfo = await tribeService.tribeUserInfo();
 
+            await this.fetchInboxNum();
             await this.initTimeMap(data);
             this.setState({data: data,address: account && account.addresses[ChainType.EMIT] ,dataOrigin: data, account: account, isSessionAvailable: f})
         }catch (e){
@@ -189,11 +192,25 @@ export class HomePage extends React.Component<Props, State> {
         this.setState({showCreateModal: f})
     }
 
+    fetchInboxNum = async ()=>{
+        const account = await emitBoxSdk.getAccount();
+        if(account && account.addresses){
+            emitBoxSdk.emitBox.emitDataNode.getUnSettles(account.addresses[ChainType.EMIT]).then((inbox:Array<SettleResp>)=>{
+                if(inbox){
+                    this.setState({
+                        inboxNum: inbox.length
+                    })
+                }
+            })
+        }
+    }
 
     render() {
-        const {segment, account,tribeUserInfo,showSearch,searchText, address, isSessionAvailable, showCreateModal ,tribeTimeMap, data, layout, showLoading, showToast, toastMsg} = this.state;
+        const {segment, account,tribeUserInfo,showSearch,searchText,inboxNum, address, isSessionAvailable, showCreateModal ,tribeTimeMap, data, layout, showLoading, showToast, toastMsg} = this.state;
         return <>
-            <IonMenu contentId="main-home">
+            <IonMenu contentId="main-home" onIonDidOpen={()=>{
+                this.fetchInboxNum()
+            }}>
                 <IonHeader>
                     <IonToolbar className="msg-toolbar">
                         <IonMenuToggle>
@@ -210,7 +227,7 @@ export class HomePage extends React.Component<Props, State> {
                     {/*<IonMenuToggle>*/}
                     {/*    <IonButton>Click to close the menu</IonButton>*/}
                     {/*</IonMenuToggle>*/}
-                    <SideBar router={this.props.router} onRequestAccount={() => {
+                    <SideBar inboxNum={inboxNum}  router={this.props.router} onRequestAccount={() => {
                         this.init().catch(e => {
                             // const err = typeof e == 'string' ? e : e.message;
                             // this.setShowToast(true, err)

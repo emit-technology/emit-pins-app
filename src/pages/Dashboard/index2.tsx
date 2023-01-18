@@ -20,7 +20,7 @@ import {
 } from "@ionic/react";
 import {GroupMsg, Message, PinnedSticky, TribeInfo, TribeRole, WsStatus} from "../../types";
 import {emitBoxSdk, tribeService} from "../../service";
-import {AccountModel, ChainType} from "@emit-technology/emit-lib";
+import {AccountModel, ChainType, SettleResp} from "@emit-technology/emit-lib";
 import {
     addOutline,
     arrowBackOutline,
@@ -269,6 +269,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
     }
 
     const initData = async () => {
+
         const account = await emitBoxSdk.getAccount();
         const tribeInfo = await tribeService.tribeInfo(tribeId);
         const owner = account && account.addresses && account.addresses[ChainType.EMIT.valueOf()]
@@ -276,7 +277,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
         setIsSessionAvailable(f);
 
         const roles = await initRole();
-
+        await fetchInboxNum();
         // const groupIds = tribeService.groupIdCache(); //await tribeService.groupIds(tribeId);
         const groupTribes = JSON.parse(JSON.stringify(tribeService.getGroupMap()))//await tribeService.groupedMsg(groupIds);
         // console.log("======> init data groupTribes", groupTribes)
@@ -522,6 +523,18 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
 
     // console.log("render parent...");
 
+    const [inboxNum, setInboxNum] = useState(0);
+
+    const fetchInboxNum = async ()=>{
+        const account = await emitBoxSdk.getAccount();
+        if(account && account.addresses){
+            emitBoxSdk.emitBox.emitDataNode.getUnSettles(account.addresses[ChainType.EMIT]).then((inbox:Array<SettleResp>)=>{
+                if(inbox){
+                    setInboxNum(inbox.length);
+                }
+            })
+        }
+    }
     return <>
         {/*<IonRow style={{height: '100%'}}>*/}
         {/*    <IonCol sizeMd="8" sizeSm="12" sizeXs="12" style={{height: '100%'}}>*/}
@@ -530,7 +543,9 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
         <IonSplitPane when="lg" contentId="main-content">
             <div className="ion-page" id="main-content">
 
-                <IonMenu contentId="main-content-left" side="start" swipeGesture={false} >
+                <IonMenu contentId="main-content-left" side="start" swipeGesture={false} onIonDidOpen={()=>{
+                    fetchInboxNum()
+                }}>
                     <IonHeader>
                         <IonToolbar className="msg-toolbar">
                             <IonMenuToggle>
@@ -544,7 +559,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                         </IonToolbar>
                     </IonHeader>
                     <IonContent className="ion-content-chat">
-                        <SideBar router={router} onRequestAccount={() => {
+                        <SideBar inboxNum={inboxNum} router={router} onRequestAccount={() => {
                             initData().catch(e => console.error(e))
                         }} account={account} onLogout={() => {
                             initData().catch(e => console.error(e))
