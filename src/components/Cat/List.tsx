@@ -14,9 +14,8 @@ import {
 } from "@ionic/react";
 import './index.scss';
 import {closeOutline} from "ionicons/icons";
-import {url} from "inspector";
-import {XBlock, XMasonry} from "react-xmasonry";
-
+// import {XBlock, XMasonry} from "react-xmasonry";
+import Masonry, {ResponsiveMasonry} from "react-responsive-masonry"
 interface Props {
     isOpen: boolean;
     onClose: () => void;
@@ -53,21 +52,18 @@ export const CatList: React.FC<Props> = ({items, isOpen, onClose,}) => {
                        </div>
                    }
 
-                   {
-                       items && items.length > 0 &&
-                       <XMasonry>
-                           {
-                               items && items.map((v,i) => {
-                                   return <XBlock key={i}>
-                                       <CatItem catInfo={v}/>
-                                   </XBlock>
-                               })
-                           }
+                    <div style={{display: "flex",flexWrap: "wrap", justifyContent: "center"}}>
+                        {
+                            items && items.map((v,i) => {
+                                return <div key={i} className="cat-item-width">
+                                    <CatItem catInfo={v}/>
+                                </div>
+                            })
+                        }
 
-                       </XMasonry>
-                   }
+                    </div>
 
-                   <div style={{position: "absolute",top: 0, right:0}}>
+                   <div style={{position: "fixed",top: 12, right: 12, zIndex: 2}}>
                        <IonButtons slot="end">
                            <IonButton color="primary" onClick={() => onClose()} style={{transform: "translateX(10px)"}}><IonIcon src={closeOutline} size="large"/></IonButton>
                        </IonButtons>

@@ -23,6 +23,8 @@ import copy from "copy-to-clipboard";
 import {QRCodeSVG} from 'qrcode.react';
 import selfStorage from "../../../common/storage";
 import {BackupModal} from "./Backup";
+import {emitBoxSdk} from "../../../service/emitBox";
+import {utils} from "../../../common";
 
 interface Props {
     isOpen: boolean;
@@ -46,15 +48,17 @@ export const AccountList: React.FC<Props> = ({isOpen, isLogin, onClose, onOk}) =
 
     const [presentAlert, dismissAlert] = useIonAlert();
 
-
     useEffect(() => {
-        getAccounts().catch(e => console.error(e));
+        if(utils.useInjectAccount()){
+            getAccounts().catch(e => console.error(e));
+        }
     }, [isOpen])
 
     const getAccounts = async () => {
         const rest = await walletWorker.accounts()
-        if (rest) {
+        if (rest && rest.length >0) {
             setAccounts(rest)
+            emitBoxSdk.setAccount(rest[0])
         }
     }
 

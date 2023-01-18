@@ -1,14 +1,21 @@
 import * as React from 'react';
 import {useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState} from 'react';
-import {Message, MessageStatus, MessageType, PinnedSticky, TribeInfo, TribeRole, UserLimit} from "../../../../types";
+import {
+    Message,
+    MessageStatus,
+    MessageType,
+    MsgText,
+    PinnedSticky,
+    TribeInfo,
+    TribeRole,
+    UserLimit
+} from "../../../../types";
 
 import './message.scss';
 import {useAppDispatch, useAppSelector} from "../../../../common/state/app/hooks";
 import {saveDataState} from "../../../../common/state/slice/dataSlice";
 import {saveMessageState} from "../../../../common/state/slice/messageSlice";
 import {
-    createGesture,
-    Gesture,
     IonAvatar,
     IonButton,
     IonButtons,
@@ -100,6 +107,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     const appDispatch = useAppDispatch();
 
     const [showModifyMsg, setShowModifyMsg] = useState(null);
+    const [file, setFile] = useState(null);
 
     const [showShareModal, setShowShareModal] = useState(false);
     const [showLoading, setShowLoading] = useState(false);
@@ -618,6 +626,19 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
 
     }, [visibleRange])
 
+    const commitUpdateMsg = async () =>{
+
+        const copyMsg:Message = JSON.parse(JSON.stringify(showModifyMsg));
+        const msgContent: MsgText = copyMsg.content as MsgText;
+        if(file){
+            const url = await tribeService.uploadServer(file as File)
+            msgContent.image.url = url;
+        }
+        await tribeService.updateMsg(copyMsg.id, '0x' + Buffer.from(JSON.stringify(msgContent)).toString('hex'),
+            selectRole && selectRole.id, replayMsg && replayMsg.id
+        )
+        setShowModifyMsg(null)
+    }
     return <>
 
         <div className={!pinnedStickies ? "msg-content" : "msg-content2"} style={{
@@ -873,13 +894,14 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                         flexDirection: 'row',
                                         justifyContent: 'center'
                                     }}>
-                                        <UploadImage borderRadio={12} defaultIcon={add}
+                                        <UploadImage maxHeight={300} borderRadio={12} defaultIcon={add}
                                                      width={showModifyMsg && showModifyMsg.content && !showModifyMsg.content.image["url"] ? "100%" : ""}
                                                      imgUrl={showModifyMsg && showModifyMsg.content && showModifyMsg.content.image["url"] && utils.getDisPlayUrl(showModifyMsg.content.image)}
-                                                     setImgUrl={(url, w, h) => {
+                                                     setImgUrl={(data, w, h,file) => {
                                                          const msgCopy = JSON.parse(JSON.stringify(showModifyMsg))
-                                                         msgCopy.content.image = {url: url, width: w, height: h}
+                                                         msgCopy.content.image = {url: data.data_url, width: w, height: h}
                                                          setShowModifyMsg(msgCopy)
+                                                         setFile(file)
                                                      }}/>
                                         {/*<div style={{position: "absolute",top: 16 , right: 26}} onClick={(e)=>{*/}
                                         {/*e.persist()}*/}
@@ -889,11 +911,11 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                     </div>
 
                                     <IonButton expand="block" onClick={() => {
-                                        tribeService.updateMsg(showModifyMsg.id, '0x' + Buffer.from(JSON.stringify(showModifyMsg.content)).toString('hex'),
-                                            selectRole && selectRole.id, replayMsg && replayMsg.id
-                                        ).then(() => {
-                                            setShowModifyMsg(null)
-                                        }).catch(e => {
+                                        setShowLoading(true)
+                                        commitUpdateMsg().then(()=>{
+                                            setShowLoading(false)
+                                        }).catch(e=>{
+                                            setShowLoading(false)
                                             console.log(e)
                                         })
                                     }}>Commit</IonButton>

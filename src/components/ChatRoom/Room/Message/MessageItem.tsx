@@ -74,6 +74,8 @@ interface Props {
     visibleRange?: {startIndex: number, endIndex: number}
 }
 
+const defaultPadding = utils.isApp()?1:3;
+
 const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                                                 total, atBottom, firstItemIndex,
                                                 pinnedStickies, tribeInfo, checkedMsgArr,
@@ -114,7 +116,7 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                 }
 
                 {/*<div>*/}
-                <div className={"visual-msg-content"} style={{paddingTop: pinnedSticky.records && pinnedSticky.records[0].hideTime?utils.isApp()?1:3:12}} onClick={(e) => {
+                <div className={"visual-msg-content"} style={{paddingTop: pinnedSticky.records && pinnedSticky.records[0].hideTime?defaultPadding:12}} onClick={(e) => {
                     e.stopPropagation();
                     e.persist();
                     if (!pinnedStickies && !!dispatchTheme && pinnedSticky && stickyMsg && pinnedSticky.groupId != stickyMsg.groupId) {
@@ -216,10 +218,12 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                                         themeTag: pinnedSticky.theme.themeTag,
                                         themeDesc: pinnedSticky.theme.themeDesc,
                                     })
-                                }}><IonIcon src={gitBranchOutline} style={{
+                                }}>
+                                <IonIcon src={gitBranchOutline} style={{
                                     color: "#4986F3",
                                     fontSize: "20px"
-                                }}/><span style={{fontSize: 14,color: "#4986F3",letterSpacing: '-0.21px',fontWeight: 500}}>Fork</span></IonButton>
+                                }}/>
+                                <span style={{fontSize: 14,color: "#4986F3",letterSpacing: '-0.21px',fontWeight: 500}}>Fork</span></IonButton>
                             </IonButtons>
                         </div>
                     </div>

@@ -2,6 +2,7 @@
   --min-height: 60px;
   --background: #ffffff;
   border-radius: 12px 12px 0 0;
+
 }
 
 .msg-toolbar2{
@@ -234,16 +235,21 @@ input::placeholder {
 .head-themes{
   float: left;
   display: flex;
+  align-items: center;
 }
 .head-themes div:first-child{
   font-size: 10px;
   background: var(--ion-color-secondary);
-  padding: 6px 12px;
+  //padding: 6px 12px;
   border-radius: 17px;
+  width: 56px;
   margin-right: 6px;
-  font-weight: 700;
   color: #48494E;
-  font-family: 'SFProText-bold';
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  font-family: SFBold !important;
+  align-items: center;
 }
 
 .head-themes div:nth-child(2){
@@ -293,8 +299,9 @@ input::placeholder {
 }
 
 .theme-pinned-box div:first-child{
-  font-weight: 700;
-  font-size: 14px
+  //font-weight: 700;
+  font-size: 14px;
+  font-family: SFBold !important;
 }
 
 .theme-pinned-box div:nth-child(2){
@@ -778,7 +785,7 @@ position: absolute;
   align-items: center;
   justify-content: space-between;
   padding-top: 6px;
-  flex: 2;
+  flex: 1;
 }
 
 .fab-box{

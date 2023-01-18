@@ -46,8 +46,6 @@ export const CatPage: React.FC<Props> = ({router}) => {
                             <ImageView url={`https://pic.emit.technology/cat/${prefix(6, index+2)}.png`} width={300} height={300}/>
                             <div style={{position: "absolute", left: 12, top: 12}}>{index+2}</div>
                         </div>
-
-
                     </div>
                 }}
             />

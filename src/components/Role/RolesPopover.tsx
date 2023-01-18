@@ -33,6 +33,7 @@ export const RolesPopover: React.FC<Props> = ({roles,isOpen,onClose, defaultRole
     useEffect(() => {
         setRoleInfoArr(roles);
     }, [roles])
+    const _lineRoles = roles.filter(v=> !v.id || !!v.roleType)
 
     return <>
         <IonModal isOpen={isOpen} className="role-select-list" onDidDismiss={() => onClose()} canDismiss>
@@ -49,7 +50,7 @@ export const RolesPopover: React.FC<Props> = ({roles,isOpen,onClose, defaultRole
                         {
                             roleInfoArr && roleInfoArr.map((v, i) => {
                                 return <IonItem
-                                    lines={i == 0 ? "full" : "none"}
+                                    lines={(_lineRoles && _lineRoles.length>0 && _lineRoles[_lineRoles.length - 1].id == v.id) ? "full" : "none"}
                                     style={{borderRadius: (i == 0) ? "12px 12px 0 0" : i == roles.length - 1 ? "0 0 12px 12px" : ""}}
                                     color="tertiary" key={i} onClick={(e) => {
                                     e.stopPropagation()
@@ -59,7 +60,7 @@ export const RolesPopover: React.FC<Props> = ({roles,isOpen,onClose, defaultRole
                                         <img src={utils.getDisPlayUrl(v.avatar)}/>
                                         {
                                             v && v.roleType && <div style={{position: "absolute",top: "14px", right: "-4px"}}>
-                                                <img src="./assets/img/icon/nokiTag.png" height={12}/>
+                                                <img src="./assets/img/icon/nokiTag.png" height={14} width={14} />
                                             </div>
                                         }
                                     </IonAvatar>

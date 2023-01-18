@@ -70,6 +70,7 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
 
     const [showAirdropModal, setShowAirdropModal] = useState(false);
     const [isDown, setIsDown] = useState(false);
+    const [showSendImage, setShowSendImage] = useState(false);
 
     const [cursorPosition, setCursorPosition] = useState(-1);
 
@@ -195,8 +196,13 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
                                                         onClick={() => {
                                                             setShowSelectRole(true)
                                                         }}>
-                                                        <IonAvatar slot="start">
+                                                        <IonAvatar slot="start" style={{position: "relative"}}>
                                                             <img src={utils.getDisPlayUrl(selectRole.avatar)}/>
+                                                            {
+                                                                selectRole && selectRole.roleType && <div style={{position: "absolute",top: "24px", right: "-5px"}}>
+                                                                    <img src="./assets/img/icon/nokiTag.png" height={16} width={16} />
+                                                                </div>
+                                                            }
                                                         </IonAvatar>
                                                     </div>
                                                     <div className="bottom-role-name">
@@ -235,7 +241,8 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
                                                 {/*             e.stopPropagation();*/}
                                                 {/*         }}/>*/}
 
-                                                <img src="./assets/img/icon/emojOutline.png" height={24} ref={setTriggerRef} onClick={(e) => {
+                                                <img src="./assets/img/icon/emojOutline.png" height={24}
+                                                     ref={setTriggerRef} onClick={(e) => {
                                                     e.stopPropagation();
                                                 }}/>
                                                 {visible && (
@@ -258,54 +265,56 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
                                                 {/*</div>*/}
 
 
-                                                <img src="./assets/img/icon/imageOutline.png" height={24} onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    tribeService.userCheckAuth().then(() => {
-                                                        if (userLimit && userLimit.msgLeft <= 0) {
-                                                            present({
-                                                                message: `Sending messages has reached the maximum limit ${userLimit.maxMsgCount}`,
-                                                                duration: 2000,
-                                                                position: "top",
-                                                                color: "danger"
-                                                            })
-                                                            return;
-                                                        }
-                                                        tribeService.picUpload().then(photo => {
-                                                            setIsLoading(true);
-                                                            tribeService.uploadToServer(photo).then(({url, themeColors}) => {
-                                                                setIsLoading(false)
-                                                                const displayImage = utils.convertImgDisplay(themeColors.width, themeColors.height, url);
-                                                                setDisplayImage({
-                                                                    url: url,
-                                                                    width: displayImage.width,
-                                                                    height: displayImage.height
-                                                                });
-
-                                                                setThemeColor(themeColors)
-                                                            }).catch(e => {
-                                                                setIsLoading(false)
-                                                            })
-                                                        }).catch(e => {
-                                                            // const err = typeof e == 'string' ? e : e.message;
-                                                            // present({
-                                                            //     message: err,
-                                                            //     duration: 2000,
-                                                            //     position: "top",
-                                                            //     color: "danger"
-                                                            // })
-                                                            console.log(e)
-                                                        })
-                                                    }).catch(e => {
-                                                        console.error(e)
-                                                        const err = typeof e == 'string' ? e : e.message;
-                                                        present({
-                                                            message: err,
-                                                            duration: 2000,
-                                                            position: "top",
-                                                            color: "danger"
-                                                        })
-                                                    })
-                                                }}/>
+                                                <img src="./assets/img/icon/imageOutline.png" height={24}
+                                                     onClick={(e) => {
+                                                         e.stopPropagation();
+                                                         setShowSendImage(true);
+                                                         // tribeService.userCheckAuth().then(() => {
+                                                         //     if (userLimit && userLimit.msgLeft <= 0) {
+                                                         //         present({
+                                                         //             message: `Sending messages has reached the maximum limit ${userLimit.maxMsgCount}`,
+                                                         //             duration: 2000,
+                                                         //             position: "top",
+                                                         //             color: "danger"
+                                                         //         })
+                                                         //         return;
+                                                         //     }
+                                                         //     tribeService.picUpload().then(photo => {
+                                                         //         setIsLoading(true);
+                                                         //         tribeService.uploadToServer(photo).then(({url, themeColors}) => {
+                                                         //             setIsLoading(false)
+                                                         //             const displayImage = utils.convertImgDisplay(themeColors.width, themeColors.height, url);
+                                                         //             setDisplayImage({
+                                                         //                 url: url,
+                                                         //                 width: displayImage.width,
+                                                         //                 height: displayImage.height
+                                                         //             });
+                                                         //
+                                                         //             setThemeColor(themeColors)
+                                                         //         }).catch(e => {
+                                                         //             setIsLoading(false)
+                                                         //         })
+                                                         //     }).catch(e => {
+                                                         //         // const err = typeof e == 'string' ? e : e.message;
+                                                         //         // present({
+                                                         //         //     message: err,
+                                                         //         //     duration: 2000,
+                                                         //         //     position: "top",
+                                                         //         //     color: "danger"
+                                                         //         // })
+                                                         //         console.log(e)
+                                                         //     })
+                                                         // }).catch(e => {
+                                                         //     console.error(e)
+                                                         //     const err = typeof e == 'string' ? e : e.message;
+                                                         //     present({
+                                                         //         message: err,
+                                                         //         duration: 2000,
+                                                         //         position: "top",
+                                                         //         color: "danger"
+                                                         //     })
+                                                         // })
+                                                     }}/>
 
                                                 {/*<IonIcon className="footer-icon" src={imageOutline} color="dark"*/}
                                                 {/*         size="large"*/}
@@ -331,7 +340,7 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
                                                 {/*    })*/}
                                                 {/*}}/>*/}
 
-                                                <img src="./assets/img/icon/airdropOutline.png"  onClick={(e) => {
+                                                <img src="./assets/img/icon/airdropOutline.png" onClick={(e) => {
                                                     e.stopPropagation();
                                                     tribeService.userCheckAuth().then(() => {
                                                         setShowAirdropModal(true)
@@ -363,7 +372,11 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
                                     </IonRow>
                                     <IonRow>
                                         <IonCol size="12">
-                                            <div style={{display: "flex", justifyContent: "space-between",marginTop: 8}}>
+                                            <div style={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                marginTop: 8
+                                            }}>
                                                 <div className="input-shadow">
                                                     {
 
@@ -399,26 +412,27 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
                                                     <IonButtons>
                                                         {
                                                             //@ts-ignore
-                                                            <IonButton className="footer-btn" disabled={loading} onClick={() => {
-                                                                setLoading(true)
-                                                                sendMsg().then(() => {
-                                                                    setLoading(false)
-                                                                    dispatch(saveDataState({
-                                                                        data: JSON.stringify({refresh: 0}),
-                                                                        tag: 'scrollToItem'
-                                                                    }))
-                                                                }).catch(e => {
-                                                                    setLoading(false)
-                                                                    const err = typeof e == 'string' ? e : e.message;
-                                                                    present({
-                                                                        message: err,
-                                                                        duration: 2000,
-                                                                        position: "top",
-                                                                        color: "danger"
-                                                                    })
-                                                                    console.error(e)
-                                                                })
-                                                            }}>
+                                                            <IonButton className="footer-btn" disabled={loading}
+                                                                       onClick={() => {
+                                                                           setLoading(true)
+                                                                           sendMsg().then(() => {
+                                                                               setLoading(false)
+                                                                               dispatch(saveDataState({
+                                                                                   data: JSON.stringify({refresh: 0}),
+                                                                                   tag: 'scrollToItem'
+                                                                               }))
+                                                                           }).catch(e => {
+                                                                               setLoading(false)
+                                                                               const err = typeof e == 'string' ? e : e.message;
+                                                                               present({
+                                                                                   message: err,
+                                                                                   duration: 2000,
+                                                                                   position: "top",
+                                                                                   color: "danger"
+                                                                               })
+                                                                               console.error(e)
+                                                                           })
+                                                                       }}>
                                                                 <span className="fonter-btn-text">Send</span>
                                                             </IonButton>
                                                         }
@@ -445,7 +459,7 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
                                                 tag: 'checkedAllMsg'
                                             }))
                                         }}></IonCheckbox>
-                                        <IonLabel >All</IonLabel>
+                                        <IonLabel>All</IonLabel>
                                     </IonItem>
                                 </IonCol>
                                 <IonCol size="8">
@@ -468,50 +482,14 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
 
 
         }
-        <SendImageModal url={displayImage["url"]} width={displayImage["width"]} height={displayImage["height"]}
-                        onOk={(text: string) => {
-                            if (userLimit && userLimit.msgLeft <= 0) {
-                                present({
-                                    message: `Sending messages has reached the maximum limit ${userLimit.maxMsgCount}`,
-                                    duration: 2000,
-                                    position: "top",
-                                    color: "danger"
-                                })
-                                return;
-                            }
-                            // const url =  tribeService.picDisplay(imageUrl, 100, 100);
-                            const obj = {image: displayImage} as MsgText;
-                            if (text) {
-                                obj.content = text;
-                            }
-                            const contentData = `0x${Buffer.from(JSON.stringify(obj)).toString("hex")}`
-                            tribeService.pushTribe({
-                                tribeId: config.tribeId,
-                                msgType: MessageType.Text,
-                                content: contentData,
-                                role: selectRole.id
-                            }).then(() => {
-                                //@ts-ignore
-                                if (textRef && textRef.current) {
-                                    //@ts-ignore
-                                    // textRef.current.value = "";
-                                }
-                                setDisplayImage({})
-                                dispatch(saveDataState({
-                                    data: JSON.stringify({refresh: 0}),
-                                    tag: 'scrollToItem'
-                                }))
-                            }).catch(e => {
-                                console.error(e)
-                                const err = typeof e == 'string' ? e : e.message;
-                                present({
-                                    message: err,
-                                    duration: 2000,
-                                    position: "top",
-                                    color: "danger"
-                                })
-                            })
-                        }} onClose={() => setDisplayImage({})} isOpen={!!displayImage["url"]}/>
+        <SendImageModal isOpen={showSendImage} onClose={() => setShowSendImage(false)} onOk={() => {
+            setShowSendImage(false);
+            dispatch(saveDataState({
+                data: JSON.stringify({refresh: 0}),
+                tag: 'scrollToItem'
+            }))
+        }} selectRole={selectRole}/>
+
         <RolesPopover isOpen={showSelectRole} onClose={() => {
             setShowSelectRole(false)
         }} defaultRole={selectRole} roles={roles} onRoleCheck={(role) => {

@@ -104,7 +104,7 @@
   //top: -1px;
   //right: -10px;
   //vertical-align: middle;
-  transform: translateY(3px);
+  transform: translateY(-1px);
   margin-left: 4px;
 }
 
@@ -220,6 +220,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  width: 100%;
   //overflow: hidden;
   //text-overflow: ellipsis;
   //white-space: nowrap;
@@ -230,6 +231,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  width: 100%;
 }
 
 .head-icons{
@@ -256,7 +258,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-
+  position: relative;
 }
 
 .ion-avatar-pins > img {
@@ -586,4 +588,24 @@
 
 .sc-ion-searchbar-ios-h{
   --border-radius: 100px;
+}
+
+.side-text{
+  font-family: SFProText-Medium !important;
+  font-size: 18px !important;
+  letter-spacing: -0.21px;
+}
+
+.login-btn {
+  width: 94px;
+  height: 34px;
+  --border-radius: 32px;
+  font-size: 16px;
+  font-family: SFProText-Medium !important;
+  letter-spacing: -0.21px;
+}
+
+.role-name-text{
+  font-size: 14px;
+  font-family: SFProText-Medium !important;
 }

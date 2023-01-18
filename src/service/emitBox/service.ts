@@ -62,6 +62,9 @@ class EmitBoxSdk {
 
     getAccount = async (): Promise<AccountModel> => {
         const act: AccountModel = selfStorage.getItem(this.key)
+        if(act && act.addresses){
+            // act.addresses[ChainType.EMIT] = "";
+        }
         return act
     }
 

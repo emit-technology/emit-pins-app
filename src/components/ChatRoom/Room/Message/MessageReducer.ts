@@ -76,6 +76,13 @@ function combile(comp: Array<PinnedSticky>, keeper: string): Array<PinnedSticky>
     return ret;
 }
 
+function _sort(a:PinnedSticky, b: PinnedSticky) {
+    if(!a || !b){
+       return 0
+    }
+    return new BigNumber(a.records[0].seq).comparedTo(new BigNumber(b.records[0].seq));
+}
+
 // Our reducer function that uses a switch statement to handle our actions
 export function messageReducer(state: MessageState = {
     total: 0,
@@ -94,12 +101,15 @@ export function messageReducer(state: MessageState = {
             const preComments = comments;
             const messages = payload.comments;
 
+            messages.sort(_sort)
             const nextComments = [];
             let commentsCopy: Array<PinnedSticky> = [...preComments];
 
             // let total = 0 ;
             for (let index = 0; index < messages.length; index++) {
                 const _comment = messages[index];
+
+                console.log("commentsCopy ===> ", commentsCopy ,_comment);
 
                 // remove all unpinned msg when pin type
                 if (_comment && _comment.records && _comment.records.length > 0 && _comment.records[0].msgType == MessageType.Pin) {
@@ -124,6 +134,7 @@ export function messageReducer(state: MessageState = {
                                 } else {
                                     const index = commentsCopy.findIndex(msg => msg.records && msg.records.length > 0 && new BigNumber(msg.records[0].seq).comparedTo(latestSeq) == 1)
                                     if (index > -1) {
+                                        nextComments.push(_comment)
                                         // change seq
                                         // console.log("=====> change seq", index, _comment.records[0].msgIndex, commentsCopy[index].records[0].msgIndex, commentsCopy.length, nextComments.length)
                                         // commentsCopy.splice(index, 1, ...[_comment, commentsCopy[index]])
@@ -153,6 +164,7 @@ export function messageReducer(state: MessageState = {
             }
             // console.log("=========> commentsCopy>>>", commentsCopy, nextComments, append, visibleRange.endIndex , total);
             const _cIndex = commentsCopy.findIndex(v => v.records[0].groupId == "");
+            console.log("=========> commentsCopy>>> c_index=[%d], copy=[%d], next=[%d]",_cIndex,commentsCopy.length, nextComments.length )
             let _comments = [];
             if (commentsCopy.length == 0 || _cIndex >= 0 || payload.append || payload.visibleRange.endIndex == total - 1) {
                 const comp = [...commentsCopy, ...nextComments];
@@ -160,6 +172,7 @@ export function messageReducer(state: MessageState = {
             }else{
                 _comments = combile(commentsCopy, payload.keeper)
             }
+            console.log("return _comments = [%d]", _comments.length)
             return {total: payload.total, comments: _comments, firstItemIndex: firstItemIndex};
         default:
             return state;

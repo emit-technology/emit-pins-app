@@ -20,6 +20,9 @@ import add from "../../img/add.png";
 import TextareaAutosize from "react-textarea-autosize";
 import config from "../../common/config";
 import {informationCircleOutline} from "ionicons/icons";
+import {saveDataState} from "../../common/state/slice/dataSlice";
+import {useAppDispatch} from "../../common/state/app/hooks";
+import {saveMessageState} from "../../common/state/slice/messageSlice";
 
 interface Props {
     isOpen: boolean;
@@ -35,6 +38,7 @@ interface Props {
 export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, onOk, onClose}) => {
     // const nullImage:ImageType = {url:"", width:0, height:0};
     const [imgUrl, setImgUrl] = useState(null);
+    const [file, setFile] = useState(null);
     const [title, setTitle] = useState(tribeInfo && tribeInfo.title);
     const [desc, setDesc] = useState(tribeInfo && tribeInfo.desc);
     const [themeTag, setThemeTag] = useState(tribeInfo && tribeInfo.theme.themeTag);
@@ -43,6 +47,7 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
     const [color, setColor] = useState(tribeInfo && tribeInfo.theme.color);
     const [showLoading, setShowLoading] = useState(false);
     const [present, dismiss] = useIonToast();
+    const dispatch = useAppDispatch();
 
     useEffect(()=>{
         setTitle(tribeInfo && tribeInfo.title)
@@ -65,12 +70,19 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                 return Promise.reject("Can't set url in the Note !")
             }
         }
+        let imageRemote = imgUrl;
+        if(file){
+            imageRemote["url"] = await tribeService.uploadServer(file as File)
+        }
+
         if (tribeInfo) {
             let tribeId:string ;
+
             if(!forkGroupId){
+                // const newTheme = JSON.parse(JSON.stringify(tribeInfo.theme))
                 await tribeService.updateTribe({
                     tribeId: tribeInfo.tribeId,
-                    image: imgUrl as ImageType,
+                    image: imageRemote as ImageType,
                     color: color,
                     backgroundColor: background,
                     themeTag: themeTag,
@@ -79,6 +91,26 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                     desc: themeDesc
                 })
                 tribeId = tribeInfo.tribeId;
+
+                // newTheme.image = imageRemote as ImageType;
+                // const stickyMsg = {
+                //     theme: newTheme,
+                //     seq: -1,
+                //     roles: [],
+                //     records: [],
+                //     groupId: "",
+                //     index: -1
+                // }
+                //
+                // console.log("update sticky msg ", stickyMsg)
+                // dispatch(saveDataState({
+                //     data: {stickyMsg: stickyMsg, time: Date.now()},
+                //     tag: 'updateThemeRight'
+                // }))
+                // dispatch(saveMessageState({
+                //     data: {stickyMsg: stickyMsg, time: Date.now()},
+                //     tag: 'updateThemeHead'
+                // }))
             }else{
                 if(title && (title.indexOf("http://") > -1 || title.indexOf("https:") > -1) ) {
                     return Promise.reject("Can't set url in the name !")
@@ -86,7 +118,7 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                 const tribeInfoCopy:TribeInfo = JSON.parse(JSON.stringify(tribeInfo));
                 tribeInfoCopy.theme = {
                     tribeId: tribeInfo.tribeId,
-                    image: imgUrl as ImageType,
+                    image: imageRemote as ImageType,
                     color: color,
                     backgroundColor: background,
                     themeTag: themeTag,
@@ -97,6 +129,7 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                 tribeId = await tribeService.forkTribe(config.tribeId,forkGroupId,tribeInfoCopy)
             }
             setTitle("")
+            setFile(null)
             setImgUrl(null)
             setDesc("")
             setBackground("")
@@ -111,11 +144,12 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                 desc: themeDesc,
                 backgroundColor: background,
                 color: color,
-                image: imgUrl as ImageType,
+                image: imageRemote as ImageType,
                 themeDesc: themeDesc,
                 themeTag: title
             });
             setTitle("")
+            setFile(null)
             setImgUrl(null)
             setThemeDesc("")
             setThemeTag("")
@@ -205,9 +239,12 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                                 <div className='create-title'>Image</div>
 
                                 <div className="tribe-info-img">
-                                    <UploadImage defaultIcon={add}  width='100%' imgUrl={imgUrl && imgUrl.url} setImgUrl={(url, width, height)=>setImgUrl({
-                                        url: url,height: height,width: width
-                                    })}
+                                    <UploadImage maxHeight={300} defaultIcon={add}  width='100%' imgUrl={imgUrl && imgUrl.url} setImgUrl={(data, width, height, file)=>{
+                                        setImgUrl({
+                                            url: data.data_url,height: height,width: width
+                                        })
+                                        setFile(file);
+                                    }}
                                                  setColor={(bg, font, badge, text) => {
                                                      setBackground(bg);
                                                      setColor(font);

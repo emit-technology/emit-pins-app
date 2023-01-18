@@ -197,22 +197,24 @@ export class HomePage extends React.Component<Props, State> {
                 <IonHeader>
                     <IonToolbar className="msg-toolbar">
                         <IonMenuToggle>
-                            <div style={{paddingLeft: 12}}><IonIcon src={arrowBackOutline}/></div>
+                            <div style={{paddingLeft: 12}}>
+                                <img src="./assets/img/icon/backOutline.png" height={24}/>
+                            </div>
                         </IonMenuToggle>
                         <IonTitle>
-                            <img height={24} src="./assets/img/pins-logo.png"/>
+                            <img height={30} src="./assets/img/pins-logo.png"/>
                         </IonTitle>
                     </IonToolbar>
                 </IonHeader>
-                <IonContent className="ion-padding ion-content-chat">
+                <IonContent className="ion-content-chat">
                     {/*<IonMenuToggle>*/}
                     {/*    <IonButton>Click to close the menu</IonButton>*/}
                     {/*</IonMenuToggle>*/}
                     <SideBar router={this.props.router} onRequestAccount={() => {
                         this.init().catch(e => {
-                            const err = typeof e == 'string' ? e : e.message;
-                            this.setShowToast(true, err)
-                            console.error(e)
+                            // const err = typeof e == 'string' ? e : e.message;
+                            // this.setShowToast(true, err)
+                            // console.error(e)
                         })
                     }} account={account} onLogout={() => {
                         tribeService.userLogout().then(() => {
@@ -228,7 +230,7 @@ export class HomePage extends React.Component<Props, State> {
             <IonPage id="main-home">
                 <IonHeader mode="ios" color="primary">
                     <IonToolbar className="msg-toolbar">
-                        <div slot="start" id="main-home">
+                        <div slot="start" id="main-home" className="msg-head-avatar">
                             <IonMenuToggle>
                                 {/*<IonIcon src={listOutline} size="large"/>*/}
                                 <img src="./assets/img/icon/menuOutline.png" height={24}/>
@@ -238,7 +240,7 @@ export class HomePage extends React.Component<Props, State> {
                         <IonTitle>
                             <div className="home-head-title">
                                 <div className="home-head-ctn">
-                                    <div style={{height: 24,borderRadius: 6}} slot={"start"}>
+                                    <div style={{height: 26,borderRadius: 6}} slot={"start"}>
                                         <img src="./assets/img/pins-logo.png" height='24px'/>
                                     </div>
                                     {/*<div style={{fontSize: '20px',fontFamily:"SFBold",paddingLeft: 2}}>*/}
@@ -272,7 +274,7 @@ export class HomePage extends React.Component<Props, State> {
 
                     </IonToolbar>
                 </IonHeader>
-                <IonContent fullscreen className="home-ctn ion-content-chat padding-top-0">
+                <IonContent className="home-ctn ion-content-chat padding-top-0">
                     <IonSegment className="segment" color="secondary" mode="md" value={segment} onIonChange={(e) => {
                         this.setState({showLoading: true, segment: e.detail.value})
                         this.init(e.detail.value).then(() => {
@@ -290,7 +292,6 @@ export class HomePage extends React.Component<Props, State> {
                         </IonSegmentButton>
                         {/*<IonSegmentButton color="dark" className="segment-button" value="recentView">Recent View</IonSegmentButton>*/}
                     </IonSegment>
-
 
                     <IonModal isOpen={showSearch} className="searchbar-modal" onDidDismiss={(e)=>{
                         this.setState({showSearch: false})
@@ -323,7 +324,7 @@ export class HomePage extends React.Component<Props, State> {
                     {/*        />*/}
                     {/*    </IonCol>*/}
                     {/*</IonRow>*/}
-                    <div style={{height: "100%",padding: "0 6px 200px 6px",overflow: "scroll"}}>
+                    <div style={{height: "calc(100% - 48px)",padding: "0 12px 20px",overflow: "scroll"}}>
                         {/*{*/}
                         {/*    layout && layout.length>0&&<TribeRecommend data={data} layout={layout}/>*/}
                         {/*}*/}

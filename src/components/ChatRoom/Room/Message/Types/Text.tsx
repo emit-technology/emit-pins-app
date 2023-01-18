@@ -95,7 +95,7 @@ export const Text: React.FC<Props> = ({
 
     const replayItem = replayCtn && msg.replayMsg && <div style={{
         minWidth: replayCtn && replayCtn.image && replayCtn.image.url ? "150px" : "50px",
-        width: 'calc(100% + 12px)',
+        width: 'calc(100% + 6px)',
         backgroundBlendMode: msg.role ? "multiply" : "screen"
     }} className={isOwner ?
         `${!msg.role ? 'replay-box replay-box-sender-norole-owner' : 'replay-box replay-box-sender'}`
@@ -203,7 +203,14 @@ export const Text: React.FC<Props> = ({
                             <div className="ion-avatar-pins">
                                 {
                                     !hideTime && msg && msg.actor && !!msg.actor.avatar &&
-                                    <img src={utils.getDisPlayUrl(msg.actor && msg.actor.avatar)} width="100%" height="100%"/>
+                                    <>
+                                        <img src={utils.getDisPlayUrl(msg.actor && msg.actor.avatar)} width="100%" height="100%"/>
+                                        {
+                                            msg.actor && msg.actor.roleType && <div style={{position: "absolute",top: "22px", right: "-4px"}}>
+                                                <img src="./assets/img/icon/nokiTag.png" height={14} width={14} />
+                                            </div>
+                                        }
+                                    </>
                                 }
                             </div>
                         </div>
@@ -250,7 +257,7 @@ export const Text: React.FC<Props> = ({
                                                         content.image && content.image.url && <div style={{
                                                             borderRadius: 12,
                                                             background: "inherit",
-                                                            padding: 0,
+                                                            paddingBottom: 4,
                                                             textAlign: isOwner ? "right" : "left",
                                                             border: isOwnerPinned ? "1px solid #D8F20C" : "0"
                                                         }}

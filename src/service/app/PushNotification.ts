@@ -77,10 +77,10 @@ export const addListeners = async () => {
 			}
 		},
              */
-            if(notification && notification.data && notification.data["aps"] && notification.data["aps"]["data"]&& notification.data["aps"]["data"]["tribeId"]){
-                const tribeId = notification.data["aps"]["data"]["tribeId"];
-                utils.goTo(tribeId);
-            }
+            // if(notification && notification.data && notification.data["aps"] && notification.data["aps"]["data"]&& notification.data["aps"]["data"]["tribeId"]){
+            //     const tribeId = notification.data["aps"]["data"]["tribeId"];
+            //     utils.goTo(tribeId);
+            // }
         }
         console.log('Push notification received: ', notification);
     });

@@ -4,6 +4,7 @@ import {
     IonItem,
     IonLabel,
     IonButton,
+    IonText,
     IonIcon,
     IonLoading, IonAvatar
 } from '@ionic/react';
@@ -61,8 +62,8 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
             tribeService.getAccountAndLogin().then(() => {
                 onRequestAccount()
             }).catch(e => {
-                const err = typeof e == 'string' ? e : e.message;
-                present({position: "top", color: "danger", message: err, duration: 2000})
+                // const err = typeof e == 'string' ? e : e.message;
+                // present({position: "top", color: "danger", message: err, duration: 2000})
             })
         }
     }
@@ -121,16 +122,16 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
         }
         setShowCatList(true)
     }
-    return <>
+    return <div style={{position: "relative", height: "100%"}}>
         {
-            window.location.pathname != "/" && <IonItem onClick={() => {
+            window.location.pathname != "/" && <IonItem lines="none" style={{marginTop: 14}}  onClick={() => {
                 if (window.location.pathname != "/") {
                     window.location.href = "/"
                 }
             }}>
                 {/*<IonIcon slot="start" src={homeOutline} size="large"/>*/}
-                <img src="./assets/img/icon/homeOutline.png" height={32} slot="start"/>
-                <IonLabel>HOME</IonLabel>
+                <img src="./assets/img/icon/homeOutline.png" height={24} slot="start"/>
+                <IonLabel className="side-text">Home</IonLabel>
             </IonItem>
         }
 
@@ -141,35 +142,43 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
         {/*    <IonLabel>Test</IonLabel>*/}
         {/*</IonItem>*/}
 
-        <IonItem onClick={() => {
+        <IonItem lines="none" style={{marginTop: 8}} onClick={() => {
             requestAccount();
         }}>
             {
-                (!account || !!account && !account.name) &&  <img src="./assets/img/icon/personOutline.png" height={32} slot="start"/>
+                (!account || !!account && !account.name) &&  <img src="./assets/img/icon/personOutline.png" height={24} slot="start"/>
             }
             {
                 !!account && account.name && <IonAvatar slot="start">
                     <Avatar name={account.name} round size={"32"}/>
                 </IonAvatar>
             }
-            <IonLabel>
-                {!!account && account.name ? account.name : 'Person'}
-                <p>
-                    <small>{!!account && utils.ellipsisStr(account && account.addresses && account.addresses[ChainType.EMIT], 3)}</small>
-                </p>
+            <IonLabel className="side-text">
+                {!!account && account.name ? account.name : 'Person'}&nbsp;{ !!account && <>
+            <IonText color="medium">[<small>{!!account && utils.ellipsisStr(account && account.addresses && account.addresses[ChainType.EMIT], 3)}</small>]</IonText>
+            </>}
             </IonLabel>
-            <IonIcon src={chevronForwardOutline} color="medium" slot="end" size="small"/>
+            {/*<IonIcon src={chevronForwardOutline} color="medium" slot="end" size="small"/>*/}
         </IonItem>
 
-        <IonItem onClick={() => {
+        <IonItem lines="none" style={{marginTop: 8}}  onClick={() => {
             checkAssets()
         }}>
             {/*<IonIcon slot="start" src={walletOutline} size="large"/>*/}
-            <img src="./assets/img/icon/walletOutline.png" height={32} slot="start"/>
-            <IonLabel>Assets</IonLabel>
-            <IonIcon src={utils.useInjectAccount() ? chevronForwardOutline : openOutline} color="medium" slot="end"
-                     size="small"/>
+            <img src="./assets/img/icon/walletOutline.png" height={24} slot="start"/>
+            <IonLabel className="side-text">Assets</IonLabel>
+            {/*<IonIcon src={utils.useInjectAccount() ? chevronForwardOutline : openOutline} color="medium" slot="end"*/}
+            {/*         size="small"/>*/}
         </IonItem>
+
+        <IonItem lines="none" style={{marginTop: 8}}  onClick={() => {
+            showCats().catch(e=>console.error(e))
+        }}>
+            {/*<IonIcon slot="start" src={catSvg} size="large"/>*/}
+            <img src="./assets/img/icon/catOutline.png" height={24} slot="start"/>
+            <IonLabel className="side-text">Noki</IonLabel>
+        </IonItem>
+
 
         {/*<IonItem onClick={() => {*/}
         {/*    const pushToken = selfStorage.getItem("pushTokenValue")*/}
@@ -204,18 +213,11 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
         {/*    <IonLabel>Notify Latest</IonLabel>*/}
         {/*</IonItem>*/}
 
-        <IonItem onClick={() => {
-            showCats().catch(e=>console.error(e))
-        }}>
-            {/*<IonIcon slot="start" src={catSvg} size="large"/>*/}
-            <img src="./assets/img/icon/catOutline.png" height={32} slot="start"/>
-            <IonLabel>Noki</IonLabel>
-        </IonItem>
 
-        <div style={{height: 30}}>
-        </div>
+        <div style={{position: "absolute", bottom: 100, left: 20}}>
+
         {
-            isSessionAvailable ? <IonButton size="small" expand="block" color="danger" onClick={() => {
+            isSessionAvailable ? <IonButton className="login-btn" size="small" expand="block" color="danger" onClick={() => {
                     setShowLoading(true)
                     tribeService.userLogout().then(() => {
                         setShowLoading(false)
@@ -226,10 +228,11 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
                         present({position: "top", color: "danger", message: err, duration: 2000})
                     })
                 }}>Logout</IonButton> :
-                <IonButton size="small" expand="block" onClick={() => {
+                <IonButton size="small"  className="login-btn"  expand="block" onClick={() => {
                     requestAccount();
                 }}>Login</IonButton>
         }
+        </div>
 
         <CreateModal isOpen={showCreateModal} onOk={(account) => {
             setShowLoading(true)
@@ -308,5 +311,5 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
             message={'Please wait...'}
             duration={60000}
         />
-    </>
+    </div>
 }

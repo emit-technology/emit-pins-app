@@ -25,7 +25,7 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
     const [presentToast] = useIonToast();
     return <>
 
-        <XMasonry>
+        <XMasonry updateOnFontLoad={false} updateOnImagesLoad={false} >
             {
                 data && data.length == 0 && <XBlock key={-1}>
                     <NoneData/>
@@ -40,8 +40,8 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                     }
                     const actor: TribeRole = roles.find(vr => !!v.latestMsg && vr.id == v.latestMsg.role);
 
-                    return <XBlock key={i}>
-                        <div className="recmt-content card" onClick={() => {
+                    return <XBlock key={i} >
+                        <div className="recmt-content card" id={`idd${i}`} onClick={() => {
                             selfStorage.setItem(`latest_view_${v.tribeId}`, Math.floor(Date.now() / 1000));
                             utils.goTo(v.tribeId)
                         }}>
@@ -66,8 +66,8 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                     <div>{v.tribeId}
 
                                         {
-                                            v.forked && v.forked.length > 0 &&
-                                            <IonIcon src={gitBranchSharp} color="primary" style={{transform: 'translate(3px,2px)'}}/>
+                                            v.forked && v.forked.length > 0 && <img src="./assets/img/icon/forkBlue.png" height={12} style={{transform: 'translate(3px,-2px)'}}/>
+                                            // <IonIcon src={gitBranchSharp} color="primary" style={{transform: 'translate(3px,2px)'}}/>
                                         }
                                     </div>
                                 </div>
@@ -75,21 +75,21 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                             {
                                 content && content["image"] && content["image"]["url"] &&
                                 <div className="recmt-img">
-                                    <img src={content["image"]["url"]}/>
+                                    <img src={utils.getDisPlayUrl(content["image"])}/>
                                     <div className="airdrop-time">{v.latestMsg && v.latestMsg.timestamp && utils.dateFormatStr(new Date(v.latestMsg.timestamp * 1000))}</div>
                                 </div>
                             }
                             {
                                 (!v.latestMsg || !!v.latestMsg && v.latestMsg.content["image"] && !((v.latestMsg.content as MsgText).image.url)) &&
                                 <div className="recmt-img">
-                                    <img src={v.theme.image["url"]}/>
+                                    <img src={utils.getDisPlayUrl(v.theme.image)}/>
                                     <div className="airdrop-time">{v.latestMsg && v.latestMsg.timestamp && utils.dateFormatStr(new Date(v.latestMsg.timestamp * 1000))}</div>
                                 </div>
 
                             }
                             {
                                 v.latestMsg && v.latestMsg.msgType == MessageType.Role && <div className="recmt-img">
-                                    <img src={(v.latestMsg.content as TribeRole).avatar["url"]}/>
+                                    <img src={utils.getDisPlayUrl((v.latestMsg.content as TribeRole).avatar)}/>
                                 </div>
                             }
                             {
@@ -138,13 +138,13 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                             }
 
                             <div className="recmt-footer">
-                                <div style={{display: "flex", alignItems: "center"}}>
+                                <div style={{display: "flex", alignItems: "center", flex: 2}}>
                                     {actor ? <>
                                         <div style={{height: 28, width: 28}}>
                                             <img className="ava-img" src={utils.getDisPlayUrl(actor.avatar)}/>
                                         </div>
                                         <div className="asv-name">
-                                            <>{actor.name}</>
+                                            <>{actor.name == actor.id ?"Noki":actor.name}</>
                                         </div>
 
                                     </> : <>
@@ -163,10 +163,10 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                         <div><img src="./assets/img/icon/viewOutline.png" className="static-icons"/></div>
                                         <div>{utils.nFormatter(v.reads,2)}</div>
                                     </div>
-                                    <div className="iconss">
-                                        <div><img src="./assets/img/icon/rolesOutline.png"  className="static-icons"/></div>
-                                        <div>{utils.nFormatter(roles && roles.length + 1,2)}</div>
-                                    </div>
+                                    {/*<div className="iconss">*/}
+                                    {/*    <div><img src="./assets/img/icon/rolesOutline.png"  className="static-icons"/></div>*/}
+                                    {/*    <div>{utils.nFormatter(roles && roles.length + 1,2)}</div>*/}
+                                    {/*</div>*/}
                                     <div className="iconss">
                                         <div><img src="./assets/img/icon/collectionOutline.png" className="static-icons"/></div>
                                         <div>{utils.nFormatter(v.collections,2)}</div>

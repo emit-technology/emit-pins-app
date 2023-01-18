@@ -116,6 +116,11 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
         if (dispatchData) {
             if (dispatchData.tag == 'initData') {
                 initRole().catch(e=>console.error(e))
+            }else if(dispatchData.tag == 'initTribeInfo'){
+                console.log("initTribeInfo...")
+                tribeService.tribeInfo(tribeId).then(tribeInfo=>{
+                    setTribeInfo(tribeInfo);
+                })
             }
         }
     }, [dispatchData.data]);
@@ -423,9 +428,9 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                 setShowUnlock(false);
                 initData().catch(e => console.error(e));
             }).catch(e => {
-                const err = typeof e == 'string' ? e : e.message;
-                setShowToast(true)
-                setToastMsg(err)
+                // const err = typeof e == 'string' ? e : e.message;
+                // setShowToast(true)
+                // setToastMsg(err)
             })
         }
     }
@@ -510,7 +515,6 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
     }
 
     const setLatestRoleFn = useCallback((v: TribeRole) => {
-        console.log("selet role", v)
         setRoleFunc(v)
     }, [latestRole, setLatestRole, setAlreadySelectRole, setShowRoleAvatar])
 
@@ -529,14 +533,16 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                     <IonHeader>
                         <IonToolbar className="msg-toolbar">
                             <IonMenuToggle>
-                                <div style={{paddingLeft: 12}}><IonIcon src={arrowBackOutline}/></div>
+                                <div style={{paddingLeft: 12}}>
+                                    <img src="./assets/img/icon/backOutline.png" height={24}/>
+                                </div>
                             </IonMenuToggle>
-                            <IonTitle>
-                                <img height={28} src="./assets/img/pins-logo.png"/>
+                            <IonTitle style={{opacity: 1}}>
+                                <img height={30} src="./assets/img/pins-logo.png"/>
                             </IonTitle>
                         </IonToolbar>
                     </IonHeader>
-                    <IonContent className="ion-padding ion-content-chat">
+                    <IonContent className="ion-content-chat">
                         <SideBar router={router} onRequestAccount={() => {
                             initData().catch(e => console.error(e))
                         }} account={account} onLogout={() => {
@@ -775,6 +781,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
             <RolesAvatarModal defaultRole={latestRole} roles={roles} onRoleCheck={setLatestRoleFn}
                               isOpen={showRoleAvatar && (!latestRole || latestRole && !latestRole.id)} onClose={() => {
                 setShowRoleAvatar(false)
+                selfStorage.setItem("alreadySelectRole", true)
             }}/>
         }
 

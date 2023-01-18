@@ -100,8 +100,8 @@
   overflow-y: scroll;
   --background: var(--ion-color-light);
   --border-radius: 20px !important;
-  --width: 90%;
-  --height: 80% !important;
+  --width: 500px;
+  --height: 600px !important;
 }
 
 .cat-empty-content {
@@ -140,10 +140,16 @@
   align-items: flex-end;
   justify-content: center;
   padding: 12px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  height: 108px;
+  background: var(--ion-color-tertiary);
 }
 
 .noki-box{
   position: relative;
+  padding-top: 100px;
 }
 
 .noki-title img{

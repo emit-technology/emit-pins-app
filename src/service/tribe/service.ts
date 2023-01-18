@@ -20,7 +20,7 @@ import {BaseRpc} from "../../rpc";
 import config from "../../common/config";
 import {Websocket, WebsocketBuilder} from 'websocket-ts';
 import selfStorage from "../../common/storage";
-import getMainColor from "../../common/getMainColor";
+import getMainColor, {ThemeColors} from "../../common/getMainColor";
 import {emitBoxSdk} from "../emitBox";
 import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import tribeWorker from "../../worker/imWorker";
@@ -479,6 +479,16 @@ class TribeService implements ITribe {
         }
     }
 
+    uploadServer = async (file: File): Promise<string> => {
+        try {
+            const data = await this._picRpc.uploadFile(file);
+            return data["url"].replace("http://", "https://");
+        } catch (e) {
+            console.error(e)
+            return Promise.reject(e)
+        }
+    }
+
     picDisplay = async (imgPath: string, w: number = 100, h: number = 100, upscale = 0): Promise<string> => {
         return await this._picRpc.get(`display?url=${config.picHost}${imgPath}&w=${w}&h=${h}&op=resize&upscale=${upscale}`)
     }
@@ -900,8 +910,11 @@ class TribeService implements ITribe {
         const address = account ? account.addresses[ChainType.EMIT] : ""
         const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/myTribes', {userId: address});
         if (rest && rest.code == 0) {
-            selfStorage.setItem("myTribes", rest.data)
-            return Promise.resolve(rest.data)
+            const ret = rest.data;
+            ret.sort(tribeService._sortTribeInfo);
+
+            selfStorage.setItem("myTribes", ret)
+            return Promise.resolve(ret)
         }
         return Promise.reject(rest.message);
     }
@@ -911,10 +924,23 @@ class TribeService implements ITribe {
         const address = account && account.addresses && account.addresses[ChainType.EMIT]
         const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/involvedTribes', {userId: address});
         if (rest && rest.code == 0) {
-            selfStorage.setItem("involvedTribes", rest.data)
-            return Promise.resolve(rest.data)
+            const ret = rest.data;
+            ret.sort(tribeService._sortTribeInfo);
+
+            selfStorage.setItem("involvedTribes", ret)
+            return Promise.resolve(ret)
         }
         return Promise.reject(rest.message);
+    }
+
+    private _sortTribeInfo = (a:TribeInfo, b:TribeInfo) =>{
+        let aTime = !a.latestMsg? 0 : a.latestMsg.timestamp;
+        let bTime = !b.latestMsg? 0 : b.latestMsg.timestamp;
+        if(aTime == 0 && bTime == 0){
+            aTime = a.reads;
+            bTime = b.reads;
+        }
+        return bTime - aTime;
     }
 
     dropTribe = async (tribeId: string): Promise<boolean> => {

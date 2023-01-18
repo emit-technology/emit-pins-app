@@ -89,7 +89,7 @@ const App: React.FC = () => {
                     if(window.location.pathname == "/"){
                         return;
                     }
-                    if (ev.deltaX >= Math.ceil(document.documentElement.clientWidth / 2)) {
+                    if (ev.deltaX >= Math.ceil(document.documentElement.clientWidth * 0.4)) {
                         window.location.href = "./"
                     } else {
                         //@ts-ignore

@@ -56,6 +56,8 @@ const RoleListModalChild: React.FC<Props> = ({
 
     const dispatch = useAppDispatch();
 
+    const _lineRoles = roles.filter(v=> !v.id || !!v.roleType)
+
     const onClickTheme = useCallback((groupId: string)=>{
 
 
@@ -207,7 +209,7 @@ const RoleListModalChild: React.FC<Props> = ({
                                         roles && roles.map((v, i) => {
                                             return <IonItem
                                                 className="role-item"
-                                                lines={i == 0 ? "full" : "none"}
+                                                lines={(_lineRoles && _lineRoles.length>0 && _lineRoles[_lineRoles.length - 1].id == v.id) ? "full" : "none"}
                                                 style={{borderRadius: (i == 0) ? "12px 12px 0 0" : i == roles.length - 1 ? "0 0 12px 12px" : ""}}
                                                 color="tertiary" key={i} onClick={(e) => {
                                                 e.persist();
@@ -217,12 +219,12 @@ const RoleListModalChild: React.FC<Props> = ({
                                                     <img src={utils.getDisPlayUrl(v.avatar)}/>
                                                     {
                                                         v && v.roleType && <div style={{position: "absolute",top: "14px", right: "-4px"}}>
-                                                            <img src="./assets/img/icon/nokiTag.png" height={12}/>
+                                                            <img src="./assets/img/icon/nokiTag.png" height={14} width={14} />
                                                         </div>
                                                     }
                                                 </IonAvatar>
                                                 <IonLabel>
-                                                    <b style={{fontSize: '12px',color: defaultRole && v.id == defaultRole.id?'':'#868990'}}>{v.name}</b>
+                                                    <span style={{color: defaultRole && v.id == defaultRole.id?'':'#868990'}} className="role-name-text">{v.name}</span>
                                                     {/*<p><IonText color="medium">{v.desc}</IonText></p>*/}
                                                 </IonLabel>
                                                 {
