@@ -296,7 +296,7 @@ export const Text: React.FC<Props> = ({
                                 <div style={{fontSize: '11px', display: "flex", alignItems:"center"}}>
                                     {
                                         keeper && msg.owner == keeper && !msg.groupId &&
-                                    <div>
+                                    <div style={{transform: "translateY(-2px)"}}>
                                         <img src="/assets/img/keeper.png" height={14} style={{verticalAlign: "middle" }}/>
                                     </div>
                                     }

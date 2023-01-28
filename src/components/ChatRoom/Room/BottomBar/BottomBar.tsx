@@ -169,7 +169,7 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
         }
         return [text.replace(regex, ""), event.target.selectionStart];
     }
-    const themeColors = themeColor as ThemeColors;
+    // const themeColors = themeColor as ThemeColors;
 
     const emitChanges = (event) => {
         const [text, caretPosition] = removeInvalidCharacters(event);

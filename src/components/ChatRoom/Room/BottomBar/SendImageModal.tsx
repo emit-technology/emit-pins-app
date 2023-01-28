@@ -25,6 +25,7 @@ import {tribeService} from "../../../../service/tribe";
 import {ImageType, MessageType, MsgText, MsgTextImage, TribeRole} from "../../../../types";
 import config from "../../../../common/config";
 import add from "../../../../img/add.png";
+import TextareaAutosize from "react-textarea-autosize";
 
 interface Props {
     onOk: () => void;
@@ -40,6 +41,7 @@ export const SendImageModal: React.FC<Props> = ({onOk, onClose, isOpen,selectRol
     const [file,setFile] = useState(null)
     const [img, setImg] = useState(null)
     const [isLoading, setIsLoading] = useState(false)
+    const [cursorPosition, setCursorPosition] = useState(-1);
 
     const [present] = useIonToast();
 
@@ -89,7 +91,30 @@ export const SendImageModal: React.FC<Props> = ({onOk, onClose, isOpen,selectRol
         onOk()
     }
 
+    const typeInTextarea = (newText, e: any) => {
+        // let cursorPosition = e.selectionStart
 
+        let textBeforeCursorPosition = e.value.substring(0, cursorPosition)
+        let textAfterCursorPosition = e.value.substring(cursorPosition)
+        e.value = textBeforeCursorPosition + newText + textAfterCursorPosition
+    }
+
+
+    const removeInvalidCharacters = (event) => {
+        const regex = /[|&;$%@"<>()+,]/g;
+        const text = event.target.value;
+
+        if (text.match(regex)) {
+            return [text.replace(regex, ""), event.target.selectionStart - 1];
+        }
+        return [text.replace(regex, ""), event.target.selectionStart];
+    }
+
+    const emitChanges = (event) => {
+        const [text, caretPosition] = removeInvalidCharacters(event);
+        // console.log(text,caretPosition)
+        setCursorPosition(caretPosition);
+    }
     return <>
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal" canDismiss>
             <IonHeader collapse="fade">
@@ -113,7 +138,7 @@ export const SendImageModal: React.FC<Props> = ({onOk, onClose, isOpen,selectRol
                     <IonItem>
                         <IonLabel position="stacked">Comment</IonLabel>
                         {//@ts-ignore
-                            <IonTextarea autoFocus ref={textRef} onIonChange={(e)=>{
+                            <IonTextarea rows={1} autoGrow className="msg-input" onBlur={emitChanges.bind(this)}  autoFocus ref={textRef} onIonChange={(e)=>{
                                 if(e.detail.value && e.detail.value.indexOf("/mind") == 0){
                                     //@ts-ignore
                                     if(textRef.current){
@@ -135,10 +160,12 @@ export const SendImageModal: React.FC<Props> = ({onOk, onClose, isOpen,selectRol
                                 {...getTooltipProps({className: 'tooltip-container'})}
                             >
                                 <EmojiBlock onSelectEmoji={(v) => {
-                                    if (textRef && textRef.current) {
-                                        //@ts-ignore
-                                        textRef.current.value = textRef.current.value + v.emoji
-                                    }
+                                    typeInTextarea(v.emoji, textRef.current);
+                                    //
+                                    // if (textRef && textRef.current) {
+                                    //     //@ts-ignore
+                                    //     textRef.current.value = textRef.current.value + v.emoji
+                                    // }
                                 }}/>
                                 {/*<div {...getArrowProps({ className: 'tooltip-arrow' })} />*/}
                             </div>

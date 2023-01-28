@@ -186,7 +186,7 @@ export const utils = {
         //@ts-ignore
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
         //@ts-ignore
-        return /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+        return /ipad|iphone|ipod|applewebkit/.test((userAgent as string).toLowerCase()) && !window.MSStream;
 
     },
 
@@ -214,8 +214,8 @@ export const utils = {
 
     useInjectAccount: (): boolean => {
         // TODO For Test
-        // return true;
-        return utils.isIos() || utils.isAndroid() || utils.isSafari();
+        return true;
+        // return utils.isIos() || utils.isAndroid() || utils.isSafari();
     },
 
     formatCategoryString: (category: Category): string => {
