@@ -186,7 +186,7 @@ export const utils = {
         //@ts-ignore
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
         //@ts-ignore
-        return /ipad|iphone|ipod|applewebkit/.test((userAgent as string).toLowerCase()) && !window.MSStream;
+        return /ipad|iphone|ipod/.test((userAgent as string).toLowerCase()) && !window.MSStream;
 
     },
 

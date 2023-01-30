@@ -6,11 +6,13 @@ import {
     IonButtons,
     IonContent,
     IonHeader,
+    IonIcon,
     IonModal,
     IonTitle,IonRow,IonCol,
     IonToolbar, useIonToast
 } from "@ionic/react";
 import {utils} from "../../common";
+import {closeOutline} from "ionicons/icons";
 
 interface Props {
     defaultRole: TribeRole
@@ -28,32 +30,42 @@ export const RolesAvatarModal: React.FC<Props> = ({roles,isOpen,onClose, default
     }, [roles])
 
     return <>
-        <IonModal isOpen={isOpen} className="role-avatar-modal" style={{zIndex: 1000}} onDidDismiss={() => onClose()}  canDismiss>
-            <IonToolbar>
-                <IonTitle>Pick a role</IonTitle>
+        <IonModal isOpen={true} className="role-avatar-modal" style={{zIndex: 1000}} onDidDismiss={() => onClose()}  canDismiss>
+            <IonToolbar color="secondary">
+                <IonTitle><div className="pick-title">Pick a Role</div></IonTitle>
                 <IonButtons slot="end">
-                    <IonButton onClick={() => onClose()}>Close</IonButton>
+                    <IonButton onClick={() => onClose()}><IonIcon src={closeOutline} size="large"/></IonButton>
                 </IonButtons>
             </IonToolbar>
-            <IonContent className="ion-padding" fullscreen >
+            <IonContent fullscreen >
                     <div style={{overflow: "scroll", height:'90%'}}>
-                        <IonRow>
-                            {
-                                roleInfoArr && roleInfoArr.map((v, i) => {
-                                    if(i>0){
-                                        return <IonCol className="avatar-col" size="2" key={i} onClick={()=>{
-                                            onRoleCheck(v)
-                                        }}>
-                                            <IonAvatar className="ion-avatar2">
-                                                <img src={utils.getDisPlayUrl(v.avatar)}/>
-                                            </IonAvatar>
-                                        </IonCol>
-                                    }else{
-                                        return <div key={i}></div>
-                                    }
-                                })
-                            }
-                        </IonRow>
+                        <div className="pick-box">
+                            <div className="pick-tip">*All selectable roles are fictional.</div>
+                        </div>
+                        <div className="pick-ctn">
+                            <IonRow>
+                                {
+                                    roleInfoArr && roleInfoArr.map((v, i) => {
+                                        if(i>0){
+                                            return <IonCol className="avatar-col" sizeMd="3" sizeXs="4" key={i} onClick={()=>{
+                                                onRoleCheck(v)
+                                            }}>
+                                                <div className="pick-item">
+                                                    <div className="pick-avatar">
+                                                        <img src={utils.getDisPlayUrl(v.avatar)}/>
+                                                    </div>
+                                                    <div className="pick-name">
+                                                        <div>{v.name}</div>
+                                                    </div>
+                                                </div>
+                                            </IonCol>
+                                        }else{
+                                            return <div key={i}></div>
+                                        }
+                                    })
+                                }
+                            </IonRow>
+                        </div>
                     </div>
             </IonContent>
         </IonModal>
