@@ -1256,7 +1256,7 @@ ion-radio.radio-checked::part(mark) {
   border-radius: 32px;
   padding: 6px;
   font-size: 12px;
-  margin-top: 15px;
+  margin-top: 8px;
   align-content: center;
   color: #ffffff;
   font-family: SFProText-Medium !important;
@@ -1268,15 +1268,14 @@ ion-radio.radio-checked::part(mark) {
 .pick-ctn {
   //height: 165px;
   //overflow: scroll;
-  background: #FFFEFB;
   padding: 8px;
-  transform: translateY(-42px);
+  transform: translateY(-50px);
 }
 
 .pick-item {
   position: relative;
   width: 104px;
-  height: 106px;
+  height: 88px;
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -1288,6 +1287,7 @@ ion-radio.radio-checked::part(mark) {
   height: 60px;
   position: absolute;
   top: 0;
+  top: -6px;
 }
 
 .pick-name{
