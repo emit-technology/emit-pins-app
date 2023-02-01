@@ -30,7 +30,7 @@ export const RolesAvatarModal: React.FC<Props> = ({roles,isOpen,onClose, default
     }, [roles])
 
     return <>
-        <IonModal isOpen={true} className="role-avatar-modal" style={{zIndex: 1000}} onDidDismiss={() => onClose()}  canDismiss>
+        <IonModal isOpen={isOpen} className="role-avatar-modal" style={{zIndex: 1000}} onDidDismiss={() => onClose()}  canDismiss>
             <IonToolbar color="secondary" >
                 <IonTitle><div className="pick-title">Pick a Role</div></IonTitle>
                 <IonButtons slot="end">
@@ -40,7 +40,7 @@ export const RolesAvatarModal: React.FC<Props> = ({roles,isOpen,onClose, default
             <IonContent fullscreen >
                     <div style={{overflow: "scroll", height:'90%',backgroundColor:"#FFFEFB"}}>
                         <div className="pick-box">
-                            <div className="pick-tip">*All selectable roles are fictional.</div>
+                            <div className="pick-tip"><img src="./assets/img/icon/infoOutline.png" height={12}/>&nbsp;The roles are purely fictional and exist only in this Verse.</div>
                         </div>
                         <div className="pick-ctn">
                             <IonRow>

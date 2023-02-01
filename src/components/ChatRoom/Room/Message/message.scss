@@ -1251,17 +1251,16 @@ ion-radio.radio-checked::part(mark) {
 .pick-tip {
   background: linear-gradient(90deg, #317BE4 0%, #609AE4 100%);
   height: 26px;
-  width: 240px;
+  width: 340px;
   display: flex;
   border-radius: 32px;
   padding: 6px;
-  font-size: 12px;
+  font-size: 11px;
   margin-top: 8px;
   align-content: center;
   color: #ffffff;
-  font-family: SFProText-Medium !important;
   align-items: center;
-  letter-spacing: -0.21px;
+  letter-spacing: -0.41px;
   justify-content: center;
 }
 

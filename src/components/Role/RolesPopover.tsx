@@ -12,7 +12,7 @@ import {
     IonTitle,
     IonToolbar, useIonToast
 } from "@ionic/react";
-import {addCircleOutline, createOutline, personOutline} from "ionicons/icons";
+import {addCircleOutline, closeOutline, createOutline, personOutline} from "ionicons/icons";
 import {RoleEditModal} from "./RoleEditModal";
 import {utils} from "../../common";
 
@@ -39,9 +39,9 @@ export const RolesPopover: React.FC<Props> = ({roles,isOpen,onClose, defaultRole
         <IonModal isOpen={isOpen} className="role-select-list" onDidDismiss={() => onClose()} canDismiss>
             <IonHeader collapse="fade">
                 <IonToolbar>
-                    <IonTitle>Select Role</IonTitle>
+                    <IonTitle>Pick a Role</IonTitle>
                     <IonButtons slot="end">
-                        <IonButton onClick={() => onClose()}>Close</IonButton>
+                        <IonButton onClick={() => onClose()}><IonIcon src={closeOutline} size="large"/></IonButton>
                     </IonButtons>
                 </IonToolbar>
             </IonHeader>

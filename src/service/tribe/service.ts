@@ -716,7 +716,6 @@ class TribeService implements ITribe {
     }
 
     getMsgPosition = async (msgId: string) => {
-        console.log("getMsgPosition pre --> ", msgId, this._groupMap.length)
         const msgInfo = await tribeService.msgInfo(msgId);
 
         const groupIndex = this._groupStatic.groupNum.findIndex(v => v.groupId == msgInfo.groupId)
@@ -731,7 +730,6 @@ class TribeService implements ITribe {
     }
 
     getMsgPositionWithGroupId = async (groupId: string) => {
-        console.log("getMsgPositionWithGroupId --> ", groupId, this._groupStatic, this._groupIds)
         // const groupMsgArr = await tribeService.groupedMsg([msgStatic.groupId])
         const groupIndex = this._groupStatic.groupNum.findIndex(v => v.groupId == groupId)
         let preMsgCount = 0;
@@ -741,7 +739,6 @@ class TribeService implements ITribe {
                 preMsgCount += v.num;
             }
         }
-        console.log("preMsgCount:: ", preMsgCount)
         return preMsgCount;
     }
 
@@ -762,7 +759,6 @@ class TribeService implements ITribe {
         if (rest && rest.code == 0) {
             return Promise.resolve(rest.data)
         }
-        console.info("stream msg err: ", rest.message);
         return {total: 0, records: []}
         // return Promise.reject(rest.message);
     }
@@ -817,7 +813,6 @@ class TribeService implements ITribe {
                     groupMsg.groupId = unFetchGroupIds[i];
                     groupMsg.records = [];
                     selfStorage.setItem(this._groupMsgKey(unFetchGroupIds[i]), groupMsg)
-                    console.log("======== groupedMsg>> ", unFetchGroupIds[i], groupMsg)
                     ret.push(groupMsg)
                 }
             } else {

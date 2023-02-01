@@ -801,7 +801,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
             }}/>
         }
 
-       <div style={{height: 0}}>
+       <div style={{height: 0, position: "absolute", bottom: 0}}>
            {/*{*/}
            {/*    roles && roles.length > 0 && roles.map(role=>{*/}
            {/*        return <img src={utils.getDisPlayUrl((role as TribeRole).avatar)}/>*/}
@@ -809,7 +809,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
            {/*}*/}
            {
               groupMsgs && groupMsgs.length > 0 && groupMsgs.map((gMsg: GroupMsg, index: number) =>{
-                  return <img src={utils.getDisPlayUrl(gMsg.theme.image)} key={index}/>
+                  return <img src={utils.getDisPlayUrl(gMsg.theme.image)} key={index} height={0}/>
               })
            }
        </div>
