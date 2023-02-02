@@ -46,53 +46,56 @@ export const RolesPopover: React.FC<Props> = ({roles,isOpen,onClose, defaultRole
                 </IonToolbar>
             </IonHeader>
             <IonContent className="ion-padding" fullscreen >
-                    <div style={{overflow: "scroll", height:'90%'}}>
-                        {
-                            roleInfoArr && roleInfoArr.map((v, i) => {
-                                return <IonItem
-                                    lines={(_lineRoles && _lineRoles.length>0 && _lineRoles[_lineRoles.length - 1].id == v.id) ? "full" : "none"}
-                                    style={{borderRadius: (i == 0) ? "12px 12px 0 0" : i == roles.length - 1 ? "0 0 12px 12px" : ""}}
-                                    color="tertiary" key={i} onClick={(e) => {
-                                    e.stopPropagation()
-                                    onRoleCheck(v)
-                                }}>
-                                    <IonAvatar slot="start" className="ion-avatar2">
-                                        <img src={utils.getDisPlayUrl(v.avatar)}/>
-                                        {
-                                            v && v.roleType && <div style={{position: "absolute",top: "14px", right: "-4px"}}>
-                                                <img src="./assets/img/icon/nokiTag.png" height={14} width={14} />
-                                            </div>
-                                        }
-                                    </IonAvatar>
-                                    <IonLabel className="ion-text-wrap">
-                                        <b style={{
-                                            fontSize: '12px',
-                                            color: defaultRole && v.id == defaultRole.id ? '' : '#868990'
-                                        }}>{v.name}</b>
-                                        {/*<p><IonText color="medium">{v.desc}</IonText></p>*/}
-                                    </IonLabel>
+                <div className="role-pop-tip">
+                    <img src="./assets/img/icon/infoBlueOutline.png" height={12}/>&nbsp;The roles are purely fictional and exist only in this Verse.
+                </div>
+                <div style={{overflow: "scroll", height:'90%'}}>
+                    {
+                        roleInfoArr && roleInfoArr.map((v, i) => {
+                            return <IonItem
+                                lines={(_lineRoles && _lineRoles.length>0 && _lineRoles[_lineRoles.length - 1].id == v.id) ? "full" : "none"}
+                                style={{borderRadius: (i == 0) ? "12px 12px 0 0" : i == roles.length - 1 ? "0 0 12px 12px" : ""}}
+                                color="tertiary" key={i} onClick={(e) => {
+                                e.stopPropagation()
+                                onRoleCheck(v)
+                            }}>
+                                <IonAvatar slot="start" className="ion-avatar2">
+                                    <img src={utils.getDisPlayUrl(v.avatar)}/>
                                     {
-                                        defaultRole && v.id == defaultRole.id &&  <IonIcon slot="end" src={personOutline} size="small"/>
+                                        v && v.roleType && <div style={{position: "absolute",top: "14px", right: "-4px"}}>
+                                            <img src="./assets/img/icon/nokiTag.png" height={14} width={14} />
+                                        </div>
                                     }
-                                    {
-                                        (i > 0 ) &&
-                                        <IonIcon size="small" slot="end" src={createOutline} color="medium"
-                                                 onClick={(e) => {
-                                                     e.stopPropagation();
-                                                     setRoleInfo(v);
-                                                     setShowRoleModal(true)
-                                                 }}/>
-                                    }
+                                </IonAvatar>
+                                <IonLabel className="ion-text-wrap">
+                                    <b style={{
+                                        fontSize: '12px',
+                                        color: defaultRole && v.id == defaultRole.id ? '' : '#868990'
+                                    }}>{v.name}</b>
+                                    {/*<p><IonText color="medium">{v.desc}</IonText></p>*/}
+                                </IonLabel>
+                                {
+                                    defaultRole && v.id == defaultRole.id &&  <IonIcon slot="end" src={personOutline} size="small"/>
+                                }
+                                {
+                                    (i > 0 ) &&
+                                    <IonIcon size="small" slot="end" src={createOutline} color="medium"
+                                             onClick={(e) => {
+                                                 e.stopPropagation();
+                                                 setRoleInfo(v);
+                                                 setShowRoleModal(true)
+                                             }}/>
+                                }
 
-                                </IonItem>
-                            })
-                        }
-                    </div>
-                <div style={{padding: 12}}>
-                    <IonButton size='small' expand="block" onClick={() => {
+                            </IonItem>
+                        })
+                    }
+                </div>
+                <div style={{padding: "12px 0"}}>
+                    <IonButton size='small' className="btn-radius" expand="block" onClick={() => {
                         setRoleInfo(null)
                         setShowRoleModal(true)
-                    }} ><IonIcon src={addCircleOutline}/> New Role</IonButton>
+                    }} ><IonIcon src={addCircleOutline} style={{height: 24}} size="large"/> New Role</IonButton>
                 </div>
                 <RoleEditModal isOpen={showRoleModal} onClose={() => {
                     setShowRoleModal(false)

@@ -867,6 +867,39 @@ class TribeService implements ITribe {
         return Promise.reject(rest.message);
     }
 
+    forbidTribe = async (tribeId: string): Promise<string> => {
+        await this.userCheckAuth()
+        const rest: TribeResult<string> = await this._rpc.post('/tribe/forbidTribe', {
+            tribeId
+        });
+        if (rest && rest.code == 0) {
+            return Promise.resolve(rest.data)
+        }
+        return Promise.reject(rest.message);
+    }
+
+    unForbidTribe = async (tribeId: string): Promise<string> => {
+        await this.userCheckAuth()
+        const rest: TribeResult<string> = await this._rpc.post('/tribe/unForbidTribe', {
+            tribeId
+        });
+        if (rest && rest.code == 0) {
+            return Promise.resolve(rest.data)
+        }
+        return Promise.reject(rest.message);
+    }
+
+    dropTribe = async (tribeId: string): Promise<string> => {
+        await this.userCheckAuth()
+        const rest: TribeResult<string> = await this._rpc.post('/tribe/dropTribe', {
+            tribeId
+        });
+        if (rest && rest.code == 0) {
+            return Promise.resolve(rest.data)
+        }
+        return Promise.reject(rest.message);
+    }
+
     airdropRecords = async (msgId: string): Promise<Array<AirdropInfo>> => {
         // await this.userCheckAuth()
         const rest: TribeResult<Array<AirdropInfo>> = await this._rpc.post('/tribe/airdropRecords', {msgId});
@@ -939,13 +972,13 @@ class TribeService implements ITribe {
         return bTime - aTime;
     }
 
-    dropTribe = async (tribeId: string): Promise<boolean> => {
-        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/dropTribe', {tribeId: tribeId});
-        if (rest && rest.code == 0) {
-            return true
-        }
-        return Promise.reject(rest.message);
-    }
+    // dropTribe = async (tribeId: string): Promise<boolean> => {
+    //     const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/dropTribe', {tribeId: tribeId});
+    //     if (rest && rest.code == 0) {
+    //         return true
+    //     }
+    //     return Promise.reject(rest.message);
+    // }
 
     subscribeTribe = async (tribeId: string): Promise<boolean> => {
         await this.userCheckAuth()

@@ -42,6 +42,8 @@ export interface TribeInfo {
     likes?:number;
     reads?:number;
     collections?:number;
+
+    silence?:boolean
 }
 
 export interface TribeTheme {

@@ -1289,7 +1289,7 @@ ion-radio.radio-checked::part(mark) {
   top: -6px;
 }
 
-.pick-name{
+.pick-name {
   background: #FFFFFF;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.06);
   border-radius: 9px;
@@ -1302,7 +1302,7 @@ ion-radio.radio-checked::part(mark) {
   font-size: 14px;
 }
 
-.pick-name > div{
+.pick-name > div {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1318,7 +1318,26 @@ ion-radio.radio-checked::part(mark) {
   object-fit: cover;
 }
 
-.pick-title{
+.pick-title {
   font-size: 17px;
   letter-spacing: 0.27px;
+}
+
+.role-pop-tip {
+  background: var(--ion-color-tertiary);
+  color: var(--ion-color-primary);
+  font-size: 11px;
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 20px;
+  font-family: SFProText-Medium !important;
+  margin-bottom: 8px;
+}
+
+.btn-radius {
+  --border-radius: 30px;
+  font-family: SFProText-Semibold !important;
 }

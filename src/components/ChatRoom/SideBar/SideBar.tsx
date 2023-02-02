@@ -187,6 +187,23 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
             <IonLabel className="side-text">Noki</IonLabel>
         </IonItem>
 
+        <IonItem lines="none" style={{marginTop: 8}}  onClick={() => {
+           window.open("https://emit.technology/pins/terms-of-service");
+        }}>
+            {/*<IonIcon slot="start" src={catSvg} size="large"/>*/}
+            <img src="./assets/img/icon/termOfService.png" height={24} slot="start"/>
+            <IonLabel className="side-text">Terms of Service</IonLabel>
+        </IonItem>
+
+
+        <IonItem lines="none" style={{marginTop: 8}}  onClick={() => {
+            window.open("https://emit.technology/pins/privacy-policy");
+        }}>
+            {/*<IonIcon slot="start" src={catSvg} size="large"/>*/}
+            <img src="./assets/img/icon/privacyPolicy.png" height={24} slot="start"/>
+            <IonLabel className="side-text">Privacy Policy</IonLabel>
+        </IonItem>
+
 
         {/*<IonItem onClick={() => {*/}
         {/*    const pushToken = selfStorage.getItem("pushTokenValue")*/}

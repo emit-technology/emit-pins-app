@@ -22,15 +22,20 @@ import {GroupMsg, Message, PinnedSticky, TribeInfo, TribeRole, WsStatus} from ".
 import {emitBoxSdk, tribeService} from "../../service";
 import {AccountModel, ChainType, SettleResp} from "@emit-technology/emit-lib";
 import {
-    addOutline,
     arrowBackOutline,
     close,
+    addOutline,
+    linkOutline,
     colorPaletteOutline,
-    ellipsisVertical, heartCircleOutline, linkOutline,
+    ellipsisVertical, heartCircleOutline,
     listOutline,
     pinOutline,
     share
 } from "ionicons/icons";
+
+// import addOutline from '../../img/createBlue.png'
+// import linkOutline from '../../img/linkBlue.png'
+
 import './index.scss';
 import selfStorage from "../../common/storage";
 import {RoleListModal} from "../../components/Role";
@@ -388,6 +393,18 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                 },
                 {
                     text: 'Dye', icon: colorPaletteOutline, handler: () => {
+                        setShowTribeEdit(true)
+                        console.log('Favorite clicked');
+                    }
+                },
+                {
+                    text: 'Ban Chat', icon: "./assets/img/icon/banChatBlue.png", handler: () => {
+                        setShowTribeEdit(true)
+                        console.log('Favorite clicked');
+                    }
+                },
+                {
+                    text: 'Resume Chat', icon: "./assets/img/icon/resumeChat.png", handler: () => {
                         setShowTribeEdit(true)
                         console.log('Favorite clicked');
                     }

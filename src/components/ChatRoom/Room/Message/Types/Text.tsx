@@ -78,6 +78,7 @@ export const Text: React.FC<Props> = ({
                 if(cache){
                     setMeta(cache)
                 }
+
                 axios.post(`${config.baseUrl}/verse/metadata/analyze`,{
                     url: _url
                 }).then((result )=>{

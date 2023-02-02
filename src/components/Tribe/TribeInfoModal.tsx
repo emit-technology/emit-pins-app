@@ -36,6 +36,27 @@ export const TribeInfoModal:React.FC<Props> = ({isOpen,stickies,onReladData,onCl
 
     const [updateTribeModal,setUpdateTribeModal] = useState(false);
 
+    const genContent = (content: string) =>{
+        let urlIndex = -1 ;
+        if(content && content.indexOf("https://")>-1){
+            urlIndex = content.indexOf("https://");
+        }else if(content && content.indexOf("http://")>-1){
+            urlIndex = content.indexOf("http://");
+        }
+        if(urlIndex > -1) {
+            let _url = content.slice(urlIndex);
+            if (_url.indexOf(" ") > -1) {
+                _url = _url.slice(0, _url.indexOf(" "))
+            }
+            return <>
+                {content.slice(0, content.indexOf(_url))}
+                <div className="text-pre-link" onClick={()=>window.open(_url)}>&nbsp;&nbsp;&nbsp;&nbsp;<span className="tex-pre-link-text">{_url}</span></div>
+                {content.slice(content.indexOf(_url) + _url.length)}
+            </>
+        }
+        return content;
+    }
+
     return <>
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-list-modal" canDismiss>
             <IonHeader collapse="fade">
@@ -100,13 +121,13 @@ export const TribeInfoModal:React.FC<Props> = ({isOpen,stickies,onReladData,onCl
                             <div className="theme-pinned-box">
                                 <div>{stickyMsg && stickyMsg.theme.themeTag}</div>
                                 <div className="text-pre">
-                                    {stickyMsg && stickyMsg.theme.themeDesc}
+                                    {genContent(stickyMsg && stickyMsg.theme.themeDesc)}
                                 </div>
                             </div>:
                             <div className="theme-pinned-box">
                                 <div>{tribeInfo && tribeInfo.theme.themeTag}</div>
                                 <div className="text-pre">
-                                    {tribeInfo && tribeInfo.theme.themeDesc}
+                                    {genContent(tribeInfo && tribeInfo.theme.themeDesc)}
                                 </div>
                             </div>
                     }

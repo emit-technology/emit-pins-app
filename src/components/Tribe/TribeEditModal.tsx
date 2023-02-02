@@ -238,7 +238,7 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                                     <TextareaAutosize maxRows={3} rows={2} maxLength={1024} value={themeDesc} onChange={(e)=>{
                                         setThemeDesc(e.target.value);
                                     }}
-                                                      placeholder="Note" className="msg-input"/>
+                                                      placeholder="Note" className="msg-input2"/>
                                 </div>
 
 

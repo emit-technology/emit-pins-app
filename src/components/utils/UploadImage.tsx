@@ -1,9 +1,8 @@
 import * as React from "react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import addCircleIcon from "../../img/add_circle.png";
 
 import {IonLoading,IonAvatar} from "@ionic/react";
-import {tribeService} from "../../service/tribe";
 import ImageUploading from "react-images-uploading";
 import getMainColor from "../../common/getMainColor";
 
@@ -25,9 +24,18 @@ const UploadImage = ({imgUrl, setImgUrl,width = 120,height,setColor,defaultIcon,
     const [images, setImages] = React.useState([]);
     const maxNumber = 69;
 
+    useEffect(()=>{
+        if(!imgUrl){
+            setImages([])
+        }
+    },[imgUrl])
+
     const onChange = async (imageList, addUpdateIndex) => {
         // data for submit
         // console.log(imageList, addUpdateIndex);
+        if(!imageList || imageList.length == 0){
+            return
+        }
         setImages(imageList);
         const image = imageList[0];
         const themeColors = await getMainColor(image["data_url"]);
