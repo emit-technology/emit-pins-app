@@ -35,9 +35,12 @@ interface Props {
     onCancelShowPin: () => void;
 
     setShowActionSheet: (f: boolean) => void;
+
+    isDetailModal?: boolean
 }
 
-const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin, setShowActionSheet, onReladData, roles, wsStatus}) => {
+const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin, setShowActionSheet,
+    isDetailModal, onReladData, roles, wsStatus}) => {
 
     const [showTribeInfoModal, setShowTribeInfoModal] = useState(false);
     const [stickies, setStickies] = useState({data: [], total: 0});
@@ -117,11 +120,11 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
                         const groupMsg = rest[0];
                         const stickyMsg1 = {
                             theme: groupMsg.theme,
-                            seq: index + 2,
+                            seq: index + 1,
                             roles: [],
                             records: [],
                             groupId: preGroupId,
-                            index: index + 2
+                            index: index + 1
                         };
                         setStickyMsg(stickyMsg1)
                         dispatch(saveDataState({
@@ -165,9 +168,9 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
 
     useEffect(() => {
         if (dispatchMessage) {
-            if (dispatchMessage.tag == 'updateThemeHead' && dispatchData.data) {
+            if (dispatchMessage.tag == 'updateThemeHead' && dispatchMessage.data) {
                 let dataObj: any = dispatchMessage.data;
-                if (dataObj.stickyMsg) {
+                if (!stickyMsg || dataObj.stickyMsg && dataObj.stickyMsg.groupId !== stickyMsg.groupId) {
                     setStickyMsg(dataObj.stickyMsg)
                 }
 
@@ -195,12 +198,24 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
         {
             <IonHeader mode="ios" color="primary">
                 <IonToolbar className="msg-toolbar">
-                    <div className="msg-head-avatar">
+                    <div className={!isDetailModal ? "msg-head-avatar":""}>
                         <div slot="start" id="main-content-left">
-                            <IonMenuToggle menu="start" autoHide={false}>
-                                {/*<IonIcon src={listOutline} size="large"/>*/}
-                                <img src="./assets/img/icon/menuOutline.png" height={24} style={{verticalAlign: "middle"}}/>
-                            </IonMenuToggle>
+                            {
+                                !isDetailModal && <IonMenuToggle menu="start" autoHide={false}>
+                                    {/*<IonIcon src={listOutline} size="large"/>*/}
+                                    <img src="./assets/img/icon/menuOutline.png" height={24} style={{verticalAlign: "middle"}}/>
+                                </IonMenuToggle>
+                            }
+                            {
+                                isDetailModal &&  <div onClick={()=>{
+                                    dispatch(saveDataState({
+                                        tag: 'closeTribeDetailModal',
+                                        data: Date.now()
+                                    }))
+                                }}>
+                                    <img src="./assets/img/icon/backOutline.png" height={24}/>
+                                </div>
+                            }
                         </div>
                     </div>
                     <IonTitle className="font-style-bold">

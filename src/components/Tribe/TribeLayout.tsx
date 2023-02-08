@@ -3,36 +3,55 @@ import {MessageType, MsgText, TribeInfo, TribeRole} from "../../types";
 import {utils} from "../../common";
 import {XBlock, XMasonry} from "react-xmasonry";
 import config from "../../common/config";
-import {IonIcon, useIonAlert, useIonToast,} from "@ionic/react";
-import {
-    gitBranchSharp,
-} from "ionicons/icons";
+import {useIonAlert, useIonToast,} from "@ionic/react";
 import selfStorage from "../../common/storage";
 import copy from "copy-to-clipboard";
 import {NoneData} from "../Data/None";
+import {useEffect, useState} from "react";
+import {TribeDetail} from "./TribeDetail";
+import {useAppSelector} from "../../common/state/app/hooks";
 
 interface Props {
     data: Array<TribeInfo>
     tribeTimeMap: Map<string, number>
     tribeUserInfo: any;
     address: string
-    onReload: ()=>void;
+    onReload: () => void;
+
+    onSelectTribe: (tribeId: string)=>void;
 }
 
-export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,address,tribeUserInfo}) => {
+export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onSelectTribe, onReload, address, tribeUserInfo}) => {
 
     const [presentAlert] = useIonAlert();
     const [presentToast] = useIonToast();
+
+    // const content && content["image"] && content["image"]["url"]
+    //
+    // const (!v.latestMsg || !!v.latestMsg && v.latestMsg.content["image"] && !((v.latestMsg.content as MsgText).image.url));
+    //
+    // const v.latestMsg && v.latestMsg.msgType == MessageType.Role
+
+    const dispatchData = useAppSelector(state => state.jsonData);
+
+    useEffect(() => {
+        if (dispatchData) {
+            if (dispatchData.tag == 'closeTribeDetailModal' && dispatchData.data) {
+                onSelectTribe("")
+            }
+        }
+    }, [dispatchData.data]);
+
     return <>
 
-        <XMasonry updateOnFontLoad={false} updateOnImagesLoad={false} >
+        <XMasonry updateOnFontLoad={false} updateOnImagesLoad={false}>
             {
                 data && data.length == 0 && <XBlock key={-1}>
                     <NoneData/>
                 </XBlock>
             }
             {
-                data && data.length>0&& data.map((v, i) => {
+                data && data.length > 0 && data.map((v, i) => {
                     const content = v.latestMsg && v.latestMsg.content as MsgText;
                     let roles = v.roles;
                     if (!roles) {
@@ -40,10 +59,10 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                     }
                     const actor: TribeRole = roles.find(vr => !!v.latestMsg && vr.id == v.latestMsg.role);
 
-                    return <XBlock key={i} >
+                    return <XBlock key={i}>
                         <div className="recmt-content card" id={`idd${i}`} onClick={() => {
                             selfStorage.setItem(`latest_view_${v.tribeId}`, Math.floor(Date.now() / 1000));
-                            utils.goTo(v.tribeId)
+                            onSelectTribe(v.tribeId);
                         }}>
                             <div className="recmt-head">
                                 <div className="recmt-head-icon">
@@ -64,9 +83,10 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                     </div>
                                     {/*<div>{v.theme.themeTag}</div>*/}
                                     <div>{v.tribeId}
-
                                         {
-                                            v.forked && v.forked.length > 0 && <img src="./assets/img/icon/forkBlue.png" height={12} style={{transform: 'translate(3px,-2px)'}}/>
+                                            v.forked && v.forked.length > 0 &&
+                                            <img src="./assets/img/icon/forkBlue.png" height={12}
+                                                 style={{transform: 'translate(3px,-2px)'}}/>
                                             // <IonIcon src={gitBranchSharp} color="primary" style={{transform: 'translate(3px,2px)'}}/>
                                         }
                                     </div>
@@ -76,14 +96,16 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                 content && content["image"] && content["image"]["url"] &&
                                 <div className="recmt-img">
                                     <img src={utils.getDisPlayUrl(content["image"])}/>
-                                    <div className="airdrop-time">{v.latestMsg && v.latestMsg.timestamp && utils.dateFormatStr(new Date(v.latestMsg.timestamp * 1000))}</div>
+                                    <div
+                                        className="airdrop-time">{v.latestMsg && v.latestMsg.timestamp && utils.dateFormatStr(new Date(v.latestMsg.timestamp * 1000))}</div>
                                 </div>
                             }
                             {
                                 (!v.latestMsg || !!v.latestMsg && v.latestMsg.content["image"] && !((v.latestMsg.content as MsgText).image.url)) &&
                                 <div className="recmt-img">
                                     <img src={utils.getDisPlayUrl(v.theme.image)}/>
-                                    <div className="airdrop-time">{v.latestMsg && v.latestMsg.timestamp && utils.dateFormatStr(new Date(v.latestMsg.timestamp * 1000))}</div>
+                                    <div
+                                        className="airdrop-time">{v.latestMsg && v.latestMsg.timestamp && utils.dateFormatStr(new Date(v.latestMsg.timestamp * 1000))}</div>
                                 </div>
 
                             }
@@ -144,7 +166,7 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                             <img className="ava-img" src={utils.getDisPlayUrl(actor.avatar)}/>
                                         </div>
                                         <div className="asv-name">
-                                            <>{actor.name == actor.id ?"Noki":actor.name}</>
+                                            <>{actor.name == actor.id ? "Noki" : actor.name}</>
                                         </div>
 
                                     </> : <>
@@ -160,24 +182,26 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                                 </div>
                                 <div className="footer-icons">
                                     <div className="iconss">
-                                        <div><img src="./assets/img/icon/viewOutline.png" className="static-icons"/></div>
-                                        <div>{utils.nFormatter(v.reads,2)}</div>
+                                        <div><img src="./assets/img/icon/viewOutline.png" className="static-icons"/>
+                                        </div>
+                                        <div>{utils.nFormatter(v.reads, 2)}</div>
                                     </div>
                                     {/*<div className="iconss">*/}
                                     {/*    <div><img src="./assets/img/icon/rolesOutline.png"  className="static-icons"/></div>*/}
                                     {/*    <div>{utils.nFormatter(roles && roles.length + 1,2)}</div>*/}
                                     {/*</div>*/}
                                     <div className="iconss">
-                                        <div><img src="./assets/img/icon/collectionOutline.png" className="static-icons"/></div>
-                                        <div>{utils.nFormatter(v.collections,2)}</div>
+                                        <div><img src="./assets/img/icon/collectionOutline.png"
+                                                  className="static-icons"/></div>
+                                        <div>{utils.nFormatter(v.collections, 2)}</div>
                                     </div>
                                     <div className="iconss">
-                                        <div><img src="./assets/img/icon/likeGrayOutline.png" className="static-icons"/></div>
-                                        <div>{utils.nFormatter(v.likes,2)}</div>
+                                        <div><img src="./assets/img/icon/likeGrayOutline.png" className="static-icons"/>
+                                        </div>
+                                        <div>{utils.nFormatter(v.likes, 2)}</div>
                                     </div>
                                 </div>
                             </div>
-
 
 
                             {/*<div className="subop">*/}
@@ -231,15 +255,15 @@ export const TribeLayout: React.FC<Props> = ({data, tribeTimeMap,onReload,addres
                             {/*</div>*/}
 
                             {
-                                tribeTimeMap && v.latestMsg &&  (tribeTimeMap.has(v.tribeId) && tribeTimeMap.get(v.tribeId) < v.latestMsg.timestamp || !tribeTimeMap.has(v.tribeId)) && <>
+                                tribeTimeMap && v.latestMsg && (tribeTimeMap.has(v.tribeId) && tribeTimeMap.get(v.tribeId) < v.latestMsg.timestamp || !tribeTimeMap.has(v.tribeId)) && <>
                                     <div className="tag-point-r"></div>
                                 </>
                             }
                             <div className="tag-point">
-                                <div className="iconss" onClick={(e)=>{
+                                <div className="iconss" onClick={(e) => {
                                     e.stopPropagation();
-                                    copy(`${window.location.href}/${v.tribeId}`)
-                                    presentToast({color:"primary", message: "Copied to clipboard", duration: 2000})
+                                    copy(`${window.location.href}${v.tribeId}`)
+                                    presentToast({color: "primary", message: "Copied to clipboard", duration: 2000})
                                 }}>
                                     <img src="./assets/img/icon/linkOutline.png" height={22}/>
                                 </div>

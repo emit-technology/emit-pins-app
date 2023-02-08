@@ -55,6 +55,8 @@ interface Props {
     subscribed?: boolean;
     onSubscribe?: (f: boolean) => void;
 
+    isOpenTribeDetail?: boolean
+
 }
 
 const pageSize = 50;
@@ -80,7 +82,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                                                  shareMsgId, userLimit,
                                                                  selectRole, pinnedStickies,
                                                                  loaded, onReload, showPinnedMsgDetail,
-                                                                 showPin, owner,
+                                                                 showPin, owner, isOpenTribeDetail,
                                                                  tribeInfo, onSupport, subscribed, onSubscribe,
                                                              }) => {
 
@@ -109,22 +111,9 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     const [maxVisibleIndex, setMaxVisibleIndex] = useState(0);
     const [replayMsg, setReplayMsg] = useState(null);
     const [checkedMsgId, setCheckedMsgId] = useState("");
-    // const [scrollEvent, setScrollEvent] = useState(null);
     const virtuoso = useRef(null);
     const [loadedData, setLoadedData] = useState(false)
     const [startItemIndex, setStartItemIndex] = useState(-1)
-
-    // useLayoutEffect(() => {
-    //     const doc = document.querySelectorAll('[data-virtuoso-scroller=true]');
-    //     if (doc && doc.length > 0) {
-    //         doc[0].className = "customer-scroll";
-    //     }
-    // }, [])
-
-    // useEffect(() => {
-    //     fetchMsgByIndex(firstIndex).catch(e => console.error(e))
-    // }, [firstIndex])
-
 
     useLayoutEffect(() => {
         if (!stickyMsg && tribeInfo) {
@@ -139,6 +128,41 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         }
     }, [tribeInfo, stickyMsg])
 
+
+    useEffect(() => {
+        if(loaded){
+            setStickyMsg(null);
+            initLatestPin().catch(e => console.log(e))
+
+
+            tribeWorker.addMessageListener(config.tribeId, async (data: { total: number, messages: Array<PinnedSticky> }) => {
+                try {
+                    console.log("======> startcallbutton ", data)
+                    setCommentsInner(data)
+                } catch (e) {
+                    console.error(e)
+                }
+            });
+
+        }
+    }, [tribeInfo, loaded])
+
+    useLayoutEffect(() => {
+        // if (isOpenTribeDetail) {
+        //     setStartItemIndex(1);
+        //     setTimeout(() => setStartItemIndex(-1), 3000)
+        // } else {
+        //     setTimeout(() => setStartItemIndex(-1), 3000)
+        // }
+        if (isOpenTribeDetail) {
+            // const currentVis = getCurrentVisible();
+            // console.log("getCurrentVisible()", currentVis, firstItemIndex);
+            // setTimeout(()=>{
+            //     startItem(currentVis);
+            // },3000)
+        }
+    }, [isOpenTribeDetail])
+
     useEffect(() => {
         if (!!shareMsgId) {
             tribeService.msgInfo(shareMsgId).then(msgInfo => {
@@ -147,48 +171,9 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         }
     }, [shareMsgId])
 
-    // const setStatusBarHide = async (f: boolean) => {
-    //     if (!await isApp()) {
-    //         return;
-    //     }
-    //     if (f) {
-    //         StatusBar.hide().catch(e => console.error(e))
-    //     } else {
-    //         StatusBar.show().catch(e => console.error(e))
-    //     }
-    // }
-    //
-    // const setFullScreen = (scrollForward: boolean) => {
-    //     try {
-    //         if (!!setHideMenu && (utils.isAndroid() || utils.isIos())) {
-    //             if (scrollForward) {
-    //                 setHideMenu(true)
-    //                 setStatusBarHide(true)
-    //             } else {
-    //                 setHideMenu(false)
-    //                 setStatusBarHide(false)
-    //             }
-    //         }
-    //     } catch (e) {
-    //         console.error(e)
-    //     }
-    // }
-
-    // const setCurrentTimeout = useCallback((f: boolean) => {
-    //     // console.log("visibleStartId == ", visibleStartId)
-    //     if (visibleStartId && delaySaveCurrentVisibleIndex++ == 0) {
-    //         setTimeout(() => {
-    //             setCurrentVisible(visibleStartId);
-    //             const itemStart = comments[visibleStartId - firstItemIndex]
-    //             if(!!itemStart){
-    //                 setStickyMsg(itemStart)
-    //             }
-    //             delaySaveCurrentVisibleIndex = 0;
-    //         }, 1000)
-    //     }
-    // },[comments,firstItemIndex, setCurrentVisible, setStickyMsg])
 
     const fetchMsgByIndex = async (firstIndex: number, toBottom: boolean = false, init: boolean = false) => {
+        console.log(`fetch msg by index , firstIndex=[${firstIndex}]`)
         if (firstIndex > -1) {
             setStartItemIndex(firstIndex);
             setTimeout(() => setStartItemIndex(-1), 1500)
@@ -240,7 +225,6 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     }
 
     const initLatestPin = async () => {
-
         const streamMsg1 = await tribeWorker.getPinnedMessageArray(config.tribeId, 0, 2);
         if (streamMsg1 && streamMsg1.total == 0) {
             const defaultThem = await tribeService.defaultTheme();
@@ -316,6 +300,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 (!!lastMsg && !!lastMsg.records && lastMsg.records[0].msgIndex > -1 && lastMsg.records[0].msgIndex < total - 1)
             ) {
 
+                console.log("=========loadMore message>> ")
                 tribeWorker.getPinnedMessageArray(config.tribeId, lastMsg.records[0].msgIndex + 1, pageSize).then(rest => {
                     setCommentsInner({total: rest.total, messages: rest.data}, true)
                 }).catch(e => console.error(e))
@@ -354,6 +339,10 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     // }, [stickyMsg])
 
     const startItem = (index: number) => {
+        console.log("scroll to index=[%d]", index)
+        if(index < 0){
+            return;
+        }
         virtuoso.current.scrollToIndex({
             index: index,
             align: "start",
@@ -362,6 +351,10 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     }
 
     const scrollToItem = (data: { index: number, align: string }) => {
+        console.log("scroll to item=[%d]", data.index, data.align)
+        if(data.index < 0){
+            return;
+        }
         virtuoso.current.scrollToIndex({
             index: data.index,
             align: data.align,
@@ -376,17 +369,17 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         }
     }
 
-    useEffect(() => {
-        if (loaded && loadCount++ == 0) {
-            initLatestPin().then(() => {
-                setLoadedData(true);
-            }).catch(e => console.error(e))
-        }
-    }, [loaded])
+    // useEffect(() => {
+    //     if (loaded && loadCount++ == 0) {
+    //         initLatestPin().then(() => {
+    //             setLoadedData(true);
+    //         }).catch(e => console.error(e))
+    //     }
+    // }, [loaded])
 
     const setCommentsInner = useCallback((data: { total: number, messages: Array<PinnedSticky> }, append?: boolean) => {
-        if(data.messages.findIndex(v=>v.records && v.records[0].msgType == MessageType.UpdateTribe) > -1){
-            tribeService.tribeInfoNoCache(config.tribeId).then(()=>{
+        if (data.messages.findIndex(v => v.records && v.records[0].msgType == MessageType.UpdateTribe) > -1) {
+            tribeService.tribeInfoNoCache(config.tribeId).then(() => {
                 appDispatch(saveDataState({
                     data: {time: Date.now()},
                     tag: 'initTribeInfo'
@@ -406,18 +399,18 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         })
     }, [])
 
-    useEffect(() => {
-        if (loaded && count++ == 0) {
-            tribeWorker.addMessageListener(config.tribeId, async (data: { total: number, messages: Array<PinnedSticky> }) => {
-                try {
-                    console.log("======> startcallbutton ", data)
-                    setCommentsInner(data)
-                } catch (e) {
-                    console.error(e)
-                }
-            });
-        }
-    }, [loaded])
+    // useEffect(() => {
+    //     if (loaded) {
+    //         tribeWorker.addMessageListener(config.tribeId, async (data: { total: number, messages: Array<PinnedSticky> }) => {
+    //             try {
+    //                 console.log("======> startcallbutton ", data)
+    //                 setCommentsInner(data)
+    //             } catch (e) {
+    //                 console.error(e)
+    //             }
+    //         });
+    //     }
+    // }, [loaded])
 
     useEffect(() => {
         if (!pinnedStickies && dispatchData) {
@@ -562,12 +555,12 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     const followOutput = useCallback((isAtBottom) => {
         const check = comments.length > 0 && (comments[comments.length - 1] as PinnedSticky).records && (comments[comments.length - 1] as PinnedSticky).records[0].msgIndex >= total - 3;
 
-        console.log('MessagesLislowOutput isAtBottom',check, isAtBottom, atBottom);
+        console.log('MessagesLislowOutput isAtBottom', check, isAtBottom, atBottom);
         return isAtBottom && atBottom && check ? 'auto' : false;
     }, [comments, atBottom, total]);
 
     const bottomChange = useCallback((bottom) => {
-        console.log("at bottom", bottom,atBottom, isScrolling)
+        console.log("at bottom", bottom, atBottom, isScrolling)
         if (bottom !== atBottom) {
             setTimeout(() => {
                 setAtBottom(bottom);
@@ -589,7 +582,7 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
     }, [stickyMsg, startItemIndex, pinnedStickies])
 
     useEffect(() => {
-        if (!!loaded && !!loadedData && !pinnedStickies) {
+        if (!!loaded && !pinnedStickies) {
             // console.log("visibleRange.startIndex >= firstItemIndex: ", visibleRange.startIndex, firstItemIndex)
             const _startIndex = visibleRange.startIndex - firstItemIndex;
             const _endIndex = visibleRange.endIndex - firstItemIndex;
@@ -620,15 +613,18 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
             }
             setCurrentVisible(visibleRange.startIndex);
 
+            if(visibleRange.endIndex < total - 1){
+                setAtBottom(false);
+            }
         }
 
     }, [visibleRange, atBottom])
 
-    const commitUpdateMsg = async () =>{
+    const commitUpdateMsg = async () => {
 
-        const copyMsg:Message = JSON.parse(JSON.stringify(showModifyMsg));
+        const copyMsg: Message = JSON.parse(JSON.stringify(showModifyMsg));
         const msgContent: MsgText = copyMsg.content as MsgText;
-        if(file){
+        if (file) {
             const url = await tribeService.uploadServer(file as File)
             msgContent.image.url = url;
         }
@@ -637,6 +633,8 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         )
         setShowModifyMsg(null)
     }
+
+    // console.log("render=====>  ", startItemIndex, firstItemIndex, comments.length, atBottom, total, visibleRange)
     return <>
 
         <div className={!pinnedStickies ? "msg-content" : "msg-content2"} style={{
@@ -646,7 +644,8 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 <div className="inner-box">
                     {/*{loadingData && <Loading/>}*/}
                     {/*<div className="position-top">[{visibleRange.startIndex}] - [{visibleRange.endIndex}]*/}
-                    {/*    :[{comments && comments.length > 0 && comments[0].records[0].msgIndex}]..[{comments && comments.length > 0 && comments[comments.length - 1].records[0].msgIndex}], [{firstItemIndex}]..[{total}]*/}
+                    {/*    :[{comments && comments.length > 0 && comments[0].records[0].msgIndex}]..[{comments && comments.length > 0 && comments[comments.length - 1].records[0].msgIndex}],*/}
+                    {/*    [{firstItemIndex}]..[{total}]*/}
                     {/*</div>*/}
                     <Virtuoso
                         ref={virtuoso}
@@ -895,9 +894,13 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                         <UploadImage maxHeight={300} borderRadio={12} defaultIcon={add}
                                                      width={showModifyMsg && showModifyMsg.content && !showModifyMsg.content.image["url"] ? "100%" : ""}
                                                      imgUrl={showModifyMsg && showModifyMsg.content && showModifyMsg.content.image["url"] && utils.getDisPlayUrl(showModifyMsg.content.image)}
-                                                     setImgUrl={(data, w, h,file) => {
+                                                     setImgUrl={(data, w, h, file) => {
                                                          const msgCopy = JSON.parse(JSON.stringify(showModifyMsg))
-                                                         msgCopy.content.image = {url: data.data_url, width: w, height: h}
+                                                         msgCopy.content.image = {
+                                                             url: data.data_url,
+                                                             width: w,
+                                                             height: h
+                                                         }
                                                          setShowModifyMsg(msgCopy)
                                                          setFile(file)
                                                      }}/>
@@ -910,9 +913,9 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
 
                                     <IonButton expand="block" onClick={() => {
                                         setShowLoading(true)
-                                        commitUpdateMsg().then(()=>{
+                                        commitUpdateMsg().then(() => {
                                             setShowLoading(false)
-                                        }).catch(e=>{
+                                        }).catch(e => {
                                             setShowLoading(false)
                                             console.log(e)
                                         })

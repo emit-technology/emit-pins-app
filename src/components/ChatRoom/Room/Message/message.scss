@@ -36,7 +36,7 @@
   display: flex;
   width: 100% !important;
   flex-direction: column;
-  padding: 0 12px;
+  //padding: 0 12px;
   font-size: 14px;
   //align-items: center;
 }
@@ -318,9 +318,9 @@
 
 
   text-align: left;
-  background: rgba(120, 120, 120, 0.5);
+  background: #C0C0C0;
   font-size: 14px;
-  border-radius: 12px;
+  border-radius: 16px;
   min-width: 36px;
   /* min-width: 200px; */
   //margin-top: 2px;
@@ -333,15 +333,15 @@
 
 .no-role-div-owner {
   text-align: left;
-  background: #A7C1E7;
+  background: #AEC0DB;
   font-size: 14px;
-  border-radius: 12px;
+  border-radius: 22px;
   //min-width: 200px;
   margin-top: 2px;
   color: #fff;
   min-width: 36px;
   max-width: 70%;
-  padding: 2px;
+  padding: 2px 12px;
 }
 
 .sender-owner-xs {
@@ -1340,4 +1340,19 @@ ion-radio.radio-checked::part(mark) {
 .btn-radius {
   --border-radius: 30px;
   font-family: SFProText-Semibold !important;
+}
+
+.no-role-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 52px;
+}
+
+.show-time{
+  color: rgb(146, 148, 156);
+  margin-left: 4px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }

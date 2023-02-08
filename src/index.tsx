@@ -14,12 +14,16 @@ import {
     setStatusBarStyleDark
 } from './service/app'
 import {utils} from "./common";
-import {LogLevel} from "react-virtuoso";
+// import {LogLevel} from "react-virtuoso";
 import ResizeObserver from 'resize-observer-polyfill'
 
 import 'overlayscrollbars/overlayscrollbars.css';
-import {ParallaxProvider} from "react-scroll-parallax";
+// import {ParallaxProvider} from "react-scroll-parallax";
 import config from "./common/config";
+import {Provider} from "react-redux";
+import store from "./common/state/app/store";
+// import {IonApp} from "@ionic/react";
+import inobounce from "inobounce"
 // import { SplashScreen } from '@capacitor/splash-screen';
 
 // globalThis.VIRTUOSO_LOG_LEVEL = LogLevel.DEBUG;
@@ -39,23 +43,29 @@ window.addEventListener("error", (e) => {
         e.message === "ResizeObserver loop limit exceeded"
     ) {
         // console.log("=====> stopImmediatePropagation")
-    e.stopImmediatePropagation();
+        e.stopImmediatePropagation();
     }
 });
 
-if (rootElement.hasChildNodes()) {
-    console.log("hydrate mode");
-    hydrate(<React.StrictMode>
-        <ParallaxProvider>
-            <App/>
-        </ParallaxProvider>
-    </React.StrictMode>, rootElement);
-} else {
-    console.log("render mode");
-    render(<React.StrictMode>
-        <App/>
-    </React.StrictMode>, rootElement);
+if(utils.isIos()){
+    inobounce.enable();
 }
+
+// if (rootElement.hasChildNodes()) {
+//     console.log("hydrate mode");
+//     hydrate(<React.StrictMode>
+//         <ParallaxProvider>
+//             <App/>
+//         </ParallaxProvider>
+//     </React.StrictMode>, rootElement);
+// } else {
+//     console.log("render mode");
+render(<React.StrictMode>
+    <Provider store={store}>
+        <App/>
+    </Provider>
+</React.StrictMode>, rootElement);
+// }
 console.log("added app url open listener.")
 
 AppPlugin.addListener("appUrlOpen", (appUrlOpen) => {

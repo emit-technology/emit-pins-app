@@ -82,7 +82,7 @@
   },
   "devDependencies": {
     "@capacitor/app": "^1.1.1",
-    "@capacitor/browser": "^4.1.0",
+    "@capacitor/browser": "1.0.7",
     "@capacitor/cli": "3.6.0",
     "@capacitor/haptics": "^1.1.4",
     "@capacitor/status-bar": "^1.0.8",
@@ -112,6 +112,7 @@
     "html-metadata-parser": "^2.0.4",
     "html2canvas": "^1.4.1",
     "https-browserify": "^1.0.0",
+    "inobounce": "^0.2.1",
     "lodash": "^4.17.21",
     "lorem-ipsum": "^2.0.8",
     "mutexify": "^1.4.0",

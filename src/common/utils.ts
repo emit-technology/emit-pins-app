@@ -4,12 +4,16 @@ import {ImageType, Message, MessageType, MsgText, MsgTextImage, TribeRole} from 
 import {Category} from "@emit-technology/emit-lib";
 import selfStorage from "./storage";
 import { Browser } from '@capacitor/browser';
+import {App} from '@capacitor/app';
+import { Capacitor, Plugins } from '@capacitor/core'
 
 const format = require('date-format');
 const BN = require("bn.js");
 
 
 const imageUrlObj:any = {};
+
+let verseWindow : Window | null;
 
 export const utils = {
     ellipsisStr: function (v: string, num?: number) {
@@ -136,7 +140,7 @@ export const utils = {
     convertImgDisplay: (width: number, height: number, url: string): { width: number, height: number, displayUrl: string } => {
         // content.image.width>content.image.height? 200: content.image.height>300?300:content.image.height
 
-        const base = utils.isIos() || utils.isAndroid() ?250:300;
+        const base = (utils.isApp()) ?250:300;
         function _getHeight() {
             if (width > 0 && height > 0) {
                 if (width > height) {
@@ -189,8 +193,23 @@ export const utils = {
         return /ipad|iphone|ipod/.test((userAgent as string).toLowerCase()) && !window.MSStream;
     },
 
+
     goTo: (verseId: string) =>{
-        window.location.href = `/${verseId}`
+        // window.location.href = `/${verseId}`
+        const _url = `/${verseId}`;
+        // alert(_url)
+        // if(utils.isApp()){
+        //     // Browser.open({ url: _url });
+        //     App.getLaunchUrl()
+        // }else{
+            // if(!verseWindow || verseWindow.closed){
+            //     verseWindow = window.open(_url, 'mozillaTab');
+            // }else{
+            //     verseWindow.focus();
+                window.location.href = _url
+            // }
+        // }
+
     },
 
     isAndroid: (): boolean => {

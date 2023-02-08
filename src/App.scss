@@ -1,5 +1,9 @@
 //import "~chrome-web-share/dist/ShareBtn";
-
+html, body {
+  overscroll-behavior-y: none;
+  position: fixed;
+  overflow: hidden;
+}
 body {
   //background-image: url("./img/background.jpg");
   //background-repeat: no-repeat;
@@ -66,6 +70,10 @@ pre {
 }
 
 @media (max-width: 760px) {
+
+  .no-role-div{
+    max-width: 82% !important;
+  }
 
   .recmt-head-title > div:first-child {
     max-width: 200px !important;

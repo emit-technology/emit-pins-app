@@ -610,3 +610,21 @@
   font-size: 14px;
   font-family: SFProText-Medium !important;
 }
+
+.tribe-detail-modal{
+  --width: 100%;
+  --height: 100%;
+}
+
+.tribe-detail-dom {
+  z-index: 1000;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  -webkit-overflow-scrolling: touch;
+}

@@ -5,17 +5,9 @@ import {
     IonLabel,
     IonButton,
     IonText,
-    IonIcon,
     IonBadge,
     IonLoading, IonAvatar
 } from '@ionic/react';
-import {
-    chevronForwardOutline,
-    homeOutline,
-    openOutline,
-    personOutline,
-    walletOutline
-} from "ionicons/icons";
 import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import {utils} from "../../../common";
 import {tribeService} from "../../../service/tribe";
@@ -27,10 +19,11 @@ import {AccountUnlock} from "../../Account/modal/Unlock";
 import {ResetModal} from "../../Account/modal/Reset";
 import {AssetsModal} from "../../Assets/Modal";
 import Avatar from "react-avatar";
-// import catSvg from '../../../img/cat.svg';
 import {CatList} from "../../Cat";
 import {useAppDispatch} from "../../../common/state/app/hooks";
 import {saveDataState} from "../../../common/state/slice/dataSlice";
+// import { useHistory } from 'react-router-dom';
+
 
 interface Props {
     onRequestAccount: () => void;
@@ -39,11 +32,12 @@ interface Props {
     isSessionAvailable: boolean
     router?: any;
     inboxNum: number
+    isModal?: boolean
 }
 
 let cb: any;
 
-export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onLogout,inboxNum, isSessionAvailable}) => {
+export const SideBar: React.FC<Props> = ({onRequestAccount, account, isModal,router, onLogout,inboxNum, isSessionAvailable}) => {
 
     const [present, dismiss] = useIonToast();
 
@@ -57,9 +51,7 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
     const [catItems, setCatItems] = useState([]);
     const dispatch = useAppDispatch();
 
-    useEffect(()=>{
-        console.log("rendersss")
-    },[])
+    // const history = useHistory();
 
     const requestAccount = () => {
         if (utils.useInjectAccount()) {
@@ -130,9 +122,14 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, router, onL
     }
     return <div style={{position: "relative", height: "100%"}}>
         {
-            window.location.pathname != "/" && <IonItem lines="none" style={{marginTop: 14}}  onClick={() => {
+            (window.location.pathname != "/" || isModal) && <IonItem lines="none" style={{marginTop: 14}}  onClick={() => {
                 if (window.location.pathname != "/") {
                     window.location.href = "/"
+                }else if(isModal){
+                    dispatch(saveDataState({
+                        tag: 'closeTribeDetailModal',
+                        data: Date.now()
+                    }))
                 }
             }}>
                 {/*<IonIcon slot="start" src={homeOutline} size="large"/>*/}

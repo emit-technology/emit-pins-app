@@ -1,11 +1,10 @@
-import {Redirect, Route, Switch, BrowserRouter as Router} from 'react-router-dom';
+import {Route, Switch, BrowserRouter as Router} from 'react-router-dom';
 import {
     createGesture,
     Gesture,
-    IonApp, IonContent, IonHeader, IonIcon, IonMenu, IonTitle, IonToolbar,
-    setupIonicReact, useIonRouter
+    IonApp,
+    setupIonicReact
 } from '@ionic/react';
-// import {IonReactHashRouter as Router} from '@ionic/react-router';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -26,7 +25,7 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 import './App.scss';
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useLayoutEffect, useRef} from "react";
 import config from "./common/config";
 import {Provider} from "react-redux";
 import store from "./common/state/app/store";
@@ -36,6 +35,8 @@ import {App as AppPin} from '@capacitor/app';
 import {utils} from "./common";
 import {Toast} from "@capacitor/toast";
 import {CatPage} from "./pages/Cat";
+import {useAppDispatch} from "./common/state/app/hooks";
+import {saveDataState} from "./common/state/slice/dataSlice";
 
 setupIonicReact({
     mode: "ios",
@@ -57,63 +58,41 @@ const App: React.FC = () => {
     // const mobileWidth = document.documentElement.clientWidth <=768;
     // const Tip = ()=>  mobileWidth?<img src="./assets/img/snaptip2.png" style={{height:'100%', width:'100%'}}/>:<img src="./assets/img/snaptip.png"  style={{height:'100%', width:'100%'}}/>
 
+    const dispatch = useAppDispatch();
 
-    if (init_count++ == 0 && (utils.isIos() || utils.isAndroid())) {
-        AppPin.addListener("backButton", () => {
-            if (window.location.pathname == "/") {
-                if (Date.now() - lastTime > 2000) {
-                    lastTime = Date.now();
-                    Toast.show({text: "Please click BACK again to exit!", position: "center", duration: "short"})
+    useLayoutEffect(()=>{
+        if (init_count++ == 0 && (utils.isIos() || utils.isAndroid())) {
+            AppPin.addListener("backButton", () => {
+                if (window.location.pathname == "/") {
+                    if (Date.now() - lastTime > 2000) {
+                        lastTime = Date.now();
+                        Toast.show({text: "Please click BACK again to exit!", position: "center", duration: "short"})
+                    } else {
+                        AppPin.exitApp();
+                    }
                 } else {
-                    AppPin.exitApp();
+                    dispatch(saveDataState({
+                        tag: 'closeTribeDetailModal',
+                        data: Date.now()
+                    }))
+                    // window.close();
                 }
-            } else {
-                window.location.href = "/"
-            }
-        })
-    }
+            })
+        }
+
+    },[])
 
     const baseURL = process.env.NODE_ENV === 'production' ? config.baseUrl : process.env.REACT_APP_DEV_API_URL;
     const routerRef = useRef<HTMLIonRouterOutletElement | null>(null);
 
 
-    useEffect(() => {
-        if (utils.isApp()) {
-            const gesture: Gesture = createGesture({
-                el: document.querySelector('.rectangle-content'),
-                threshold: 100,
-                direction: "x",
-                disableScroll: true,
-                gestureName: 'my-gesture',
-                onEnd: ev => {
-                    if(window.location.pathname == "/"){
-                        return;
-                    }
-                    if (ev.deltaX >= Math.ceil(document.documentElement.clientWidth * 0.4)) {
-                        window.location.href = "./"
-                    } else {
-                        //@ts-ignore
-                        document.querySelector('.rectangle-content').style.transform = `translateX(0px)`
-                    }
-                },
-                onMove: ev => {
-                    if(window.location.pathname == "/"){
-                        return;
-                    }
-                    //@ts-ignore
-                    document.querySelector('.rectangle-content').style.transform = `translateX(${Math.abs(ev.deltaX)}px)`
-                }
-            });
-            gesture.enable();
-        }
-    }, [])
+
 
     return <>
         {
             <div className={`page`} id="page">
                 <div className="page-inner">
-                    <IonApp className="rectangle-content">
-                        <Provider store={store}>
+                    <IonApp>
                             <Router basename={baseURL}>
                                 <Switch>
                                     {/*<Route exact path="/:tribeId" component={(props: any) => {*/}
@@ -153,7 +132,6 @@ const App: React.FC = () => {
                                     }}/>
                                 </Switch>
                             </Router>
-                        </Provider>
                     </IonApp>
                 </div>
             </div>

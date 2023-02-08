@@ -37,7 +37,9 @@ export const AssetsModal:React.FC<Props> = ({isOpen,router ,address, onClose}) =
     const [showLoading, setShowLoading] = useState(false);
     useEffect(()=>{
        try{
-           init().catch(e=>{console.error(e)})
+           if(isOpen){
+               init().catch(e=>{console.error(e)})
+           }
        }catch (e){
            console.error(e)
        }

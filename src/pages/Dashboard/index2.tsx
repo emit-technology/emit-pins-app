@@ -1,46 +1,28 @@
 import * as React from 'react';
 import {
-    IonActionSheet,
-    IonButton,
-    IonButtons,
-    IonCol,
-    IonFooter,
+    IonModal,
     IonContent,
     IonHeader,
-    IonIcon,
     IonMenu,
     IonMenuToggle,
     IonSplitPane,
     IonPage,
-    IonRow,
     IonText,
     IonTitle,
     IonToast,
-    IonToolbar, useIonAlert, useIonToast,createGesture, Gesture
+    IonToolbar, useIonAlert, useIonToast, IonLoading,
 } from "@ionic/react";
 import {GroupMsg, Message, PinnedSticky, TribeInfo, TribeRole, WsStatus} from "../../types";
 import {emitBoxSdk, tribeService} from "../../service";
 import {AccountModel, ChainType, SettleResp} from "@emit-technology/emit-lib";
 import {
-    arrowBackOutline,
     close,
-    addOutline,
-    linkOutline,
-    colorPaletteOutline,
-    ellipsisVertical, heartCircleOutline,
-    listOutline,
-    pinOutline,
-    share
 } from "ionicons/icons";
-
-// import addOutline from '../../img/createBlue.png'
-// import linkOutline from '../../img/linkBlue.png'
 
 import './index.scss';
 import selfStorage from "../../common/storage";
 import {RoleListModal} from "../../components/Role";
 import {TribeEditModal} from "../../components/Tribe";
-// import {Share} from '@capacitor/share';
 import config from "../../common/config";
 import {BottomBar} from "../../components/ChatRoom/Room/BottomBar";
 import {PinnedMsgModal} from "../../components/ChatRoom/Room/Message/PinnedMsgModal";
@@ -57,20 +39,19 @@ import walletWorker from "../../worker/walletWorker";
 import {utils} from "../../common";
 import {CreateModal} from "../../components/Account/modal";
 import {RolesAvatarModal} from "../../components/Role/RolesAvatarModal";
-import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import copy from "copy-to-clipboard";
-import {useAppDispatch, useAppSelector} from "../../common/state/app/hooks";
+import {useAppSelector} from "../../common/state/app/hooks";
 
 interface Props {
     tribeId: string
     router: any;
     msgId?: string
+    isDetailModal?: boolean
+    isOpenDetail?: boolean
 }
 
-let checkInterVal = null;
-let count = 0;
-
-export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
+export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId,isDetailModal,isOpenDetail}) => {
 
     const [owner, setOwner] = useState("");
     const [showActionSheet, setShowActionSheet] = useState(false);
@@ -98,7 +79,6 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
     const [forkGroupId, setForkGroupId] = useState("");
 
     const [alreadySelectRole, setAlreadySelectRole] = useState(false);
-    const [hideMenu, setHideMenu] = useState(false);
     const [account, setAccount] = useState(null);
     const [latestRole, setLatestRole] = useState(null);
     const [tribeInfo, setTribeInfo] = useState(null);
@@ -108,6 +88,9 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
     const [forkTribeInfo, setForkTribeInfo] = useState(null);
     // const [firstItemIndex, setFirstItemIndex] = useState(-1);
     const [loaded, setLoaded] = useState(false);
+
+    const [showLoading, setShowLoading] = useState(false);
+
     const [subscribed, setSubscribed] = useState(false);
 
     const [timestamp, setTimestamp] = useState(Date.now());
@@ -147,9 +130,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
     // }
 
     const initLayoutData = async () => {
-        const begin = Date.now();
         await tribeService.init();
-        console.log("initLayoutData = [%d] ", Date.now() - begin)
         tribeWorker.init(config.tribeId).then(()=>{
             setLoaded(true);
         }).catch(e=>console.error(e))
@@ -157,15 +138,31 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
         tribeService.userLimit(config.tribeId).catch(e=>console.error(e));
     }
 
-    useLayoutEffect(() => {
-        setAlreadySelectRole(!!selfStorage.getItem("alreadySelectRole"))
-        setShowRoleAvatar(!!selfStorage.getItem("alreadySelectRole"))
-        initLayoutData().then(() => {
-            initData().catch(e => console.error(e))
-        }).catch(e => {
-            console.error(e);
-        })
-    }, [])
+    useEffect(() => {
+        if(tribeId){
+            console.log("----------> init layout data")
+            setShowLoading(true)
+
+            setLoaded(false);
+            setRoles([]);
+            setGroupMsgs([])
+            setGroupPinnedMsg([])
+            setTribeInfo(null);
+            setPinnedSticky(null);
+
+            setAlreadySelectRole(!!selfStorage.getItem("alreadySelectRole"))
+            setShowRoleAvatar(!!selfStorage.getItem("alreadySelectRole"))
+            setTimeout(()=>{
+                initLayoutData().then(() => {
+                    initData().then(()=>{
+                        setShowLoading(false)
+                    }).catch(e => console.error(e))
+                }).catch(e => {
+                    console.error(e);
+                })
+            }, 1000)
+        }
+    }, [tribeId])
 
     useEffect(() => {
         document.addEventListener('visibilitychange', () => {
@@ -211,27 +208,6 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
         return () => clearInterval(interval);
     }, [isConnecting, timestamp, userLimit]);
 
-    // const checkWsAlive = (setLimit,setConnecting) => {
-    //     tribeWorker.checkAlive(config.tribeId).then((rest:any)=>{
-    //         console.log("check status==> ", rest, isConnecting, rest !== isConnecting)
-    //         if (rest !== isConnecting) {
-    //             setConnecting(rest)
-    //         }
-    //
-    //         if (rest == WsStatus.active && (!userLimit || (Math.floor(Date.now() / 1000)) % 9 == 0)) {
-    //             tribeService.userLimit(config.tribeId).then(rest=>{
-    //                 config.userLimit = rest;
-    //                 console.log(!userLimit || userLimit.supportLeft != rest.supportLeft || userLimit.msgLeft != rest.msgLeft)
-    //                 if (!userLimit || userLimit.supportLeft != rest.supportLeft || userLimit.msgLeft != rest.msgLeft) {
-    //                     setLimit(rest)
-    //                 }
-    //             })
-    //
-    //         }
-    //         setTimeout(()=>checkWsAlive(setLimit, setConnecting), 2000)
-    //     })
-    // }
-
     const initOwnerData = async () => {
         {
             const rest = await tribeService.tribeUserInfo();
@@ -242,16 +218,6 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                 setSubscribed(rest.subscribed)
             }
         }
-    }
-
-    const showShareModal = async () => {
-        const rest = await tribeWorker.getPinnedMessageArray(config.tribeId, 1, 20)
-        const latestMgs: Array<Message> = [];
-        for (let ps of rest.data) {
-            latestMgs.push(...ps.records)
-        }
-        setLatestMgs(latestMgs)
-        setShowShare(true);
     }
 
     const initRole = async ()=>{
@@ -366,52 +332,100 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
 
 
     const menuButtons = useMemo(() => {
-        const buttons = [
+        const buttons:any = [
             {
-                text: 'Verse', icon: addOutline, handler: () => {
+                text: 'Create Verse', icon: './assets/img/icon/createBlue.png', handler: () => {
                     console.log('Share clicked');
                     setShowCreateTribe(true)
                 }
             },
             {
-                text: 'Link', icon: linkOutline, handler: () => {
+                text: 'Copy Link', icon: './assets/img/icon/linkBlue.png', handler: () => {
                     console.log('Link clicked');
                     copy(`${config.baseUrl}/${config.tribeId}`);
                     presentToast({color:"primary", message: "Copied to clipboard!", duration: 2000}).catch(e=>console.error(e))
                 }
-            },
-            {
-                text: 'Cancel', icon: close, role: 'cancel', handler: () => {
-                    console.log('Cancel clicked');
-                }
-            }]
+            }
+        ]
         if (!!tribeInfo && owner == tribeInfo.keeper) {
             buttons.unshift({
-                    text: 'Pin', icon: pinOutline, handler: () => {
+                    text: 'Pin', icon: './assets/img/icon/pinBlue.png', handler: () => {
                         setShowPin(true)
                     }
                 },
                 {
-                    text: 'Dye', icon: colorPaletteOutline, handler: () => {
-                        setShowTribeEdit(true)
-                        console.log('Favorite clicked');
-                    }
-                },
-                {
-                    text: 'Ban Chat', icon: "./assets/img/icon/banChatBlue.png", handler: () => {
-                        setShowTribeEdit(true)
-                        console.log('Favorite clicked');
-                    }
-                },
-                {
-                    text: 'Resume Chat', icon: "./assets/img/icon/resumeChat.png", handler: () => {
+                    text: 'Dye', icon: './assets/img/icon/dyeBlue.png', handler: () => {
                         setShowTribeEdit(true)
                         console.log('Favorite clicked');
                     }
                 },
             )
+            if(tribeInfo && !!((tribeInfo as TribeInfo).silence)){
+                buttons.push({
+                    text: 'Resume', icon: "./assets/img/icon/resumeChat.png", handler: () => {
+                        tribeService.unForbidTribe(config.tribeId).catch(e=>console.error(e));
+                    }
+                })
+            }else{
+                buttons.push({
+                    text: 'Ban', icon: "./assets/img/icon/banChatBlue.png", handler: () => {
+                        tribeService.forbidTribe(config.tribeId).catch(e=>console.error(e));
+                    }
+                })
+            }
+            buttons.push(
+                {
+                    text: 'Delete', icon: "./assets/img/icon/deleteRed.png", role: 'destructive', handler: () => {
+                        presentAlert({
+                            header: `Delete [${tribeInfo && (tribeInfo as TribeInfo).title}]`,
+                            subHeader: "You are deleting the verse, are you sure?",
+                            inputs:[
+                                {name: "tribeName", placeholder: `Please enter the title of verse.`}
+                            ],
+                            buttons: [
+                                {
+                                    text: 'Cancel',
+                                    role: 'cancel',
+                                    handler: () => {
+
+                                    },
+                                },
+                                {
+                                    text: 'OK',
+                                    role: 'confirm',
+                                    handler: (data) => {
+                                        if(data["tribeName"] == tribeInfo.title){
+                                            tribeService.dropTribe(config.tribeId).then(() => {
+                                                presentToast({
+                                                    color: "primary",
+                                                    message: "Successfully.",
+                                                    duration: 2000,
+                                                    position: "top"
+                                                })
+                                                setTimeout(()=>{
+                                                    window.location.href = "/"
+                                                },2000)
+                                            }).catch(e => {
+                                                const err = typeof e == "string" ? e : e.message;
+                                                presentToast({message: err, position: "top", duration: 2000, color: "danger"})
+                                            })
+                                        }else{
+                                            presentToast({ color: "danger", message: "The title you entered does not match!", duration: 2000, position: "top" })
+                                        }
+                                    },
+                                },
+                            ]
+                        })
+                    }
+                }
+            )
 
         }
+        buttons.push({
+            text: 'Cancel', icon: close, role: 'cancel', handler: () => {
+                console.log('Cancel clicked');
+            }
+        })
         return buttons
     }, [subscribed, owner, tribeInfo])
 
@@ -552,40 +566,44 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
             })
         }
     }
+
+
     return <>
         {/*<IonRow style={{height: '100%'}}>*/}
         {/*    <IonCol sizeMd="8" sizeSm="12" sizeXs="12" style={{height: '100%'}}>*/}
 
 
-        <IonSplitPane when="lg" contentId="main-content">
+        <IonSplitPane when="md" contentId="main-content">
             <div className="ion-page" id="main-content">
 
-                <IonMenu contentId="main-content-left" side="start" swipeGesture={false} onIonDidOpen={()=>{
-                    fetchInboxNum()
-                }}>
-                    <IonHeader>
-                        <IonToolbar className="msg-toolbar">
-                            <IonMenuToggle>
-                                <div style={{paddingLeft: 12}}>
-                                    <img src="./assets/img/icon/backOutline.png" height={24}/>
-                                </div>
-                            </IonMenuToggle>
-                            <IonTitle style={{opacity: 1}}>
-                                <img height={30} src="./assets/img/pins-logo.png"/>
-                            </IonTitle>
-                        </IonToolbar>
-                    </IonHeader>
-                    <IonContent className="ion-content-chat">
-                        <SideBar inboxNum={inboxNum} router={router} onRequestAccount={() => {
-                            initData().catch(e => console.error(e))
-                        }} account={account} onLogout={() => {
-                            initData().catch(e => console.error(e))
-                        }} isSessionAvailable={isSessionAvailable}/>
-                    </IonContent>
-                </IonMenu>
+                {
+                    !isDetailModal && <IonMenu contentId="main-content-left" side="start" swipeGesture={false} onIonDidOpen={()=>{
+                        fetchInboxNum()
+                    }}>
+                        <IonHeader>
+                            <IonToolbar className="msg-toolbar">
+                                <IonMenuToggle>
+                                    <div style={{paddingLeft: 12}}>
+                                        <img src="./assets/img/icon/backOutline.png" height={24}/>
+                                    </div>
+                                </IonMenuToggle>
+                                <IonTitle style={{opacity: 1}}>
+                                    <img height={30} src="./assets/img/pins-logo.png"/>
+                                </IonTitle>
+                            </IonToolbar>
+                        </IonHeader>
+                        <IonContent className="ion-content-chat">
+                            <SideBar inboxNum={inboxNum} router={router} onRequestAccount={() => {
+                                initData().catch(e => console.error(e))
+                            }} account={account} onLogout={() => {
+                                initData().catch(e => console.error(e))
+                            }} isSessionAvailable={isSessionAvailable}/>
+                        </IonContent>
+                    </IonMenu>
+                }
 
                 <IonPage>
-                    <TribeHeader onReladData={onReload}
+                    <TribeHeader isDetailModal={isDetailModal} onReladData={onReload}
                                  tribeInfo={tribeInfo} roles={roles} wsStatus={isConnecting}
                                  stickyMsg={pinnedSticky} showPin={showPin}
                                  setShowActionSheet={setShowActionSheet}
@@ -630,17 +648,32 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
                                 shareMsgId={msgId}
                                 subscribed={subscribed}
                                 onSubscribe={onSubscribe}
+                                isOpenTribeDetail={isOpenDetail}
                             />
                         </div>
 
-                        <IonActionSheet
-                            isOpen={showActionSheet}
-                            onDidDismiss={() => setShowActionSheet(false)}
-                            cssClass='my-custom-class'
-                            buttons={menuButtons}
-                        >
+                        <IonModal
+                            className="action-sheet-modal"
+                            canDismiss
+                            isOpen={showActionSheet} initialBreakpoint={tribeInfo && owner == tribeInfo.keeper ?0.6:0.26} breakpoints={[0,0.26, 0.6,0.75]}
+                                  onDidDismiss={()=>setShowActionSheet(false)}>
+                            <div className="action-sheet-box">
+                                <div className="action-sheet-content">
+                                    {
+                                        menuButtons && menuButtons.map((v,i)=>{
+                                            return <div key={i} className={`action-sheet-item ${menuButtons.length - 1 == i && "action-cancel-btn"}`} onClick={()=>{
+                                                setShowActionSheet(false)
+                                                v.handler()
+                                            }}>
+                                                <div style={menuButtons.length - 3 == i?{left:14}:{}}><img src={v.icon} height={24}/></div>
+                                                <div style={v.role == "destructive"?{color: "#f82f24"}:{}}>{v.text}</div>
+                                            </div>
+                                        })
+                                    }
+                                </div>
+                            </div>
+                        </IonModal>
 
-                        </IonActionSheet>
                         {
                             tribeInfo && <TribeEditModal isOpen={showTribeEdit}
                                                          onClose={() => setShowTribeEdit(false)}
@@ -830,5 +863,13 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId}) => {
               })
            }
        </div>
+
+        <IonLoading
+            cssClass='my-custom-class'
+            isOpen={showLoading}
+            onDidDismiss={() => setShowLoading(false)}
+            message={'Loading verse...'}
+            duration={60000}
+        />
     </>
 }

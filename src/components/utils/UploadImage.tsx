@@ -2,9 +2,10 @@ import * as React from "react";
 import {useEffect, useState} from "react";
 import addCircleIcon from "../../img/add_circle.png";
 
-import {IonLoading,IonAvatar} from "@ionic/react";
+import {IonLoading, IonAvatar, IonIcon} from "@ionic/react";
 import ImageUploading from "react-images-uploading";
 import getMainColor from "../../common/getMainColor";
+import {closeCircleOutline, closeCircleSharp} from "ionicons/icons";
 
 interface ImgInfo {
     imgUrl: string,
@@ -32,8 +33,9 @@ const UploadImage = ({imgUrl, setImgUrl,width = 120,height,setColor,defaultIcon,
 
     const onChange = async (imageList, addUpdateIndex) => {
         // data for submit
-        // console.log(imageList, addUpdateIndex);
         if(!imageList || imageList.length == 0){
+            setImages([])
+            setImgUrl({data_url:"", file: null},0,0,null)
             return
         }
         setImages(imageList);
@@ -41,7 +43,6 @@ const UploadImage = ({imgUrl, setImgUrl,width = 120,height,setColor,defaultIcon,
         const themeColors = await getMainColor(image["data_url"]);
         setImgUrl(image, themeColors.width, themeColors.height, image["file"])
 
-        console.log("onChange==> ", themeColors, imageList);
         if(setColor){
             const palette = themeColors;
             if(palette && palette.primary && palette.palette){
@@ -79,7 +80,7 @@ const UploadImage = ({imgUrl, setImgUrl,width = 120,height,setColor,defaultIcon,
                   dragProps,
               }) => (
                 // write your building UI
-                <div className="upload__image-wrapper">
+                <div className="upload__image-wrapper" style={{position: "relative"}}>
                     <img className='cursor' style={{width:width,maxHeight: maxHeight ,height: height?height:width,objectFit:"cover",borderRadius: borderRadio}}
                          src={imageList.length>0?imageList[0]['data_url']:(imgUrl?imgUrl:defaultIcon?defaultIcon:addCircleIcon) } onClick={()=>{
                         if(imageList.length == 0){
@@ -90,6 +91,13 @@ const UploadImage = ({imgUrl, setImgUrl,width = 120,height,setColor,defaultIcon,
                     }}
                          {...dragProps}
                     />
+                    {
+                        imageList.length >0 && <div style={{position:"absolute", right: 12, top: 0}} onClick={()=>{
+                            onImageRemove(0)
+                        }}>
+                            <IonIcon src={closeCircleSharp} size="large" color="danger"/>
+                        </div>
+                    }
                     {/*<button onClick={onImageRemoveAll}>Remove all images</button>*/}
                     {/*{imageList.map((image, index) => (*/}
                     {/*    <div key={index} className="image-item">*/}

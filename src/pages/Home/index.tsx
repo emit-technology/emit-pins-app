@@ -1,16 +1,21 @@
 import * as React from 'react';
 import {
-    IonHeader, IonModal,IonButton, IonPage, IonSearchbar, IonContent, IonToolbar, IonSegment, IonLabel, IonSegmentButton, IonItem,
-    IonButtons, IonIcon,IonRow,IonCol,IonText, IonToast, IonTitle, IonLoading, IonMenu, IonMenuToggle
+    IonHeader,
+    IonModal,
+    IonButton,
+    IonPage,
+    IonSearchbar,
+    IonContent,
+    IonToolbar,
+    IonSegment,
+    IonSegmentButton,
+    IonButtons,
+    IonText,
+    IonToast,
+    IonTitle,
+    IonMenu,
+    IonMenuToggle
 } from "@ionic/react";
-import {
-    addOutline,
-    arrowBackOutline,
-    closeOutline,
-    listOutline,
-    personCircleOutline,
-    searchOutline
-} from "ionicons/icons";
 import {tribeService} from "../../service/tribe";
 import {TribeInfo} from "../../types";
 import './index.scss';
@@ -21,6 +26,8 @@ import {TribeLayout} from "../../components/Tribe/TribeLayout";
 import selfStorage from "../../common/storage";
 import {TribeEditModal} from "../../components/Tribe";
 import {utils} from "../../common";
+import {TribeDetail} from "../../components/Tribe/TribeDetail";
+import config from "../../common/config";
 
 interface State {
     segment: string
@@ -32,13 +39,15 @@ interface State {
     showLoading: boolean
     showToast: boolean;
     toastMsg?: string
-    tribeTimeMap: Map<string,number>;
+    tribeTimeMap: Map<string, number>;
     showCreateModal: boolean
     tribeUserInfo: any;
-    address:string
+    address: string
     showSearch: boolean
     searchText: string;
-    inboxNum:number
+    inboxNum: number
+    showTribeDetail: boolean;
+    selectTribeId?: string
 }
 
 interface Props {
@@ -56,14 +65,15 @@ export class HomePage extends React.Component<Props, State> {
         showLoading: false,
         showToast: false,
         toastMsg: "",
-        tribeTimeMap: new Map<string,number>() ,
+        tribeTimeMap: new Map<string, number>(),
         showCreateModal: false,
-        tribeUserInfo:null,
+        tribeUserInfo: null,
         address: "",
         showSearch: false,
         searchText: "",
-        inboxNum:0
-
+        inboxNum: 0,
+        showTribeDetail: false,
+        selectTribeId: ""
     }
 
     componentDidMount() {
@@ -79,12 +89,12 @@ export class HomePage extends React.Component<Props, State> {
 
         if (document.hidden !== undefined) {
             document.addEventListener('visibilitychange', () => {
-                try{
+                try {
                     if (!document.hidden) {
                         console.log("init... ")
-                        this.init().catch(e=>console.error(e))
+                        this.init().catch(e => console.error(e))
                     }
-                }catch (e){
+                } catch (e) {
                     console.error(JSON.stringify(e))
                 }
             })
@@ -92,7 +102,7 @@ export class HomePage extends React.Component<Props, State> {
     }
 
     init = async (seqmt?: string) => {
-        try{
+        try {
             if (!seqmt) {
                 const {segment} = this.state;
                 seqmt = segment;
@@ -102,10 +112,10 @@ export class HomePage extends React.Component<Props, State> {
                 const rest = selfStorage.getItem("involvedTribes"); //await tribeService.involvedTribes();
                 if (rest) {
                     data = [...rest]
-                    tribeService.involvedTribes().then(data=>{
+                    tribeService.involvedTribes().then(data => {
                         this.setState({data: data})
                     })
-                }else{
+                } else {
                     const res = await tribeService.involvedTribes();
                     data = [...res]
                 }
@@ -113,10 +123,10 @@ export class HomePage extends React.Component<Props, State> {
                 const rest = selfStorage.getItem("myTribes"); //await tribeService.myTribes();
                 if (rest) {
                     data = [...rest]
-                    tribeService.myTribes().then(data=>{
+                    tribeService.myTribes().then(data => {
                         this.setState({data: data})
                     })
-                }else{
+                } else {
                     const res = await tribeService.myTribes();
                     data = [...res]
                 }
@@ -131,22 +141,28 @@ export class HomePage extends React.Component<Props, State> {
 
             await this.fetchInboxNum();
             await this.initTimeMap(data);
-            this.setState({data: data,address: account && account.addresses[ChainType.EMIT] ,dataOrigin: data, account: account, isSessionAvailable: f})
-        }catch (e){
-            setTimeout(()=>{
+            this.setState({
+                data: data,
+                address: account && account.addresses[ChainType.EMIT],
+                dataOrigin: data,
+                account: account,
+                isSessionAvailable: f
+            })
+        } catch (e) {
+            setTimeout(() => {
                 this.init(seqmt)
             }, 500)
         }
 
     }
 
-    initTimeMap = (data:Array<TribeInfo>) =>{
-        const timeMap:Map<string,number> = new Map<string,number>();
-        for(let d of data){
-            if(d.latestMsg){
+    initTimeMap = (data: Array<TribeInfo>) => {
+        const timeMap: Map<string, number> = new Map<string, number>();
+        for (let d of data) {
+            if (d.latestMsg) {
                 const time = selfStorage.getItem(`latest_view_${d.tribeId}`)
-                if(time){
-                    timeMap.set(d.tribeId,time)
+                if (time) {
+                    timeMap.set(d.tribeId, time)
                 }
             }
         }
@@ -164,23 +180,23 @@ export class HomePage extends React.Component<Props, State> {
     searchText = (value: string) => {
         const {dataOrigin, segment} = this.state;
         if (!value) {
-            this.setState({data: dataOrigin,searchText:value})
+            this.setState({data: dataOrigin, searchText: value})
         } else {
             const data = dataOrigin.filter(v => (v.title.toLowerCase().indexOf(value.toLowerCase()) > -1 || v.tribeId.toLowerCase().indexOf(value.toLowerCase()) > -1))
-            this.setState({data: data,searchText:value})
-            if(!data || data.length == 0){
-                try{
+            this.setState({data: data, searchText: value})
+            if (!data || data.length == 0) {
+                try {
                     const tribeId = utils.getTribeIdFromUrl(value)
-                    if(tribeId && tribeId.length>=11){
-                        tribeService.tribeInfo(tribeId).then(tribeInfo=>{
+                    if (tribeId && tribeId.length >= 11) {
+                        tribeService.tribeInfo(tribeId).then(tribeInfo => {
                             tribeInfo.latestMsg = null;
                             tribeInfo.roles = [];
                             tribeInfo.subscribed = false;
 
-                            this.setState({data:[tribeInfo],searchText:value})
-                        }).catch(e=>console.log(e))
+                            this.setState({data: [tribeInfo], searchText: value})
+                        }).catch(e => console.log(e))
                     }
-                }catch (e){
+                } catch (e) {
                     console.error(e)
                 }
 
@@ -188,15 +204,15 @@ export class HomePage extends React.Component<Props, State> {
         }
     }
 
-    setShowCreateModal = (f:boolean) =>{
+    setShowCreateModal = (f: boolean) => {
         this.setState({showCreateModal: f})
     }
 
-    fetchInboxNum = async ()=>{
+    fetchInboxNum = async () => {
         const account = await emitBoxSdk.getAccount();
-        if(account && account.addresses){
-            emitBoxSdk.emitBox.emitDataNode.getUnSettles(account.addresses[ChainType.EMIT]).then((inbox:Array<SettleResp>)=>{
-                if(inbox){
+        if (account && account.addresses) {
+            emitBoxSdk.emitBox.emitDataNode.getUnSettles(account.addresses[ChainType.EMIT]).then((inbox: Array<SettleResp>) => {
+                if (inbox) {
                     this.setState({
                         inboxNum: inbox.length
                     })
@@ -206,9 +222,14 @@ export class HomePage extends React.Component<Props, State> {
     }
 
     render() {
-        const {segment, account,tribeUserInfo,showSearch,searchText,inboxNum, address, isSessionAvailable, showCreateModal ,tribeTimeMap, data, layout, showLoading, showToast, toastMsg} = this.state;
+        const {segment, account, tribeUserInfo, showSearch, searchText,
+            inboxNum, address, isSessionAvailable, showCreateModal,
+            tribeTimeMap, data, layout, showLoading, showToast, toastMsg,
+            selectTribeId, showTribeDetail
+        } = this.state;
+
         return <>
-            <IonMenu contentId="main-home" onIonDidOpen={()=>{
+            <IonMenu contentId="main-home" swipeGesture={false}      onIonDidOpen={() => {
                 this.fetchInboxNum()
             }}>
                 <IonHeader>
@@ -227,7 +248,7 @@ export class HomePage extends React.Component<Props, State> {
                     {/*<IonMenuToggle>*/}
                     {/*    <IonButton>Click to close the menu</IonButton>*/}
                     {/*</IonMenuToggle>*/}
-                    <SideBar inboxNum={inboxNum}  router={this.props.router} onRequestAccount={() => {
+                    <SideBar inboxNum={inboxNum} router={this.props.router} onRequestAccount={() => {
                         this.init().catch(e => {
                             // const err = typeof e == 'string' ? e : e.message;
                             // this.setShowToast(true, err)
@@ -245,7 +266,7 @@ export class HomePage extends React.Component<Props, State> {
                 </IonContent>
             </IonMenu>
             <IonPage id="main-home">
-                <IonHeader mode="ios" color="primary">
+                <IonHeader style={{background: "#fff"}} >
                     <IonToolbar className="msg-toolbar">
                         <div slot="start" id="main-home" className="msg-head-avatar">
                             <IonMenuToggle>
@@ -257,7 +278,7 @@ export class HomePage extends React.Component<Props, State> {
                         <IonTitle>
                             <div className="home-head-title">
                                 <div className="home-head-ctn">
-                                    <div style={{height: 26,borderRadius: 6}} slot={"start"}>
+                                    <div style={{height: 26, borderRadius: 6}} slot={"start"}>
                                         <img src="./assets/img/pins-logo.png" height='24px'/>
                                     </div>
                                     {/*<div style={{fontSize: '20px',fontFamily:"SFBold",paddingLeft: 2}}>*/}
@@ -267,13 +288,13 @@ export class HomePage extends React.Component<Props, State> {
                             </div>
                         </IonTitle>
                         <IonButtons slot="end">
-                            <IonButton onClick={()=>{
+                            <IonButton onClick={() => {
                                 this.setState({showSearch: true})
                             }}>
                                 <img src="./assets/img/icon/searchOutline.png" style={{height: 24}}/>
                             </IonButton>
 
-                            <IonButton onClick={()=>{
+                            <IonButton onClick={() => {
                                 this.setState({showCreateModal: true})
                             }}>
                                 <img src="./assets/img/icon/addOutline.png" style={{height: 24}}/>
@@ -302,20 +323,20 @@ export class HomePage extends React.Component<Props, State> {
                         });
                     }}>
                         <IonSegmentButton color="dark" className="segment-button" value="forYou">
-                            <span className={segment == "forYou"?"seq-title":"seq-title-2"}><IonText color="dark">For You</IonText></span>
+                            <span className={segment == "forYou" ? "seq-title" : "seq-title-2"}><IonText color="dark">For You</IonText></span>
                         </IonSegmentButton>
                         <IonSegmentButton color="dark" className="segment-button" value="myVerse">
-                            <span className={segment == "myVerse"?"seq-title":"seq-title-2"}><IonText color="dark">My Verse</IonText></span>
+                            <span className={segment == "myVerse" ? "seq-title" : "seq-title-2"}><IonText color="dark">My Verse</IonText></span>
                         </IonSegmentButton>
                         {/*<IonSegmentButton color="dark" className="segment-button" value="recentView">Recent View</IonSegmentButton>*/}
                     </IonSegment>
 
-                    <IonModal isOpen={showSearch} className="searchbar-modal" onDidDismiss={(e)=>{
+                    <IonModal isOpen={showSearch} className="searchbar-modal" onDidDismiss={(e) => {
                         this.setState({showSearch: false})
                     }}>
-                        <IonSearchbar value={searchText}  onIonBlur={()=>{
+                        <IonSearchbar value={searchText} onIonBlur={() => {
                             this.setState({showSearch: false})
-                        }}  showClearButton="focus" id="search-input" placeholder="Search"
+                        }} showClearButton="focus" id="search-input" placeholder="Search"
                                       onIonChange={(e) => {
                                           this.searchText(e.detail.value)
                                       }}
@@ -341,12 +362,20 @@ export class HomePage extends React.Component<Props, State> {
                     {/*        />*/}
                     {/*    </IonCol>*/}
                     {/*</IonRow>*/}
-                    <div style={{height: "calc(100% - 48px)",padding: "0 12px 20px",overflow: "scroll"}}>
+                    <div style={{height: "calc(100% - 48px)", padding: "0 12px 20px", overflow: "scroll"}}>
                         {/*{*/}
                         {/*    layout && layout.length>0&&<TribeRecommend data={data} layout={layout}/>*/}
                         {/*}*/}
-                        <TribeLayout onReload={()=>{
-                            this.init().catch(e=>console.error(e))
+                        <TribeLayout onSelectTribe={(tribeId) => {
+                            if(!!tribeId){
+                                config.tribeId = tribeId;
+                                this.setState({showTribeDetail:true, selectTribeId: tribeId})
+                            }else{
+                                this.setState({showTribeDetail:false})
+                                this.init().catch(e => console.error(e))
+                            }
+                        }} onReload={() => {
+                            this.init().catch(e => console.error(e))
                         }} address={address} tribeUserInfo={tribeUserInfo} data={data} tribeTimeMap={tribeTimeMap}/>
                     </div>
 
@@ -367,12 +396,17 @@ export class HomePage extends React.Component<Props, State> {
                         color="danger"
                     />
 
-                    <TribeEditModal isOpen={showCreateModal} onClose={()=>this.setShowCreateModal(false)} onOk={(tribeId)=>{
-                        this.setShowCreateModal(false);
-                        utils.goTo(tribeId)
-                    }} />
+                    <TribeEditModal isOpen={showCreateModal} onClose={() => this.setShowCreateModal(false)}
+                                    onOk={(tribeId) => {
+                                        this.setShowCreateModal(false);
+                                        utils.goTo(tribeId)
+                                    }}/>
 
                 </IonContent>
+
+                <TribeDetail tribeId={selectTribeId} isOpen={showTribeDetail}
+                             onClose={() => this.setState({showTribeDetail:false})}/>
+
             </IonPage>
 
         </>;

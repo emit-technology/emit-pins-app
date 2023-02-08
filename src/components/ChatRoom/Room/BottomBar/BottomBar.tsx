@@ -380,7 +380,7 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
                                                 <div className="input-shadow">
                                                     {
 
-                                                        <TextareaAutosize onChange={(e) => {
+                                                        tribeInfo && (!tribeInfo.silence || tribeInfo.keeper == owner) && <TextareaAutosize onChange={(e) => {
                                                             if (e.target.value && e.target.value.indexOf("/mind") == 0) {
                                                                 //@ts-ignore
                                                                 if (textRef.current) {
@@ -395,6 +395,12 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
                                                                           placeholder={tribeInfo && owner !== tribeInfo.keeper && userLimit ? `msg (${userLimit && userLimit.msgLeft}/${userLimit && userLimit.maxMsgCount}) , likes (${userLimit && userLimit.supportLeft}/${userLimit && userLimit.maxSupportCount}) ` : `Your messages`}
                                                                           className="msg-input"/>
 
+                                                    }
+                                                    {
+                                                        tribeInfo && !!tribeInfo.silence && tribeInfo.keeper !== owner && <div className="talk-silence">
+                                                            <img src="./assets/img/icon/banChat.png" height={22}/>
+                                                            <div>Banned from speaking</div>
+                                                        </div>
                                                     }
                                                     {
                                                         replayMsg && <ReplayText msg={replayMsg} onClose={() => {

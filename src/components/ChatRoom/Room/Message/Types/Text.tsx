@@ -152,7 +152,7 @@ export const Text: React.FC<Props> = ({
 
         return meta && <div className="og-card-box">
                 {
-                    (meta as Metadata).og.image && <div className="og-card-image"><img src={(meta as Metadata).og.image} style={{borderRadius: '12px 12px 0 0', verticalAlign: "middle"}}/></div>
+                    (meta as Metadata).og &&  (meta as Metadata).og.image && <div className="og-card-image"><img src={(meta as Metadata).og.image} style={{borderRadius: '12px 12px 0 0', verticalAlign: "middle"}}/></div>
                 }
                 <div style={msg.owner == owner && !msg.groupId ?{backgroundImage: "linear-gradient(var(--ion-color-secondary), var(--ion-color-secondary))"}:{}}>
                     {
@@ -162,7 +162,7 @@ export const Text: React.FC<Props> = ({
                         </div>
                     }
                     {
-                        (meta as Metadata).og.title && <div>
+                        (meta as Metadata).og && (meta as Metadata).og.title && <div>
                             <div className="og-card-title">{(meta as Metadata).og.title}</div>
                             <div className="og-card-desc og-card-text">{(meta as Metadata).og.description}</div>
                         </div>
@@ -294,7 +294,7 @@ export const Text: React.FC<Props> = ({
                     <div style={{width: '100%'}}>
                         {
                             !hideTime && <div>
-                                <div style={{fontSize: '11px', display: "flex", alignItems:"center"}}>
+                                <div style={{fontSize: '11px', display: "flex", alignItems:"center", padding: "0 0 4px 52px"}}>
                                     {
                                         keeper && msg.owner == keeper && !msg.groupId &&
                                     <div style={{transform: "translateY(-2px)"}}>
@@ -306,6 +306,9 @@ export const Text: React.FC<Props> = ({
                             </div>
                         }
                         <div className={`support-outer  ${hovered && 'support-outer-column'}`}>
+                            <div className="no-role-icon">
+                                <img height={24} src={`./assets/img/icon/${owner && msg.owner == owner ?"noroleBlue":"noroleOutline"}.png`}/>
+                            </div>
                             <div className={isOwner ? 'no-role-div-owner' : "no-role-div"} style={{
                                 position: "relative",
                                 width: !onSupport ? "100%" : "",
@@ -314,22 +317,24 @@ export const Text: React.FC<Props> = ({
                             }}>
                                 {
                                     msg.msgType == MessageType.Airdrop ? <Airdrop msg={msg} owner={owner} keeper={keeper}/> : <>
-                                        {
-                                            content.image && content.image.url &&
-                                            <div style={{borderRadius: 12, padding: '6px 6px 0px 6px'}}>
-                                                <ImageView url={content.image.url} width={content.image.width}
-                                                           height={content.image.height}/>
-                                            </div>
-                                        }
+
                                         {
                                             content.content && <div style={{padding: '5px'}}>
                                                 {replayItem}
                                                 { genMetadataEl() }
-                                                <div style={{padding: '0 0 0 0px'}}>
+                                                <div style={{padding: '0 4px 0 4px'}}>
                                                     <div className="text-pre">
                                                         {genContent()}
                                                     </div>
                                                 </div>
+                                            </div>
+                                        }
+
+                                        {
+                                            content.image && content.image.url &&
+                                            <div style={{borderRadius: 12, padding: '3px'}}>
+                                                <ImageView url={content.image.url} width={content.image.width}
+                                                           height={content.image.height}/>
                                             </div>
                                         }
                                     </>
