@@ -124,8 +124,13 @@ export const RoleEditModal: React.FC<Props> = ({isOpen, roleInfo, onOk, onClose}
                             (!roleInfo || roleInfo && !roleInfo.roleType) ?
                                 <UploadImage defaultIcon={add} imgUrl={utils.getDisPlayUrl(imgUrl)}
                                              setImgUrl={(data, width, height) => {
-                                                 setImgUrl({url: data.data_url, width: width, height: height})
-                                                 setFile(data.file)
+                                                 if(!data.data_url){
+                                                     setImgUrl(null)
+                                                     setFile(null)
+                                                 }else{
+                                                     setImgUrl({url: data.data_url, width: width, height: height})
+                                                     setFile(data.file)
+                                                 }
                                              }} height={200} width={200}/>
                                 :
                                 roleInfo && <ImageView url={roleInfo.avatar["url"]} width={200} height={200}/>

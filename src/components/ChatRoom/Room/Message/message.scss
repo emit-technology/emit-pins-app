@@ -1356,3 +1356,15 @@ ion-radio.radio-checked::part(mark) {
   display: flex;
   justify-content: center;
 }
+
+
+.hideScrollBar::-webkit-scrollbar {
+  width: 0
+}
+.content-ltr::-webkit-scrollbar { width: 0 }
+div {
+  -ms-overflow-style: none;
+  overflow: -moz-scrollbars-none;
+}
+
+div::-webkit-scrollbar { width: 0 }

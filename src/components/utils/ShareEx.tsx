@@ -376,6 +376,10 @@ export const ShareEx: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latestMs
                                 <TwitterShareButton
                                     url={url}
                                     title={desc}
+                                    via={"emit_protocol"}
+                                    windowWidth={1200}
+                                    windowHeight={800}
+                                    hashtags={["PINs","EMIT"]}
                                 >
                                     <TwitterIcon size={48} round/>
                                 </TwitterShareButton>

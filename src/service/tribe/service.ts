@@ -30,6 +30,9 @@ import walletWorker from "../../worker/walletWorker";
 import {Device} from "@capacitor/device";
 import {Photo} from "@capacitor/camera";
 import {CatInfo} from "../../types/cat";
+
+const version = require("../../../package.json").version;
+
 // import WebSocket from 'ws';
 
 const W3CWebSocket = require('websocket').w3cwebsocket;
@@ -337,7 +340,8 @@ class TribeService implements ITribe {
             const deviceInfo = await Device.getInfo();
             return deviceInfo.platform == "ios" || deviceInfo.platform == "android"
         } catch (e) {
-            console.error(e)
+            console.log(e)
+            return false
         }
         return false;
     }
@@ -949,13 +953,24 @@ class TribeService implements ITribe {
     }
 
     involvedTribes = async (): Promise<Array<TribeInfo>> => {
+        let osVersion = version, platform = "web" ;
+        try{
+            if(await this.isApp){
+                const appInfo = await App.getInfo();
+                osVersion = appInfo.version;
+                platform = (await Device.getInfo()).platform;
+            }
+        }catch (e){console.error(e)}
         const account = await emitBoxSdk.getAccount();
         const address = account && account.addresses && account.addresses[ChainType.EMIT]
-        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/involvedTribes', {userId: address});
+        const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post(`/tribe/involvedTribes`, {
+            userId: address,
+            osVersion: osVersion,
+            platform: platform
+        });
         if (rest && rest.code == 0) {
             const ret = rest.data;
             ret.sort(tribeService._sortTribeInfo);
-
             selfStorage.setItem("involvedTribes", ret)
             return Promise.resolve(ret)
         }

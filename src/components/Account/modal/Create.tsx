@@ -77,7 +77,7 @@ export const CreateModal: React.FC<Props> = ({isOpen, onOk, onClose}) => {
         }
 
         //@ts-ignore
-        const accountId = await walletWorker.importMnemonic(mnemonic.join(" "), "", passwordRef.current.value, "", "");
+        const accountId:any = await walletWorker.importMnemonic(mnemonic.join(" "), "", passwordRef.current.value, "", "");
         const account: AccountModel = await walletWorker.accountInfo(accountId)
         setShowBackupModal(false);
         setIsOpenCreate(false)
@@ -117,6 +117,7 @@ export const CreateModal: React.FC<Props> = ({isOpen, onOk, onClose}) => {
         }
         if(accountId){
             const account: AccountModel = await walletWorker.accountInfo(accountId)
+            await walletWorker.setBackedUp(accountId);
             setIsOpenImport(false);
             onOk(account)
         }

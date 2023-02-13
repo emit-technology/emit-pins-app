@@ -83,6 +83,15 @@ function _sort(a:PinnedSticky, b: PinnedSticky) {
     return new BigNumber(a.records[0].seq).comparedTo(new BigNumber(b.records[0].seq));
 }
 
+function getMaxSeq(comments:Array<PinnedSticky>){
+    if(comments.length == 0){
+        return "0"
+    }
+    const _data:Array<PinnedSticky> = JSON.parse(JSON.stringify(comments));
+    _data.sort(_sort);
+    return _data[_data.length-1].records ? _data[_data.length-1].records[0].seq:"0";
+}
+
 // Our reducer function that uses a switch statement to handle our actions
 export function messageReducer(state: MessageState = {
     total: 0,
@@ -114,37 +123,39 @@ export function messageReducer(state: MessageState = {
                     tribeService.init().catch(e => console.error(e));
                     //TODO
                     // onReload();
-                } else if (_comment.records && _comment.records.length > 0 && _comment.records[0].msgType == MessageType.UpdateTribe) {
+                } else if (_comment && _comment.records && _comment.records.length > 0 && _comment.records[0].msgType == MessageType.UpdateTribe) {
                 } else {
                     const _index = commentsCopy.findIndex(v => (v.records && v.records.length > 0 && _comment && _comment.records && _comment.records.length > 0 && v.records[0].id == _comment.records[0].id))
                     //new message
                     if (_index == -1) {
-                        if (_comment.records && _comment.records[0].msgStatus !== MessageStatus.removed) {
+                        if (_comment && _comment.records && _comment.records[0].msgStatus != MessageStatus.removed) {
                             if (commentsCopy.length > 0) {
-
-                                const latest: PinnedSticky = commentsCopy[commentsCopy.length - 1];
-                                const latestSeq = new BigNumber(_comment.records && _comment.records.length > 0 && _comment.records[0].seq);
-                                if (new BigNumber(latest.records && latest.records.length > 0 && latest.records[0].seq).comparedTo(
+                                const maxSeq: any = getMaxSeq(commentsCopy);
+                                const latestSeq = new BigNumber(_comment.records && _comment && _comment.records.length > 0 && _comment.records[0].seq);
+                                if (new BigNumber(maxSeq).comparedTo(
                                     latestSeq
                                 ) == -1) {
+                                    // console.log("nextComments.len3=[%d]", nextComments.length, _comment.records[0].msgIndex);
                                     nextComments.push(_comment)
                                     // total++
                                 } else {
                                     const index = commentsCopy.findIndex(msg => msg.records && msg.records.length > 0 && new BigNumber(msg.records[0].seq).comparedTo(latestSeq) == 1)
                                     if (index > -1) {
-                                        nextComments.push(_comment)
+                                        // console.log("nextComments.len2=[%d]", nextComments.length, _comment.records[0].msgIndex, index);
+                                        // nextComments.push(_comment)
                                         // change seq
                                         // console.log("=====> change seq", index, _comment.records[0].msgIndex, commentsCopy[index].records[0].msgIndex, commentsCopy.length, nextComments.length)
-                                        // commentsCopy.splice(index, 1, ...[_comment, commentsCopy[index]])
+                                        commentsCopy.splice(index, 1, ...[_comment, commentsCopy[index]])
                                     }
                                 }
                             } else {
+                                // console.log("nextComments.len=[%d]", nextComments.length, _comment.records[0].msgStatus);
                                 nextComments.push(_comment)
                             }
                         }
                     } else {
                         //removed
-                        if (_comment.records && _comment.records.length > 0 && _comment.records[0].msgStatus == MessageStatus.removed) {
+                        if (_comment && _comment.records && _comment.records.length > 0 && _comment.records[0].msgStatus == MessageStatus.removed) {
                             commentsCopy.splice(_index, 1)
                             // total--;
                         } else { //support or edit
@@ -171,7 +182,7 @@ export function messageReducer(state: MessageState = {
                 _comments = combile(commentsCopy, payload.keeper)
             }
             // console.log("return _comments = ", _comments)
-            return {total: payload.total, comments: _comments, firstItemIndex: firstItemIndex};
+            return {total: payload.total, comments: _comments, firstItemIndex: _comments && _comments.length>0 ?Math.max(_comments[0].records[0].msgIndex,0):0};
         default:
             return state;
     }

@@ -92,8 +92,12 @@ const UploadImage = ({imgUrl, setImgUrl,width = 120,height,setColor,defaultIcon,
                          {...dragProps}
                     />
                     {
-                        imageList.length >0 && <div style={{position:"absolute", right: 12, top: 0}} onClick={()=>{
-                            onImageRemove(0)
+                        ( imageList.length >0 || !!imgUrl) && <div style={{position:"absolute", right: -10, top: -10}} onClick={()=>{
+                            if(imageList.length>0){
+                                onImageRemove(0)
+                            }else{
+                                setImgUrl({data_url:"", file: null},0,0,null)
+                            }
                         }}>
                             <IonIcon src={closeCircleSharp} size="large" color="danger"/>
                         </div>

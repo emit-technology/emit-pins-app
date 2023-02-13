@@ -128,8 +128,14 @@ export const SendImageModal: React.FC<Props> = ({onOk, onClose, isOpen,selectRol
             <IonContent className="ion-padding">
                 <div style={{borderRadius:12, display: "flex",justifyContent:"center"}}>
                     <UploadImage imgUrl={img && img["url"]} maxHeight={300}  defaultIcon={add} width="100%" setImgUrl={(data,width, height, file)=>{
-                        setImg({url: data.data_url, width: width, height: height});
-                        setFile(file)
+                        if(!data.data_url){
+                            setImg(null)
+                            setFile(null)
+                        }else{
+                            setImg({url: data.data_url, width: width, height: height});
+                            setFile(file)
+                        }
+
                     }}/>
                     {/*<img src={url} style={{objectFit: 'cover', height: '100%', borderRadius: 12}}/>*/}
                 </div>

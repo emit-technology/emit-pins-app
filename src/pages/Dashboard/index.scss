@@ -76,7 +76,7 @@
   outline: none;
   /* display: flex; */
   font-size: 15px;
-  overflow: scroll;
+  overflow: hidden;
 }
 .msg-bottom-icon{
   text-align: right;
@@ -812,7 +812,7 @@ position: absolute;
   outline: none;
   display: flex;
   font-size: 15px;
-  overflow: scroll;
+  overflow: hidden;
 }
 
 .talk-silence{

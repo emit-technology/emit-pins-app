@@ -229,6 +229,15 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
         if (streamMsg1 && streamMsg1.total == 0) {
             const defaultThem = await tribeService.defaultTheme();
             setStickyMsg(defaultThem)
+            dispatch({
+                type: MessageActionKind.RESET,
+                payload: {
+                    total: 0,
+                    firstItemIndex: 0,
+                    comments: [],
+                    keeper: tribeInfo && tribeInfo.keeper
+                }
+            })
         } else {
             let latestId = getCurrentVisible();
             if (latestId == -1) {
@@ -644,8 +653,8 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 <div className="inner-box">
                     {/*{loadingData && <Loading/>}*/}
                     {/*<div className="position-top">[{visibleRange.startIndex}] - [{visibleRange.endIndex}]*/}
-                    {/*    :[{comments && comments.length > 0 && comments[0].records[0].msgIndex}]..[{comments && comments.length > 0 && comments[comments.length - 1].records[0].msgIndex}],*/}
-                    {/*    [{firstItemIndex}]..[{total}]*/}
+                        {/*:[{comments && comments.length > 0 && comments[0].records[0].msgIndex}]..[{comments && comments.length > 0 && comments[comments.length - 1].records[0].msgIndex}],*/}
+                        {/*[{firstItemIndex}]..[{total}]*/}
                     {/*</div>*/}
                     <Virtuoso
                         ref={virtuoso}
@@ -896,13 +905,18 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                                                      imgUrl={showModifyMsg && showModifyMsg.content && showModifyMsg.content.image["url"] && utils.getDisPlayUrl(showModifyMsg.content.image)}
                                                      setImgUrl={(data, w, h, file) => {
                                                          const msgCopy = JSON.parse(JSON.stringify(showModifyMsg))
-                                                         msgCopy.content.image = {
-                                                             url: data.data_url,
-                                                             width: w,
-                                                             height: h
+                                                         if(!data.data_url){
+                                                             msgCopy.content.image = {url: "", width: 0, height: 0}
+                                                             setFile(null)
+                                                         }else{
+                                                             msgCopy.content.image = {
+                                                                 url: data.data_url,
+                                                                 width: w,
+                                                                 height: h
+                                                             }
+                                                             setFile(file)
                                                          }
                                                          setShowModifyMsg(msgCopy)
-                                                         setFile(file)
                                                      }}/>
                                         {/*<div style={{position: "absolute",top: 16 , right: 26}} onClick={(e)=>{*/}
                                         {/*e.persist()}*/}

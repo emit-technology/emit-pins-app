@@ -1035,7 +1035,11 @@ const MessageContentViewportChild: React.FC<Props> = ({groupMsg
                                                      imgUrl={showModifyMsg && showModifyMsg.content && showModifyMsg.content.image["url"] && utils.getDisPlayUrl(showModifyMsg.content.image)}
                                                      setImgUrl={(url, w, h) => {
                                                          const msgCopy = JSON.parse(JSON.stringify(showModifyMsg))
-                                                         msgCopy.content.image = {url: url, width: w, height: h}
+                                                         if(!url.data_url){
+                                                             msgCopy.content.image = {url: "", width: 0, height: 0}
+                                                         }else{
+                                                             msgCopy.content.image = {url: url, width: w, height: h}
+                                                         }
                                                          setShowModifyMsg(msgCopy)
                                                      }}/>
                                         {/*<div style={{position: "absolute",top: 16 , right: 26}} onClick={(e)=>{*/}

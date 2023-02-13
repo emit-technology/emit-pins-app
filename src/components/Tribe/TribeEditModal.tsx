@@ -246,10 +246,15 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
 
                                 <div className="tribe-info-img">
                                     <UploadImage maxHeight={300} defaultIcon={add}  width='100%' imgUrl={imgUrl && imgUrl.url} setImgUrl={(data, width, height, file)=>{
-                                        setImgUrl({
-                                            url: data.data_url,height: height,width: width
-                                        })
-                                        setFile(file);
+                                        if(!data.data_url){
+                                            setImgUrl(null)
+                                            setFile(null)
+                                        }else{
+                                            setImgUrl({
+                                                url: data.data_url,height: height,width: width
+                                            })
+                                            setFile(file);
+                                        }
                                     }}
                                                  setColor={(bg, font, badge, text) => {
                                                      setBackground(bg);

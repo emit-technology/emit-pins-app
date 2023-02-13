@@ -188,9 +188,19 @@ export const utils = {
             return deviceInfo["platform"] == "ios";
         }
         //@ts-ignore
-        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        // const userAgent = navigator.userAgent || navigator.vendor || window.opera;
         //@ts-ignore
-        return /ipad|iphone|ipod/.test((userAgent as string).toLowerCase()) && !window.MSStream;
+        // return /ipad|iphone|ipod|applewebkit/.test((userAgent as string).toLowerCase()) && !window.MSStream;
+        return  [
+                'iPad Simulator',
+                'iPhone Simulator',
+                'iPod Simulator',
+                'iPad',
+                'iPhone',
+                'iPod'
+            ].includes(navigator.platform)
+            // iPad on iOS 13 detection
+            || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
     },
 
 

@@ -94,7 +94,7 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                  style={{padding: index >= total - 1 && index == visibleRange.endIndex ? "0 0 44px" : "0" }}
                  key={index}>
 
-                {/*<small>{pinnedSticky.records[0].msgIndex}</small>*/}
+                {/*<small>{pinnedSticky.records[0].msgIndex}-{pinnedSticky.records[0].msgStatus}</small>*/}
 
                 {
                     firstItemIndex == 0 && index - firstItemIndex - 1 == -1 && !pinnedStickies && <div style={{paddingTop: 20}}>
@@ -116,7 +116,7 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                 }
 
                 {/*<div>*/}
-                <div className={"visual-msg-content"} style={{paddingTop: pinnedSticky.records && pinnedSticky.records[0].hideTime?defaultPadding:12}} onClick={(e) => {
+                <div className={"visual-msg-content"} style={{paddingTop: pinnedSticky && pinnedSticky.records && pinnedSticky.records[0].hideTime?defaultPadding:12}} onClick={(e) => {
                     e.stopPropagation();
                     e.persist();
                     if (!pinnedStickies && !!dispatchTheme && pinnedSticky && stickyMsg && pinnedSticky.groupId != stickyMsg.groupId) {
@@ -125,7 +125,7 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                     }
                 }}>
                     {
-                        pinnedSticky.records && pinnedSticky.records.length>0 && pinnedSticky.records.map((m,index)=>{
+                        pinnedSticky && pinnedSticky.records && pinnedSticky.records.length>0 && pinnedSticky.records.map((m,index)=>{
                             const v:Message = m; //JSON.parse(JSON.stringify(m));
 
                             if (v.msgType == MessageType.Text || v.msgType == MessageType.Role || v.msgType == MessageType.Airdrop) {
@@ -230,7 +230,7 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
                 }
 
                 {
-                    pinnedSticky.records[0].msgIndex == total - 1 && !!pinnedSticky.records[0].groupId &&
+                    pinnedSticky && pinnedSticky.records[0].msgIndex == total - 1 && !!pinnedSticky.records[0].groupId &&
                     <>
                         <div className="strike">
                             <span>New Tape</span>

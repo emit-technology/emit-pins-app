@@ -25,7 +25,7 @@ export const TribeDetail: React.FC<Props> = ({tribeId, isOpen, onClose}) => {
                 onEnd: ev => {
                     if (ev.deltaX >= Math.ceil(document.documentElement.clientWidth * 0.4)) {
                         onClose();
-                        setImmediate(()=>{
+                        setImmediate(() => {
                             //@ts-ignore
                             document.querySelector('.tribe-detail-dom').style.transform = `translateX(0px)`
                         })
@@ -37,6 +37,7 @@ export const TribeDetail: React.FC<Props> = ({tribeId, isOpen, onClose}) => {
                 onMove: ev => {
                     //@ts-ignore
                     document.querySelector('.tribe-detail-dom').style.transform = `translateX(${Math.abs(ev.deltaX)}px)`
+                    // document.querySelector('.main-home-page').style.transform = `translateX(${Math.max(0, Math.abs(80 - ev.deltaX))}px)`
                 }
             });
             gesture.enable();
@@ -53,8 +54,8 @@ export const TribeDetail: React.FC<Props> = ({tribeId, isOpen, onClose}) => {
         const wrapperAnimation = createAnimation()
             .addElement(root?.querySelector('.modal-wrapper')!)
             .keyframes([
-                { offset: 0, opacity: 0.1, transform: 'translateX(100%)' },
-                { offset: 1, opacity: 1, transform: 'translateX(0%)' },
+                {offset: 0, opacity: 0.1, transform: 'translateX(100%)'},
+                {offset: 1, opacity: 1, transform: 'translateX(0%)'},
             ]);
 
         return createAnimation()
@@ -62,11 +63,11 @@ export const TribeDetail: React.FC<Props> = ({tribeId, isOpen, onClose}) => {
             .easing('ease-out')
             .duration(300)
             .addAnimation([backdropAnimation, wrapperAnimation]);
-    },[]);
+    }, []);
 
     const leaveAnimation = useCallback((baseEl: HTMLElement) => {
         return enterAnimation(baseEl).direction('reverse');
-    },[]);
+    }, []);
 
     return <>
         {/*<IonModal keepContentsMounted isOpen={isOpen} onDidDismiss={()=>onClose()} className="tribe-detail-modal"*/}
@@ -78,7 +79,11 @@ export const TribeDetail: React.FC<Props> = ({tribeId, isOpen, onClose}) => {
         {/*    </IonContent>*/}
         {/*</IonModal>*/}
 
-        <div className="tribe-detail-dom" style={{display: isOpen?"block":"none"}}>
+        <div className={`tribe-detail-dom`} style={isOpen ? {
+            transform: "translateX(0)",
+            opacity: 1,
+            display: "block"
+        } : {transform: "translateX(100%)", opacity: 0, display: "none"}}>
             <IonContent>
                 <DashboardV2 tribeId={tribeId} router={null} isDetailModal={true} isOpenDetail={isOpen}/>
             </IonContent>

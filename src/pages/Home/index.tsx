@@ -265,6 +265,7 @@ export class HomePage extends React.Component<Props, State> {
                     }} isSessionAvailable={isSessionAvailable}/>
                 </IonContent>
             </IonMenu>
+            {/*className="main-home-page" style={showTribeDetail?{transform: "translateX(-80px)"}:{transform:"translateX(0px)"}}*/}
             <IonPage id="main-home">
                 <IonHeader style={{background: "#fff"}} >
                     <IonToolbar className="msg-toolbar">
@@ -404,11 +405,11 @@ export class HomePage extends React.Component<Props, State> {
 
                 </IonContent>
 
-                <TribeDetail tribeId={selectTribeId} isOpen={showTribeDetail}
-                             onClose={() => this.setState({showTribeDetail:false})}/>
+
 
             </IonPage>
-
+            <TribeDetail tribeId={selectTribeId} isOpen={showTribeDetail}
+                         onClose={() => this.setState({showTribeDetail:false})}/>
         </>;
     }
 }
