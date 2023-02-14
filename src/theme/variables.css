@@ -28,14 +28,14 @@ http://ionicframework.com/docs/theming/ */
 @font-face {
   font-family: 'SFProText-Semibold';
   src: url('./fonts/SF/sf-pro-text-bold.eot?#iefix') format('embedded-opentype'),
-  url('./fonts/SF/sf-pro-text-bold.woff') format('woff'),
+  url('./fonts/SF/sf-pro-text-bold.woff2') format('woff'),
   url('./fonts/SF/sf-pro-text-bold.ttf')  format('truetype'),
   url('./fonts/SF/sf-pro-text-bold.svg#svgFontName') format('svg');
 }
 @font-face {
   font-family: 'SFProText-Bold';
   src: url('./fonts/SF/sf-pro-text-bold.eot?#iefix') format('embedded-opentype'),
-  url('./fonts/SF/sf-pro-text-bold.woff') format('woff'),
+  url('./fonts/SF/sf-pro-text-bold.woff2') format('woff'),
   url('./fonts/SF/sf-pro-text-bold.ttf')  format('truetype'),
   url('./fonts/SF/sf-pro-text-bold.svg#svgFontName') format('svg');
 }

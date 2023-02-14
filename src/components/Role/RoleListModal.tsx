@@ -168,7 +168,7 @@ const RoleListModalChild: React.FC<Props> = ({
                     </div>
 
                     {
-                        !utils.isApp() && <div className="role-list-box"  style={{height: !showThemes?"100%":"0px"}}>
+                        !utils.isApp() && <div className="role-list-box"  style={{height: !showThemes?"98%":"0px"}}>
                             <div style={{display: "flex", flexDirection: 'column'}}>
                                 <IonItem lines="none">
                                     <IonLabel slot="start">
