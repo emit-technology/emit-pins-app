@@ -47,9 +47,9 @@ export const RolesPopover: React.FC<Props> = ({roles,isOpen,onClose, defaultRole
             </IonHeader>
             <IonContent className="ion-padding" fullscreen >
                 <div className="role-pop-tip">
-                    <img src="./assets/img/icon/infoBlueOutline.png" height={12}/>&nbsp;The roles are purely fictional and exist only in this Verse.
+                    <img src="./assets/img/icon/infoBlueOutline.png" height={12}/>&nbsp;All ROLEs are fictional and only exist in current VERSE.
                 </div>
-                <div style={{overflow: "scroll", height:'90%'}}>
+                <div style={{overflow: "scroll", height:'85%'}}>
                     {
                         roleInfoArr && roleInfoArr.map((v, i) => {
                             return <IonItem

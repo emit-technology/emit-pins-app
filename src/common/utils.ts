@@ -138,8 +138,6 @@ export const utils = {
     },
 
     convertImgDisplay: (width: number, height: number, url: string): { width: number, height: number, displayUrl: string } => {
-        // content.image.width>content.image.height? 200: content.image.height>300?300:content.image.height
-
         const base = (utils.isApp()) ?250:300;
         function _getHeight() {
             if (width > 0 && height > 0) {
@@ -167,7 +165,7 @@ export const utils = {
 
         const h = _getHeight();
         const w = Math.floor(h * width / height);
-        const webPath = url && (url.indexOf("blob") == 0 || url.indexOf("data") == 0) ? url : `${config.tribePic}/display?url=${url}&w=${w}&h=${h}&op=resize&upscale=1`;
+        const webPath = url && (url.indexOf("blob") == 0 || url.indexOf("data") == 0) ? url : `${config.tribePic}/display?url=${url}&w=${w*2}&h=${h*2}&op=resize&upscale=1&q=100`;
         return {
             width: w, height: h, displayUrl: webPath
         }

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonModal, IonTitle, IonToolbar} from "@ionic/react";
+import {closeOutline} from "ionicons/icons";
 
 interface Props{
     isOpen: boolean;
@@ -16,9 +17,7 @@ export const AccountInfo:React.FC<Props> = ({isOpen, onClose,onOk})=>{
             <IonHeader collapse="fade">
                 <IonToolbar>
                     <IonTitle>Create Account</IonTitle>
-                    <IonButtons slot="end">
-                        <IonButton onClick={() => onClose()}>Close</IonButton>
-                    </IonButtons>
+                    <IonIcon src={closeOutline} size="large" onClick={()=>onClose()} slot="end"/>
                 </IonToolbar>
             </IonHeader>
             <IonContent className="ion-padding">

@@ -27,8 +27,6 @@ import './theme/variables.css';
 import './App.scss';
 import React, {useEffect, useLayoutEffect, useRef} from "react";
 import config from "./common/config";
-import {Provider} from "react-redux";
-import store from "./common/state/app/store";
 import {HomePage} from "./pages/Home";
 import {DashboardV2} from "./pages/Dashboard/index2";
 import {App as AppPin} from '@capacitor/app';

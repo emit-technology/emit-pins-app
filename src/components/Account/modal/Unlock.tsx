@@ -43,7 +43,7 @@ export const AccountUnlock: React.FC<Props> = ({isOpen,onForgot, onClose, onOk})
             onClose()
         }} canDismiss>
             <IonToolbar >
-                <IonTitle>Unlock Account</IonTitle>
+                <IonTitle>Unlock</IonTitle>
                 <IonButtons slot="end">
                     <IonButton onClick={() => onClose()}>
                         <IonIcon src={closeOutline} size="large" color='dark'/>
@@ -55,7 +55,7 @@ export const AccountUnlock: React.FC<Props> = ({isOpen,onForgot, onClose, onOk})
                     <IonLabel position="stacked">Password</IonLabel>
                     {
                         //@ts-ignore
-                        <IonInput type="password" placeholder="Account password" ref={passwordRef}/>
+                        <IonInput type="password" placeholder="Identity password" ref={passwordRef}/>
                     }
                 </IonItem>
                 <IonButton expand="block" color="dark" onClick={()=>{

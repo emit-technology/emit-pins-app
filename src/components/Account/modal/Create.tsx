@@ -188,9 +188,9 @@ export const CreateModal: React.FC<Props> = ({isOpen, onOk, onClose}) => {
                             setIsOpenImport(true)
                             setIsOpenCreate(false)
                         }}><IonIcon
-                            src={downloadOutline}/> Import</IonButton>
+                            src={downloadOutline}/> Recovery</IonButton>
                     </IonButtons>
-                    <IonTitle>Create Account</IonTitle>
+                    <IonTitle>Create Identity</IonTitle>
                     <IonButtons slot="end">
                         <IonButton onClick={() => onClose()}>Close</IonButton>
                     </IonButtons>
@@ -200,7 +200,7 @@ export const CreateModal: React.FC<Props> = ({isOpen, onOk, onClose}) => {
                 <IonItem>
                     <IonLabel className="ion-text-wrap">
                         <div className="men-title">
-                            Write down these words &nbsp;<IonIcon src={refreshCircleOutline}
+                            Write down these mnemonic words for identity recovery &nbsp;<IonIcon src={refreshCircleOutline}
                                                             style={{cursor: "pointer", transform: 'translateY(4px)'}}
                                                             color="primary" onClick={() => genMen()}/>
                             &nbsp; {
@@ -289,7 +289,7 @@ export const CreateModal: React.FC<Props> = ({isOpen, onOk, onClose}) => {
                         }}><IonIcon
                             src={createOutline}/> Create</IonButton>
                     </IonButtons>
-                    <IonTitle>Import Account</IonTitle>
+                    <IonTitle>Recovery Account</IonTitle>
                     <IonButtons slot="end">
                         <IonButton onClick={() => {
                             setIsOpenImport(false);

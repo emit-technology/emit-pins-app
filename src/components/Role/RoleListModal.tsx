@@ -159,7 +159,7 @@ const RoleListModalChild: React.FC<Props> = ({
                 }
                 <IonContent  className="ion-content-chat">
                     {
-                        tribeInfo && (!tribeInfo.forked  || tribeInfo.forked.length  == 0)  && <div style={{height: (utils.isIos()) ?"30px": "12px"}}></div>
+                        tribeInfo && (!tribeInfo.forked  || tribeInfo.forked.length  == 0)  && <div style={{height: (utils.isIos()) ?"30px": "0px"}}></div>
                     }
                     <div style={{height: (!showThemes && !utils.isApp()) ?"0":"100%" }}>
                         <ThemesItems onClickTheme={onClickTheme} groupMsg={groupMsg} checkedGroupId={pinnedSticky && (pinnedSticky as PinnedSticky).groupId}  onClose={()=>{

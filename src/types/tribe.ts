@@ -44,6 +44,8 @@ export interface TribeInfo {
     collections?:number;
 
     silence?:boolean
+
+    drop?:boolean
 }
 
 export interface TribeTheme {

@@ -40,7 +40,7 @@ export const RolesAvatarModal: React.FC<Props> = ({roles,isOpen,onClose, default
             <IonContent fullscreen >
                     <div style={{overflow: "scroll", height:'90%',backgroundColor:"#FFFEFB"}}>
                         <div className="pick-box">
-                            <div className="pick-tip"><img src="./assets/img/icon/infoOutline.png" height={12}/>&nbsp;The roles are purely fictional and exist only in this Verse.</div>
+                            <div className="pick-tip"><img src="./assets/img/icon/infoOutline.png" height={12}/>&nbsp;All ROLEs are fictional and only exist in current VERSE.</div>
                         </div>
                         <div className="pick-ctn">
                             <IonRow>

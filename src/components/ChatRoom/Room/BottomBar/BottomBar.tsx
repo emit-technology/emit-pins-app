@@ -179,6 +179,17 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
 
     // const avatar = utils.convertImgDisplay()
 
+    const onAirdrop = async () =>{
+        await tribeService.checkTribeStatus();
+        await tribeService.userCheckAuth()
+        setShowAirdropModal(true)
+    }
+
+    const onSendImage = async ()=>{
+        await tribeService.checkTribeStatus();
+        await tribeService.userCheckAuth()
+        setShowSendImage(true);
+    }
     return <>
         {
             !isDown && <IonFooter>
@@ -262,89 +273,27 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
                                                     </div>
                                                 )}
 
-                                                {/*</div>*/}
-
 
                                                 <img src="./assets/img/icon/imageOutline.png" height={24}
                                                      onClick={(e) => {
                                                          e.stopPropagation();
-                                                         setShowSendImage(true);
-                                                         // tribeService.userCheckAuth().then(() => {
-                                                         //     if (userLimit && userLimit.msgLeft <= 0) {
-                                                         //         present({
-                                                         //             message: `Sending messages has reached the maximum limit ${userLimit.maxMsgCount}`,
-                                                         //             duration: 2000,
-                                                         //             position: "top",
-                                                         //             color: "danger"
-                                                         //         })
-                                                         //         return;
-                                                         //     }
-                                                         //     tribeService.picUpload().then(photo => {
-                                                         //         setIsLoading(true);
-                                                         //         tribeService.uploadToServer(photo).then(({url, themeColors}) => {
-                                                         //             setIsLoading(false)
-                                                         //             const displayImage = utils.convertImgDisplay(themeColors.width, themeColors.height, url);
-                                                         //             setDisplayImage({
-                                                         //                 url: url,
-                                                         //                 width: displayImage.width,
-                                                         //                 height: displayImage.height
-                                                         //             });
-                                                         //
-                                                         //             setThemeColor(themeColors)
-                                                         //         }).catch(e => {
-                                                         //             setIsLoading(false)
-                                                         //         })
-                                                         //     }).catch(e => {
-                                                         //         // const err = typeof e == 'string' ? e : e.message;
-                                                         //         // present({
-                                                         //         //     message: err,
-                                                         //         //     duration: 2000,
-                                                         //         //     position: "top",
-                                                         //         //     color: "danger"
-                                                         //         // })
-                                                         //         console.log(e)
-                                                         //     })
-                                                         // }).catch(e => {
-                                                         //     console.error(e)
-                                                         //     const err = typeof e == 'string' ? e : e.message;
-                                                         //     present({
-                                                         //         message: err,
-                                                         //         duration: 2000,
-                                                         //         position: "top",
-                                                         //         color: "danger"
-                                                         //     })
-                                                         // })
+                                                         onSendImage().catch(e=>{
+                                                             console.error(e)
+                                                             const err = typeof e == 'string' ? e : e.message;
+                                                             present({
+                                                                 message: err,
+                                                                 duration: 2000,
+                                                                 position: "top",
+                                                                 color: "danger"
+                                                             })
+                                                         });
+
                                                      }}/>
 
-                                                {/*<IonIcon className="footer-icon" src={imageOutline} color="dark"*/}
-                                                {/*         size="large"*/}
-                                                {/*         onClick={(e) => {*/}
-                                                {/*             */}
-                                                {/*         }}/>*/}
-
-
-                                                {/*<IonIcon className="footer-icon" src={rocketOutline} color="dark"*/}
-                                                {/*         size="large" onClick={(e) => {*/}
-                                                {/*    e.stopPropagation();*/}
-                                                {/*    tribeService.userCheckAuth().then(() => {*/}
-                                                {/*        setShowAirdropModal(true)*/}
-                                                {/*    }).catch(e => {*/}
-                                                {/*        console.error(e)*/}
-                                                {/*        const err = typeof e == 'string' ? e : e.message;*/}
-                                                {/*        present({*/}
-                                                {/*            message: err,*/}
-                                                {/*            duration: 2000,*/}
-                                                {/*            position: "top",*/}
-                                                {/*            color: "danger"*/}
-                                                {/*        })*/}
-                                                {/*    })*/}
-                                                {/*}}/>*/}
 
                                                 <img src="./assets/img/icon/airdropOutline.png" onClick={(e) => {
                                                     e.stopPropagation();
-                                                    tribeService.userCheckAuth().then(() => {
-                                                        setShowAirdropModal(true)
-                                                    }).catch(e => {
+                                                    onAirdrop().catch(e=>{
                                                         console.error(e)
                                                         const err = typeof e == 'string' ? e : e.message;
                                                         present({
@@ -353,20 +302,10 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
                                                             position: "top",
                                                             color: "danger"
                                                         })
-                                                    })
+                                                    });
 
                                                 }} height={24}/>
 
-                                                {/*<IonIcon className="footer-icon" src={diceOutline} color="dark" size="large"*/}
-                                                {/*         onClick={(e) => {*/}
-                                                {/*             e.stopPropagation();*/}
-                                                {/*             sendMsg(true).then(() => {*/}
-                                                {/*                 dispatch(saveDataState({*/}
-                                                {/*                     data: JSON.stringify({refresh: 0}),*/}
-                                                {/*                     tag: 'scrollToItem'*/}
-                                                {/*                 }))*/}
-                                                {/*             })*/}
-                                                {/*         }}/>*/}
                                             </div>
                                         </IonCol>
                                     </IonRow>
@@ -418,7 +357,7 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
                                                     <IonButtons>
                                                         {
                                                             //@ts-ignore
-                                                            <IonButton className="footer-btn" disabled={loading}
+                                                            <IonButton className="footer-btn" color={(loading || tribeInfo && !!tribeInfo.drop)?"medium":"primary"} disabled={loading || tribeInfo && !!tribeInfo.drop}
                                                                        onClick={() => {
                                                                            setLoading(true)
                                                                            sendMsg().then(() => {

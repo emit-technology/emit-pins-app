@@ -13,6 +13,7 @@ import {
 import {useState} from "react";
 import walletWorker from "../../../worker/walletWorker";
 import {AccountModel} from "@emit-technology/emit-lib";
+import {closeOutline} from "ionicons/icons";
 
 interface Props {
     isOpen: boolean;
@@ -72,10 +73,8 @@ export const ResetModal:React.FC<Props> = ({isOpen,onOk,onUnlock,onClose})=>{
                     <IonButtons slot="start">
                         <IonButton onClick={() => onUnlock() }>Unlock</IonButton>
                     </IonButtons>
-                    <IonTitle>Reset Account</IonTitle>
-                    <IonButtons slot="end">
-                        <IonButton onClick={() => onClose()}>Close</IonButton>
-                    </IonButtons>
+                    <IonTitle>Identity Recovery</IonTitle>
+                    <IonIcon src={closeOutline} size="large" onClick={()=>onClose()} slot="end"/>
                 </IonToolbar>
             </IonHeader>
             <IonContent className="ion-padding">
@@ -83,7 +82,7 @@ export const ResetModal:React.FC<Props> = ({isOpen,onOk,onUnlock,onClose})=>{
                     setSegment(e.detail.value)
                 }}>
                     <IonSegmentButton value="mnemonic">
-                        <span className={segment == "mnemonic"?"seq-title":"seq-title-2"}><IonLabel color="dark">Mnemonic</IonLabel></span>
+                        <span className={segment == "mnemonic"?"seq-title":"seq-title-2"}><IonLabel color="dark">MNEMONIC WORDS</IonLabel></span>
                     </IonSegmentButton>
                     <IonSegmentButton value="privateKey">
                         <span className={segment == "privateKey"?"seq-title":"seq-title-2"}><IonLabel color="dark">Private Key</IonLabel></span>
@@ -134,8 +133,8 @@ export const ResetModal:React.FC<Props> = ({isOpen,onOk,onUnlock,onClose})=>{
                     duration={60000}
                 />
                 <div style={{padding: 12}}>
-                    EMIT-Account does not keep a copy of your password. If you’re having trouble unlocking your account, you will need to reset your wallet. You can do this by providing the Secret Recovery Phrase or Private Key you once used when you set up your wallet.
-                    <b>This action will remove all your current wallet, and you’ll also be able to re-add any other accounts created previously.</b>
+                    You can enter your previously backed-up mnemonic words to restore your PINs Identity. The mnemonic words are only stored locally on the device and will not be uploaded or backed up to the server in any form.
+                    <b>This action will remove the current identity in PINs, but you can restore it again using the mnemonic words.</b>
                 </div>
             </IonContent>
         </IonModal>

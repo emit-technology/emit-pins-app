@@ -12,7 +12,7 @@ import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import {utils} from "../../../common";
 import {tribeService} from "../../../service/tribe";
 import {CreateModal} from "../../Account/modal";
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import walletWorker from "../../../worker/walletWorker";
 import {AccountList} from "../../Account/modal/List";
 import {AccountUnlock} from "../../Account/modal/Unlock";
@@ -120,6 +120,15 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, isModal,rou
         }
         setShowCatList(true)
     }
+
+    const adoptCat = useCallback(async ()=>{
+        setShowLoading(true)
+        await tribeService.adpotNoki()
+        const items = await tribeService.catItems();
+        setCatItems(items);
+        setShowLoading(false)
+    },[])
+
     return <div style={{position: "relative", height: "100%"}}>
         {
             (window.location.pathname != "/" || isModal) && <IonItem lines="none" style={{marginTop: 14}}  onClick={() => {
@@ -157,7 +166,7 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, isModal,rou
                 </IonAvatar>
             }
             <IonLabel className="side-text">
-                {!!account && account.name ? account.name : 'Person'}&nbsp;{ !!account && <>
+                {!!account && account.name ? account.name : 'Identity'}&nbsp;{ !!account && <>
             <IonText color="medium">[<small>{!!account && utils.ellipsisStr(account && account.addresses && account.addresses[ChainType.EMIT], 3)}</small>]</IonText>
             </>}
             </IonLabel>
@@ -324,7 +333,7 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, isModal,rou
         <AssetsModal address={account && account.addresses[ChainType.EMIT]} isOpen={showAssetsModal}
                      onClose={() => setShowAssetsModal(false)}/>
 
-        <CatList isOpen={showCatList} onClose={()=>setShowCatList(false)} items={catItems}/>
+        <CatList isOpen={showCatList} onClose={()=>setShowCatList(false)} items={catItems} onAdoptCat={adoptCat}/>
 
         <IonLoading
             cssClass='my-custom-class'

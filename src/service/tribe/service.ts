@@ -31,7 +31,6 @@ import {Device} from "@capacitor/device";
 import {Photo} from "@capacitor/camera";
 import {CatInfo} from "../../types/cat";
 
-const version = require("../../../package.json").version;
 
 // import WebSocket from 'ws';
 
@@ -94,6 +93,7 @@ class TribeService implements ITribe {
     }
 
     addRole = async (tribeRole: TribeRole): Promise<string> => {
+        await this.checkTribeStatus();
         await this.userCheckAuth()
         const rest: TribeResult<string> = await this._rpc.post(tribeRole && tribeRole.id ? '/tribe/updateRole' : '/tribe/addRole', tribeRole);
         if (rest && rest.code == 0) {
@@ -114,6 +114,7 @@ class TribeService implements ITribe {
     }
 
     msgSupport = async (msgId: string, bool: boolean): Promise<boolean> => {
+        await this.checkTribeStatus();
         await this.userCheckAuth()
         const rest: TribeResult<string> = await this._rpc.post('/tribe/msgSupport', {msgId: msgId, support: bool});
         if (rest && rest.code == 0) {
@@ -135,6 +136,7 @@ class TribeService implements ITribe {
     }
 
     updateTribe = async (theme: TribeTheme): Promise<boolean> => {
+        await this.checkTribeStatus();
         await this.userCheckAuth()
         const rest: TribeResult<any> = await this._rpc.post('/tribe/updateTribe', theme);
         if (rest && rest.code == 0) {
@@ -145,6 +147,7 @@ class TribeService implements ITribe {
     }
 
     summarizeTribe = async (tribeId: string, msgIds: Array<string>): Promise<boolean> => {
+        await this.checkTribeStatus();
         await this.userCheckAuth()
         const rest: TribeResult<boolean> = await this._rpc.post('/tribe/summarizeTribe', {tribeId, msgIds});
         if (rest && rest.code == 0) {
@@ -188,9 +191,18 @@ class TribeService implements ITribe {
 
     userNFTs = async (): Promise<Array<CatInfo>> => {
         const account = await emitBoxSdk.getAccount();
-        const rest: TribeResult<Array<CatInfo>> = await this._rpc.post('/tribe/userNFTs', {user: account && account.addresses[ChainType.EMIT]});
+        const rest: TribeResult<CatInfo> = await this._rpc.post('/tribe/userNoki', {user: account && account.addresses[ChainType.EMIT]});
         if (rest && rest.code == 0) {
-            return Promise.resolve(rest.data)
+            return Promise.resolve(rest.data?[rest.data]:[])
+        }
+        return Promise.resolve([]);
+    }
+
+    adpotNoki = async (): Promise<boolean> => {
+        // const account = await emitBoxSdk.getAccount();
+        const rest: TribeResult<any> = await this._rpc.post('/tribe/adpotNoki', {});
+        if (rest && rest.code == 0) {
+            return Promise.resolve(true)
         }
         return Promise.reject(rest.message);
     }
@@ -472,6 +484,12 @@ class TribeService implements ITribe {
         return await this._picRpc.upload()
     }
 
+    checkTribeStatus = async (): Promise<boolean> =>{
+        if(tribeService._tribeInfo && !!tribeService._tribeInfo.drop){
+            return Promise.reject("The verse has been discarded !")
+        }
+        return true;
+    }
     uploadToServer = async (image: any) => {
         try {
             const themeColors = await getMainColor(image.webPath);
@@ -499,6 +517,7 @@ class TribeService implements ITribe {
     }
 
     pushTribe = async (data: { tribeId: string, msgType: MessageType, role: string, content: string, replayToMsgId?: string }): Promise<string> => {
+        await this.checkTribeStatus();
         await this.userCheckAuth()
         const rest: TribeResult<string> = await this._rpc.post('/push/pushTribe', data);
         if (rest && rest.code == 0) {
@@ -832,6 +851,7 @@ class TribeService implements ITribe {
     }
 
     forkTribe = async (tribeId: string, groupId: string, tribeInfo: TribeInfo): Promise<string> => {
+        await this.checkTribeStatus();
         await this.userCheckAuth()
         const data: any = {
             groupId: groupId,
@@ -849,6 +869,7 @@ class TribeService implements ITribe {
     }
 
     deleteMsg = async (msgId: string): Promise<string> => {
+        await this.checkTribeStatus();
         await this.userCheckAuth()
         const rest: TribeResult<string> = await this._rpc.post('/tribe/deleteMsg', {msgId});
         if (rest && rest.code == 0) {
@@ -858,6 +879,7 @@ class TribeService implements ITribe {
     }
 
     updateMsg = async (msgId: string, content: string, role?: string, replayToMsgId?: string): Promise<string> => {
+        await this.checkTribeStatus();
         await this.userCheckAuth()
         const rest: TribeResult<string> = await this._rpc.post('/tribe/updateMsg', {
             msgId,
@@ -872,6 +894,7 @@ class TribeService implements ITribe {
     }
 
     forbidTribe = async (tribeId: string): Promise<string> => {
+        await this.checkTribeStatus();
         await this.userCheckAuth()
         const rest: TribeResult<string> = await this._rpc.post('/tribe/forbidTribe', {
             tribeId
@@ -883,6 +906,7 @@ class TribeService implements ITribe {
     }
 
     unForbidTribe = async (tribeId: string): Promise<string> => {
+        await this.checkTribeStatus();
         await this.userCheckAuth()
         const rest: TribeResult<string> = await this._rpc.post('/tribe/unForbidTribe', {
             tribeId
@@ -894,6 +918,7 @@ class TribeService implements ITribe {
     }
 
     dropTribe = async (tribeId: string): Promise<string> => {
+        await this.checkTribeStatus();
         await this.userCheckAuth()
         const rest: TribeResult<string> = await this._rpc.post('/tribe/dropTribe', {
             tribeId
@@ -953,20 +978,10 @@ class TribeService implements ITribe {
     }
 
     involvedTribes = async (): Promise<Array<TribeInfo>> => {
-        let osVersion = version, platform = "web" ;
-        try{
-            if(await this.isApp){
-                const appInfo = await App.getInfo();
-                osVersion = appInfo.version;
-                platform = (await Device.getInfo()).platform;
-            }
-        }catch (e){console.error(e)}
         const account = await emitBoxSdk.getAccount();
         const address = account && account.addresses && account.addresses[ChainType.EMIT]
         const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post(`/tribe/involvedTribes`, {
             userId: address,
-            osVersion: osVersion,
-            platform: platform
         });
         if (rest && rest.code == 0) {
             const ret = rest.data;
@@ -996,6 +1011,7 @@ class TribeService implements ITribe {
     // }
 
     subscribeTribe = async (tribeId: string): Promise<boolean> => {
+        await this.checkTribeStatus();
         await this.userCheckAuth()
         const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/subscribeTribe', {tribeId: tribeId});
         if (rest && rest.code == 0) {
@@ -1005,6 +1021,7 @@ class TribeService implements ITribe {
     }
 
     unSubscribeTribe = async (tribeId: string): Promise<boolean> => {
+        await this.checkTribeStatus();
         await this.userCheckAuth()
         const rest: TribeResult<Array<TribeInfo>> = await this._rpc.post('/tribe/unSubscribeTribe', {tribeId: tribeId});
         if (rest && rest.code == 0) {
@@ -1284,10 +1301,7 @@ class TribeService implements ITribe {
 
     catItems = async (): Promise<Array<CatInfo>> => {
         const arr = await tribeService.userNFTs()
-        return arr.map(v => {
-            // v.image = `${config.tribePic}/display?url=${v.image}&w=${300}&h=${300}&op=resize&upscale=1`
-            return v
-        });
+        return arr
     }
 
 

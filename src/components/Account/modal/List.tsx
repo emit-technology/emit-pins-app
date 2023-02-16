@@ -134,7 +134,7 @@ export const AccountList: React.FC<Props> = ({isOpen, isLogin, onClose, onOk}) =
                                                             <IonButton onClick={() => {
                                                                 presentAlert({
                                                                     header: 'Backup Account',
-                                                                    subHeader: 'Export Mnemonic or Private Key.',
+                                                                    subHeader: 'Export Mnemonic words or Private Key.',
                                                                     buttons: [
                                                                         {
                                                                             text: 'Cancel',
@@ -234,8 +234,8 @@ export const AccountList: React.FC<Props> = ({isOpen, isLogin, onClose, onOk}) =
                                             &nbsp;&nbsp;
                                             <div onClick={() => {
                                                 presentAlert({
-                                                    header: 'Delete Account',
-                                                    subHeader: 'You are deleting account!',
+                                                    header: 'Delete Identity',
+                                                    subHeader: 'You are deleting identity!',
                                                     buttons: [
                                                         {
                                                             text: 'Cancel',
@@ -252,7 +252,7 @@ export const AccountList: React.FC<Props> = ({isOpen, isLogin, onClose, onOk}) =
                                                                     present({
                                                                         position: "top",
                                                                         color: "primary",
-                                                                        message: "Delete account successfully!",
+                                                                        message: "Delete Identity successfully!",
                                                                         duration: 2000
                                                                     }).then(() => {
                                                                         onClose();
@@ -403,7 +403,7 @@ export const AccountList: React.FC<Props> = ({isOpen, isLogin, onClose, onOk}) =
                     <IonHeader collapse="fade">
                         <IonToolbar color="white">
                             <IonTitle>
-                                Write down these words
+                                Write down these mnemonic words for identity recovery
                             </IonTitle>
                             <IonIcon slot="end" src={closeOutline} size="large" onClick={() => {
                                setShowAlert(false);
@@ -442,7 +442,7 @@ export const AccountList: React.FC<Props> = ({isOpen, isLogin, onClose, onOk}) =
                             </IonCol>
                         </IonRow>
                         <div className="account-note">
-                            This information is sensitive, and these options should only be used in offline settings by experienced crypto users. Your phrase is the key to your wallet. Please make sure to write it down and save it in a secure location. We CAN NOT retrieve or reset your phrase if you lose it.
+                            This information is sensitive. Your mnemonic words are the key to your PINs Identity. Please make sure to write it down and save it in a secure location. We CAN NOT retrieve or reset your mnemonic words if you lose it.
                         </div>
                     </IonContent>
                 </IonModal>

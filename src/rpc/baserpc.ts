@@ -1,7 +1,11 @@
 import axios from "axios";
 import {Camera, CameraResultType, CameraSource, Photo} from "@capacitor/camera";
-import getMainColor, {ThemeColors} from "../common/getMainColor";
 import {tribeService} from "../service/tribe";
+import {App} from "@capacitor/app";
+import {Device} from "@capacitor/device";
+import {utils} from "../common";
+
+const version = require("../../package.json").version;
 
 export class BaseRpc {
 
@@ -13,10 +17,22 @@ export class BaseRpc {
 
     post = async (path: string, data: any): Promise<any> => {
         const authToken = tribeService.getAuthToken();
+
+        let osVersion = version, platform = "web" ;
+        try{
+            if(utils.isApp()){
+                const appInfo = await App.getInfo();
+                osVersion = appInfo.version;
+                platform = (await Device.getInfo()).platform;
+            }
+        }catch (e){}
+
         const rest = await axios.post(`${this._url}${path}`, data, {
             headers: {
                 'Content-Type': 'application/json',
-                'AuthToken': authToken
+                'AuthToken': authToken,
+                osVersion: osVersion,
+                platform: platform
             }
         })
         return rest.data;

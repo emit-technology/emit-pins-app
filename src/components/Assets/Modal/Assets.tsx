@@ -20,6 +20,7 @@ import {useEffect, useState} from "react";
 import {emitBoxSdk} from "../../../service/emitBox";
 import {InboxList} from "./InboxList";
 import walletWorker from "../../../worker/walletWorker";
+import {closeOutline} from "ionicons/icons";
 
 interface Props {
     address: string;
@@ -86,10 +87,8 @@ export const AssetsModal:React.FC<Props> = ({isOpen,router ,address, onClose}) =
               onDidDismiss={() => onClose()} className="assets-modal" canDismiss>
             <IonHeader collapse="fade">
                 <IonToolbar>
-                    <IonTitle>EMIT Assets</IonTitle>
-                    <IonButtons slot="end">
-                        <IonButton onClick={() => onClose()}>Close</IonButton>
-                    </IonButtons>
+                    <IonTitle>Assets</IonTitle>
+                    <IonIcon src={closeOutline} size="large" onClick={()=>onClose()} slot="end"/>
                 </IonToolbar>
             </IonHeader>
             <IonContent className="ion-padding">

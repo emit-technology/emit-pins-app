@@ -23,7 +23,7 @@ import config from "./common/config";
 import {Provider} from "react-redux";
 import store from "./common/state/app/store";
 // import {IonApp} from "@ionic/react";
-import inobounce from "inobounce"
+// import inobounce from "inobounce"
 // import { SplashScreen } from '@capacitor/splash-screen';
 
 // globalThis.VIRTUOSO_LOG_LEVEL = LogLevel.DEBUG;
@@ -48,7 +48,7 @@ window.addEventListener("error", (e) => {
 });
 
 if(utils.isIos()){
-    inobounce.enable();
+    // inobounce.enable();
 }
 
 // if (rootElement.hasChildNodes()) {

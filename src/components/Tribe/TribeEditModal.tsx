@@ -3,6 +3,7 @@ import {ImageType, MsgTextImage, TribeInfo, TribeRole} from "../../types";
 import {
     IonModal,
     IonHeader,
+    IonLabel,IonItem,
     IonToolbar,
     IonTitle,
     IonButtons,
@@ -19,10 +20,11 @@ import {tribeService} from "../../service/tribe";
 import add from "../../img/add.png";
 import TextareaAutosize from "react-textarea-autosize";
 import config from "../../common/config";
-import {informationCircleOutline} from "ionicons/icons";
+import {closeOutline, informationCircleOutline} from "ionicons/icons";
 import {saveDataState} from "../../common/state/slice/dataSlice";
 import {useAppDispatch} from "../../common/state/app/hooks";
 import {saveMessageState} from "../../common/state/slice/messageSlice";
+import {ImageView} from "../utils/ImageView";
 
 interface Props {
     isOpen: boolean;
@@ -171,9 +173,10 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal" canDismiss>
             <IonHeader collapse="fade">
                 <IonToolbar>
-                    <IonTitle>{forkGroupId? `Create a new Fork  ${tribeInfo.title} `: (tribeInfo ? `Update ${tribeInfo.title}` : `Create Verse`)}</IonTitle>
+                    <IonTitle>{forkGroupId? `Fork the Verse - ${tribeInfo.title} `: (tribeInfo ? `Update ${tribeInfo.title}` : `Create Verse`)}</IonTitle>
                     <IonButtons slot="end">
-                        <IonButton onClick={() => onClose()}>Close</IonButton>
+                        <IonIcon src={closeOutline} size="large" onClick={()=>onClose()}/>
+                        {/*<IonButton onClick={() => onClose()}>Close</IonButton>*/}
                     </IonButtons>
                 </IonToolbar>
             </IonHeader>
@@ -209,11 +212,12 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                                     <IonInput value={tribeInfo && title} placeholder="Verse Name"
                                               onIonChange={e => setTitle(e.detail.value!)}/>
                                 </div>
-                                {
-                                    !!forkGroupId && <div className="fork-title">
-                                        By default, forks are named the same as their upstream verse. You can customize the name to distinguish it further.
-                                    </div>
-                                }
+                                {/*{*/}
+                                {/*    !!forkGroupId && <div className="fork-title">*/}
+                                {/*        /!*By default, forks are named the same as their upstream verse. You can customize the name to distinguish it further.*!/*/}
+                                {/*        */}
+                                {/*    </div>*/}
+                                {/*}*/}
                             </div>
                         }
                         {
@@ -266,18 +270,37 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
 
                         {
                             !!forkGroupId && <div className="fork-title" style={{padding: "12px 0 0"}}>
-                                <IonIcon src={informationCircleOutline} style={{transform: 'translateY(3px)'}}/> You are creating a fork of <b>#{tribeService.getGroupIds().indexOf(forkGroupId) + 1} pin</b> in your personal account.<br/>
-                                {/*A fork is a copy of a verse. Forking a pin allows you to freely experiment with changes without affecting the original verse.*/}
+                                <div className="fork-decs">
+                                    <div className="create-title">Pos</div>
+                                    <div><IonText color="primary">#{tribeService.getGroupIds().indexOf(forkGroupId) + 1}</IonText></div>
+                                </div>
+
+                                <div className="fork-decs">
+                                    <div className="create-title">Tag</div>
+                                    <div className="text-pre" style={{padding: "0 0 0 12px"}}>
+                                        <IonText color="primary">{themeTag}</IonText>
+                                    </div>
+                                </div>
+
+                                <div className="create-title" style={{marginTop: 6}}>Photo</div>
+                                <div style={{display: "flex", justifyContent: "center",marginTop: 12}}>
+                                    {
+                                        imgUrl && <ImageView url={(imgUrl as MsgTextImage).url} width={(imgUrl as MsgTextImage).width} height={(imgUrl as MsgTextImage).height}/>
+                                    }
+                                </div>
                             </div>
                         }
+
+
+
                     </div>
                     <div className="modal-btn">
                         <IonRow>
                             <IonCol size="4">
-                                <IonButton fill="outline" expand="block" onClick={() => onClose()}>Cancel</IonButton>
+                                <IonButton  className="btn-common" fill="outline" expand="block" onClick={() => onClose()}>Cancel</IonButton>
                             </IonCol>
                             <IonCol size="8">
-                                <IonButton expand="block" disabled={showLoading} onClick={() => {
+                                <IonButton className="btn-common" expand="block" disabled={showLoading} onClick={() => {
                                     setShowLoading(true)
                                     createTribe().then((tribeId: string) => {
                                         onOk(tribeId)
@@ -296,7 +319,7 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                                             console.error(e)
                                         })
                                     })
-                                }}>Ok</IonButton>
+                                }}>OK</IonButton>
                             </IonCol>
                         </IonRow>
                     </div>

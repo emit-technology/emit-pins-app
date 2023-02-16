@@ -22,6 +22,7 @@ import {utils} from "../../common";
 import {ImageView} from "../utils/ImageView";
 import {useAppDispatch} from "../../common/state/app/hooks";
 import {saveDataState} from "../../common/state/slice/dataSlice";
+import {closeOutline} from "ionicons/icons";
 
 interface Props {
     isOpen: boolean;
@@ -112,7 +113,7 @@ export const RoleEditModal: React.FC<Props> = ({isOpen, roleInfo, onOk, onClose}
                 <IonToolbar>
                     <IonTitle>{roleInfo ? "Update" : "New"} Role</IonTitle>
                     <IonButtons slot="end">
-                        <IonButton onClick={() => onClose()}>Close</IonButton>
+                        <IonIcon src={closeOutline} size="large" onClick={() => onClose()}/>
                     </IonButtons>
                 </IonToolbar>
             </IonHeader>

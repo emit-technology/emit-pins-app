@@ -8,7 +8,7 @@ import {
     IonLabel,
     IonText,
     IonRow,
-    IonCol,
+    IonCol,useIonToast,
     IonToolbar,
     IonButtons,
     IonButton,
@@ -22,6 +22,7 @@ import BigNumber from "bignumber.js";
 import {tribeService} from "../../service/tribe";
 import {TribeInfoModal} from "./TribeInfoModal";
 import {utils} from "../../common";
+import useToast from "../../../../../pancake/pancake-frontend/src/hooks/useToast";
 
 interface Props {
     tribeInfo: TribeInfo;
@@ -47,6 +48,8 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
     const [stickyMsg, setStickyMsg] = useState(null);
 
     const [isLoading, setIsLoading] = useState(false);
+
+    const [present] = useIonToast();
 
 
     const dispatchData = useAppSelector(state => state.jsonData);
@@ -299,6 +302,10 @@ const TribeHeaderChild: React.FC<Props> = ({tribeInfo, showPin, onCancelShowPin,
                             </IonButton>
                         </IonButtons> :
                             <img src="./assets/img/icon/moreOutline.png" slot='end' height={24} onClick={(e) => {
+                                if(tribeInfo && !!tribeInfo.drop){
+                                    present({position: "top", color: "danger", message:"The verse has been discarded!", duration: 2000})
+                                    return
+                                }
                                 e.persist();
                                 setShowActionSheet(true)
                             }}/>

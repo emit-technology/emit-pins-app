@@ -148,6 +148,7 @@
   font-weight: bold;
   margin-top: 12px;
   margin-bottom: 12px;
+  font-family: SFBold !important;
 }
 
 .radius-6 {
@@ -882,4 +883,10 @@ position: absolute;
 
 .action-cancel-btn  >div:nth-child(2) {
   color: #fff !important;
+}
+
+.btn-common {
+  --border-radius: 32px;
+  font-family: 'SFBold' !important;
+  --border-width: 2px;
 }

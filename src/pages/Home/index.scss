@@ -645,3 +645,21 @@
 //  -o-transition: transform 0.5s ease-in-out;
 //  transition: transform 0.5s ease-in-out;
 //}
+
+.fork-decs{
+  display: flex;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: 16px;
+  border-radius: 32px;
+  border: 1.5px solid #F0F2F3;
+  align-items: center;
+  margin: 12px 0;
+  font-family: SFProText-Semibold !important;
+  text-align: right;
+}
+
+.fork-decs > div{
+  //font-family: SF !important;
+  font-size: 15px;
+}

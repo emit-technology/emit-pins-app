@@ -150,7 +150,7 @@ export const Text: React.FC<Props> = ({
 
     const genMetadataEl = () =>{
 
-        return meta && <div className="og-card-box">
+        return meta && meta.title && <div className="og-card-box">
                 {
                     (meta as Metadata).og &&  (meta as Metadata).og.image && <div className="og-card-image"><img src={(meta as Metadata).og.image} style={{borderRadius: '12px 12px 0 0', verticalAlign: "middle"}}/></div>
                 }

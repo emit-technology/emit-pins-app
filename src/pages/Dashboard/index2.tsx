@@ -1,23 +1,25 @@
 import * as React from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {
-    IonModal,
     IonContent,
     IonHeader,
+    IonLoading,
     IonMenu,
     IonMenuToggle,
-    IonSplitPane,
+    IonModal,
     IonPage,
+    IonSplitPane,
     IonText,
     IonTitle,
     IonToast,
-    IonToolbar, useIonAlert, useIonToast, IonLoading,
+    IonToolbar,
+    useIonAlert,
+    useIonToast,
 } from "@ionic/react";
-import {GroupMsg, Message, PinnedSticky, TribeInfo, TribeRole, WsStatus} from "../../types";
+import {GroupMsg, PinnedSticky, TribeInfo, TribeRole, WsStatus} from "../../types";
 import {emitBoxSdk, tribeService} from "../../service";
 import {AccountModel, ChainType, SettleResp} from "@emit-technology/emit-lib";
-import {
-    close,
-} from "ionicons/icons";
+import {close,} from "ionicons/icons";
 
 import './index.scss';
 import selfStorage from "../../common/storage";
@@ -39,7 +41,6 @@ import walletWorker from "../../worker/walletWorker";
 import {utils} from "../../common";
 import {CreateModal} from "../../components/Account/modal";
 import {RolesAvatarModal} from "../../components/Role/RolesAvatarModal";
-import {useCallback, useEffect, useMemo, useState} from "react";
 import copy from "copy-to-clipboard";
 import {useAppSelector} from "../../common/state/app/hooks";
 
@@ -362,20 +363,20 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId,isDetailMod
             )
             if(tribeInfo && !!((tribeInfo as TribeInfo).silence)){
                 buttons.push({
-                    text: 'Resume', icon: "./assets/img/icon/resumeChat.png", handler: () => {
+                    text: 'Unmute', icon: "./assets/img/icon/resumeChat.png", handler: () => {
                         tribeService.unForbidTribe(config.tribeId).catch(e=>console.error(e));
                     }
                 })
             }else{
                 buttons.push({
-                    text: 'Ban', icon: "./assets/img/icon/banChatBlue.png", handler: () => {
+                    text: 'Mute', icon: "./assets/img/icon/banChatBlue.png", handler: () => {
                         tribeService.forbidTribe(config.tribeId).catch(e=>console.error(e));
                     }
                 })
             }
             buttons.push(
                 {
-                    text: 'Delete', icon: "./assets/img/icon/deleteRed.png", role: 'destructive', handler: () => {
+                    text: 'Discard Verse', icon: "./assets/img/icon/deleteRed.png", role: 'destructive', handler: () => {
                         presentAlert({
                             header: `Delete [${tribeInfo && (tribeInfo as TribeInfo).title}]`,
                             subHeader: "You are deleting the verse, are you sure?",
@@ -663,7 +664,12 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId,isDetailMod
                                         menuButtons && menuButtons.map((v,i)=>{
                                             return <div key={i} className={`action-sheet-item ${menuButtons.length - 1 == i && "action-cancel-btn"}`} onClick={()=>{
                                                 setShowActionSheet(false)
+                                                if(isConnecting !== WsStatus.active){
+                                                    presentToast({message: "Account not login!", position: "top", duration: 2000, color: "danger"})
+                                                    return
+                                                }
                                                 v.handler()
+
                                             }}>
                                                 <div style={menuButtons.length - 3 == i?{left:14}:{}}><img src={v.icon} height={24}/></div>
                                                 <div style={v.role == "destructive"?{color: "#f82f24"}:{}}>{v.text}</div>

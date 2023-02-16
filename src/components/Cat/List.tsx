@@ -14,15 +14,17 @@ import {
 } from "@ionic/react";
 import './index.scss';
 import {closeOutline} from "ionicons/icons";
+import {tribeService} from "../../service/tribe";
 // import {XBlock, XMasonry} from "react-xmasonry";
 // import Masonry, {ResponsiveMasonry} from "react-responsive-masonry"
 interface Props {
     isOpen: boolean;
     onClose: () => void;
     items: Array<CatInfo>
+    onAdoptCat: ()=>void;
 }
 
-export const CatList: React.FC<Props> = ({items, isOpen, onClose,}) => {
+export const CatList: React.FC<Props> = ({items, isOpen, onClose,onAdoptCat}) => {
     return <>
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-cat-modal" >
             {/*<IonHeader>*/}
@@ -45,9 +47,11 @@ export const CatList: React.FC<Props> = ({items, isOpen, onClose,}) => {
                            <div className="cat-empty-box" style={{backgroundImage: `url('./assets/img/icon/catDashRec.svg')`}}>
                                <div style={{marginBottom: 20}}>
                                    Seems like you don’t have a noki yet.<br/>
-                                   {/*Adopt one right now!*/}
+                                   Adopt one right now!
                                </div>
-                               {/*<IonButton size="small">Adopt</IonButton>*/}
+                               <IonButton size="small" onClick={()=>{
+                                   onAdoptCat();
+                               }}>Adopt</IonButton>
                            </div>
                        </div>
                    }
