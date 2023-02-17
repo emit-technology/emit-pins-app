@@ -200,6 +200,7 @@ class TribeService implements ITribe {
 
     adpotNoki = async (): Promise<boolean> => {
         // const account = await emitBoxSdk.getAccount();
+        await this.userCheckAuth();
         const rest: TribeResult<any> = await this._rpc.post('/tribe/adpotNoki', {});
         if (rest && rest.code == 0) {
             return Promise.resolve(true)

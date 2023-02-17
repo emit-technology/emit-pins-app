@@ -121,13 +121,11 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, isModal,rou
         setShowCatList(true)
     }
 
-    const adoptCat = useCallback(async ()=>{
-        setShowLoading(true)
+    const adoptCat = async ()=>{
         await tribeService.adpotNoki()
         const items = await tribeService.catItems();
         setCatItems(items);
-        setShowLoading(false)
-    },[])
+    }
 
     return <div style={{position: "relative", height: "100%"}}>
         {
@@ -333,7 +331,16 @@ export const SideBar: React.FC<Props> = ({onRequestAccount, account, isModal,rou
         <AssetsModal address={account && account.addresses[ChainType.EMIT]} isOpen={showAssetsModal}
                      onClose={() => setShowAssetsModal(false)}/>
 
-        <CatList isOpen={showCatList} onClose={()=>setShowCatList(false)} items={catItems} onAdoptCat={adoptCat}/>
+        <CatList isOpen={showCatList} onClose={()=>setShowCatList(false)} items={catItems} onAdoptCat={()=>{
+            setShowLoading(true)
+            adoptCat().then(()=>{
+                setShowLoading(false)
+            }).catch(e=>{
+                const err = typeof e == 'string' ? e : e.message;
+                setShowLoading(false)
+                present({position: "top", color: "danger", message: err, duration: 2000})
+            })
+        }}/>
 
         <IonLoading
             cssClass='my-custom-class'
