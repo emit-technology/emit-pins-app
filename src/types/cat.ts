@@ -9,4 +9,10 @@ export interface CatInfo {
     createAt: number;
     visibility: number;
     life: number
+
+
+    RelatedUser: string
+    status: number;
+    updateTime: number;
+    user: string;
 }

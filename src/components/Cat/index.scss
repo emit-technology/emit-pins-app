@@ -7,7 +7,7 @@
 
 .cat-box-info {
   position: absolute;
-  width: 280px;
+  width: 270px;
   height: 360px;
   left: 0;
   top: 0;
@@ -62,7 +62,7 @@
 }
 
 .cat-box-img {
-  width: 280px;
+  width: 270px;
   height: 280px;
   position: relative;
   display: flex;
@@ -131,35 +131,194 @@
 }
 
 .noki-title{
-  font-size: 36px;
-  width: 100%;
+  font-size: 24px;
+  width: 190px;
   text-align: center;
   margin-bottom: 12px;
-  color: #333333;
+  color: #ffffff;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 12px;
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  height: 108px;
-  background: var(--ion-color-tertiary);
+  padding: 16px 12px;
 }
 
 .noki-box{
   position: relative;
-  padding-top: 100px;
+  height: 100%;
+  cursor: pointer;
 }
 
 .noki-title img{
-  height: 68px;
+  height: 42px;
 }
 
 .noki-title > div:nth-child(2) {
   width: 130px;
   line-height: 0.9 !important;
   text-align: left !important;
-  /* padding-left: 8px; */
   font-family: SF-Pro-Rounded-Bold !important;
+}
+
+.noki-ion-modal {
+  --width: 100%;
+  --height: 100%;
+  --background: transparent !important;
+}
+
+.noki-ion-content{
+  --background: transparent !important;
+}
+
+.modal-wrapper, .inner-scroll {
+  background: transparent !important;
+}
+
+.noki-body {
+  position: relative;
+  width: 292px;
+  height: 368px;
+  background: linear-gradient(180deg, #000000 0%, #3C3C3C 85.48%, #464646 100%);
+  border-radius: 28px;
+}
+
+.noki-body-exist {
+  background: linear-gradient(180deg, #333333 0%, #292929 100%) !important;
+  border-radius: 28px !important;
+  height: 222px !important;
+  margin-top: 38px;
+
+}
+
+.noki-body >div:nth-child(2) {
+  transform: translateY(-42px);
+}
+
+.noki-body >div:nth-child(3){
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  transform: translateY(-24px);
+}
+
+.noki-body >div:nth-child(3) >div{
+  font-size: 14px;
+  line-height: 16px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  letter-spacing: -0.21px;
+  color: #D1D1D1;
+  /* width: 134px; */
+  height: 82px;
+  flex-direction: column;;
+
+}
+
+.noki-body >div:nth-child(3) >div >div{
+  font-family: SFProText-Medium !important;
+}
+.noki-body-btn{
+  width: 292px;
+  height: 48px;
+  background: #DFFC0D;
+  border-radius: 50px;
+  position: absolute;
+  bottom: -80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* padding-top: 20px; */
+  font-size: 20px;
+  line-height: 24px;
+  text-align: center;
+  font-family: SF-Pro-Rounded-Bold !important;
+  color: #333333;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+//.noki-body-box >div:first-child {
+//  position: absolute;
+//  top: 18px;
+//  left: 50%;
+//  transform: translate(-50%, 0%);
+//  width: 48px;
+//  background: var(--ion-color-secondary);
+//  height: 48px;
+//  border-radius: 50%;
+//  display: flex;
+//  justify-content: center;
+//  align-items: center;
+//}
+
+.noki-body-box{
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  position: relative;
+}
+
+.noki-bottom{
+  display: flex;
+  position: absolute;
+  justify-content: center;
+  top: 155px;
+  z-index: -2;
+  width: 125%;
+  transform: translateX(-10%);
+}
+
+.noki-bottom >div{
+  position: relative;
+  height: 1000px;
+  background: linear-gradient(180deg, #2F2F2F 0%, #0B0B0B 100%);
+  border-radius: 210px 210px 0px 0px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.noki-bottom-text{
+  width: 300px;
+  text-align: center;
+  color: #D1D1D1;
+  font-size: 14px;
+  line-height: 17px;
+  position: absolute;
+  bottom: -160px;
+}
+
+.noki-bottom-text > div{
+  font-family: SFProText-Medium !important;
+  letter-spacing: -0.21px;
+}
+
+.noki-status-text{
+  width: 266px;
+  height: 266px;
+  border-radius: 50%;
+  background: #333333;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 20px;
+}
+
+.noki-status-text > div {
+  position: absolute;
+  height: 20px;
+  font-size: 13px;
+  background: #464646;
+  color: #6C6C6C;
+  border-radius: 32px;
+  width: 80px;
+  text-align: center;
+  z-index: 10;
+}
+
+.noki-exist{
+  bottom: -280px !important;
+  width: 350px !important;
 }
