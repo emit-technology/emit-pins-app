@@ -79,7 +79,7 @@ export const CatItem: React.FC<Props> = ({catInfo}) => {
                 </div>
                 <div className="cat-desc">
                     <div>
-                        <div className="cat-box-info-text1">PINs NFT</div>
+                        <div className="cat-box-info-text1">Life</div>
                         <div className="cat-box-info-text2">
                             <img src="./assets/img/icon/lifeOutline.png" height={16}
                                  style={{verticalAlign: "middle", marginRight: 2}}/>
