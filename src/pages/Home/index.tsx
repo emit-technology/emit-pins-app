@@ -52,6 +52,9 @@ interface State {
 
 interface Props {
     router: any;
+    nokiId?: string;
+    nokiReward?: string;
+    opType?: string;
 }
 
 export class HomePage extends React.Component<Props, State> {
@@ -229,13 +232,13 @@ export class HomePage extends React.Component<Props, State> {
         } = this.state;
 
         return <>
-            <IonMenu contentId="main-home" swipeGesture={false}      onIonDidOpen={() => {
+            <IonMenu contentId="main-home" swipeGesture={false} onIonDidOpen={() => {
                 this.fetchInboxNum()
             }}>
                 <IonHeader>
                     <IonToolbar className="msg-toolbar">
                         <IonMenuToggle>
-                            <div style={{paddingLeft: 12}}>
+                            <div style={{paddingLeft: 12}} id="toggleBtn">
                                 <img src="./assets/img/icon/backOutline.png" height={24}/>
                             </div>
                         </IonMenuToggle>
@@ -248,7 +251,11 @@ export class HomePage extends React.Component<Props, State> {
                     {/*<IonMenuToggle>*/}
                     {/*    <IonButton>Click to close the menu</IonButton>*/}
                     {/*</IonMenuToggle>*/}
-                    <SideBar inboxNum={inboxNum} router={this.props.router} onRequestAccount={() => {
+                    <SideBar inboxNum={inboxNum} router={this.props.router}
+                             opType={this.props.opType}
+                             nokiReward={this.props.nokiReward}
+                             nokiId={this.props.nokiId}
+                             onRequestAccount={() => {
                         this.init().catch(e => {
                             // const err = typeof e == 'string' ? e : e.message;
                             // this.setShowToast(true, err)

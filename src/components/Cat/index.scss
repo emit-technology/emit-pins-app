@@ -27,33 +27,41 @@
   color: #fff;
 }
 
-.cat-box-info-text1{
+.cat-box-info-text1 {
   color: #868990;
-  font-size: 13px;
-  text-align: right;
+  font-size: 12px;
+  color: rgba(232, 41, 41, 0.7);
 }
 
 
-.cat-box-info-text2{
+.cat-box-info-text2 {
   color: #E82929;
-  font-size: 13px;
+  font-size: 18px;
+  font-family: SFBold !important;
+  background: rgba(232, 41, 41, 0.2);
+  border-radius: 9px;
+  width: 98px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
 }
 
-.cat-box-info-text3{
+.cat-box-info-text3 {
   color: #000;
   font-size: 18px;
   font-family: SFBold !important;
-  margin-top: 4px;
+  //margin-top: 4px;
   letter-spacing: -0.21px;
 }
 
-.cat-box-info-text4{
+.cat-box-info-text4 {
   color: #000;
   font-size: 16px;
   font-weight: 500;
 }
 
-.cat-desc{
+.cat-desc {
   background: rgba(255, 255, 255, 0.93);
   padding: 10px 12px;
   border-radius: 16px;
@@ -74,7 +82,7 @@
   border-radius: 20px;
 }
 
-.cat-box-img-div{
+.cat-box-img-div {
   width: 280px;
   height: 360px;
   position: absolute;
@@ -84,19 +92,25 @@
   border-radius: 20px;
 }
 
-.cat-content{
+.cat-content {
   display: flex;
   justify-content: center;
   padding: 12px;
 }
 
-.cat-desc > div{
+.cat-desc > div:nth-child(2) {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
 }
 
-.tribe-cat-modal{
+.cat-desc > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tribe-cat-modal {
   overflow-y: scroll;
   --background: var(--ion-color-light);
   --border-radius: 20px !important;
@@ -110,7 +124,7 @@
   position: relative;
 }
 
-.cat-empty-box{
+.cat-empty-box {
   width: 280px;
   height: 360px;
   display: flex;
@@ -130,25 +144,28 @@
   --background: url("../../img/nokiBg.png");
 }
 
-.noki-title{
+.noki-title {
+  /* width: 215px; */
   font-size: 24px;
-  width: 190px;
   text-align: center;
-  margin-bottom: 12px;
+  /* margin-bottom: 12px; */
   color: #ffffff;
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  /* align-items: flex-end; */
+  /* justify-content: center; */
   padding: 16px 12px;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
 }
 
-.noki-box{
+.noki-box {
   position: relative;
   height: 100%;
   cursor: pointer;
+  overflow: hidden;
 }
 
-.noki-title img{
+.noki-title img {
   height: 42px;
 }
 
@@ -165,7 +182,7 @@
   --background: transparent !important;
 }
 
-.noki-ion-content{
+.noki-ion-content {
   --background: transparent !important;
 }
 
@@ -189,18 +206,18 @@
 
 }
 
-.noki-body >div:nth-child(2) {
+.noki-body > div:nth-child(2) {
   transform: translateY(-42px);
 }
 
-.noki-body >div:nth-child(3){
+.noki-body > div:nth-child(3) {
   display: flex;
   justify-content: center;
   width: 100%;
   transform: translateY(-24px);
 }
 
-.noki-body >div:nth-child(3) >div{
+.noki-body > div:nth-child(3) > div {
   font-size: 14px;
   line-height: 16px;
   display: flex;
@@ -214,10 +231,11 @@
 
 }
 
-.noki-body >div:nth-child(3) >div >div{
+.noki-body > div:nth-child(3) > div > div {
   font-family: SFProText-Medium !important;
 }
-.noki-body-btn{
+
+.noki-body-btn {
   width: 292px;
   height: 48px;
   background: #DFFC0D;
@@ -251,14 +269,14 @@
 //  align-items: center;
 //}
 
-.noki-body-box{
+.noki-body-box {
   display: flex;
   justify-content: center;
   height: 100%;
   position: relative;
 }
 
-.noki-bottom{
+.noki-bottom {
   display: flex;
   position: absolute;
   justify-content: center;
@@ -268,7 +286,7 @@
   transform: translateX(-10%);
 }
 
-.noki-bottom >div{
+.noki-bottom > div {
   position: relative;
   height: 1000px;
   background: linear-gradient(180deg, #2F2F2F 0%, #0B0B0B 100%);
@@ -278,22 +296,23 @@
   justify-content: center;
 }
 
-.noki-bottom-text{
+.noki-bottom-text {
   width: 300px;
   text-align: center;
   color: #D1D1D1;
   font-size: 14px;
   line-height: 17px;
   position: absolute;
-  bottom: -160px;
+  bottom: -200px;
 }
 
-.noki-bottom-text > div{
+.noki-bottom-text > div {
   font-family: SFProText-Medium !important;
   letter-spacing: -0.21px;
+
 }
 
-.noki-status-text{
+.noki-status-text {
   width: 266px;
   height: 266px;
   border-radius: 50%;
@@ -317,8 +336,135 @@
   text-align: center;
   z-index: 10;
 }
+.noki-status-active{
+  position: absolute;
+  height: 20px;
+  font-size: 13px;
+  background: #DFFC0D;
+  color: #333333;
+  font-family: SF-Pro-Rounded-Bold !important;
+  border-radius: 32px;
+  width: 80px;
+  text-align: center;
+  z-index: 10;
+}
+.noki-exist {
+  bottom: -340px !important;
+  width: 368px !important;
+}
 
-.noki-exist{
-  bottom: -280px !important;
-  width: 350px !important;
+.font-symbol {
+  font-family: SF-Pro-Rounded-Bold !important;
+  font-size: 32px;
+  color: #F8F8F7;
+  background: #404040;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.noki-text-btn{
+  background: #DFFC0D;
+  border-radius: 32px;
+  height: 44px;
+  width: 157px;
+  letter-spacing: -0.21px;
+  font-family: SF-Pro-Rounded-Bold !important;
+  color: #333333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.noki-item-2{
+  display: flex;
+  justify-content: space-around;
+  padding: 0 60px;
+}
+
+.noki-item-3 {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  margin-top: 24px;
+}
+
+.noki-item-3 > div:nth-child(2){
+  height: 44px;
+  font-family: 'SF Pro Rounded' !important;
+  font-size: 10px;
+  line-height: 14px;
+  display: flex;
+  align-items: center;
+  color: #D1D1D1;
+  text-align: left;
+}
+
+.noki-reward-text {
+  position: absolute;
+  right: 12px;
+  top: 16px;
+  color: rgb(248, 248, 247);
+  text-align: right;
+  text-shadow: rgba(0, 0, 0, 0.25) 0px 0px 4px;
+  font-size: 16px;
+  font-family: SF-Pro-Rounded-Bold !important;
+  z-index: 1;
+}
+
+.noki-reward-img{
+  border-radius: 20px;
+  transform: rotate(-9.42deg) !important;
+  display: flex;
+  justify-content: center;
+}
+
+.noki-reward-number {
+  transform: translateY(12px) !important;
+  justify-content: center;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  color: #ffffff;
+  font-size: 15px;
+}
+
+.noki-reward-number > span{
+  font-size: 42px !important;
+  font-family: SF-Pro-Rounded-Bold !important;
+  color: #FFFFFF;
+  padding: 12px;
+}
+
+.noki-reward-ok{
+  width: 292px;
+  height: 90px;
+  background: #DFFC0D;
+  border-radius: 0px 0px 20px 20px;
+  display: flex;
+  justify-content: center;
+  font-size: 20px;
+  align-items: center;
+  transform: translateY(66px);
+  z-index: -1;
+  overflow: hidden;
+  position: absolute;
+  padding-top: 24px;
+  font-family: SF-Pro-Rounded-Bold !important;
+  bottom: 0;
+}
+
+.noki-reward-head {
+  display: flex;
+  align-items: center;
+  /* z-index: 10; */
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
+  border-radius: 28px 28px 0px 0px;
+}
+
+.my-custom-class{
+
 }

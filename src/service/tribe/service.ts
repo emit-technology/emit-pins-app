@@ -1305,6 +1305,21 @@ class TribeService implements ITribe {
         return arr
     }
 
+    activateTweet = async (): Promise<string> => {
+        const rest: TribeResult<string> = await this._rpc.post('/tribe/activateTweet', {});
+        if (rest && rest.code == 0) {
+            return rest.data
+        }
+        return Promise.reject(rest.message);
+    }
+
+    feedTweet = async (): Promise<string> => {
+        const rest: TribeResult<string> = await this._rpc.post('/tribe/feedTweet', {});
+        if (rest && rest.code == 0) {
+            return rest.data
+        }
+        return Promise.reject(rest.message);
+    }
 
 }
 

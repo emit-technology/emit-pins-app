@@ -203,21 +203,8 @@ export const utils = {
 
 
     goTo: (verseId: string) =>{
-        // window.location.href = `/${verseId}`
         const _url = `/${verseId}`;
-        // alert(_url)
-        // if(utils.isApp()){
-        //     // Browser.open({ url: _url });
-        //     App.getLaunchUrl()
-        // }else{
-            // if(!verseWindow || verseWindow.closed){
-            //     verseWindow = window.open(_url, 'mozillaTab');
-            // }else{
-            //     verseWindow.focus();
-                window.location.href = _url
-            // }
-        // }
-
+        window.location.href = _url
     },
 
     isAndroid: (): boolean => {

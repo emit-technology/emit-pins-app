@@ -5,28 +5,28 @@ import {Device} from "@capacitor/device";
 import {utils} from "../../common";
 import {Toast} from "@capacitor/toast";
 
-export const isApp = async () =>{
+export const isApp = async () => {
     try {
         const deviceInfo = await Device.getInfo();
         return deviceInfo.platform == "ios" || deviceInfo.platform == "android"
-    }catch (e){
+    } catch (e) {
         console.error(e)
     }
     return false;
 }
 
 export const addListeners = async () => {
-    if(! await isApp()){
+    if (!await isApp()) {
         return;
     }
     await PushNotifications.addListener('registration', token => {
         console.info('Registration token: ', token.value);
         selfStorage.setItem("pushTokenValue", token.value)
 
-        tribeService.registerDevice(token.value).then(rest=>{
+        tribeService.registerDevice(token.value).then(rest => {
             console.log("registerDevice success");
-        }).catch(e=>{
-            console.error("registerDevice err: ",e)
+        }).catch(e => {
+            console.error("registerDevice err: ", e)
         });
     });
 
@@ -36,35 +36,49 @@ export const addListeners = async () => {
     });
 
     await PushNotifications.addListener('pushNotificationActionPerformed', (actionPerformed: ActionPerformed) => {
-            console.log('Push action performed: ' + JSON.stringify(actionPerformed));
+        console.log('Push action performed: ' + JSON.stringify(actionPerformed));
 
-            const notification = actionPerformed.notification;
+        const notification = actionPerformed.notification;
 
-            if(utils.isIos()){
-                if(notification && notification.data && notification.data["aps"] && notification.data["aps"]["data"]&& notification.data["aps"]["data"]["tribeId"]){
-                    const tribeId = notification.data["aps"]["data"]["tribeId"];
+        if (utils.isIos()) {
+            if (notification && notification.data && notification.data["aps"] && notification.data["aps"]["data"] && notification.data["aps"]["data"]["tribeId"]) {
+                const tribeId = notification.data["aps"]["data"]["tribeId"];
+                if (tribeId) {
                     utils.goTo(tribeId);
+                } else {
+                    const noki: { id: string, reward: string,msgType:string } = notification.data["aps"]["data"]["noki"];
+                    if(!!noki){
+                        window.location.href = `/noki/${noki.id}/${noki.reward}/${noki.msgType}`;
+                    }
                 }
             }
+        }
 
-            if(utils.isAndroid()){
-                if(actionPerformed && actionPerformed.notification.data){
-                    const tribeId = actionPerformed.notification.data["tribeId"];
+        if (utils.isAndroid()) {
+            if (actionPerformed && actionPerformed.notification.data) {
+                const tribeId = actionPerformed.notification.data["tribeId"];
+                if (tribeId) {
                     utils.goTo(tribeId);
+                } else {
+                    const noki: { id: string, reward: string,msgType:string } = actionPerformed.notification.data["noki"];
+                    if(!!noki){
+                        window.location.href = `/noki/${noki.id}/${noki.reward}/${noki.msgType}`;
+                    }
                 }
             }
+        }
 
-        })
+    })
 
     await PushNotifications.addListener('pushNotificationReceived', notification => {
-        if(utils.isAndroid()){
+        if (utils.isAndroid()) {
             Toast.show({
                 text: notification.body,
                 position: "top",
                 duration: "long"
             });
         }
-        if(utils.isIos()){
+        if (utils.isIos()) {
             /**
              * "data": {
 			"aps": {
@@ -91,7 +105,7 @@ export const addListeners = async () => {
 }
 
 export const registerNotifications = async () => {
-    if(!await isApp()){
+    if (!await isApp()) {
         return;
     }
     let permStatus = await PushNotifications.checkPermissions();
@@ -107,8 +121,8 @@ export const registerNotifications = async () => {
     await PushNotifications.register();
 }
 
-export const getDeliveredNotifications = async ():Promise<any> => {
-    if(! await isApp()){
+export const getDeliveredNotifications = async (): Promise<any> => {
+    if (!await isApp()) {
         return;
     }
     const notificationList = await PushNotifications.getDeliveredNotifications();

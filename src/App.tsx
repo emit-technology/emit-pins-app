@@ -121,6 +121,13 @@ const App: React.FC = () => {
                                     {/*    return <HomePage />*/}
                                     {/*}}/>*/}
 
+                                    <Route exact path="/noki/:id/:reward/:opType" component={(props: any) => {
+                                        const nokiId = props.match.params.id;
+                                        const reward = props.match.params.reward;
+                                        const opType = props.match.params.opType;
+                                        return <HomePage router={routerRef.current} nokiId={nokiId} nokiReward={reward} opType={opType}/>
+                                    }}/>
+
                                     <Route exact path="/" component={(props: any) => {
                                         // setTimeout(()=>{
                                         //     window.location.href = `./4E6BFunxNE5`

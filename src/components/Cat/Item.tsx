@@ -8,15 +8,16 @@ import {createOutline} from "ionicons/icons";
 import {tribeService} from "../../service/tribe";
 import {useAppDispatch} from "../../common/state/app/hooks";
 import {saveDataState} from "../../common/state/slice/dataSlice";
-import {ImageView} from "../utils/ImageView";
 import {PhotoProvider, PhotoView} from "react-photo-view";
 import config from "../../common/config";
+import Countdown from 'react-countdown';
 
 interface Props {
     catInfo: CatInfo
+    onComplete: ()=>void;
 }
 
-export const CatItem: React.FC<Props> = ({catInfo}) => {
+export const CatItem: React.FC<Props> = ({catInfo,onComplete}) => {
 
     const [background, setBackground] = useState("");
     const [name, setName] = useState("");
@@ -28,7 +29,6 @@ export const CatItem: React.FC<Props> = ({catInfo}) => {
     useLayoutEffect(() => {
         const _imgDisplay = utils.convertImgDisplay(280, 280, catInfo.image);
         getBackgroundColor(_imgDisplay.displayUrl).then(bg => {
-            console.log("bg::", bg)
             setBackground(bg)
             console.log(bg.replace(")", " / 60%)"))
         });
@@ -42,7 +42,7 @@ export const CatItem: React.FC<Props> = ({catInfo}) => {
 
         <div className="cat-box" style={background ? {
             background: background,
-            boxShadow: `0px 16px 20px -12px ${background}cc`
+            boxShadow: `0px 16px 20px -12px #000000cc`
         } : {}}>
             <div className="cat-box-img">
                         <>
@@ -78,14 +78,34 @@ export const CatItem: React.FC<Props> = ({catInfo}) => {
                     }
                 </div>
                 <div className="cat-desc">
-                    <div>
-                        <div className="cat-box-info-text1">PINs NFT</div>
-                        <div className="cat-box-info-text2">
-                            <img src="./assets/img/icon/lifeOutline.png" height={16}
-                                 style={{verticalAlign: "middle", marginRight: 2}}/>
-                            {catInfo.life}%
+                    {
+                        catInfo.status !== 0 && <div>
+                            <div className="cat-box-info-text1">LIFE</div>
+                            <div className="cat-box-info-text2">
+                                <img src="./assets/img/icon/lifeOutline.png" height={16}
+                                     style={{verticalAlign: "middle", marginRight: 2}}/>
+                                {catInfo.life}%
+                            </div>
                         </div>
-                    </div>
+                    }
+                    {
+                        catInfo.status == 0 && <div>
+                            <div className="cat-box-info-text1">The Noki will expire in</div>
+                            <div className="cat-box-info-text2">
+                                <Countdown date={(catInfo.createAt + 60 * 60)*1000}
+                                           intervalDelay={1000}
+                                           zeroPadTime={2}
+                                           daysInHours
+                                           autoStart
+                                           onComplete={()=>{
+                                               setTimeout(()=>{
+                                                   onComplete()
+                                               },3000)
+                                           }}
+                                />
+                            </div>
+                        </div>
+                    }
                     <div>
                         <div>
                             <div className="cat-box-info-text3">{name}
@@ -126,7 +146,7 @@ export const CatItem: React.FC<Props> = ({catInfo}) => {
                                 }}/></div>
                             <div className="cat-box-info-text4">#{utils.ellipsisStr(catInfo.id, 5)}</div>
                         </div>
-                        <div className="cat-box-info-text1">
+                        <div className="cat-box-info-text1" style={{color: "#6C6C6C"}}>
                             <div>Adopted on</div>
                             <div>{new Date(catInfo.createAt * 1000).toLocaleDateString()}</div>
                         </div>
