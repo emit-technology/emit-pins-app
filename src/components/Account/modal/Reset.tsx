@@ -73,7 +73,7 @@ export const ResetModal:React.FC<Props> = ({isOpen,onOk,onUnlock,onClose})=>{
                     <IonButtons slot="start">
                         <IonButton onClick={() => onUnlock() }>Unlock</IonButton>
                     </IonButtons>
-                    <IonTitle>Identity Recovery</IonTitle>
+                    <IonTitle>Recover Identity</IonTitle>
                     <IonIcon src={closeOutline} size="large" onClick={()=>onClose()} slot="end"/>
                 </IonToolbar>
             </IonHeader>

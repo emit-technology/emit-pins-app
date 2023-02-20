@@ -11,12 +11,12 @@
 .men-item{
     border-bottom: 1px solid var(--ion-color-primary);
     padding: 6px 0;
-    font-family: SFProText-Medium;
+    font-family: SFProText-Medium !important;
 }
 
 .men-title{
     font-size: 20px;
-    font-family: SFBold;
+    font-family: SFBold !important;
     margin-bottom: 12px;
 }
 
