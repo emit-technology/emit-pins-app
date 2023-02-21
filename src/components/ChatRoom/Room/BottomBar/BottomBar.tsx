@@ -34,6 +34,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import {ThemeColors} from "../../../../common/getMainColor";
 import {utils} from "../../../../common";
 import {AirdropModal} from "./AirdropModal";
+import walletWorker from "../../../../worker/walletWorker";
 
 interface Props {
     selectRole?: TribeRole
@@ -180,16 +181,66 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
     // const avatar = utils.convertImgDisplay()
 
     const onAirdrop = async () =>{
-        await tribeService.checkTribeStatus();
-        await tribeService.userCheckAuth()
-        setShowAirdropModal(true)
+        setIsLoading(true)
+        checkRequestAccount().then(async ()=>{
+            setIsLoading(false)
+            await tribeService.checkTribeStatus();
+            // await tribeService.userCheckAuth()
+            setShowAirdropModal(true)
+        }).catch(e=>{
+            setIsLoading(false)
+        })
+
     }
 
     const onSendImage = async ()=>{
-        await tribeService.checkTribeStatus();
-        await tribeService.userCheckAuth()
-        setShowSendImage(true);
+        setIsLoading(true)
+        checkRequestAccount().then(async ()=>{
+            setIsLoading(false)
+            await tribeService.checkTribeStatus();
+            // await tribeService.userCheckAuth()
+            setShowSendImage(true);
+        }).catch(e=>{
+            setIsLoading(false)
+        })
     }
+
+    const checkRequestAccount = async ()=>{
+        let flag = false;
+        const isAvailable = await tribeService.isSessionAvailable();
+        console.log("====> isAvailable: ", isAvailable)
+        if(!isAvailable){
+            const isLock = await walletWorker.isLocked();
+            if (isLock) {
+                flag = true;
+            }
+            if(flag){
+                dispatch(saveDataState({
+                    tag: 'requestAccount',
+                    data: Date.now()
+                }))
+                return Promise.reject("Account not login");
+            }else{
+                const accounts = await walletWorker.accounts();
+                if(accounts && accounts.length>0){
+                    await tribeService.accountLogin(accounts[0])
+                    dispatch(saveDataState({
+                        tag: 'initData',
+                        data: Date.now()
+                    }))
+                }else{
+                    dispatch(saveDataState({
+                        tag: 'requestAccount',
+                        data: Date.now()
+                    }))
+                    return Promise.reject("Account not exist");
+                }
+            }
+            return Promise.resolve(true)
+        }
+        return Promise.resolve(true)
+    }
+
     return <>
         {
             !isDown && <IonFooter>
@@ -359,24 +410,27 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
                                                             //@ts-ignore
                                                             <IonButton className="footer-btn" color={(loading || tribeInfo && !!tribeInfo.drop)?"medium":"primary"} disabled={loading || tribeInfo && !!tribeInfo.drop}
                                                                        onClick={() => {
-                                                                           setLoading(true)
-                                                                           sendMsg().then(() => {
-                                                                               setLoading(false)
-                                                                               dispatch(saveDataState({
-                                                                                   data: JSON.stringify({refresh: 0}),
-                                                                                   tag: 'scrollToItem'
-                                                                               }))
-                                                                           }).catch(e => {
-                                                                               setLoading(false)
-                                                                               const err = typeof e == 'string' ? e : e.message;
-                                                                               present({
-                                                                                   message: err,
-                                                                                   duration: 2000,
-                                                                                   position: "top",
-                                                                                   color: "danger"
+                                                                           checkRequestAccount().then(()=>{
+                                                                               sendMsg().then(() => {
+                                                                                   // setLoading(false)
+                                                                                   dispatch(saveDataState({
+                                                                                       data: JSON.stringify({refresh: 0}),
+                                                                                       tag: 'scrollToItem'
+                                                                                   }))
+                                                                               }).catch(e => {
+                                                                                   // setLoading(false)
+                                                                                   const err = typeof e == 'string' ? e : e.message;
+                                                                                   present({
+                                                                                       message: err,
+                                                                                       duration: 2000,
+                                                                                       position: "top",
+                                                                                       color: "danger"
+                                                                                   })
+                                                                                   console.error(e)
                                                                                })
-                                                                               console.error(e)
+                                                                           }).catch(e=>{
                                                                            })
+
                                                                        }}>
                                                                 <span className="fonter-btn-text">Send</span>
                                                             </IonButton>

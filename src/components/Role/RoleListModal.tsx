@@ -25,6 +25,7 @@ import {tribeService} from "../../service/tribe";
 import {useAppDispatch, useAppSelector} from "../../common/state/app/hooks";
 import {saveDataState} from '../../common/state/slice/dataSlice';
 import {saveMessageState} from '../../common/state/slice/messageSlice';
+import walletWorker from "../../worker/walletWorker";
 
 interface Props {
     roles: Array<TribeRole>
@@ -138,6 +139,40 @@ const RoleListModalChild: React.FC<Props> = ({
         }
     }, [dispatchData.data]);
 
+    const checkRequestAccount = async ()=>{
+        let flag = false;
+        const isAvailable = await tribeService.isSessionAvailable();
+        if(!isAvailable){
+            const isLock = await walletWorker.isLocked();
+            if (isLock) {
+                flag = true;
+            }
+            if(flag){
+                dispatch(saveDataState({
+                    tag: 'requestAccount',
+                    data: Date.now()
+                }))
+                return Promise.reject("Account not login");
+            }else{
+                const accounts = await walletWorker.accounts();
+                if(accounts && accounts.length>0){
+                    await tribeService.accountLogin(accounts[0])
+                    dispatch(saveDataState({
+                        tag: 'initData',
+                        data: Date.now()
+                    }))
+                }else{
+                    dispatch(saveDataState({
+                        tag: 'requestAccount',
+                        data: Date.now()
+                    }))
+                    return Promise.reject("Account not exist");
+                }
+            }
+            return Promise.resolve(true)
+        }
+        return Promise.resolve(true)
+    }
 
     return <>
                 {
@@ -257,8 +292,14 @@ const RoleListModalChild: React.FC<Props> = ({
                                                     <IonIcon size="small" slot="end" src={createOutline} color="medium"
                                                              onClick={(e) => {
                                                                  e.stopPropagation();
-                                                                 setRoleInfo(v);
-                                                                 setShowRoleModal(true)
+                                                                 setShowLoading(true);
+                                                                 checkRequestAccount().then(()=>{
+                                                                     setShowLoading(false)
+                                                                     setRoleInfo(v);
+                                                                     setShowRoleModal(true)
+                                                                 }).catch(e=>{
+                                                                     setShowLoading(false)
+                                                                 })
                                                              }}/>
                                                 }
                                             </IonItem>

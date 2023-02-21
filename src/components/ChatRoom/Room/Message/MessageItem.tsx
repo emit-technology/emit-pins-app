@@ -89,8 +89,9 @@ const MessageItemChild:React.FC<Props> = ({ index,onSupport, pinnedSticky,
     // }, [index, firstItemIndex]);
     //
     if (!!pinnedSticky) {
+        const checked = checkedMsgArr.indexOf(pinnedSticky.records[0].id) > -1;
         return (
-            <div className="visual-msg-box"
+            <div className={`visual-msg-box ${checked && showPin && 'pin-background'}`}
                  style={{padding: index >= total - 1 && index == visibleRange.endIndex ? "0 0 44px" : "0" }}
                  key={index}>
 

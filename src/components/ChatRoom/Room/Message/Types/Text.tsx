@@ -186,13 +186,16 @@ export const Text: React.FC<Props> = ({
 
     const isMind = contentText && contentText.indexOf("💭") == 0;
 
-    return <div style={{width: '100%'}} className={isSystem ? `box msg-no-role` : `box`}>
-
+    return <>
         {
             showPin && <div className="pin-check">
                 <IonCheckbox name="pinMsgId" checked={checked} value={msg.id} disabled={msg && msg.msgType == MessageType.Airdrop}/>
             </div>
         }
+
+        <div style={{width: '100%'}} className={isSystem ? `box msg-no-role` : `box`}>
+
+
 
         {
             (
@@ -379,4 +382,5 @@ export const Text: React.FC<Props> = ({
         }
 
     </div>
+        </>
 }

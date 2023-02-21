@@ -42,7 +42,8 @@ import {utils} from "../../common";
 import {CreateModal} from "../../components/Account/modal";
 import {RolesAvatarModal} from "../../components/Role/RolesAvatarModal";
 import copy from "copy-to-clipboard";
-import {useAppSelector} from "../../common/state/app/hooks";
+import {useAppDispatch, useAppSelector} from "../../common/state/app/hooks";
+import {saveDataState} from "../../common/state/slice/dataSlice";
 
 interface Props {
     tribeId: string
@@ -337,7 +338,13 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId,isDetailMod
             {
                 text: 'Create Verse', icon: './assets/img/icon/createBlue.png', handler: () => {
                     console.log('Share clicked');
-                    setShowCreateTribe(true)
+                    setShowLoading(true)
+                    checkRequestAccount().then(()=>{
+                        setShowLoading(false)
+                        setShowCreateTribe(true)
+                    }).catch(e=>{
+                        setShowLoading(false)
+                    })
                 }
             },
             {
@@ -351,12 +358,25 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId,isDetailMod
         if (!!tribeInfo && owner == tribeInfo.keeper) {
             buttons.unshift({
                     text: 'Pin', icon: './assets/img/icon/pinBlue.png', handler: () => {
-                        setShowPin(true)
+                        setShowLoading(true)
+                        checkRequestAccount().then(()=>{
+                            setShowLoading(false)
+                            setShowPin(true)
+                        }).catch(e=>{
+                            setShowLoading(false)
+                        })
+
                     }
                 },
                 {
                     text: 'Dye', icon: './assets/img/icon/dyeBlue.png', handler: () => {
-                        setShowTribeEdit(true)
+                        setShowLoading(true)
+                        checkRequestAccount().then(()=>{
+                            setShowLoading(false)
+                            setShowTribeEdit(true)
+                        }).catch(e=>{
+                            setShowLoading(false)
+                        })
                         console.log('Favorite clicked');
                     }
                 },
@@ -364,13 +384,26 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId,isDetailMod
             if(tribeInfo && !!((tribeInfo as TribeInfo).silence)){
                 buttons.push({
                     text: 'Unmute', icon: "./assets/img/icon/resumeChat.png", handler: () => {
-                        tribeService.unForbidTribe(config.tribeId).catch(e=>console.error(e));
+                        setShowLoading(true)
+                        checkRequestAccount().then(()=>{
+                            setShowLoading(false)
+                            tribeService.unForbidTribe(config.tribeId).catch(e=>console.error(e));
+                        }).catch(e=>{
+                            setShowLoading(false)
+                        })
                     }
                 })
             }else{
                 buttons.push({
                     text: 'Mute', icon: "./assets/img/icon/banChatBlue.png", handler: () => {
-                        tribeService.forbidTribe(config.tribeId).catch(e=>console.error(e));
+                        setShowLoading(true)
+                        checkRequestAccount().then(()=>{
+                            setShowLoading(false)
+                            tribeService.forbidTribe(config.tribeId).catch(e=>console.error(e));
+                        }).catch(e=>{
+                            setShowLoading(false)
+                        })
+
                     }
                 })
             }
@@ -396,20 +429,28 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId,isDetailMod
                                     role: 'confirm',
                                     handler: (data) => {
                                         if(data["tribeName"] == tribeInfo.title){
-                                            tribeService.dropTribe(config.tribeId).then(() => {
-                                                presentToast({
-                                                    color: "primary",
-                                                    message: "Successfully.",
-                                                    duration: 2000,
-                                                    position: "top"
+                                            setShowLoading(true)
+                                            checkRequestAccount().then(()=>{
+                                                setShowLoading(false)
+                                                tribeService.dropTribe(config.tribeId).then(() => {
+                                                    presentToast({
+                                                        color: "primary",
+                                                        message: "Successfully.",
+                                                        duration: 2000,
+                                                        position: "top"
+                                                    })
+                                                    setTimeout(()=>{
+                                                        window.location.href = "/"
+                                                    },2000)
+                                                }).catch(e => {
+                                                    const err = typeof e == "string" ? e : e.message;
+                                                    presentToast({message: err, position: "top", duration: 2000, color: "danger"})
                                                 })
-                                                setTimeout(()=>{
-                                                    window.location.href = "/"
-                                                },2000)
-                                            }).catch(e => {
-                                                const err = typeof e == "string" ? e : e.message;
-                                                presentToast({message: err, position: "top", duration: 2000, color: "danger"})
+                                            }).catch(e=>{
+                                                setShowLoading(false)
                                             })
+
+
                                         }else{
                                             presentToast({ color: "danger", message: "The title you entered does not match!", duration: 2000, position: "top" })
                                         }
@@ -434,7 +475,13 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId,isDetailMod
         if (userLimit && userLimit.supportLeft <= 0) {
             return Promise.reject(`reaching the max number(${userLimit.maxSupportCount})`)
         }
-        await tribeService.msgSupport(msgId, f)
+        setShowLoading(true)
+        checkRequestAccount().then(()=>{
+            setShowLoading(false)
+            tribeService.msgSupport(msgId, f)
+        }).catch(e=>{
+            setShowLoading(false);
+        });
     }
 
     const showPinnedMsgDetail = async (groupId: string) => {
@@ -484,9 +531,16 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId,isDetailMod
     }
 
     const fork = useCallback((groupId: string, tribeInfo: TribeInfo) => {
-        setShowForkModal(true)
-        setForkGroupId(groupId);
-        setForkTribeInfo(tribeInfo)
+        setShowLoading(true)
+        checkRequestAccount().then(()=>{
+            setShowLoading(false)
+
+            setShowForkModal(true)
+            setForkGroupId(groupId);
+            setForkTribeInfo(tribeInfo)
+        }).catch(e=>{
+            setShowLoading(false)
+        })
     }, [])
 
     const showPinnedMsgFn = useCallback((groupId) => {
@@ -568,6 +622,41 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId,isDetailMod
         }
     }
 
+    const dispatch = useAppDispatch();
+
+    const checkRequestAccount = async ()=>{
+        let flag = false;
+        const isAvailable = await tribeService.isSessionAvailable();
+        if(!isAvailable){
+            const isLock = await walletWorker.isLocked();
+            if (isLock) {
+                flag = true;
+            }
+            if(flag){
+                dispatch(saveDataState({
+                    tag: 'requestAccount',
+                    data: Date.now()
+                }))
+                return Promise.reject("Account not login");
+            }else{
+                const accounts = await walletWorker.accounts();
+                if(accounts && accounts.length>0){
+                    await tribeService.accountLogin(accounts[0])
+                    initData().catch(e=>console.error(e));
+                }else{
+                    dispatch(saveDataState({
+                        tag: 'requestAccount',
+                        data: Date.now()
+                    }))
+                    return Promise.reject("Account not exist");
+                }
+            }
+            return Promise.resolve(true)
+        }
+        return Promise.resolve(true)
+    }
+
+
 
     return <>
         {/*<IonRow style={{height: '100%'}}>*/}
@@ -594,7 +683,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId,isDetailMod
                             </IonToolbar>
                         </IonHeader>
                         <IonContent className="ion-content-chat">
-                            <SideBar inboxNum={inboxNum} router={router} onRequestAccount={() => {
+                            <SideBar inboxNumber={inboxNum} router={router} onRequestAccount={() => {
                                 initData().catch(e => console.error(e))
                             }} account={account} onLogout={() => {
                                 initData().catch(e => console.error(e))
@@ -617,7 +706,7 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId,isDetailMod
                                 {
                                     isConnecting == WsStatus.tokenInvalid &&
                                     <div className="not-connect" onClick={() => {
-                                        requestAccount();
+                                        requestAccount()
                                     }}><IonText color="primary">No connection , <span style={{
                                         textDecoration: "underline",
                                         textUnderlineOffset: '4px',
@@ -664,10 +753,10 @@ export const DashboardV2: React.FC<Props> = ({tribeId, router, msgId,isDetailMod
                                         menuButtons && menuButtons.map((v,i)=>{
                                             return <div key={i} className={`action-sheet-item ${menuButtons.length - 1 == i && "action-cancel-btn"}`} onClick={()=>{
                                                 setShowActionSheet(false)
-                                                if(isConnecting !== WsStatus.active){
-                                                    presentToast({message: "Account not login!", position: "top", duration: 2000, color: "danger"})
-                                                    return
-                                                }
+                                                // if(isConnecting !== WsStatus.active){
+                                                //     presentToast({message: "Account not login!", position: "top", duration: 2000, color: "danger"})
+                                                //     return
+                                                // }
                                                 v.handler()
 
                                             }}>

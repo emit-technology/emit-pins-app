@@ -25,6 +25,7 @@ import selfStorage from "../../../common/storage";
 import {BackupModal} from "./Backup";
 import {emitBoxSdk} from "../../../service/emitBox";
 import {utils} from "../../../common";
+import {tribeService} from "../../../service/tribe";
 
 interface Props {
     isOpen: boolean;
@@ -249,6 +250,7 @@ export const AccountList: React.FC<Props> = ({isOpen, isLogin, onClose, onOk}) =
                                                             handler: (e) => {
                                                                 walletWorker.removeAccount(account.accountId, e[0] as string).then(() => {
                                                                     selfStorage.removeItem("ACCOUNT");
+                                                                    tribeService.userLogout().catch(e=>console.log(e))
                                                                     present({
                                                                         position: "top",
                                                                         color: "primary",

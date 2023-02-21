@@ -265,7 +265,7 @@ class TribeService implements ITribe {
         });
         const defaultRole = {
             avatar: {
-                url: `https://pic.emit.technology/img/3ce83e299e485e006cd9e820ea9c790f.png`,
+                url: `https://pic.emit.technology/img/28bd5a4007d65009cf85f6f783719278.jpg`,
                 height: 300,
                 width: 300
             },

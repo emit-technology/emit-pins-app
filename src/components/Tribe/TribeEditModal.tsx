@@ -61,6 +61,7 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
     },[tribeInfo])
 
     const createTribe = async (): Promise<string> => {
+
         if(!forkGroupId){
             if(!imgUrl || !(imgUrl as MsgTextImage).url){
                 return Promise.reject("Please upload the image! ")
@@ -89,7 +90,7 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
                     backgroundColor: background,
                     themeTag: themeTag,
                     themeDesc: themeDesc,
-                    title: tribeInfo.title,
+                    title: tribeInfo && tribeInfo.title,
                     desc: themeDesc
                 })
                 tribeId = tribeInfo.tribeId;
@@ -173,7 +174,7 @@ export const TribeEditModal: React.FC<Props> = ({isOpen,forkGroupId, tribeInfo, 
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="tribe-edit-modal" canDismiss>
             <IonHeader collapse="fade">
                 <IonToolbar>
-                    <IonTitle>{forkGroupId? `Fork the Verse - ${tribeInfo.title} `: (tribeInfo ? `Update ${tribeInfo.title}` : `Create Verse`)}</IonTitle>
+                    <IonTitle>{forkGroupId? `Fork the Verse - ${tribeInfo && tribeInfo.title} `: (tribeInfo ? `Update ${tribeInfo.title}` : `Create Verse`)}</IonTitle>
                     <IonButtons slot="end">
                         <IonIcon src={closeOutline} size="large" onClick={()=>onClose()}/>
                         {/*<IonButton onClick={() => onClose()}>Close</IonButton>*/}

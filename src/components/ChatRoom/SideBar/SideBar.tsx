@@ -8,7 +8,7 @@ import {
     IonBadge,
     IonLoading, IonAvatar, IonMenuToggle
 } from '@ionic/react';
-import {AccountModel, ChainType} from "@emit-technology/emit-lib";
+import {AccountModel, ChainType, SettleResp} from "@emit-technology/emit-lib";
 import {utils} from "../../../common";
 import {tribeService} from "../../../service/tribe";
 import {CreateModal} from "../../Account/modal";
@@ -22,6 +22,7 @@ import Avatar from "react-avatar";
 import {CatList} from "../../Cat";
 import {useAppDispatch, useAppSelector} from "../../../common/state/app/hooks";
 import {saveDataState} from "../../../common/state/slice/dataSlice";
+import {emitBoxSdk} from "../../../service/emitBox";
 
 // import { useHistory } from 'react-router-dom';
 
@@ -32,19 +33,19 @@ interface Props {
     onLogout: () => void;
     isSessionAvailable: boolean
     router?: any;
-    inboxNum: number
     isModal?: boolean
     nokiId?: string
     nokiReward?: string;
     opType?: string;
+    inboxNumber: number
 }
 
 let cb: any;
 
 export const SideBar: React.FC<Props> = ({
-                                             onRequestAccount, account,
+                                             onRequestAccount, account,inboxNumber,
                                              isModal, router,
-                                             onLogout, inboxNum, isSessionAvailable,
+                                             onLogout, isSessionAvailable,
                                              nokiId, nokiReward, opType
                                          }) => {
 
@@ -59,6 +60,7 @@ export const SideBar: React.FC<Props> = ({
     const [showCatList, setShowCatList] = useState(false);
     const [catItems, setCatItems] = useState([]);
     const [nokiParams, setNokiParams] = useState(null);
+    const [inboxNum, setInboxNum] = useState(0);
 
     const dispatch = useAppDispatch();
 
@@ -74,9 +76,24 @@ export const SideBar: React.FC<Props> = ({
         }
     }, [nokiId, nokiReward, opType])
 
+    useEffect(()=>{
+        fetchInboxNum().catch(e=>console.error(e))
+    },[inboxNumber, showAssetsModal])
+
+    const fetchInboxNum = async () => {
+        const account = await emitBoxSdk.getAccount();
+        if (account && account.addresses) {
+            emitBoxSdk.emitBox.emitDataNode.getUnSettles(account.addresses[ChainType.EMIT]).then((inbox: Array<SettleResp>) => {
+                if (inbox) {
+                    setInboxNum(inbox.length)
+                }
+            })
+        }
+    }
+
     const requestAccount = () => {
         if (utils.useInjectAccount()) {
-            checkAccount().catch(e => console.error(e))
+            checkAccount(true).catch(e => console.error(e))
         } else {
             tribeService.getAccountAndLogin().then(() => {
                 onRequestAccount()
@@ -87,7 +104,7 @@ export const SideBar: React.FC<Props> = ({
         }
     }
 
-    const checkAccount = async () => {
+    const checkAccount = async (showInfo: boolean = true) => {
         const isLock = await walletWorker.isLocked();
         if (isLock) {
             cb = checkAccount;
@@ -98,7 +115,9 @@ export const SideBar: React.FC<Props> = ({
                 setShowUnlock(true)
             }
         } else {
-            setShowList(true)
+            if(showInfo){
+                setShowList(true)
+            }
         }
     }
 
@@ -148,18 +167,15 @@ export const SideBar: React.FC<Props> = ({
         setCatItems(items);
     }
 
-    // const dispatchData = useAppSelector(state => state.jsonData);
-    //
-    // useEffect(() => {
-    //     if (dispatchData) {
-    //         console.log("init initNoki")
-    //         if (dispatchData.tag == 'initNoki') {
-    //             setShowCatList(false);
-    //             setNokiParams(null)
-    //             showCats()
-    //         }
-    //     }
-    // }, [dispatchData.data]);
+    const dispatchData = useAppSelector(state => state.jsonData);
+
+    useEffect(() => {
+        if (dispatchData) {
+            if (dispatchData.tag == 'requestAccount') {
+                checkAccount(false);
+            }
+        }
+    }, [dispatchData.data]);
 
     return <div style={{position: "relative", height: "100%"}}>
         {
@@ -336,7 +352,9 @@ export const SideBar: React.FC<Props> = ({
         }}/>
 
         <AssetsModal address={account && account.addresses[ChainType.EMIT]} isOpen={showAssetsModal}
-                     onClose={() => setShowAssetsModal(false)}/>
+                     onClose={() => {
+                         setShowAssetsModal(false);
+                     }}/>
 
         <CatList nokiData={nokiParams} isOpen={showCatList} onClose={() => {
             document.getElementById("toggleBtn").click();

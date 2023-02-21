@@ -13,7 +13,9 @@
   justify-content: flex-start;
   align-items: center;
 }
-
+.inner{
+  display: flex;
+}
 .msg-sender .inner {
   width: 100%;
 }
@@ -226,6 +228,7 @@
 
 .support-outer {
   display: flex;
+  flex-wrap: wrap;
   //padding-top: 2px;
   //align-items: center;
   //justify-content: center;
@@ -1368,3 +1371,7 @@ div {
 }
 
 div::-webkit-scrollbar { width: 0 }
+
+.pin-background{
+  background-color: rgba(0,0,0,0.1);
+}

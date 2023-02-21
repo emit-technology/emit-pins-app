@@ -46,9 +46,10 @@ export const addListeners = async () => {
                 if (tribeId) {
                     utils.goTo(tribeId);
                 } else {
-                    const noki: { id: string, reward: string,msgType:string } = notification.data["aps"]["data"]["noki"];
-                    if(!!noki){
-                        window.location.href = `/noki/${noki.id}/${noki.reward}/${noki.msgType}`;
+                    //{"nokiId":"1247d5e4ca4b741116a720b26d7d4841096708936419879b3ff592602d44eff1","msgType":"Noki_Feed","reward":"300"}
+                    const noki: { nokiId: string, reward: string,msgType:string } = notification.data["aps"]["data"];
+                    if(noki && noki.nokiId){
+                        window.location.href = `/noki/${noki.nokiId}/${noki.reward}/${noki.msgType}`;
                     }
                 }
             }
@@ -60,9 +61,9 @@ export const addListeners = async () => {
                 if (tribeId) {
                     utils.goTo(tribeId);
                 } else {
-                    const noki: { id: string, reward: string,msgType:string } = actionPerformed.notification.data["noki"];
-                    if(!!noki){
-                        window.location.href = `/noki/${noki.id}/${noki.reward}/${noki.msgType}`;
+                    const noki: { nokiId: string, reward: string,msgType:string } = actionPerformed.notification.data;
+                    if(noki && noki.nokiId){
+                        window.location.href = `/noki/${noki.nokiId}/${noki.reward}/${noki.msgType}`;
                     }
                 }
             }
