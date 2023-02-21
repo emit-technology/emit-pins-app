@@ -187,6 +187,7 @@ input::placeholder {
 .tribe-share-modal {
   --width: 90%;
   //--max-height: 75% ;
+  --background: var(--ion-color-light);
   --height: 55%;
   overflow: hidden;
   --border-radius: 12px;

@@ -22,15 +22,17 @@ export const ShareText: React.FC<Props> = ({msg}) => {
            }:{}}>
                {
                    msg.role && <>
-                       <div style={{marginRight: 4,width: 36, height: 36}}>
+                       <div style={{marginRight: 4,width: 36, height: 36, filter: 'drop-shadow(0px 6px 16px rgba(69,118,215,0.16))'}}>
                            <img src={utils.getDisPlayUrl(msg.actor.avatar)} style={{borderRadius: "50%", width: "100%", height: "100%", objectFit: "cover"}}/>
                        </div>
                        <div className="share-content-text-right">
                            {
                                msg.replayMsg && <ShareReplay msg={msg}/>
                            }
-                           <div style={{color: isMind?"#FFFFFF":"#A7A7A7"}}>{msg.actor.name}</div>
-                           <div className="text-pre" style={{color: isMind?"#fff":"#000"}}>{content.content}</div>
+                           <div style={{paddingLeft: 4}}>
+                               <div style={{color: isMind?"#FFFFFF":"#A7A7A7"}}>{msg.actor.name}</div>
+                               <div className="text-pre" style={{color: isMind?"#fff":"#000"}}>{content.content}</div>
+                           </div>
                        </div>
                    </>
                }

@@ -37,6 +37,7 @@ import {ReplayText} from "./Types/ReplayText";
 import {Virtuoso} from 'react-virtuoso'
 import {MessageItem} from "./MessageItem";
 import {MessageActionKind, messageInitializer, messageReducer} from "./MessageReducer";
+import {ShareExV2} from "../../../utils/ShareExV2";
 
 interface Props {
     pinnedStickies?: { data: Array<PinnedSticky>, total: number }
@@ -787,13 +788,13 @@ export const MessageContentVisualsoChild: React.FC<Props> = ({
                 </IonFab>
             }
 
-            <ShareEx stickyMsg={stickyMsg} isOpen={showShareModal} showHistory={true}
-                     onClose={() => setShowShareModal(false)}
-                     tribeInfo={tribeInfo} latestMsg={shareMsgs} roles={shareRoles as Array<TribeRole>} owner={owner}/>
-
-            {/*<ShareExV2 stickyMsg={stickyMsg} isOpen={showShareModal} showHistory={true}*/}
+            {/*<ShareEx stickyMsg={stickyMsg} isOpen={showShareModal} showHistory={true}*/}
             {/*         onClose={() => setShowShareModal(false)}*/}
             {/*         tribeInfo={tribeInfo} latestMsg={shareMsgs} roles={shareRoles as Array<TribeRole>} owner={owner}/>*/}
+
+            <ShareExV2 stickyMsg={stickyMsg} isOpen={showShareModal} showHistory={true}
+                     onClose={() => setShowShareModal(false)}
+                     tribeInfo={tribeInfo} latestMsg={shareMsgs} roles={shareRoles as Array<TribeRole>} owner={owner}/>
 
             <IonModal isOpen={!!showModifyMsg} className="role-select-list" onDidDismiss={() => setShowModifyMsg(null)}
                       canDismiss>

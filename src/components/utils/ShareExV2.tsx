@@ -326,6 +326,9 @@ export const ShareExV2: React.FC<Props> = ({isOpen,showHistory,stickyMsg, latest
                             </div>
                         </div>
 
+                        <div className="bottom-shadow">
+
+                        </div>
                     </div>
                 </div>
 
