@@ -289,7 +289,7 @@ export const CreateModal: React.FC<Props> = ({isOpen, onOk, onClose}) => {
                         }}><IonIcon
                             src={createOutline}/> Create</IonButton>
                     </IonButtons>
-                    <IonTitle>Recovery Account</IonTitle>
+                    <IonTitle>Recover Identity</IonTitle>
                     <IonButtons slot="end">
                         <IonButton onClick={() => {
                             setIsOpenImport(false);

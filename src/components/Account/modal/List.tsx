@@ -134,7 +134,7 @@ export const AccountList: React.FC<Props> = ({isOpen, isLogin, onClose, onOk}) =
                                                         <div>
                                                             <IonButton onClick={() => {
                                                                 presentAlert({
-                                                                    header: 'Backup Account',
+                                                                    header: 'Backup Identity',
                                                                     subHeader: 'Export Mnemonic words or Private Key.',
                                                                     buttons: [
                                                                         {
@@ -159,7 +159,7 @@ export const AccountList: React.FC<Props> = ({isOpen, isLogin, onClose, onOk}) =
                                                                         }
                                                                     ],
                                                                 })
-                                                            }} size="small">Backup Account</IonButton>
+                                                            }} size="small">Backup Identity</IonButton>
                                                         </div>
                                                     </div>
                                                 }
@@ -205,7 +205,7 @@ export const AccountList: React.FC<Props> = ({isOpen, isLogin, onClose, onOk}) =
                                             &nbsp;&nbsp;
                                             <div onClick={() => {
                                                 presentAlert({
-                                                    header: 'Backup Account',
+                                                    header: 'Backup Identity',
                                                     subHeader: 'Export Mnemonic or Private Key.',
                                                     buttons: [
                                                         {
@@ -405,7 +405,7 @@ export const AccountList: React.FC<Props> = ({isOpen, isLogin, onClose, onOk}) =
                     <IonHeader collapse="fade">
                         <IonToolbar color="white">
                             <IonTitle>
-                                Write down these mnemonic words for identity recovery
+                                Backup Identity
                             </IonTitle>
                             <IonIcon slot="end" src={closeOutline} size="large" onClick={() => {
                                setShowAlert(false);
@@ -413,6 +413,9 @@ export const AccountList: React.FC<Props> = ({isOpen, isLogin, onClose, onOk}) =
                         </IonToolbar>
                     </IonHeader>
                     <IonContent className="ion-padding">
+                        <div className="men-title" style={{fontSize: 15, margin: "0 12px"}}>
+                            Write down these mnemonic words for identity recovery
+                        </div>
                         <IonItem>
                             <IonLabel className="ion-text-wrap">
                                 <div className="men-box">
@@ -499,7 +502,7 @@ export const AccountList: React.FC<Props> = ({isOpen, isLogin, onClose, onOk}) =
                         present({
                             position: "top",
                             color: "primary",
-                            message: "Backup Account successfully!",
+                            message: "Backup Identity successfully!",
                             duration: 2000
                         })
                         getAccounts().catch(e => console.error(e));

@@ -368,30 +368,40 @@ const BottomBarChild: React.FC<Props> = ({showPin, alreadySelectRole, roles, isT
                                                 marginTop: 8
                                             }}>
                                                 <div className="input-shadow">
-                                                    {
 
-                                                        tribeInfo && (!tribeInfo.silence || tribeInfo.keeper == owner) && <TextareaAutosize onChange={(e) => {
-                                                            if (e.target.value && e.target.value.indexOf("/mind") == 0) {
-                                                                //@ts-ignore
-                                                                if (textRef.current) {
+                                                    {
+                                                        tribeInfo && !!tribeInfo.drop ? <div className="talk-silence">
+                                                            <img src="./assets/img/icon/deleteRed.png" height={22}/>
+                                                            <div style={{color: "red"}}>&nbsp;The verse has been discarded!</div>
+                                                        </div>: <>
+                                                            {
+
+                                                                tribeInfo && (!tribeInfo.silence || tribeInfo.keeper == owner) && <TextareaAutosize onChange={(e) => {
+                                                                    if (e.target.value && e.target.value.indexOf("/mind") == 0) {
+                                                                        //@ts-ignore
+                                                                        if (textRef.current) {
+                                                                            //@ts-ignore
+                                                                            textRef.current.value = textRef.current.value.replace("/mind", "💭");
+                                                                        }
+                                                                    }
                                                                     //@ts-ignore
-                                                                    textRef.current.value = textRef.current.value.replace("/mind", "💭");
-                                                                }
-                                                            }
-                                                            //@ts-ignore
-                                                        }} onBlur={emitChanges.bind(this)} id="msgText" rows={1}
-                                                                          style={{backgroundColor: "#fff"}}
-                                                                          maxLength={1024} ref={textRef} wrap='hard'
-                                                                          placeholder={tribeInfo && owner !== tribeInfo.keeper && userLimit ? `msg (${userLimit && userLimit.msgLeft}/${userLimit && userLimit.maxMsgCount}) , likes (${userLimit && userLimit.supportLeft}/${userLimit && userLimit.maxSupportCount}) ` : `Your messages`}
-                                                                          className="msg-input"/>
+                                                                }} onBlur={emitChanges.bind(this)} id="msgText" rows={1}
+                                                                                                                                                    style={{backgroundColor: "#fff"}}
+                                                                                                                                                    maxLength={1024} ref={textRef} wrap='hard'
+                                                                                                                                                    placeholder={tribeInfo && owner !== tribeInfo.keeper && userLimit ? `msg (${userLimit && userLimit.msgLeft}/${userLimit && userLimit.maxMsgCount}) , likes (${userLimit && userLimit.supportLeft}/${userLimit && userLimit.maxSupportCount}) ` : `Your messages`}
+                                                                                                                                                    className="msg-input"/>
 
+                                                            }
+                                                            {
+                                                                tribeInfo && !!tribeInfo.silence && tribeInfo.keeper !== owner && <div className="talk-silence">
+                                                                    <img src="./assets/img/icon/banChat.png" height={22}/>
+                                                                    <div>Banned from speaking</div>
+                                                                </div>
+                                                            }
+
+                                                        </>
                                                     }
-                                                    {
-                                                        tribeInfo && !!tribeInfo.silence && tribeInfo.keeper !== owner && <div className="talk-silence">
-                                                            <img src="./assets/img/icon/banChat.png" height={22}/>
-                                                            <div>Banned from speaking</div>
-                                                        </div>
-                                                    }
+
                                                     {
                                                         replayMsg && <ReplayText msg={replayMsg} onClose={() => {
                                                             setReplayMsg(null)

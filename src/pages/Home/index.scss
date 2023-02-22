@@ -303,7 +303,7 @@
   background-size: 100%;
   display: flex;
   justify-content: space-between;
-  padding: 40px;
+  padding: 40px 40px 20px 40px;
   overflow: hidden;
 }
 
@@ -321,6 +321,7 @@
 
 .share-content-v2-box-left {
   max-width: 55%;
+  overflow: hidden;
 }
 
 .share-content-v2-box-right {
@@ -451,19 +452,21 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
-  border-radius: 45px;
+  border-radius: 100px;
   min-height: 50px;
   //max-height: 116px;
-  padding: 6px 20px 6px 6px;
+  padding: 10px 20px 10px 6px;
   background: #ffffff;
   max-width: 100%;
   display: flex;
   flex-direction: row;
   align-items: center;
+  backdrop-filter: blur(22.5px);
 }
 
 .share-content-text-right{
-  max-width: calc(100% - 40px)
+  max-width: calc(100% - 40px);
+  padding: 0 0 0 6px;
 }
 
 .share-no-role {
@@ -662,4 +665,14 @@
 .fork-decs > div{
   //font-family: SF !important;
   font-size: 15px;
+}
+
+.bottom-shadow{
+  height: 60px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(0, rgba(0, 0, 0, 0.6), transparent);
+  z-index: 10;
 }
