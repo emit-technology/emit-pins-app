@@ -18,6 +18,9 @@ import {useCallback, useLayoutEffect, useState} from "react";
 import {saveDataState} from "../../common/state/slice/dataSlice";
 import {useAppDispatch} from "../../common/state/app/hooks";
 import {tribeService} from "../../service/tribe";
+import walletWorker from "../../worker/walletWorker";
+import {Toast} from "@capacitor/toast";
+import { Browser } from '@capacitor/browser';
 
 interface Props {
     isOpen: boolean;
@@ -44,6 +47,39 @@ export const CatList: React.FC<Props> = ({items, isOpen, onClose, onAdoptCat, no
         setNokiParams(null);
     }, [])
 
+    const dispatch = useAppDispatch();
+
+    const checkRequestAccount = async ()=>{
+        let flag = false;
+        const isAvailable = await tribeService.isSessionAvailable();
+        if(!isAvailable){
+            const isLock = await walletWorker.isLocked();
+            if (isLock) {
+                flag = true;
+            }
+            if(flag){
+                dispatch(saveDataState({
+                    tag: 'requestAccount',
+                    data: Date.now()
+                }))
+                return Promise.reject("Account not login");
+            }else{
+                const accounts = await walletWorker.accounts();
+                if(accounts && accounts.length>0){
+                    await tribeService.accountLogin(accounts[0])
+                }else{
+                    dispatch(saveDataState({
+                        tag: 'requestAccount',
+                        data: Date.now()
+                    }))
+                    return Promise.reject("Account not exist");
+                }
+            }
+            return Promise.resolve(true)
+        }
+        return Promise.resolve(true)
+    }
+
     return <>
         <IonModal isOpen={isOpen} onDidDismiss={() => onClose()} className="noki-ion-modal" initialBreakpoint={0.75}
                   breakpoints={[0, 0.75]}>
@@ -55,7 +91,7 @@ export const CatList: React.FC<Props> = ({items, isOpen, onClose, onAdoptCat, no
                             <div className="noki-body-box">
                                 {
                                     items && items.length > 0 && <div className="noki-status-text">
-                                        {items[0].status === 0 ? <div>Inactive</div> :
+                                        {items[0].status === 0 ? <div>Inactivated</div> :
                                             <div className="noki-status-active">Activated</div>}
                                     </div>
                                 }
@@ -89,7 +125,16 @@ export const CatList: React.FC<Props> = ({items, isOpen, onClose, onAdoptCat, no
                                 </div>
                                 {
                                     items && items.length == 0 &&
-                                    <div className="noki-body-btn" onClick={() => onAdoptCat()}>
+                                    <div className="noki-body-btn" onClick={() => {
+                                        setShowLoading(true)
+                                        checkRequestAccount().then(()=>{
+                                            setShowLoading(false)
+                                            onAdoptCat()
+                                        }).catch(e=>{
+                                            setShowLoading(false)
+                                        })
+
+                                    }}>
                                         <img src="./assets/img/noki/catBlack.png" height={26}/>
                                         Get your Noki for free.
                                     </div>
@@ -107,20 +152,40 @@ export const CatList: React.FC<Props> = ({items, isOpen, onClose, onAdoptCat, no
                                                 {
                                                     items[0].status === 0 ? <div className="noki-text-btn" onClick={() => {
                                                         setShowLoading(true)
-                                                        tribeService.activateTweet().then(twid=>{
-                                                            setShowLoading(false)
-                                                            window.open(`https://twitter.com/intent/retweet?tweet_id=${twid}`)
+                                                        checkRequestAccount().then(()=>{
+                                                            tribeService.activateTweet().then(twid=>{
+                                                                setShowLoading(false)
+                                                                Browser.open({url:`https://twitter.com/intent/retweet?tweet_id=${twid}`, presentationStyle: "popover" })
+                                                                // window.open(`https://twitter.com/intent/retweet?tweet_id=${twid}`, "_blank", "popup=yes")
+                                                            }).catch(e=>{
+                                                                const err = typeof e == 'string' ?e:e.message;
+                                                                // Toast.show({text: err})
+                                                                setShowLoading(false)
+                                                            })
                                                         }).catch(e=>{
+                                                            const err = typeof e == 'string' ?e:e.message;
+                                                            // Toast.show({text: err})
                                                             setShowLoading(false)
                                                         })
+
                                                     }}>
                                                         Activate <img src="./assets/img/noki/outLine.png" height={20}/>
                                                     </div>:<div className="noki-text-btn" onClick={() => {
                                                         setShowLoading(true)
-                                                        tribeService.feedTweet().then(twid=>{
-                                                            setShowLoading(false)
-                                                            window.open(`https://twitter.com/intent/retweet?tweet_id=${twid}`)
+                                                        checkRequestAccount().then(()=>{
+                                                            tribeService.feedTweet().then(twid=>{
+                                                                setShowLoading(false)
+                                                                // Browser.open({url:`https://twitter.com/intent/retweet?tweet_id=${twid}` })
+                                                                Browser.open({url:`https://twitter.com/intent/retweet?tweet_id=${twid}`, presentationStyle: "popover" })
+                                                                // window.open(`https://twitter.com/intent/retweet?tweet_id=${twid}`, "_blank", "popup=yes")
+                                                            }).catch(e=>{
+                                                                const err = typeof e == 'string' ?e:e.message;
+                                                                // Toast.show({text: err})
+                                                                setShowLoading(false)
+                                                            })
                                                         }).catch(e=>{
+                                                            const err = typeof e == 'string' ?e:e.message;
+                                                            // Toast.show({text: err})
                                                             setShowLoading(false)
                                                         })
                                                     }}>
@@ -171,7 +236,7 @@ export const CatList: React.FC<Props> = ({items, isOpen, onClose, onAdoptCat, no
                                     {
                                         items && items.length > 0 && <>
                                             <div className="noki-reward-head">
-                                                <div className="noki-title" style={{width: '100%'}}>
+                                                <div className="noki-title noki-title-pck" style={{width: '100%'}}>
                                                     <div><img src="./assets/img/noki/catOutline.png"/></div>
                                                     <div>YOUR<br/>NOKI</div>
                                                 </div>
